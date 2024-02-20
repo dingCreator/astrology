@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/immortal.iml" filepath="$PROJECT_DIR$/immortal.iml" />
+      <module fileurl="file://$PROJECT_DIR$/astrology.iml" filepath="$PROJECT_DIR$/astrology.iml" />
     </modules>
   </component>
 </project>
