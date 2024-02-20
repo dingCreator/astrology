@@ -1,9 +1,12 @@
 package com.dingCreator.astrology.cache;
 
-import com.dingCreator.astrology.data.PlayerData;
+import com.dingCreator.astrology.database.DatabaseContext;
+import com.dingCreator.astrology.database.DatabaseProvider;
+import com.dingCreator.astrology.database.PlayerDataMapper;
 import com.dingCreator.astrology.dto.PlayerDTO;
 import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
+import com.dingCreator.astrology.service.PlayerService;
 
 import java.util.List;
 import java.util.Map;
@@ -19,14 +22,13 @@ public class PlayerCache {
 
     private static final Map<Long, PlayerDTO> PLAYER_MAP = new ConcurrentHashMap<>();
 
-    private PlayerData playerData;
-
     public void createPlayer(Player player) {
         if (PLAYER_MAP.containsKey(player.getId())) {
             throw PlayerExceptionEnum.PLAYER_EXIST.getException();
         }
-
-        // todo 持久化数据
+        if (!PlayerService.createPlayer(player)) {
+            throw new IllegalArgumentException("创建角色失败");
+        }
         PlayerDTO playerDTO = new PlayerDTO();
         playerDTO.setPlayer(player);
         PLAYER_MAP.put(player.getId(), playerDTO);
@@ -41,9 +43,9 @@ public class PlayerCache {
     public PlayerDTO getPlayerById(Long id) {
         PlayerDTO playerDTO = PLAYER_MAP.getOrDefault(id, null);
         if (Objects.isNull(playerDTO)) {
-            playerDTO = playerData.getPlayerById(id);
-            if (Objects.isNull(playerDTO)) {
-                throw PlayerExceptionEnum.PLAYER_EXIST.getException();
+            playerDTO = PlayerService.getPlayerDTOById(id);
+            if (Objects.isNull(playerDTO.getPlayer())) {
+                throw PlayerExceptionEnum.PLAYER_NOT_FOUND.getException();
             }
             PLAYER_MAP.put(id, playerDTO);
         }
@@ -52,6 +54,6 @@ public class PlayerCache {
 
     public void flush(List<Long> ids) {
         List<Player> players = ids.stream().map(PLAYER_MAP::get).map(PlayerDTO::getPlayer).collect(Collectors.toList());
-        playerData.batchUpdateById(players);
+        players.forEach(PlayerService::updatePlayerById);
     }
 }
