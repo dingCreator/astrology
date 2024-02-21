@@ -3,21 +3,15 @@ package com.dingCreator.astrology.entity;
 import lombok.Data;
 
 /**
- * 区域Boss
- *
  * @author ding
- * @date 2024/2/2
+ * @date 2024/2/21
  */
 @Data
-public class AreaBoss {
+public class WorldBoss {
     /**
-     * 主键
+     * 主键ID
      */
     private Long id;
-    /**
-     * 所属地图ID
-     */
-    private Long mapId;
     /**
      * boss的ID
      */

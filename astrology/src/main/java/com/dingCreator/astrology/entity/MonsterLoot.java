@@ -31,7 +31,7 @@ public class MonsterLoot {
      */
     private String type;
     /**
-     * 掉落物属性
+     * 掉落物ID
      */
-    private String val;
+    private Long lootId;
 }

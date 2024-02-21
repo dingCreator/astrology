@@ -2,10 +2,10 @@ package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.cache.TeamCache;
+import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.PlayerDTO;
 import com.dingCreator.astrology.dto.TeamDTO;
 import com.dingCreator.astrology.enums.exception.TeamExceptionEnum;
-import com.dingCreator.astrology.constants.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +20,17 @@ import java.util.stream.Collectors;
  */
 public class TeamBehavior {
 
-    private PlayerCache playerCache;
+    private static class Holder {
+        private static final TeamBehavior BEHAVIOR = new TeamBehavior();
+    }
 
-    private TeamCache teamCache;
+    private TeamBehavior() {
+
+    }
+
+    public static TeamBehavior getInstance() {
+        return Holder.BEHAVIOR;
+    }
 
     /**
      * 创建小队
@@ -31,10 +39,10 @@ public class TeamBehavior {
      * @return 小队编号
      */
     public Long buildTeam(Long initiatorId) {
-        PlayerDTO playerDTO = playerCache.getPlayerById(initiatorId);
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(initiatorId);
         playerDTO.setTeam(true);
 
-        teamCache.createTeam(initiatorId);
+        TeamCache.createTeam(initiatorId);
         return playerDTO.getPlayer().getId();
     }
 
@@ -45,14 +53,14 @@ public class TeamBehavior {
      * @param teamId      小队编号
      */
     public void joinTeam(Long initiatorId, Long teamId) {
-        TeamDTO teamDTO = teamCache.getTeamById(teamId);
+        TeamDTO teamDTO = TeamCache.getTeamById(teamId);
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.TEAM_NOT_EXIST.getException();
         }
         if (teamDTO.getMembers().size() >= Constants.TEAM_MEMBER_LIMIT) {
             throw TeamExceptionEnum.TEAM_MEMBER_OVER_LIMIT.getException();
         }
-        PlayerDTO playerDTO = playerCache.getPlayerById(initiatorId);
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(initiatorId);
         playerDTO.setTeam(true);
 
         teamDTO.getMembers().add(initiatorId);
@@ -68,7 +76,7 @@ public class TeamBehavior {
         if (Objects.equals(initiatorId, removedId)) {
             throw TeamExceptionEnum.NOT_ALLOW_OWN_2_OWN.getException();
         }
-        TeamDTO teamDTO = teamCache.getTeamById(initiatorId);
+        TeamDTO teamDTO = TeamCache.getTeamById(initiatorId);
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.NOT_CAPTAIN.getException();
         }
@@ -77,7 +85,7 @@ public class TeamBehavior {
             throw TeamExceptionEnum.NOT_TEAM_MEMBER.getException();
         }
 
-        PlayerDTO playerDTO = playerCache.getPlayerById(removedId);
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(removedId);
         playerDTO.setTeam(false);
     }
 
@@ -87,7 +95,7 @@ public class TeamBehavior {
      * @param initiatorId 发起人ID
      */
     public void leaveTeam(Long initiatorId) {
-        TeamDTO teamDTO = teamCache.getTeamByPlayerId(initiatorId);
+        TeamDTO teamDTO = TeamCache.getTeamByPlayerId(initiatorId);
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.NOT_IN_TEAM.getException();
         }
@@ -95,7 +103,7 @@ public class TeamBehavior {
             throw TeamExceptionEnum.CAPTAIN_NOT_ALLOW.getException();
         }
 
-        PlayerDTO playerDTO = playerCache.getPlayerById(initiatorId);
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(initiatorId);
         playerDTO.setTeam(false);
     }
 
@@ -106,7 +114,7 @@ public class TeamBehavior {
      * @param index       新的排序
      */
     public void sortMembers(Long initiatorId, List<Integer> index) {
-        TeamDTO teamDTO = teamCache.getTeamById(initiatorId);
+        TeamDTO teamDTO = TeamCache.getTeamById(initiatorId);
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.NOT_CAPTAIN.getException();
         }
@@ -137,7 +145,7 @@ public class TeamBehavior {
         if (Objects.equals(from, to)) {
             throw TeamExceptionEnum.NOT_ALLOW_OWN_2_OWN.getException();
         }
-        TeamDTO teamDTO = teamCache.getTeamById(from);
+        TeamDTO teamDTO = TeamCache.getTeamById(from);
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.NOT_CAPTAIN.getException();
         }
@@ -145,8 +153,8 @@ public class TeamBehavior {
             throw TeamExceptionEnum.NOT_TEAM_MEMBER.getException();
         }
         teamDTO.setCaptainId(to);
-        teamCache.deleteTeam(from);
-        teamCache.createTeam(to, teamDTO);
+        TeamCache.deleteTeam(from);
+        TeamCache.createTeam(to, teamDTO);
     }
 
     /**
@@ -155,11 +163,11 @@ public class TeamBehavior {
      * @param initiatorId 发起人ID
      */
     public void deleteTeam(Long initiatorId) {
-        TeamDTO teamDTO = teamCache.getTeamById(initiatorId);
+        TeamDTO teamDTO = TeamCache.getTeamById(initiatorId);
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.NOT_CAPTAIN.getException();
         }
         teamDTO.getMembers().forEach(this::leaveTeam);
-        teamCache.deleteTeam(initiatorId);
+        TeamCache.deleteTeam(initiatorId);
     }
 }

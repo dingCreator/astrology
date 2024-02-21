@@ -7,6 +7,7 @@ import com.dingCreator.astrology.enums.JobEnum;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -15,7 +16,17 @@ import java.util.Objects;
  */
 public class PlayerBehavior {
 
-    private PlayerCache playerCache;
+    private static class Holder {
+        private static final PlayerBehavior BEHAVIOR = new PlayerBehavior();
+    }
+
+    private PlayerBehavior() {
+
+    }
+
+    public static PlayerBehavior getInstance() {
+        return Holder.BEHAVIOR;
+    }
 
     /**
      * 创建角色
@@ -56,6 +67,7 @@ public class PlayerBehavior {
 
         player.setHit(job.getInitHit());
         player.setDodge(job.getInitDodge());
-        playerCache.createPlayer(player);
+        PlayerCache.createPlayer(player);
+        PlayerCache.flush(Collections.singletonList(player.getId()));
     }
 }

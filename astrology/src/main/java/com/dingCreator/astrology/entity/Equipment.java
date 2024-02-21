@@ -10,6 +10,20 @@ import lombok.Data;
  */
 @Data
 public class Equipment {
-
-    private String name;
+    /**
+     * 主键ID
+     */
+    private Long id;
+    /**
+     * 装备类型
+     */
+    private String equipmentType;
+    /**
+     * 装备归属
+     */
+    private String belongTo;
+    /**
+     * 装备所属ID
+     */
+    private Long belongToId;
 }

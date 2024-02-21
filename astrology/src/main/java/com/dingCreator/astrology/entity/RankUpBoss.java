@@ -25,5 +25,5 @@ public class RankUpBoss {
     /**
      * boss的ID
      */
-    private Long bossId;
+    private Long monsterId;
 }

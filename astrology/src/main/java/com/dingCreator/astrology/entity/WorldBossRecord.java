@@ -3,6 +3,8 @@ package com.dingCreator.astrology.entity;
 import lombok.Data;
 
 /**
+ * 世界boss挑战记录
+ *
  * @author ding
  * @date 2024/2/20
  */

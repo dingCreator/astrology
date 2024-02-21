@@ -23,7 +23,7 @@ public class TeamCache {
      * @param teamId 小队ID
      * @return 小队
      */
-    public TeamDTO getTeamById(Long teamId) {
+    public static TeamDTO getTeamById(Long teamId) {
         return TEAM.get(teamId);
     }
 
@@ -33,7 +33,7 @@ public class TeamCache {
      * @param playerId 玩家ID
      * @return 小队
      */
-    public TeamDTO getTeamByPlayerId(Long playerId) {
+    public static TeamDTO getTeamByPlayerId(Long playerId) {
         return TEAM.values().stream().filter(t -> t.getMembers().contains(playerId)).findFirst().orElse(null);
     }
 
@@ -42,7 +42,7 @@ public class TeamCache {
      *
      * @param playerId 创建者ID
      */
-    public void createTeam(Long playerId) {
+    public static void createTeam(Long playerId) {
         List<Long> members = new ArrayList<>(3);
         members.add(playerId);
         createTeam(playerId, new TeamDTO(playerId, members));
@@ -53,7 +53,7 @@ public class TeamCache {
      *
      * @param playerId 创建者ID
      */
-    public void createTeam(Long playerId, TeamDTO teamDTO) {
+    public static void createTeam(Long playerId, TeamDTO teamDTO) {
         TEAM.put(playerId, teamDTO);
     }
 
@@ -62,7 +62,7 @@ public class TeamCache {
      *
      * @param teamId 小队ID
      */
-    public void deleteTeam(Long teamId) {
+    public static void deleteTeam(Long teamId) {
         TEAM.remove(teamId);
     }
 }

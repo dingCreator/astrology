@@ -20,7 +20,17 @@ import java.util.Date;
  */
 public class ExpBehavior {
 
-    private PlayerCache playerCache;
+    private static class Holder {
+        private static final ExpBehavior BEHAVIOR = new ExpBehavior();
+    }
+
+    private ExpBehavior() {
+
+    }
+
+    public static ExpBehavior getInstance() {
+        return ExpBehavior.Holder.BEHAVIOR;
+    }
 
     /**
      * 经验值发生改变
@@ -29,7 +39,7 @@ public class ExpBehavior {
      * @param exp 改变的经验值
      */
     public synchronized void getExp(Long id, Long exp) {
-        Player player = playerCache.getPlayerById(id).getPlayer();
+        Player player = PlayerCache.getPlayerById(id).getPlayer();
         long currentExp = player.getExp() + exp;
 
         while (currentExp >= getCurrentLevelMaxExp(player.getLevel())) {
@@ -50,7 +60,7 @@ public class ExpBehavior {
             }
         }
         player.setExp(currentExp);
-        playerCache.flush(Collections.singletonList(id));
+        PlayerCache.flush(Collections.singletonList(id));
     }
 
     /**
@@ -83,14 +93,14 @@ public class ExpBehavior {
      * @param id 玩家ID
      */
     public void hangUp(Long id) {
-        PlayerDTO playerDTO = playerCache.getPlayerById(id);
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
         Player player = playerDTO.getPlayer();
         if (PlayerStatusEnum.HANG_UP.getCode().equals(player.getStatus())) {
             throw ExpExceptionEnum.ALREADY_HANG_UP.getException();
         }
         player.setStatus(PlayerStatusEnum.HANG_UP.getCode());
         player.setHangUpTime(new Date());
-        playerCache.flush(Collections.singletonList(id));
+        PlayerCache.flush(Collections.singletonList(id));
     }
 
     /**
@@ -99,13 +109,13 @@ public class ExpBehavior {
      * @param id 玩家ID
      */
     public long stopHangUp(Long id) {
-        PlayerDTO playerDTO = playerCache.getPlayerById(id);
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
         Player player = playerDTO.getPlayer();
         if (!PlayerStatusEnum.HANG_UP.getCode().equals(player.getStatus())) {
             throw ExpExceptionEnum.NOT_HANG_UP.getException();
         }
         player.setStatus(PlayerStatusEnum.FREE.getCode());
-        playerCache.flush(Collections.singletonList(id));
+        PlayerCache.flush(Collections.singletonList(id));
 
         long between = DateUtil.between(player.getHangUpTime(), new Date(), DateUnit.SECOND);
         // todo EXP计算

@@ -13,20 +13,30 @@ import com.dingCreator.astrology.util.BattleUtil;
  */
 public class RankBehavior {
 
-    private PlayerCache playerCache;
+    private static class Holder {
+        private static final RankBehavior BEHAVIOR = new RankBehavior();
+    }
+
+    private RankBehavior() {
+
+    }
+
+    public static RankBehavior getInstance() {
+        return RankBehavior.Holder.BEHAVIOR;
+    }
 
     /**
      * 突破
+     *
      * @param id 突破者 ID
      */
     public void rankUp(Long id) {
-        PlayerDTO playerDTO = playerCache.getPlayerById(id);
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
         OrganismDTO player = new OrganismDTO();
         player.setOrganism(playerDTO.getPlayer());
 
         RankUpBoss rankUpBoss = new RankUpBoss();
         OrganismDTO boss = new OrganismDTO();
-        boss.setOrganism(rankUpBoss);
 
         BattleBehaviorResponse response = BattleUtil.battle(player, boss);
     }
