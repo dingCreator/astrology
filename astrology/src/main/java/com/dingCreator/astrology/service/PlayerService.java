@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.service;
 
 import com.dingCreator.astrology.database.DatabaseProvider;
+import com.dingCreator.astrology.database.PlayerDataMapper;
 import com.dingCreator.astrology.dto.PlayerDTO;
 import com.dingCreator.astrology.entity.Player;
 
@@ -16,7 +17,8 @@ public class PlayerService {
      * @return 玩家基本信息
      */
     public static Player getPlayerById(Long id) {
-        return DatabaseProvider.getInstance().getPlayerDataMapper().getPlayerById(id);
+        return (Player) DatabaseProvider.getInstance().doExecute(sqlSession ->
+                sqlSession.getMapper(PlayerDataMapper.class).getPlayerById(id));
     }
 
     /**
@@ -45,7 +47,8 @@ public class PlayerService {
         player.setMapId(1L);
         player.setLevel(1);
         player.setRank(1);
-        return DatabaseProvider.getInstance().getPlayerDataMapper().createPlayer(player);
+        return (Boolean) DatabaseProvider.getInstance().doExecute(sqlSession ->
+                sqlSession.getMapper(PlayerDataMapper.class).createPlayer(player));
     }
 
     /**
@@ -55,6 +58,7 @@ public class PlayerService {
      * @return 是否更新成功
      */
     public static boolean updatePlayerById(Player player) {
-        return DatabaseProvider.getInstance().getPlayerDataMapper().createPlayer(player);
+        return (Boolean) DatabaseProvider.getInstance().doExecute(sqlSession ->
+                sqlSession.getMapper(PlayerDataMapper.class).createPlayer(player));
     }
 }

@@ -1,7 +1,6 @@
 package com.dingCreator.astrology.database;
 
-import lombok.Data;
-import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 
 /**
  * @author ding
@@ -9,13 +8,13 @@ import org.apache.ibatis.session.SqlSession;
  */
 public class DatabaseContext {
 
-    private static SqlSession sqlSession;
+    private static SqlSessionFactory sqlSessionFactory;
 
-    public static SqlSession getSqlSession() {
-        return sqlSession;
+    public static SqlSessionFactory getSqlSessionFactory() {
+        return sqlSessionFactory;
     }
 
-    public static void setSqlSession(SqlSession sqlSession) {
-        DatabaseContext.sqlSession = sqlSession;
+    public static void setSqlSession(SqlSessionFactory sqlSessionFactory) {
+        DatabaseContext.sqlSessionFactory = sqlSessionFactory;
     }
 }
