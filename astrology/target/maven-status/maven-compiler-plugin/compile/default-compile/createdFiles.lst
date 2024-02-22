@@ -3,7 +3,6 @@ com\dingCreator\astrology\behavior\DungeonBehavior$Holder.class
 com\dingCreator\astrology\behavior\response\BattleBehaviorResponse.class
 com\dingCreator\astrology\service\PlayerService.class
 com\dingCreator\astrology\entity\AreaBossRecord.class
-com\dingCreator\astrology\database\DatabaseProvider$1.class
 com\dingCreator\astrology\entity\MonsterLoot.class
 com\dingCreator\astrology\enums\exception\TeamExceptionEnum.class
 com\dingCreator\astrology\behavior\SearchBehavior.class
@@ -17,7 +16,6 @@ com\dingCreator\astrology\cache\PlayerCache.class
 com\dingCreator\astrology\util\BuffUtil.class
 com\dingCreator\astrology\vo\PlayerVO.class
 com\dingCreator\astrology\enums\SkillEffectEnum.class
-com\dingCreator\astrology\database\MapDataMapper.class
 com\dingCreator\astrology\enums\BuffTypeEnum.class
 com\dingCreator\astrology\behavior\response\BattleBehaviorResponse$BattleResult.class
 com\dingCreator\astrology\behavior\WorldBossBehavior.class
@@ -28,6 +26,7 @@ com\dingCreator\astrology\enums\exception\PlayerExceptionEnum.class
 com\dingCreator\astrology\entity\DailyTask.class
 com\dingCreator\astrology\behavior\ExpBehavior$1.class
 com\dingCreator\astrology\enums\exception\ExpExceptionEnum.class
+com\dingCreator\astrology\mapper\MapDataMapper.class
 com\dingCreator\astrology\behavior\MapBehavior.class
 com\dingCreator\astrology\dto\SkillBarDTO.class
 com\dingCreator\astrology\behavior\RankBehavior.class
@@ -46,7 +45,6 @@ com\dingCreator\astrology\enums\RankEnum.class
 com\dingCreator\astrology\entity\base\Organism.class
 com\dingCreator\astrology\entity\WorldBoss.class
 com\dingCreator\astrology\util\BattleUtil.class
-com\dingCreator\astrology\database\PlayerDataMapper.class
 com\dingCreator\astrology\exception\BusinessException.class
 com\dingCreator\astrology\behavior\RankBehavior$Holder.class
 com\dingCreator\astrology\enums\SkillConditionEnum.class
@@ -60,6 +58,7 @@ com\dingCreator\astrology\behavior\ExpBehavior.class
 com\dingCreator\astrology\entity\base\Boss.class
 com\dingCreator\astrology\database\DatabaseProvider.class
 com\dingCreator\astrology\database\DatabaseProvider$Holder.class
+com\dingCreator\astrology\mapper\PlayerDataMapper.class
 com\dingCreator\astrology\entity\AreaBoss.class
 com\dingCreator\astrology\behavior\PlayerBehavior$1.class
 com\dingCreator\astrology\behavior\TeamBehavior$1.class

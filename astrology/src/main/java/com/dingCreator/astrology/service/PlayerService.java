@@ -1,7 +1,7 @@
 package com.dingCreator.astrology.service;
 
 import com.dingCreator.astrology.database.DatabaseProvider;
-import com.dingCreator.astrology.database.PlayerDataMapper;
+import com.dingCreator.astrology.mapper.PlayerDataMapper;
 import com.dingCreator.astrology.dto.PlayerDTO;
 import com.dingCreator.astrology.entity.Player;
 
@@ -41,12 +41,6 @@ public class PlayerService {
      * @return 是否创建成功
      */
     public static boolean createPlayer(Player player) {
-        player.setEnabled(true);
-        player.setExp(0L);
-        // todo 新手村地图ID
-        player.setMapId(1L);
-        player.setLevel(1);
-        player.setRank(1);
         return (Boolean) DatabaseProvider.getInstance().doExecute(sqlSession ->
                 sqlSession.getMapper(PlayerDataMapper.class).createPlayer(player));
     }
@@ -59,6 +53,6 @@ public class PlayerService {
      */
     public static boolean updatePlayerById(Player player) {
         return (Boolean) DatabaseProvider.getInstance().doExecute(sqlSession ->
-                sqlSession.getMapper(PlayerDataMapper.class).createPlayer(player));
+                sqlSession.getMapper(PlayerDataMapper.class).updateById(player));
     }
 }

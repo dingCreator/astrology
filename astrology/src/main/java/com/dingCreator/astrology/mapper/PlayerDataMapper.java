@@ -1,17 +1,13 @@
-package com.dingCreator.astrology.database;
+package com.dingCreator.astrology.mapper;
 
 import com.dingCreator.astrology.entity.Player;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
-
-import java.util.List;
+import org.apache.ibatis.annotations.*;
 
 /**
  * @author ding
  * @date 2023/4/19
  */
+@Mapper
 public interface PlayerDataMapper {
 
     /**
@@ -20,7 +16,7 @@ public interface PlayerDataMapper {
      * @param id 玩家ID
      * @return 玩家信息
      */
-    @Select("select * from astrology_player where id=#{id}}")
+    @Select("select * from astrology_player where id=#{id}")
     Player getPlayerById(@Param("id") Long id);
 
     /**
@@ -29,10 +25,10 @@ public interface PlayerDataMapper {
      * @param player 玩家基本信息
      * @return 是否新增成功
      */
-    @Insert("INSERT INTO astrology_player (name, hp, maxHp, mp, maxMp, atk, magicAtk, def, magicDef, penetrate, " +
+    @Insert("INSERT INTO astrology_player (id, name, hp, maxHp, mp, maxMp, atk, magicAtk, def, magicDef, penetrate, " +
             "critical, behaviorSpeed, hit, dodge, rank, level, exp, job, mapId, status, hangUpTime, enabled" +
             ") VALUES (" +
-            "#{name}, #{hp}, #{maxHp}, #{mp}, #{maxMp}, #{atk}, #{magicAtk}, #{def}, #{magicDef}, #{penetrate}," +
+            "#{id}, #{name}, #{hp}, #{maxHp}, #{mp}, #{maxMp}, #{atk}, #{magicAtk}, #{def}, #{magicDef}, #{penetrate}," +
             "#{critical}, #{behaviorSpeed}, #{hit}, #{dodge}, #{rank}, #{level}, #{exp}, #{job}, #{mapId}," +
             "#{status}, #{hangUpTime}, #{enabled})")
     Boolean createPlayer(Player player);

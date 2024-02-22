@@ -2,10 +2,12 @@ package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.dto.PlayerDTO;
 import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.enums.JobEnum;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
+import com.dingCreator.astrology.vo.BaseVO;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -16,23 +18,11 @@ import java.util.Objects;
  */
 public class PlayerBehavior {
 
-    private static class Holder {
-        private static final PlayerBehavior BEHAVIOR = new PlayerBehavior();
-    }
-
-    private PlayerBehavior() {
-
-    }
-
-    public static PlayerBehavior getInstance() {
-        return Holder.BEHAVIOR;
-    }
-
     /**
      * 创建角色
      *
-     * @param id 玩家ID
-     * @param name 玩家名称
+     * @param id      玩家ID
+     * @param name    玩家名称
      * @param jobName 职业名称
      */
     public void createPlayer(Long id, String name, String jobName) {
@@ -68,6 +58,31 @@ public class PlayerBehavior {
         player.setHit(job.getInitHit());
         player.setDodge(job.getInitDodge());
         PlayerCache.createPlayer(player);
-        PlayerCache.flush(Collections.singletonList(player.getId()));
+    }
+
+    /**
+     * 根据玩家ID获取玩家信息
+     *
+     * @param id 玩家ID
+     * @return 玩家信息
+     */
+    public BaseVO<String> getPlayerInfoById(Long id) {
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
+        String msg = "";
+        BaseVO<String> baseVO = new BaseVO<>();
+        baseVO.setMsg(Collections.singletonList(msg));
+        return baseVO;
+    }
+
+    private static class Holder {
+        private static final PlayerBehavior BEHAVIOR = new PlayerBehavior();
+    }
+
+    private PlayerBehavior() {
+
+    }
+
+    public static PlayerBehavior getInstance() {
+        return Holder.BEHAVIOR;
     }
 }

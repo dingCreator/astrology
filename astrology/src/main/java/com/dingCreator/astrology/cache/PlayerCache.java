@@ -20,7 +20,7 @@ public class PlayerCache {
     private static final Map<Long, PlayerDTO> PLAYER_MAP = new ConcurrentHashMap<>();
 
     public static void createPlayer(Player player) {
-        if (PLAYER_MAP.containsKey(player.getId())) {
+        if (PLAYER_MAP.containsKey(player.getId()) || Objects.nonNull(getPlayerById(player.getId()))) {
             throw PlayerExceptionEnum.PLAYER_EXIST.getException();
         }
         if (!PlayerService.createPlayer(player)) {
