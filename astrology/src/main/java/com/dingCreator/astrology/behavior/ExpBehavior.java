@@ -20,18 +20,6 @@ import java.util.Date;
  */
 public class ExpBehavior {
 
-    private static class Holder {
-        private static final ExpBehavior BEHAVIOR = new ExpBehavior();
-    }
-
-    private ExpBehavior() {
-
-    }
-
-    public static ExpBehavior getInstance() {
-        return ExpBehavior.Holder.BEHAVIOR;
-    }
-
     /**
      * 经验值发生改变
      *
@@ -95,8 +83,8 @@ public class ExpBehavior {
     public void hangUp(Long id) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
         Player player = playerDTO.getPlayer();
-        if (PlayerStatusEnum.HANG_UP.getCode().equals(player.getStatus())) {
-            throw ExpExceptionEnum.ALREADY_HANG_UP.getException();
+        if (!PlayerStatusEnum.FREE.getCode().equals(player.getStatus())) {
+            throw ExpExceptionEnum.CANT_HANG_UP.getException();
         }
         player.setStatus(PlayerStatusEnum.HANG_UP.getCode());
         player.setHangUpTime(new Date());
@@ -122,5 +110,17 @@ public class ExpBehavior {
         long exp = between;
         getExp(id, exp);
         return between;
+    }
+
+    private static class Holder {
+        private static final ExpBehavior BEHAVIOR = new ExpBehavior();
+    }
+
+    private ExpBehavior() {
+
+    }
+
+    public static ExpBehavior getInstance() {
+        return ExpBehavior.Holder.BEHAVIOR;
     }
 }

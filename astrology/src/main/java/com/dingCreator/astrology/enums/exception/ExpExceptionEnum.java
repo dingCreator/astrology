@@ -15,7 +15,7 @@ public enum ExpExceptionEnum {
     /**
      * 业务异常
      */
-    ALREADY_HANG_UP(new BusinessException(Constants.EXP_EXCEPTION_PREFIX + "000", "已处于挂机状态，请勿重复操作")),
+    CANT_HANG_UP(new BusinessException(Constants.EXP_EXCEPTION_PREFIX + "000", "非空闲状态，无法挂机")),
     NOT_HANG_UP(new BusinessException(Constants.EXP_EXCEPTION_PREFIX + "001", "非挂机状态，无法结束挂机")),
     ;
 

@@ -6,10 +6,13 @@ import com.dingCreator.astrology.dto.PlayerDTO;
 import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.enums.JobEnum;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
+import com.dingCreator.astrology.enums.RankEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.vo.BaseVO;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -35,7 +38,7 @@ public class PlayerBehavior {
         player.setName(name);
         player.setStatus(PlayerStatusEnum.FREE.getCode());
         player.setMapId(1L);
-        player.setJob(jobName);
+        player.setJob(job.getJobCode());
         player.setExp(0L);
         player.setLevel(Constants.MIN_LEVEL);
         player.setRank(Constants.MIN_RANK);
@@ -68,9 +71,25 @@ public class PlayerBehavior {
      */
     public BaseVO<String> getPlayerInfoById(Long id) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
-        String msg = "";
+        Player player = playerDTO.getPlayer();
+        List<String> list = new ArrayList<>(16);
+        list.add("账号：" + player.getId());
+        list.add("名字：" + player.getName());
+        list.add("职业：" + JobEnum.getByCode(player.getJob()));
+        list.add("阶级：" + RankEnum.getEnum(player.getJob(), player.getRank()).getRankName());
+        list.add("等级：" + player.getLevel());
+        list.add("经验：" + player.getExp());
+        list.add("血量：" + player.getHp() + "/" + player.getMaxHp());
+        list.add("蓝量：" + player.getMp() + "/" + player.getMaxMp());
+        list.add("物攻：" + player.getAtk());
+        list.add("物防：" + player.getDef());
+        list.add("魔攻：" + player.getMagicAtk());
+        list.add("魔防：" + player.getMagicDef());
+        list.add("穿甲：" + player.getPenetrate() + "%");
+        list.add("命中：" + player.getHit());
+        list.add("闪避：" + player.getDodge());
         BaseVO<String> baseVO = new BaseVO<>();
-        baseVO.setMsg(Collections.singletonList(msg));
+        baseVO.setMsg(list);
         return baseVO;
     }
 

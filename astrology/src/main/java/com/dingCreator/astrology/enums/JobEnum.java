@@ -137,4 +137,9 @@ public enum JobEnum {
         return Arrays.stream(JobEnum.values()).filter(job -> job.getJobName().equals(name))
                 .findFirst().orElse(null);
     }
+
+    public static JobEnum getByCode(String name) {
+        return Arrays.stream(JobEnum.values()).filter(job -> job.getJobCode().equals(name))
+                .findFirst().orElse(null);
+    }
 }

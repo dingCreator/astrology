@@ -1,5 +1,7 @@
 package com.dingCreator.astrology.mapper;
 
+import com.dingCreator.astrology.entity.SkillBelongTo;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -8,4 +10,13 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface SkillBelongToMapper {
+
+    /**
+     * 创建技能归属
+     *
+     * @param skillBelongTo 实体类
+     * @return 是否成功
+     */
+    @Insert("INSERT INTO SkillBelongTo (belongTo, belongToId, skillId) VALUES (#{belongTo}, #{belongToId}, #{skillId})")
+    Boolean createSkillBelongTo(SkillBelongTo skillBelongTo);
 }
