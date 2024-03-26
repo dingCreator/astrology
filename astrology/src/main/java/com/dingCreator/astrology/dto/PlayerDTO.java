@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.dto;
 
+import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.entity.Player;
 import lombok.Data;
 
@@ -19,4 +20,12 @@ public class PlayerDTO implements Serializable {
      * 是否在小队中
      */
     private Boolean team;
+    /**
+     * 技能栏
+     */
+    private SkillBarDTO skillBarDTO;
+    /**
+     * 装备栏
+     */
+    private EquipmentBarDTO equipmentBarDTO;
 }

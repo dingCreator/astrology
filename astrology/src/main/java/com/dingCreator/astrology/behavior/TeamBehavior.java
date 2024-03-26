@@ -5,7 +5,9 @@ import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.PlayerDTO;
 import com.dingCreator.astrology.dto.TeamDTO;
+import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.exception.TeamExceptionEnum;
+import com.dingCreator.astrology.util.MapUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,18 +21,6 @@ import java.util.stream.Collectors;
  * @date 2024/2/1
  */
 public class TeamBehavior {
-
-    private static class Holder {
-        private static final TeamBehavior BEHAVIOR = new TeamBehavior();
-    }
-
-    private TeamBehavior() {
-
-    }
-
-    public static TeamBehavior getInstance() {
-        return Holder.BEHAVIOR;
-    }
 
     /**
      * 创建小队
@@ -56,6 +46,18 @@ public class TeamBehavior {
         TeamDTO teamDTO = TeamCache.getTeamById(teamId);
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.TEAM_NOT_EXIST.getException();
+        }
+        if (!PlayerStatusEnum.FREE.getCode()
+                .equals(PlayerCache.getPlayerById(initiatorId).getPlayer().getStatus())) {
+            throw TeamExceptionEnum.PRE_JOIN_NOT_FREE.getException();
+        }
+        if (!PlayerStatusEnum.FREE.getCode()
+                .equals(PlayerCache.getPlayerById(teamId).getPlayer().getStatus())) {
+            throw TeamExceptionEnum.TEAM_NOT_FREE.getException();
+        }
+        if (!MapUtil.getNowLocation(PlayerCache.getPlayerById(initiatorId).getPlayer().getMapId())
+                .equals(MapUtil.getNowLocation(PlayerCache.getPlayerById(teamId).getPlayer().getMapId()))) {
+            throw TeamExceptionEnum.NOT_IN_SAME_MAP.getException();
         }
         if (teamDTO.getMembers().size() >= Constants.TEAM_MEMBER_LIMIT) {
             throw TeamExceptionEnum.TEAM_MEMBER_OVER_LIMIT.getException();
@@ -169,5 +171,17 @@ public class TeamBehavior {
         }
         teamDTO.getMembers().forEach(this::leaveTeam);
         TeamCache.deleteTeam(initiatorId);
+    }
+
+    private static class Holder {
+        private static final TeamBehavior BEHAVIOR = new TeamBehavior();
+    }
+
+    private TeamBehavior() {
+
+    }
+
+    public static TeamBehavior getInstance() {
+        return Holder.BEHAVIOR;
     }
 }

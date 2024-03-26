@@ -26,12 +26,4 @@ public class BuffDTO implements Serializable {
      * 比例变化
      */
     private Float rate;
-    /**
-     * 特殊效果生效概率
-     */
-    private Float effectedRate;
-    /**
-     * 剩余回合
-     */
-    private Integer round;
 }

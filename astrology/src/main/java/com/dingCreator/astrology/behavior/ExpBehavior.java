@@ -10,6 +10,9 @@ import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.RankEnum;
 import com.dingCreator.astrology.enums.exception.ExpExceptionEnum;
+import com.dingCreator.astrology.enums.job.JobInitPropertiesEnum;
+import com.dingCreator.astrology.response.BaseResponse;
+import com.dingCreator.astrology.vo.HangUpVO;
 
 import java.util.Collections;
 import java.util.Date;
@@ -44,7 +47,18 @@ public class ExpBehavior {
             } else {
                 currentExp -= getCurrentLevelMaxExp(player.getLevel());
                 player.setLevel(player.getLevel() + 1);
-                // todo 属性提升
+                // 属性提升
+                player.setHp(player.getMaxHp() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitHp());
+                player.setMaxHp(player.getMaxHp() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitHp());
+                player.setMp(player.getMaxMp() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitMp());
+                player.setMaxHp(player.getMaxMp() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitMp());
+                player.setAtk(player.getAtk() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitAtk());
+                player.setMagicAtk(player.getMagicAtk() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitMagicAtk());
+                player.setDef(player.getDef() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitDef());
+                player.setMagicDef(player.getMagicDef() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitMagicDef());
+                player.setBehaviorSpeed(player.getBehaviorSpeed() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitBehaviorSpeed());
+                player.setHit(player.getHit() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitHit());
+                player.setDodge(player.getDodge() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitDodge());
             }
         }
         player.setExp(currentExp);
@@ -58,7 +72,7 @@ public class ExpBehavior {
      * @return 最大经验值
      */
     private long getCurrentLevelMaxExp(int level) {
-        return level * 100;
+        return 100 + (long) Math.pow(level - 1, 4);
     }
 
     /**
@@ -83,11 +97,11 @@ public class ExpBehavior {
     public void hangUp(Long id) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
         Player player = playerDTO.getPlayer();
-        if (!PlayerStatusEnum.FREE.getCode().equals(player.getStatus())) {
+        if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(id))) {
             throw ExpExceptionEnum.CANT_HANG_UP.getException();
         }
         player.setStatus(PlayerStatusEnum.HANG_UP.getCode());
-        player.setHangUpTime(new Date());
+        player.setStatusStartTime(new Date());
         PlayerCache.flush(Collections.singletonList(id));
     }
 
@@ -95,8 +109,9 @@ public class ExpBehavior {
      * 停止挂机
      *
      * @param id 玩家ID
+     * @return 挂机信息
      */
-    public long stopHangUp(Long id) {
+    public BaseResponse<HangUpVO> stopHangUp(Long id) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
         Player player = playerDTO.getPlayer();
         if (!PlayerStatusEnum.HANG_UP.getCode().equals(player.getStatus())) {
@@ -105,11 +120,23 @@ public class ExpBehavior {
         player.setStatus(PlayerStatusEnum.FREE.getCode());
         PlayerCache.flush(Collections.singletonList(id));
 
-        long between = DateUtil.between(player.getHangUpTime(), new Date(), DateUnit.SECOND);
-        // todo EXP计算
-        long exp = between;
+        HangUpVO hangUpVO = new HangUpVO();
+        long between = DateUtil.between(player.getStatusStartTime(), new Date(), DateUnit.MINUTE);
+        hangUpVO.setHangUpTime(between);
+
+        between = Math.min(between, Constants.MAX_HANG_UP_TIME);
+
+        long maxHp = player.getMaxHp();
+        long hp = player.getHp();
+        long maxMp = player.getMaxMp();
+        long mp = player.getMp();
+
+        long exp = (10 + (long) Math.pow(player.getLevel() - 1, 3)) * between;
         getExp(id, exp);
-        return between;
+        hangUpVO.setExp(exp);
+        BaseResponse<HangUpVO> response = new BaseResponse<>();
+        response.setContent(hangUpVO);
+        return response;
     }
 
     private static class Holder {

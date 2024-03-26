@@ -1,19 +1,33 @@
 package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.PlayerCache;
+import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.PlayerDTO;
+import com.dingCreator.astrology.dto.TeamDTO;
 import com.dingCreator.astrology.entity.Player;
-import com.dingCreator.astrology.enums.JobEnum;
+import com.dingCreator.astrology.entity.SkillBarItem;
+import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.RankEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
-import com.dingCreator.astrology.vo.BaseVO;
+import com.dingCreator.astrology.enums.exception.TeamExceptionEnum;
+import com.dingCreator.astrology.enums.job.JobEnum;
+import com.dingCreator.astrology.enums.job.JobInitPropertiesEnum;
+import com.dingCreator.astrology.enums.skill.SkillEnum;
+import com.dingCreator.astrology.response.BaseResponse;
+import com.dingCreator.astrology.service.PlayerService;
+import com.dingCreator.astrology.service.SkillBarItemService;
+import com.dingCreator.astrology.service.SkillBelongToService;
+import com.dingCreator.astrology.util.BattleUtil;
+import com.dingCreator.astrology.util.MapUtil;
+import com.dingCreator.astrology.util.SkillUtil;
+import com.dingCreator.astrology.vo.BattleResultVO;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author ding
@@ -29,38 +43,76 @@ public class PlayerBehavior {
      * @param jobName 职业名称
      */
     public void createPlayer(Long id, String name, String jobName) {
+        // 获取职业
         JobEnum job = JobEnum.getByName(jobName);
         if (Objects.isNull(job)) {
             throw PlayerExceptionEnum.JOB_NOT_EXIST.getException();
         }
+        // 设置初始属性
         Player player = new Player();
         player.setId(id);
         player.setName(name);
         player.setStatus(PlayerStatusEnum.FREE.getCode());
-        player.setMapId(1L);
+        player.setMapId(job.getMapId());
         player.setJob(job.getJobCode());
         player.setExp(0L);
         player.setLevel(Constants.MIN_LEVEL);
         player.setRank(Constants.MIN_RANK);
         player.setEnabled(true);
 
-        player.setHp(job.getInitHp());
-        player.setMaxHp(job.getInitHp());
-        player.setMp(job.getInitMp());
-        player.setMaxMp(job.getInitMp());
+        JobInitPropertiesEnum prop = JobInitPropertiesEnum.getByCode(job.getJobCode());
+        player.setHp(prop.getInitHp());
+        player.setMaxHp(prop.getInitHp());
+        player.setMp(prop.getInitMp());
+        player.setMaxMp(prop.getInitMp());
 
-        player.setAtk(job.getInitAtk());
-        player.setDef(job.getInitDef());
-        player.setMagicAtk(job.getInitMagicAtk());
-        player.setMagicDef(job.getInitMagicDef());
+        player.setAtk(prop.getInitAtk());
+        player.setDef(prop.getInitDef());
+        player.setMagicAtk(prop.getInitMagicAtk());
+        player.setMagicDef(prop.getInitMagicDef());
 
-        player.setBehaviorSpeed(job.getInitBehaviorSpeed());
-        player.setPenetrate(job.getInitPenetrate());
-        player.setCritical(job.getInitCritical());
+        player.setBehaviorSpeed(prop.getInitBehaviorSpeed());
+        player.setPenetrate(prop.getInitPenetrate());
+        player.setMagicPenetrate(prop.getInitMagicPenetrate());
+        player.setCriticalRate(prop.getInitCriticalRate());
+        player.setCriticalReductionRate(prop.getInitCriticalReductionRate());
+        player.setCriticalDamage(prop.getInitCriticalDamage());
+        player.setCriticalDamageReduction(prop.getInitCriticalDamageReduction());
 
-        player.setHit(job.getInitHit());
-        player.setDodge(job.getInitDodge());
+        player.setHit(prop.getInitHit());
+        player.setDodge(prop.getInitDodge());
+        player.setLifeStealing(prop.getInitLifeStealing());
         PlayerCache.createPlayer(player);
+
+        // 赠送默认技能
+        SkillBelongToService.createSkillBelongTo(BelongToEnum.Player.getBelongTo(), id,
+                SkillEnum.getDefaultSkillByJob(job.getJobCode()).getId());
+
+        // 装备技能栏
+        List<SkillBarItem> skillBarItemList = SkillUtil.buildSkillBarItemChain(
+                Collections.singletonList(SkillEnum.getDefaultSkillByJob(job.getJobCode()).getId()),
+                BelongToEnum.Player, id);
+        SkillBarItemService.addSkillBarItem(skillBarItemList);
+    }
+
+    /**
+     * 改名
+     *
+     * @param playerId 玩家ID
+     * @param name     新名字
+     */
+    public void rename(Long playerId, String name) {
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId);
+        if (playerDTO.getPlayer().getName().equals(name)) {
+            return;
+        }
+        // todo 敏感词校验
+        Player player = PlayerService.getPlayerByName(name);
+        if (Objects.nonNull(player)) {
+            throw PlayerExceptionEnum.NAME_EXIST.getException();
+        }
+        playerDTO.getPlayer().setName(name);
+        PlayerCache.flush(Collections.singletonList(playerId));
     }
 
     /**
@@ -69,28 +121,88 @@ public class PlayerBehavior {
      * @param id 玩家ID
      * @return 玩家信息
      */
-    public BaseVO<String> getPlayerInfoById(Long id) {
+    public BaseResponse<List<String>> getPlayerInfoById(Long id) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
         Player player = playerDTO.getPlayer();
         List<String> list = new ArrayList<>(16);
-        list.add("账号：" + player.getId());
-        list.add("名字：" + player.getName());
-        list.add("职业：" + JobEnum.getByCode(player.getJob()));
+        list.add("昵称：" + player.getName() + " 职业：" + JobEnum.getByCode(player.getJob()));
         list.add("阶级：" + RankEnum.getEnum(player.getJob(), player.getRank()).getRankName());
-        list.add("等级：" + player.getLevel());
-        list.add("经验：" + player.getExp());
+        list.add("等级：" + player.getLevel() + " 经验：" + player.getExp());
         list.add("血量：" + player.getHp() + "/" + player.getMaxHp());
         list.add("蓝量：" + player.getMp() + "/" + player.getMaxMp());
         list.add("物攻：" + player.getAtk());
         list.add("物防：" + player.getDef());
         list.add("魔攻：" + player.getMagicAtk());
         list.add("魔防：" + player.getMagicDef());
-        list.add("穿甲：" + player.getPenetrate() + "%");
+        list.add("穿甲：" + player.getPenetrate() * 100 + "%");
         list.add("命中：" + player.getHit());
         list.add("闪避：" + player.getDodge());
-        BaseVO<String> baseVO = new BaseVO<>();
-        baseVO.setMsg(list);
-        return baseVO;
+        list.add("暴击：" + player.getCriticalRate() * 100 + "%");
+        list.add("暴击减免：" + player.getCriticalReductionRate() * 100 + "%");
+        list.add("暴伤：" + player.getCriticalDamage() * 100 + "%");
+        list.add("暴伤减免：" + player.getCriticalDamageReduction() * 100 + "%");
+        BaseResponse<List<String>> baseResponse = new BaseResponse<>();
+        baseResponse.setContent(list);
+        return baseResponse;
+    }
+
+    /**
+     * 获取当前状态
+     *
+     * @return 当前状态
+     */
+    public String getStatus(Long playerId) {
+        Player player = PlayerCache.getPlayerById(playerId).getPlayer();
+        if (PlayerStatusEnum.MOVING.getCode().equals(player.getStatus())) {
+            Long targetMapId = MapUtil.getTargetLocation(playerId);
+            if (Objects.isNull(targetMapId)) {
+                player.setStatus(PlayerStatusEnum.FREE.getCode());
+                PlayerCache.flush(Collections.singletonList(playerId));
+            } else {
+                long seconds = MapUtil.moveTime(playerId, MapUtil.getNowLocation(playerId), targetMapId);
+                if (System.currentTimeMillis() >= player.getStatusStartTime().getTime() + seconds * 1000) {
+                    // 已经到了
+                    player.setStatus(PlayerStatusEnum.FREE.getCode());
+                    player.setStatusStartTime(new Date());
+                    player.setMapId(MapUtil.getTargetLocation(playerId));
+                    PlayerCache.flush(Collections.singletonList(playerId));
+                }
+            }
+        }
+        return PlayerCache.getPlayerById(playerId).getPlayer().getStatus();
+    }
+
+    /**
+     * 发起决斗
+     *
+     * @param initiatorId 发起者ID
+     * @param recipientId 接受者ID
+     */
+    public long createBattle(Long initiatorId, Long recipientId) {
+        return BattleUtil.createBattle(initiatorId, recipientId);
+    }
+
+    /**
+     * 接受决斗
+     *
+     * @param recipientId 接受玩家ID
+     * @return 战斗结果
+     */
+    public BaseResponse<BattleResultVO> acceptBattle(Long recipientId) {
+        BattleResultVO vo = BattleUtil.acceptBattle(recipientId);
+        BaseResponse<BattleResultVO> response = new BaseResponse<>();
+        response.setContent(vo);
+        return response;
+    }
+
+    /**
+     * 拒绝决斗
+     *
+     * @param recipientId 被发起者ID
+     * @return 发起者ID
+     */
+    public long refuseBattle(Long recipientId) {
+        return BattleUtil.refuseBattle(recipientId);
     }
 
     private static class Holder {

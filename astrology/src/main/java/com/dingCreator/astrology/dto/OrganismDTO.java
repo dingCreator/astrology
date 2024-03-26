@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.dto;
 
-import com.dingCreator.astrology.entity.Equipment;
+import com.dingCreator.astrology.dto.skill.SkillBarDTO;
+import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import com.dingCreator.astrology.entity.base.Organism;
 import lombok.Data;
 
@@ -26,5 +27,5 @@ public class OrganismDTO implements Serializable {
     /**
      * 装备
      */
-    private List<Equipment> equipmentList;
+    private List<EquipmentBelongTo> equipmentBelongToList;
 }

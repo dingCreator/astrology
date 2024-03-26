@@ -17,6 +17,10 @@ public class Constants {
      * 玩家错误码前缀
      */
     public static final String PLAYER_EXCEPTION_PREFIX = "PLAYER_";
+    /**
+     * CD错误码前缀
+     */
+    public static final String CD_EXCEPTION_PREFIX = "CD_";
 
 
     /**
@@ -33,6 +37,10 @@ public class Constants {
 
 
     // 经验相关配置
+    /**
+     * 最长挂机时间
+     */
+    public static final long MAX_HANG_UP_TIME = 24 * 60;
     /**
      * 最低等级
      */
@@ -54,4 +62,20 @@ public class Constants {
      */
     public static final int MAX_TMP_LEVEL = 5;
 
+    // 战斗相关配置
+    /**
+     * 接受决斗超时时间
+     */
+    public static final int ACCEPT_BATTLE_TIME_OUT = 30;
+    /**
+     * 发起决斗冷却时间
+     */
+    public static final int BATTLE_CD = 180;
+
+
+    // CD key前缀
+    /**
+     * 战斗CD前缀
+     */
+    public static final String CD_BATTLE_PREFIX = "cd_battle_";
 }

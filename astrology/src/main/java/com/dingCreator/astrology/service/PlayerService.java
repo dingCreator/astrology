@@ -22,6 +22,17 @@ public class PlayerService {
     }
 
     /**
+     * 获取玩家基本信息
+     *
+     * @param name 玩家名称
+     * @return 玩家基本信息
+     */
+    public static Player getPlayerByName(String name) {
+        return (Player) DatabaseProvider.getInstance().doExecute(sqlSession ->
+                sqlSession.getMapper(PlayerDataMapper.class).getPlayerByName(name));
+    }
+
+    /**
      * 获取玩家信息
      *
      * @param id 玩家ID

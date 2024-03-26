@@ -20,6 +20,15 @@ public interface PlayerDataMapper {
     Player getPlayerById(@Param("id") Long id);
 
     /**
+     * 根据名称获取玩家
+     *
+     * @param name 玩家名称
+     * @return 玩家信息
+     */
+    @Select("select * from astrology_player where name=#{name}")
+    Player getPlayerByName(@Param("name") String name);
+
+    /**
      * 新增玩家
      *
      * @param player 玩家基本信息

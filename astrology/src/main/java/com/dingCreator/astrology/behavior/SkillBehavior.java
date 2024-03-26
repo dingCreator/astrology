@@ -1,8 +1,7 @@
 package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.SkillCache;
-import com.dingCreator.astrology.dto.SkillBarDTO;
-import com.dingCreator.astrology.entity.SkillBelongTo;
+import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.service.SkillBelongToService;
 
 /**

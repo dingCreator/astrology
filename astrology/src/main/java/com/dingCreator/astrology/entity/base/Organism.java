@@ -51,9 +51,25 @@ public class Organism {
      */
     private Float penetrate;
     /**
-     * 暴击
+     * 法穿
      */
-    private Long critical;
+    private Float magicPenetrate;
+    /**
+     * 暴击率
+     */
+    private Float criticalRate;
+    /**
+     * 抗暴率
+     */
+    private Float criticalReductionRate;
+    /**
+     * 爆伤倍率
+     */
+    private Float criticalDamage;
+    /**
+     * 爆伤减免
+     */
+    private Float criticalDamageReduction;
     /**
      * 行动速度
      */
@@ -66,6 +82,10 @@ public class Organism {
      * 闪避率
      */
     private Long dodge;
+    /**
+     * 吸血
+     */
+    private Float lifeStealing;
     /**
      * 阶段
      */

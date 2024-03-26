@@ -1,10 +1,14 @@
 package com.dingCreator.astrology.entity;
 
 import com.dingCreator.astrology.entity.base.Organism;
+import com.dingCreator.astrology.enums.PlayerStatusEnum;
+import com.dingCreator.astrology.service.PlayerService;
+import com.dingCreator.astrology.util.MapUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * 玩家
@@ -36,9 +40,9 @@ public class Player extends Organism {
      */
     private String status;
     /**
-     * 开始挂机时间
+     * 进入此状态时间
      */
-    private Date hangUpTime;
+    private Date statusStartTime;
     /**
      * 是否可用
      */

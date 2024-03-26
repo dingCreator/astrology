@@ -1,9 +1,10 @@
 package com.dingCreator.astrology.behavior;
 
-import com.dingCreator.astrology.enums.JobEnum;
-import com.dingCreator.astrology.vo.BaseVO;
+import com.dingCreator.astrology.enums.job.JobEnum;
+import com.dingCreator.astrology.response.BaseResponse;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -18,13 +19,17 @@ public class JobBehavior {
      *
      * @return 职业信息
      */
-    public BaseVO<String> getJob() {
-        BaseVO<String> baseVO = new BaseVO<>();
+    public BaseResponse<List<String>> getJob() {
+        BaseResponse<List<String>> response = new BaseResponse<>();
         final AtomicInteger index = new AtomicInteger(1);
-        baseVO.setMsg(Arrays.stream(JobEnum.values()).map(job ->
+        response.setContent(Arrays.stream(JobEnum.values()).map(job ->
                 index.getAndAdd(1) + "." + job.getJobName()
         ).collect(Collectors.toList()));
-        return baseVO;
+        return response;
+    }
+
+    public BaseResponse<?> getJobDetail(String jobName) {
+        return null;
     }
 
     private static class Holder {

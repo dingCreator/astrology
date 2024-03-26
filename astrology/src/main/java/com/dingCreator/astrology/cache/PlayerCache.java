@@ -49,6 +49,11 @@ public class PlayerCache {
         return playerDTO;
     }
 
+    /**
+     * 更新玩家数据
+     *
+     * @param ids 玩家ID
+     */
     public static void flush(List<Long> ids) {
         List<Player> players = ids.stream().map(PLAYER_MAP::get).map(PlayerDTO::getPlayer).collect(Collectors.toList());
         players.forEach(PlayerService::updatePlayerById);

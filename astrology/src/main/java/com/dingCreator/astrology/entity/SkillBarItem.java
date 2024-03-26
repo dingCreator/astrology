@@ -1,6 +1,8 @@
 package com.dingCreator.astrology.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 技能栏
@@ -9,11 +11,13 @@ import lombok.Data;
  * @date 2024/2/3
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class SkillBarItem {
     /**
      * 主键
      */
-    private Long id;
+    private String id;
     /**
      * Player/DungeonBoss/RankUpBoss/AreaBoss
      */
@@ -29,9 +33,9 @@ public class SkillBarItem {
     /**
      * 头
      */
-    private Long headId;
+    private String headId;
     /**
      * 技能组下一个技能
      */
-    private Long nextId;
+    private String nextId;
 }

@@ -1,6 +1,6 @@
 package com.dingCreator.astrology.behavior;
 
-import com.dingCreator.astrology.behavior.response.BattleBehaviorResponse;
+import com.dingCreator.astrology.vo.BattleResultVO;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.dto.OrganismDTO;
 import com.dingCreator.astrology.dto.PlayerDTO;
@@ -38,6 +38,6 @@ public class RankBehavior {
         RankUpBoss rankUpBoss = new RankUpBoss();
         OrganismDTO boss = new OrganismDTO();
 
-        BattleBehaviorResponse response = BattleUtil.battle(player, boss);
+//        BattleResultVO response = BattleUtil.battle(player, boss);
     }
 }

@@ -8,18 +8,6 @@ import java.util.List;
  */
 public class WorldBossBehavior {
 
-    private static class Holder {
-        private static final WorldBossBehavior BEHAVIOR = new WorldBossBehavior();
-    }
-
-    private WorldBossBehavior() {
-
-    }
-
-    public static WorldBossBehavior getInstance() {
-        return WorldBossBehavior.Holder.BEHAVIOR;
-    }
-
     /**
      * 讨伐世界boss
      *
@@ -37,5 +25,17 @@ public class WorldBossBehavior {
     public List<?> worldBossRank() {
 
         return null;
+    }
+
+    private static class Holder {
+        private static final WorldBossBehavior BEHAVIOR = new WorldBossBehavior();
+    }
+
+    private WorldBossBehavior() {
+
+    }
+
+    public static WorldBossBehavior getInstance() {
+        return WorldBossBehavior.Holder.BEHAVIOR;
     }
 }

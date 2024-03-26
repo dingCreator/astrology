@@ -17,7 +17,11 @@ public enum PlayerExceptionEnum {
      */
     PLAYER_NOT_FOUND(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "000", "未创建角色")),
     PLAYER_EXIST(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "001", "已创建角色，请勿重复创建")),
-    JOB_NOT_EXIST(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "002", "职业输入错误，输入“查询职业”指令查看职业信息")),
+    JOB_NOT_EXIST(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "002", "角色正在开发，敬请期待")),
+    NAME_EXIST(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "003", "该名称已存在")),
+    IN_BATTLE(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "004", "决斗尚未结束，不能发起新的决斗")),
+    NO_BATTLE(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "005", "没有人向你发起决斗")),
+    BATTLE_EXPIRED(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "006", "决斗已过期")),
     ;
     private final BusinessException exception;
 }

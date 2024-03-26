@@ -1,7 +1,7 @@
 package com.dingCreator.astrology.cache;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.dingCreator.astrology.dto.SkillBarDTO;
+import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.entity.SkillBarItem;
 import com.dingCreator.astrology.enums.OrganismEnum;
 import com.dingCreator.astrology.service.SkillBarItemService;
@@ -68,8 +68,6 @@ public class SkillCache {
 
         SkillBarDTO skillBarDTO = new SkillBarDTO();
         skillBarDTO.setId(skillBarDTO.getId());
-        skillBarDTO.setBelongTo(belongTo);
-        skillBarDTO.setBelongToId(belongToId);
 
         return skillBarDTO;
     }
