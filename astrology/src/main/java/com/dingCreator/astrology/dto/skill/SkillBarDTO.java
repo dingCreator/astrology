@@ -11,10 +11,6 @@ import java.io.Serializable;
 @Data
 public class SkillBarDTO implements Serializable {
     /**
-     * 主键
-     */
-    private Long id;
-    /**
      * 技能ID
      */
     private Long skillId;

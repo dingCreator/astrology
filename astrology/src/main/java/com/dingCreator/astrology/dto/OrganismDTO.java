@@ -3,6 +3,7 @@ package com.dingCreator.astrology.dto;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import com.dingCreator.astrology.entity.base.Organism;
+import com.dingCreator.astrology.enums.skill.SkillEnum;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -24,6 +25,10 @@ public class OrganismDTO implements Serializable {
      * 技能组
      */
     private SkillBarDTO skillBarDTO;
+    /**
+     * 默认技能
+     */
+    private SkillEnum defaultSkill;
     /**
      * 装备
      */

@@ -20,7 +20,7 @@ public enum JobInitPropertiesEnum {
             30L, 8L,
             10L, 5L,
             0F, 0F,
-            0.1F, 0F,
+            0.01F, 0F,
             1.5F, 0F,
             5L, 10L, 10L, 0F),
     /**
@@ -31,7 +31,7 @@ public enum JobInitPropertiesEnum {
             15L, 15L,
             15L, 6L,
             0F, 0F,
-            0.1F, 0F,
+            0.01F, 0F,
             1.5F, 0F,
             2L, 10L, 10L, 0F),
     /**
@@ -42,7 +42,7 @@ public enum JobInitPropertiesEnum {
             8L, 6L,
             35L, 12L,
             0F, 0F,
-            0.1F, 0F,
+            0.01F, 0F,
             1.5F, 0F,
             2L, 10L, 10L, 0F),
     /**
@@ -53,7 +53,7 @@ public enum JobInitPropertiesEnum {
             20L, 7L,
             15L, 4L,
             0.02F, 0F,
-            0.1F, 0F,
+            0.01F, 0F,
             1.5F, 0F,
             3L, 10L, 10L, 0F),
     /**

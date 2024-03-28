@@ -89,9 +89,9 @@ public class PlayerBehavior {
                 SkillEnum.getDefaultSkillByJob(job.getJobCode()).getId());
 
         // 装备技能栏
-        List<SkillBarItem> skillBarItemList = SkillUtil.buildSkillBarItemChain(
-                Collections.singletonList(SkillEnum.getDefaultSkillByJob(job.getJobCode()).getId()),
-                BelongToEnum.Player, id);
+        List<Long> skillIds = new ArrayList<>();
+        skillIds.add(SkillEnum.getDefaultSkillByJob(job.getJobCode()).getId());
+        List<SkillBarItem> skillBarItemList = SkillUtil.buildSkillBarItemChain(skillIds, BelongToEnum.Player, id);
         SkillBarItemService.addSkillBarItem(skillBarItemList);
     }
 
@@ -125,9 +125,10 @@ public class PlayerBehavior {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
         Player player = playerDTO.getPlayer();
         List<String> list = new ArrayList<>(16);
-        list.add("昵称：" + player.getName() + " 职业：" + JobEnum.getByCode(player.getJob()));
+        list.add("昵称：" + player.getName() + " 职业：" + JobEnum.getByCode(player.getJob()).getJobName());
         list.add("阶级：" + RankEnum.getEnum(player.getJob(), player.getRank()).getRankName());
-        list.add("等级：" + player.getLevel() + " 经验：" + player.getExp());
+        list.add("等级：" + player.getLevel() + " 经验：" + player.getExp()
+                + "/" + ExpBehavior.getInstance().getCurrentLevelMaxExp(player.getLevel()));
         list.add("血量：" + player.getHp() + "/" + player.getMaxHp());
         list.add("蓝量：" + player.getMp() + "/" + player.getMaxMp());
         list.add("物攻：" + player.getAtk());
@@ -203,6 +204,20 @@ public class PlayerBehavior {
      */
     public long refuseBattle(Long recipientId) {
         return BattleUtil.refuseBattle(recipientId);
+    }
+
+    /**
+     * 清除玩家信息缓存
+     */
+    public void clearCache() {
+        PlayerCache.clearCache();
+    }
+
+    /**
+     * 清除对战锁
+     */
+    public void clearBattleLock() {
+        BattleUtil.clearLock();
     }
 
     private static class Holder {

@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author ding
@@ -66,10 +68,25 @@ public class SkillCache {
             throw new IllegalArgumentException("invalid belong to and belong to id");
         }
 
-        SkillBarDTO skillBarDTO = new SkillBarDTO();
-        skillBarDTO.setId(skillBarDTO.getId());
+        Map<String, SkillBarItem> tmp = skillBarItem.stream().collect(Collectors.toMap(SkillBarItem::getId, Function.identity()));
+        String headId = skillBarItem.get(0).getHeadId();
+        SkillBarItem headBarItem = tmp.get(headId);
 
-        return skillBarDTO;
+        SkillBarDTO head = new SkillBarDTO();
+        head.setHead(head);
+        head.setSkillId(headBarItem.getSkillId());
+
+        SkillBarItem indexBarItem = headBarItem;
+        SkillBarDTO index = head;
+        while (Objects.nonNull(indexBarItem.getNextId())) {
+            indexBarItem = tmp.get(indexBarItem.getNextId());
+            SkillBarDTO skillBarDTO = new SkillBarDTO();
+            skillBarDTO.setHead(head);
+            skillBarDTO.setSkillId(indexBarItem.getSkillId());
+            index.setNext(skillBarDTO);
+            index = skillBarDTO;
+        }
+        return head;
     }
 
     public static void deleteSkillBar(Long id) {

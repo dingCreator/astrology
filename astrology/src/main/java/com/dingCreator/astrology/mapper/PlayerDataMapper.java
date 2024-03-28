@@ -2,6 +2,10 @@ package com.dingCreator.astrology.mapper;
 
 import com.dingCreator.astrology.entity.Player;
 import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.type.DateTypeHandler;
+import org.apache.ibatis.type.JdbcType;
+
+import java.util.Date;
 
 /**
  * @author ding
@@ -35,11 +39,13 @@ public interface PlayerDataMapper {
      * @return 是否新增成功
      */
     @Insert("INSERT INTO astrology_player (id, name, hp, maxHp, mp, maxMp, atk, magicAtk, def, magicDef, penetrate, " +
-            "critical, behaviorSpeed, hit, dodge, rank, level, exp, job, mapId, status, hangUpTime, enabled" +
+            "magicPenetrate, criticalRate, criticalReductionRate, criticalDamage, criticalDamageReduction, " +
+            "behaviorSpeed, hit, dodge, rank, level, exp, job, mapId, status, statusStartTime, enabled" +
             ") VALUES (" +
             "#{id}, #{name}, #{hp}, #{maxHp}, #{mp}, #{maxMp}, #{atk}, #{magicAtk}, #{def}, #{magicDef}, #{penetrate}," +
-            "#{critical}, #{behaviorSpeed}, #{hit}, #{dodge}, #{rank}, #{level}, #{exp}, #{job}, #{mapId}," +
-            "#{status}, #{hangUpTime}, #{enabled})")
+            "#{magicPenetrate}, #{criticalRate}, #{criticalReductionRate}, #{criticalDamage}, #{criticalDamageReduction}, " +
+            "#{behaviorSpeed}, #{hit}, #{dodge}, #{rank}, #{level}, #{exp}, #{job}, #{mapId}," +
+            "#{status}, #{statusStartTime}, #{enabled})")
     Boolean createPlayer(Player player);
 
     /**
@@ -61,7 +67,11 @@ public interface PlayerDataMapper {
             "<if test='def != null'>def=#{def},</if>" +
             "<if test='magicDef != null'>magicDef=#{magicDef},</if>" +
             "<if test='penetrate != null'>penetrate=#{penetrate},</if>" +
-            "<if test='critical != null'>critical=#{critical},</if>" +
+            "<if test='magicPenetrate != null'>penetrate=#{magicPenetrate},</if>" +
+            "<if test='criticalRate != null'>criticalRate=#{criticalRate},</if>" +
+            "<if test='criticalReductionRate != null'>criticalReductionRate=#{criticalReductionRate},</if>" +
+            "<if test='criticalDamage != null'>criticalDamage=#{criticalDamage},</if>" +
+            "<if test='criticalDamageReduction != null'>criticalDamageReduction=#{criticalDamageReduction},</if>" +
             "<if test='behaviorSpeed != null'>behaviorSpeed=#{behaviorSpeed},</if>" +
             "<if test='hit != null'>hit=#{hit},</if>" +
             "<if test='dodge != null'>dodge=#{dodge},</if>" +
@@ -71,7 +81,7 @@ public interface PlayerDataMapper {
             "<if test='job != null'>job=#{job},</if>" +
             "<if test='mapId != null'>mapId=#{mapId},</if>" +
             "<if test='status != null'>status=#{status},</if>" +
-            "<if test='hangUpTime != null'>hangUpTime=#{hangUpTime},</if>" +
+            "<if test='statusStartTime != null'>statusStartTime=#{statusStartTime},</if>" +
             "<if test='enabled != null'>enabled=#{enabled},</if>" +
             "</set>" +
             "WHERE id=#{id}" +

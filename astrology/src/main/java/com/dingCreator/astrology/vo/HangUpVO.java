@@ -18,4 +18,20 @@ public class HangUpVO implements Serializable {
      * 获得的经验值
      */
     private Long exp;
+    /**
+     * 旧等级
+     */
+    private Integer oldLevel;
+    /**
+     * 新等级
+     */
+    private Integer newLevel;
+    /**
+     * 回复的hp
+     */
+    private Long hp;
+    /**
+     * 回复的mp
+     */
+    private Long mp;
 }

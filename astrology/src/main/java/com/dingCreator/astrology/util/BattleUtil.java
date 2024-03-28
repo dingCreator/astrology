@@ -2,10 +2,13 @@ package com.dingCreator.astrology.util;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.dingCreator.astrology.cache.PlayerCache;
+import com.dingCreator.astrology.cache.SkillCache;
 import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.*;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
+import com.dingCreator.astrology.dto.skill.SkillBuffDTO;
+import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.enums.exception.TeamExceptionEnum;
@@ -13,6 +16,7 @@ import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.enums.skill.SkillTargetEnum;
 import com.dingCreator.astrology.exception.BusinessException;
+import com.dingCreator.astrology.service.SkillBarItemService;
 import com.dingCreator.astrology.vo.BattleResultVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,6 +40,13 @@ public class BattleUtil {
      * 决斗请求
      */
     private static final Map<Long, BattleRequest> BATTLE_REQUEST_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * 清除锁缓存
+     */
+    public static void clearLock() {
+        BATTLE_REQUEST_MAP.clear();
+    }
 
     /**
      * 发起决斗
@@ -69,10 +80,10 @@ public class BattleUtil {
         // 接收方
         List<Long> recipientTeamPlayers = new ArrayList<>(3);
         if (recipientPlayer.getTeam()) {
-            TeamDTO teamDTO = TeamCache.getTeamByPlayerId(initiatorId);
+            TeamDTO teamDTO = TeamCache.getTeamByPlayerId(recipientId);
             recipientTeamPlayers.addAll(teamDTO.getMembers());
         } else {
-            recipientTeamPlayers.add(initiatorId);
+            recipientTeamPlayers.add(recipientId);
         }
 
         // 锁
@@ -98,12 +109,9 @@ public class BattleUtil {
         if (Objects.isNull(request)) {
             throw PlayerExceptionEnum.NO_BATTLE.getException();
         }
-        Duration duration = Duration.between(request.getRequestTime(), LocalDateTime.now());
-        if (duration.getSeconds() > Constants.ACCEPT_BATTLE_TIME_OUT) {
-            throw PlayerExceptionEnum.BATTLE_EXPIRED.getException();
-        }
 
         List<Long> initiatorIds, recipientIds;
+        // 获取接收方
         if (playerDTO.getTeam()) {
             TeamDTO teamDTO = TeamCache.getTeamById(recipientId);
             // 若为组队状态
@@ -114,8 +122,7 @@ public class BattleUtil {
         } else {
             recipientIds = Collections.singletonList(recipientId);
         }
-        BattleResultVO resultVO = battlePVP(request.getInitiatorId(), recipientId);
-
+        // 获取发起方
         TeamDTO initiatorTeam = TeamCache.getTeamById(request.initiatorId);
         if (Objects.nonNull(initiatorTeam)) {
             initiatorIds = initiatorTeam.getMembers();
@@ -125,8 +132,11 @@ public class BattleUtil {
         // 释放锁
         unlock(initiatorIds);
         unlock(recipientIds);
-
-        return resultVO;
+        Duration duration = Duration.between(request.getRequestTime(), LocalDateTime.now());
+        if (duration.getSeconds() > Constants.ACCEPT_BATTLE_TIME_OUT) {
+            throw PlayerExceptionEnum.BATTLE_EXPIRED.getException();
+        }
+        return battlePVP(request.getInitiatorId(), recipientId);
     }
 
     /**
@@ -135,19 +145,15 @@ public class BattleUtil {
      * @return 发起者ID
      */
     public static long refuseBattle(Long recipientId) {
-
         PlayerDTO playerDTO = PlayerCache.getPlayerById(recipientId);
         // 获取决斗信息
         BattleRequest request = BATTLE_REQUEST_MAP.get(recipientId);
         if (Objects.isNull(request)) {
             throw PlayerExceptionEnum.NO_BATTLE.getException();
         }
-        Duration duration = Duration.between(request.getRequestTime(), LocalDateTime.now());
-        if (duration.getSeconds() > Constants.ACCEPT_BATTLE_TIME_OUT) {
-            throw PlayerExceptionEnum.BATTLE_EXPIRED.getException();
-        }
 
         List<Long> initiatorIds, recipientIds;
+        // 获取接收方
         if (playerDTO.getTeam()) {
             TeamDTO teamDTO = TeamCache.getTeamById(recipientId);
             // 若为组队状态
@@ -158,17 +164,21 @@ public class BattleUtil {
         } else {
             recipientIds = Collections.singletonList(recipientId);
         }
-
+        // 获取发起方
         TeamDTO initiatorTeam = TeamCache.getTeamById(request.initiatorId);
         if (Objects.nonNull(initiatorTeam)) {
             initiatorIds = initiatorTeam.getMembers();
         } else {
             initiatorIds = Collections.singletonList(request.getInitiatorId());
         }
+
         // 释放锁
         unlock(initiatorIds);
         unlock(recipientIds);
-
+        Duration duration = Duration.between(request.getRequestTime(), LocalDateTime.now());
+        if (duration.getSeconds() > Constants.ACCEPT_BATTLE_TIME_OUT) {
+            throw PlayerExceptionEnum.BATTLE_EXPIRED.getException();
+        }
         return request.getInitiatorId();
     }
 
@@ -237,24 +247,33 @@ public class BattleUtil {
 
         List<OrganismDTO> initiatorList;
         List<OrganismDTO> recipientList;
-        if (initiatorDTO.getTeam() && recipientDTO.getTeam()) {
+        List<Long> initiatorIds;
+        List<Long> recipientIds;
+        if (initiatorDTO.getTeam()) {
             TeamDTO initiatorTeam = TeamCache.getTeamByPlayerId(initiatorId);
             initiatorList = getOrganismByPlayerId(initiatorTeam.getMembers());
-            TeamDTO recipientTeam = TeamCache.getTeamByPlayerId(recipientId);
-            recipientList = getOrganismByPlayerId(recipientTeam.getMembers());
-        } else if (initiatorDTO.getTeam() && !recipientDTO.getTeam()) {
-            TeamDTO initiatorTeam = TeamCache.getTeamByPlayerId(initiatorId);
-            initiatorList = getOrganismByPlayerId(initiatorTeam.getMembers());
-            recipientList = getOrganismByPlayerId(Collections.singletonList(recipientId));
-        } else if (!initiatorDTO.getTeam() && recipientDTO.getTeam()) {
-            initiatorList = getOrganismByPlayerId(Collections.singletonList(initiatorId));
-            TeamDTO recipientTeam = TeamCache.getTeamByPlayerId(recipientId);
-            recipientList = getOrganismByPlayerId(recipientTeam.getMembers());
+            initiatorIds = initiatorTeam.getMembers();
         } else {
             initiatorList = getOrganismByPlayerId(Collections.singletonList(initiatorId));
-            recipientList = getOrganismByPlayerId(Collections.singletonList(recipientId));
+            initiatorIds = Collections.singletonList(initiatorId);
         }
-        return battle(initiatorList, recipientList);
+
+        if (recipientDTO.getTeam()) {
+            TeamDTO recipientTeam = TeamCache.getTeamByPlayerId(recipientId);
+            recipientList = getOrganismByPlayerId(recipientTeam.getMembers());
+            recipientIds = recipientTeam.getMembers();
+        } else {
+            recipientList = getOrganismByPlayerId(Collections.singletonList(recipientId));
+            recipientIds = Collections.singletonList(recipientId);
+        }
+
+        BattleResultVO vo = battle(initiatorList, recipientList);
+        vo.setInitiatorId(initiatorId);
+        vo.setRecipientId(recipientId);
+
+        PlayerCache.flush(initiatorIds);
+        PlayerCache.flush(recipientIds);
+        return vo;
     }
 
     /**
@@ -275,6 +294,7 @@ public class BattleUtil {
             PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
             OrganismDTO organismDTO = new OrganismDTO();
             organismDTO.setOrganism(playerDTO.getPlayer());
+            organismDTO.setSkillBarDTO(SkillCache.getSkillBarItem(BelongToEnum.Player.getBelongTo(), playerDTO.getPlayer().getId()));
             return organismDTO;
         }).collect(Collectors.toList());
     }
@@ -341,6 +361,9 @@ public class BattleUtil {
     private static BattleDTO buildBattleDTO(OrganismDTO organismDTO) {
         BattleDTO battleDTO = new BattleDTO();
         battleDTO.setOrganismDTO(organismDTO);
+        battleDTO.setBehavior(0L);
+        battleDTO.setBuffMap(new HashMap<>());
+        battleDTO.setRound(0L);
         return battleDTO;
     }
 
@@ -394,7 +417,7 @@ public class BattleUtil {
         if (mp > 0) {
             if (mp < skillEnum.getMp()) {
                 // 蓝不够 替换为默认技能 若没有默认技能 则原地罚站
-                if ((skillEnum = SkillEnum.getById(from.getDefaultSkillId())) == null) {
+                if ((skillEnum = from.getOrganismDTO().getDefaultSkill()) == null) {
                     return;
                 }
             } else {
@@ -469,17 +492,22 @@ public class BattleUtil {
 
                 if (skillEffect.getDamageRate() > 0) {
                     // 没有伤害的不需要此段信息
-                    builder.append(",对")
-                            .append(tar.getOrganismDTO().getOrganism().getName())
-                            .append("造成")
-                            .append(damage)
-                            .append("点伤害");
+                    builder.append(",对").append(tar.getOrganismDTO().getOrganism().getName())
+                            .append("造成").append(damage).append("点伤害")
+                            .append("，").append(tar.getOrganismDTO().getOrganism().getName())
+                            .append("剩余生命值：").append(tar.getOrganismDTO().getOrganism().getHp());
                 }
                 // 若对方没死，计算buff
                 if (hp > 0) {
-                    // 概率附加buff
-                    skillEffect.getSkillBuffDTOList().stream().filter(buff -> RandomUtil.isHit(buff.getEffectRate()))
-                            .forEach(buff -> BuffUtil.addBuff(tar, buff.getBuffDTO(), buff.getRound()));
+                    List<SkillBuffDTO> skillBuffDTOList = skillEffect.getSkillBuffDTOList();
+                    if (CollectionUtil.isNotEmpty(skillBuffDTOList)) {
+                        // 概率附加buff
+                        skillEffect.getSkillBuffDTOList().stream().filter(buff -> RandomUtil.isHit(buff.getEffectRate()))
+                                .forEach(buff -> {
+                                    builder.append("");
+                                    BuffUtil.addBuff(tar, buff.getBuffDTO(), buff.getRound());
+                                });
+                    }
                 }
             });
         });

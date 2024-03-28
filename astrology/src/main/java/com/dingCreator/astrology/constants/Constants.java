@@ -70,7 +70,7 @@ public class Constants {
     /**
      * 发起决斗冷却时间
      */
-    public static final int BATTLE_CD = 180;
+    public static final int BATTLE_CD = 30;
 
 
     // CD key前缀

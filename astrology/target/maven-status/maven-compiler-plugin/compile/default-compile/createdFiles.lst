@@ -23,6 +23,7 @@ com\dingCreator\astrology\behavior\MapBehavior.class
 com\dingCreator\astrology\dto\OrganismDTO.class
 com\dingCreator\astrology\entity\Map.class
 com\dingCreator\astrology\dto\skill\SkillBuffDTO.class
+com\dingCreator\astrology\behavior\ExpBehavior$LevelChange.class
 com\dingCreator\astrology\response\BaseResponse.class
 com\dingCreator\astrology\cache\TeamCache.class
 com\dingCreator\astrology\entity\WorldBoss.class

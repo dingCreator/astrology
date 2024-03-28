@@ -25,8 +25,8 @@ public class SkillUtil {
     public static List<SkillBarItem> buildSkillBarItemChain(List<Long> skillIdList, BelongToEnum belongToEnum,
                                                             Long belongToId) {
         String headId = UUID.randomUUID().toString();
-        SkillBarItem head = new SkillBarItem(headId, belongToEnum.getBelongTo(), skillIdList.remove(0),
-                belongToId, headId, null);
+        SkillBarItem head = new SkillBarItem(headId, belongToEnum.getBelongTo(), belongToId,
+                skillIdList.remove(0), headId, null);
         List<SkillBarItem> skillBarItemList = new ArrayList<>(skillIdList.size());
         skillBarItemList.add(head);
         SkillBarItem index = head;
@@ -34,7 +34,7 @@ public class SkillUtil {
             for (Long skillId : skillIdList) {
                 String uuid = UUID.randomUUID().toString();
                 index.setNextId(uuid);
-                SkillBarItem item = new SkillBarItem(headId, belongToEnum.getBelongTo(), skillId, belongToId,
+                SkillBarItem item = new SkillBarItem(headId, belongToEnum.getBelongTo(), belongToId, skillId,
                         headId, null);
                 skillBarItemList.add(item);
                 index = item;

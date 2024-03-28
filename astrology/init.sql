@@ -11,6 +11,7 @@ CREATE TABLE astrology_player
     def                     INTEGER     NOT NULL,
     magicDef                INTEGER     NOT NULL,
     penetrate               REAL        NOT NULL,
+    magicPenetrate          REAL        NOT NULL,
     criticalRate            REAL        NOT NULL,
     criticalDamageReduction REAL        NOT NULL,
     criticalDamage          REAL        NOT NULL,
@@ -24,7 +25,7 @@ CREATE TABLE astrology_player
     job                     VARCHAR(32) NOT NULL,
     mapId                   INTEGER     NOT NULL,
     status                  VARCHAR(16) NOT NULL,
-    statusStartTime         VARCHAR(16),
+    statusStartTime         DATE,
     enabled                 INTEGER     NOT NULL
 );
 

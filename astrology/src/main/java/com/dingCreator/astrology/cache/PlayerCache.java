@@ -28,6 +28,7 @@ public class PlayerCache {
         }
         PlayerDTO playerDTO = new PlayerDTO();
         playerDTO.setPlayer(player);
+        playerDTO.setTeam(false);
         PLAYER_MAP.put(player.getId(), playerDTO);
     }
 
@@ -57,5 +58,12 @@ public class PlayerCache {
     public static void flush(List<Long> ids) {
         List<Player> players = ids.stream().map(PLAYER_MAP::get).map(PlayerDTO::getPlayer).collect(Collectors.toList());
         players.forEach(PlayerService::updatePlayerById);
+    }
+
+    /**
+     * 清除缓存
+     */
+    public static void clearCache() {
+        PLAYER_MAP.clear();
     }
 }

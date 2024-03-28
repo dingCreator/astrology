@@ -1,9 +1,12 @@
 package com.dingCreator.astrology.service;
 
+import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.mapper.PlayerDataMapper;
 import com.dingCreator.astrology.dto.PlayerDTO;
 import com.dingCreator.astrology.entity.Player;
+
+import java.util.Objects;
 
 /**
  * @author ding
@@ -42,6 +45,7 @@ public class PlayerService {
         PlayerDTO playerDTO = new PlayerDTO();
         Player player = getPlayerById(id);
         playerDTO.setPlayer(player);
+        playerDTO.setTeam(Objects.nonNull(TeamCache.getTeamById(id)));
         return playerDTO;
     }
 

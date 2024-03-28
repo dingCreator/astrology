@@ -26,37 +26,11 @@ public class BattleDTO implements Serializable {
      */
     private Long behavior;
     /**
-     * mp不足时的默认技能
-     */
-    private Long defaultSkillId;
-    /**
      * 获得的buff
      */
     private Map<String, List<BattleBuffDTO>> buffMap;
     /**
-     * 装备
-     */
-    private EquipmentBarDTO equipmentBarDTO;
-    /**
      * 轮次
      */
     private Long round;
-
-    /**
-     * 设置默认技能
-     * @param id 技能id
-     */
-    public void setDefaultSkillId(Long id) {
-        SkillEnum skillEnum;
-        if (Objects.isNull(skillEnum = SkillEnum.getById(id))) {
-            throw new IllegalArgumentException("技能id对应的技能不存在");
-        }
-        if (!skillEnum.getActive()) {
-            throw new IllegalArgumentException("不能设置被动技能为默认技能");
-        }
-        if (skillEnum.getMp() > 0 || skillEnum.getMpRate() > 0F) {
-            throw new IllegalArgumentException("不能设置耗蓝技能为默认技能");
-        }
-        this.defaultSkillId = id;
-    }
 }

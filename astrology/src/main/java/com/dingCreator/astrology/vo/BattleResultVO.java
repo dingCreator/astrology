@@ -25,7 +25,14 @@ public class BattleResultVO implements Serializable {
      * 战况（对于发起方而言）
      */
     private BattleResult battleResult;
-
+    /**
+     * 发起方ID
+     */
+    private Long initiatorId;
+    /**
+     * 接收方ID
+     */
+    private Long recipientId;
     /**
      * 战斗结果
      */

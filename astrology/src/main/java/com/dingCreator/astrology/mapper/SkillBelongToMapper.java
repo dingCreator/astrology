@@ -17,6 +17,6 @@ public interface SkillBelongToMapper {
      * @param skillBelongTo 实体类
      * @return 是否成功
      */
-    @Insert("INSERT INTO SkillBelongTo (belongTo, belongToId, skillId) VALUES (#{belongTo}, #{belongToId}, #{skillId})")
+    @Insert("INSERT INTO astrology_skill_belong_to (belongTo, belongToId, skillId) VALUES (#{belongTo}, #{belongToId}, #{skillId})")
     Boolean createSkillBelongTo(SkillBelongTo skillBelongTo);
 }
