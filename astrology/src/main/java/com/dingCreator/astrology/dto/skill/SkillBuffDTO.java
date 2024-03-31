@@ -29,4 +29,14 @@ public class SkillBuffDTO implements Serializable {
      * 持续回合数
      */
     private Integer round;
+    /**
+     * 是否可清除
+     */
+    private Boolean clear;
+
+    public SkillBuffDTO(BuffDTO buffDTO, Float effectRate, Integer round) {
+        this.buffDTO = buffDTO;
+        this.effectRate = effectRate;
+        this.round = round;
+    }
 }

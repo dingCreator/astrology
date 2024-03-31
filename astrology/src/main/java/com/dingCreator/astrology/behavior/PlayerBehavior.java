@@ -91,8 +91,8 @@ public class PlayerBehavior {
         // 装备技能栏
         List<Long> skillIds = new ArrayList<>();
         skillIds.add(SkillEnum.getDefaultSkillByJob(job.getJobCode()).getId());
-        List<SkillBarItem> skillBarItemList = SkillUtil.buildSkillBarItemChain(skillIds, BelongToEnum.Player, id);
-        SkillBarItemService.addSkillBarItem(skillBarItemList);
+        SkillBarItem skillBarItem = SkillUtil.buildSkillBarItemChain(skillIds, BelongToEnum.Player, id);
+        SkillBarItemService.addSkillBarItem(skillBarItem);
     }
 
     /**
@@ -138,6 +138,7 @@ public class PlayerBehavior {
         list.add("穿甲：" + player.getPenetrate() * 100 + "%");
         list.add("命中：" + player.getHit());
         list.add("闪避：" + player.getDodge());
+        list.add("速度：" + player.getBehaviorSpeed());
         list.add("暴击：" + player.getCriticalRate() * 100 + "%");
         list.add("暴击减免：" + player.getCriticalReductionRate() * 100 + "%");
         list.add("暴伤：" + player.getCriticalDamage() * 100 + "%");

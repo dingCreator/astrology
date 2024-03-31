@@ -70,9 +70,9 @@ public class BuffUtil {
      * @param buffMap buff列表
      * @return 物攻
      */
-    public static Long getAtk(long val, Map<String, List<BattleBuffDTO>> buffMap) {
-        List<BattleBuffDTO> atkBuffList = buffMap.get(BuffTypeEnum.ATK.getName());
-        List<BattleBuffDTO> atkRateBuffList = buffMap.get(BuffTypeEnum.ATK_RATE.getName());
+    public static Long getAtk(long val, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
+        List<BattleBuffDTO> atkBuffList = buffMap.get(BuffTypeEnum.ATK);
+        List<BattleBuffDTO> atkRateBuffList = buffMap.get(BuffTypeEnum.ATK_RATE);
         return buffRate(atkRateBuffList, buffVal(atkBuffList, val));
     }
 
@@ -83,9 +83,9 @@ public class BuffUtil {
      * @param buffMap buff列表
      * @return 物防
      */
-    public static Long getDef(long val, Map<String, List<BattleBuffDTO>> buffMap) {
-        List<BattleBuffDTO> defBuffList = buffMap.get(BuffTypeEnum.DEF.getName());
-        List<BattleBuffDTO> defRateBuffList = buffMap.get(BuffTypeEnum.DEF_RATE.getName());
+    public static Long getDef(long val, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
+        List<BattleBuffDTO> defBuffList = buffMap.get(BuffTypeEnum.DEF);
+        List<BattleBuffDTO> defRateBuffList = buffMap.get(BuffTypeEnum.DEF_RATE);
         return buffRate(defRateBuffList, buffVal(defBuffList, val));
     }
 
@@ -96,9 +96,9 @@ public class BuffUtil {
      * @param buffMap buff列表
      * @return 魔攻
      */
-    public static Long getMagicAtk(long val, Map<String, List<BattleBuffDTO>> buffMap) {
-        List<BattleBuffDTO> magicAtkBuffList = buffMap.get(BuffTypeEnum.MAGIC_ATK.getName());
-        List<BattleBuffDTO> magicAtkRateBuffList = buffMap.get(BuffTypeEnum.MAGIC_ATK_RATE.getName());
+    public static Long getMagicAtk(long val, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
+        List<BattleBuffDTO> magicAtkBuffList = buffMap.get(BuffTypeEnum.MAGIC_ATK);
+        List<BattleBuffDTO> magicAtkRateBuffList = buffMap.get(BuffTypeEnum.MAGIC_ATK_RATE);
         return buffRate(magicAtkRateBuffList, buffVal(magicAtkBuffList, val));
     }
 
@@ -109,9 +109,9 @@ public class BuffUtil {
      * @param buffMap buff列表
      * @return 魔防
      */
-    public static Long getMagicDef(long val, Map<String, List<BattleBuffDTO>> buffMap) {
-        List<BattleBuffDTO> magicDefBuffList = buffMap.get(BuffTypeEnum.MAGIC_DEF.getName());
-        List<BattleBuffDTO> magicDefRateBuffList = buffMap.get(BuffTypeEnum.MAGIC_DEF_RATE.getName());
+    public static Long getMagicDef(long val, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
+        List<BattleBuffDTO> magicDefBuffList = buffMap.get(BuffTypeEnum.MAGIC_DEF);
+        List<BattleBuffDTO> magicDefRateBuffList = buffMap.get(BuffTypeEnum.MAGIC_DEF_RATE);
         return buffRate(magicDefRateBuffList, buffVal(magicDefBuffList, val));
     }
 
@@ -122,9 +122,9 @@ public class BuffUtil {
      * @param buffMap buff列表
      * @return 速度
      */
-    public static Long getSpeed(long val, Map<String, List<BattleBuffDTO>> buffMap) {
-        List<BattleBuffDTO> speedBuffList = buffMap.get(BuffTypeEnum.SPEED.getName());
-        List<BattleBuffDTO> speedRateBuffList = buffMap.get(BuffTypeEnum.SPEED_RATE.getName());
+    public static Long getSpeed(long val, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
+        List<BattleBuffDTO> speedBuffList = buffMap.get(BuffTypeEnum.SPEED);
+        List<BattleBuffDTO> speedRateBuffList = buffMap.get(BuffTypeEnum.SPEED_RATE);
         return buffRate(speedRateBuffList, buffVal(speedBuffList, val));
     }
 
@@ -135,9 +135,9 @@ public class BuffUtil {
      * @param buffMap buff列表
      * @return 速度
      */
-    public static Long getHit(long val, Map<String, List<BattleBuffDTO>> buffMap) {
-        List<BattleBuffDTO> hitBuffList = buffMap.get(BuffTypeEnum.HIT.getName());
-        List<BattleBuffDTO> hitRateBuffList = buffMap.get(BuffTypeEnum.HIT_RATE.getName());
+    public static Long getHit(long val, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
+        List<BattleBuffDTO> hitBuffList = buffMap.get(BuffTypeEnum.HIT);
+        List<BattleBuffDTO> hitRateBuffList = buffMap.get(BuffTypeEnum.HIT_RATE);
         return buffRate(hitRateBuffList, buffVal(hitBuffList, val));
     }
 
@@ -148,9 +148,9 @@ public class BuffUtil {
      * @param buffMap buff列表
      * @return 速度
      */
-    public static Long getDodge(long val, Map<String, List<BattleBuffDTO>> buffMap) {
-        List<BattleBuffDTO> dodgeBuffList = buffMap.get(BuffTypeEnum.DODGE.getName());
-        List<BattleBuffDTO> dodgeRateBuffList = buffMap.get(BuffTypeEnum.DODGE_RATE.getName());
+    public static Long getDodge(long val, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
+        List<BattleBuffDTO> dodgeBuffList = buffMap.get(BuffTypeEnum.DODGE);
+        List<BattleBuffDTO> dodgeRateBuffList = buffMap.get(BuffTypeEnum.DODGE_RATE);
         return buffRate(dodgeRateBuffList, buffVal(dodgeBuffList, val));
     }
 }

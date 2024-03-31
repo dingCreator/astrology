@@ -15,13 +15,18 @@ import java.util.Objects;
 public class SkillBarItemService {
 
     @SuppressWarnings({"unchecked"})
-    public static List<SkillBarItem> getSkillBarItemByBelongToId(String belongTo, Long belongToId) {
-        return (List<SkillBarItem>) DatabaseProvider.getInstance().doExecute(sqlSession ->
+    public static SkillBarItem getSkillBarItemByBelongToId(String belongTo, Long belongToId) {
+        return (SkillBarItem) DatabaseProvider.getInstance().doExecute(sqlSession ->
                 sqlSession.getMapper(SkillBarItemMapper.class).querySkillBarItemByBelongToId(belongTo, belongToId));
     }
 
-    public static void addSkillBarItem(List<SkillBarItem> skillBarItemList) {
+    public static void addSkillBarItem(SkillBarItem skillBarItem) {
         DatabaseProvider.getInstance().doExecute(sqlSession ->
-                sqlSession.getMapper(SkillBarItemMapper.class).insertSkillBarItem(skillBarItemList));
+                sqlSession.getMapper(SkillBarItemMapper.class).insertSkillBarItem(skillBarItem));
+    }
+
+    public static void deleteSkillBarItem(String belongTo, Long belongToId) {
+        DatabaseProvider.getInstance().doExecute(sqlSession ->
+                sqlSession.getMapper(SkillBarItemMapper.class).deleteSkillBarItem(belongTo, belongToId));
     }
 }

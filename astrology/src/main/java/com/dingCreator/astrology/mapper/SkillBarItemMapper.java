@@ -20,7 +20,17 @@ public interface SkillBarItemMapper {
      * @return 技能栏信息
      */
     @Select("select * from astrology_skill_bar_item where belongTo=#{belongTo} and belongToId=#{belongToId}")
-    List<SkillBarItem> querySkillBarItemByBelongToId(@Param("belongTo") String belongTo, @Param("belongToId") Long belongToId);
+    SkillBarItem querySkillBarItemByBelongToId(@Param("belongTo") String belongTo, @Param("belongToId") Long belongToId);
+
+    /**
+     * 插入新技能栏信息
+     *
+     * @param skillBarItem 技能栏信息
+     * @return int
+     */
+    @Insert("INSERT INTO astrology_skill_bar_item (belongTo, belongToId, skillId) VALUES"
+            + "(#{belongTo}, #{belongToId}, #{skillId})")
+    Integer insertSkillBarItem(SkillBarItem skillBarItem);
 
     /**
      * 插入新技能栏信息
@@ -36,7 +46,7 @@ public interface SkillBarItemMapper {
             "</foreach>",
             "</script>"
     })
-    Integer insertSkillBarItem(List<SkillBarItem> list);
+    Integer batchInsertSkillBarItem(List<SkillBarItem> list);
 
     /**
      * 删除技能栏信息
@@ -45,5 +55,5 @@ public interface SkillBarItemMapper {
      * @param belongToId 归属ID
      */
     @Delete("delete from astrology_skill_bar_item where belongTo=#{belongTo} and belongToId=#{belongToId}")
-    void deleteSkillBarItem(@Param("belongTo") String belongTo, @Param("belongToId") Long belongToId);
+    Integer deleteSkillBarItem(@Param("belongTo") String belongTo, @Param("belongToId") Long belongToId);
 }

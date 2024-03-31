@@ -36,46 +36,47 @@ public class ExpBehavior {
         Player player = PlayerCache.getPlayerById(id).getPlayer();
         long currentExp = player.getExp() + exp;
         int oldLevel = player.getLevel();
-        long realExp = 0L;
+        long realExp = exp;
 
         while (currentExp >= getCurrentLevelMaxExp(player.getLevel())) {
             RankEnum rankEnum = RankEnum.getEnum(player.getJob(), player.getRank());
             if (player.getLevel() >= Constants.MAX_LEVEL) {
-                currentExp = getCurrentLevelMaxExp(Constants.MAX_LEVEL) - 1;
-                realExp += (currentExp - player.getExp());
+                long maxExp = getCurrentLevelMaxExp(Constants.MAX_LEVEL) - 1;
+                // 减掉溢出经验值
+                realExp -= (currentExp - maxExp);
+                currentExp = maxExp;
                 break;
             } else if (player.getLevel() >= rankEnum.getMaxLevel()) {
                 // 上限了，不突破不允许升级
                 long expLimit = getExpLimit(player.getLevel());
                 if (currentExp >= expLimit) {
+                    // 减掉溢出经验值
+                    realExp -= (currentExp - expLimit);
                     currentExp = expLimit;
                 }
-                realExp += (currentExp - player.getExp());
                 break;
             } else {
                 long currentLevelMaxExp = getCurrentLevelMaxExp(player.getLevel());
                 currentExp -= currentLevelMaxExp;
-                realExp += currentLevelMaxExp;
                 player.setLevel(player.getLevel() + 1);
-                // 此处为了统计实际获得的经验值
-                player.setExp(0L);
                 // 属性提升
-                player.setHp(player.getMaxHp() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitHp());
-                player.setMaxHp(player.getMaxHp() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitHp());
-                player.setMp(player.getMaxMp() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitMp());
-                player.setMaxMp(player.getMaxMp() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitMp());
-                player.setAtk(player.getAtk() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitAtk());
-                player.setMagicAtk(player.getMagicAtk() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitMagicAtk());
-                player.setDef(player.getDef() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitDef());
-                player.setMagicDef(player.getMagicDef() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitMagicDef());
-                player.setBehaviorSpeed(player.getBehaviorSpeed() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitBehaviorSpeed());
-                player.setHit(player.getHit() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitHit());
-                player.setDodge(player.getDodge() + JobInitPropertiesEnum.getByCode(player.getJob()).getInitDodge());
+                JobInitPropertiesEnum base = JobInitPropertiesEnum.getByCode(player.getJob());
+                player.setHp(player.getMaxHp() + getLevelUpIncrease(base.getInitHp(), player.getLevel()));
+                player.setMaxHp(player.getMaxHp() + getLevelUpIncrease(base.getInitHp(), player.getLevel()));
+                player.setMp(player.getMaxMp() + getLevelUpIncrease(base.getInitMp(), player.getLevel()));
+                player.setMaxMp(player.getMaxMp() + getLevelUpIncrease(base.getInitMp(), player.getLevel()));
+                player.setAtk(player.getAtk() + getLevelUpIncrease(base.getInitAtk(), player.getLevel()));
+                player.setMagicAtk(player.getMagicAtk() + getLevelUpIncrease(base.getInitMagicAtk(), player.getLevel()));
+                player.setDef(player.getDef() + getLevelUpIncrease(base.getInitDef(), player.getLevel()));
+                player.setMagicDef(player.getMagicDef() + getLevelUpIncrease(base.getInitMagicDef(), player.getLevel()));
+                player.setBehaviorSpeed(player.getBehaviorSpeed() + getLevelUpIncrease(base.getInitBehaviorSpeed(), player.getLevel()));
+                player.setHit(player.getHit() + getLevelUpIncrease(base.getInitHit(), player.getLevel()));
+                player.setDodge(player.getDodge() + getLevelUpIncrease(base.getInitDodge(), player.getLevel()));
             }
         }
         player.setExp(currentExp);
         PlayerCache.flush(Collections.singletonList(id));
-        return new LevelChange(oldLevel, player.getLevel(), realExp + currentExp);
+        return new LevelChange(oldLevel, player.getLevel(), realExp);
     }
 
     /**
@@ -100,6 +101,17 @@ public class ExpBehavior {
             exp += getCurrentLevelMaxExp(level + i);
         }
         return exp;
+    }
+
+    /**
+     * 获取升级提升
+     *
+     * @param base  基础数值
+     * @param level 等级
+     * @return 提升数值
+     */
+    private long getLevelUpIncrease(long base, int level) {
+        return Math.round((1 + 0.2F * level) * base);
     }
 
     /**

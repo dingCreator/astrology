@@ -22,24 +22,19 @@ public class SkillUtil {
      * @param skillIdList 技能id列表
      * @return 技能循环链
      */
-    public static List<SkillBarItem> buildSkillBarItemChain(List<Long> skillIdList, BelongToEnum belongToEnum,
-                                                            Long belongToId) {
-        String headId = UUID.randomUUID().toString();
-        SkillBarItem head = new SkillBarItem(headId, belongToEnum.getBelongTo(), belongToId,
-                skillIdList.remove(0), headId, null);
-        List<SkillBarItem> skillBarItemList = new ArrayList<>(skillIdList.size());
-        skillBarItemList.add(head);
-        SkillBarItem index = head;
+    public static SkillBarItem buildSkillBarItemChain(List<Long> skillIdList, BelongToEnum belongToEnum, Long belongToId) {
+        SkillBarItem skillBarItem = new SkillBarItem();
+        skillBarItem.setBelongTo(belongToEnum.getBelongTo());
+        skillBarItem.setBelongToId(belongToId);
+
+        StringBuilder builder = new StringBuilder(skillIdList.remove(0).toString());
         if (skillIdList.size() > 0) {
-            for (Long skillId : skillIdList) {
-                String uuid = UUID.randomUUID().toString();
-                index.setNextId(uuid);
-                SkillBarItem item = new SkillBarItem(headId, belongToEnum.getBelongTo(), belongToId, skillId,
-                        headId, null);
-                skillBarItemList.add(item);
-                index = item;
+            for (Long id : skillIdList) {
+                builder.append(",").append(id);
             }
         }
-        return skillBarItemList;
+
+        skillBarItem.setSkillId(builder.toString());
+        return skillBarItem;
     }
 }

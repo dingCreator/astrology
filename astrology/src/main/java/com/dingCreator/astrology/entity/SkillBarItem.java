@@ -17,7 +17,7 @@ public class SkillBarItem {
     /**
      * 主键
      */
-    private String id;
+    private Long id;
     /**
      * Player/DungeonBoss/RankUpBoss/AreaBoss
      */
@@ -27,15 +27,7 @@ public class SkillBarItem {
      */
     private Long belongToId;
     /**
-     * 技能ID
+     * 技能ID，用逗号区隔
      */
-    private Long skillId;
-    /**
-     * 头
-     */
-    private String headId;
-    /**
-     * 技能组下一个技能
-     */
-    private String nextId;
+    private String skillId;
 }

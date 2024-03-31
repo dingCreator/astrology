@@ -14,4 +14,8 @@ public class Monster extends Organism {
      * ID
      */
     private Long id;
+    /**
+     * 怪物描述
+     */
+    private String description;
 }

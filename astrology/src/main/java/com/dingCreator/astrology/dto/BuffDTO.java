@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.dto;
 
+import com.dingCreator.astrology.enums.BuffTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ public class BuffDTO implements Serializable {
     /**
      * buff类型
      */
-    private String buffType;
+    private BuffTypeEnum buffType;
     /**
      * 数值变化
      */

@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,6 +44,12 @@ public class SkillEffectDTO implements Serializable {
         this.skillTargetEnum = skillTargetEnum;
         this.damageTypeEnum = damageTypeEnum;
         this.damageRate = damageRate;
+    }
+
+    public SkillEffectDTO(SkillTargetEnum skillTargetEnum, DamageTypeEnum damageTypeEnum, Float damageRate,
+                          SkillBuffDTO skillBuffDTO) {
+        this(skillTargetEnum, damageTypeEnum, damageRate);
+        this.skillBuffDTOList = Collections.singletonList(skillBuffDTO);
     }
 
     public SkillEffectDTO(SkillTargetEnum skillTargetEnum, DamageTypeEnum damageTypeEnum, Float damageRate,

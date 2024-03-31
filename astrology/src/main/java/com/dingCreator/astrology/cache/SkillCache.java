@@ -9,10 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,9 +25,9 @@ public class SkillCache {
      * 技能栏缓存
      * 格式
      * {
-     *  "player": {
-     *      1: SkillBarDTO
-     *  }
+     *      "player": {
+     *          1: SkillBarDTO
+     *      }
      * }
      */
     private static final Map<String, Map<Long, SkillBarDTO>> SKILL_CACHE = new HashMap<>(64);
@@ -38,7 +35,7 @@ public class SkillCache {
     /**
      * 获取技能栏
      *
-     * @param belongTo 技能归属
+     * @param belongTo   技能归属
      * @param belongToId 技能归属ID
      * @return 技能栏
      */
@@ -58,38 +55,38 @@ public class SkillCache {
     /**
      * 初始化技能栏
      *
-     * @param belongTo player/boss
-     * @param belongToId  对应的Id
+     * @param belongTo   player/boss
+     * @param belongToId 对应的Id
      */
     public static SkillBarDTO initSkillBar(String belongTo, Long belongToId) {
-        List<SkillBarItem> skillBarItem = SkillBarItemService.getSkillBarItemByBelongToId(belongTo, belongToId);
-        if (Objects.isNull(skillBarItem) || skillBarItem.size() == 0) {
+        SkillBarItem skillBarItem = SkillBarItemService.getSkillBarItemByBelongToId(belongTo, belongToId);
+        if (Objects.isNull(skillBarItem)) {
             logger.error("invalid belong to [{}] and belong to id [{}]", belongTo, belongToId);
             throw new IllegalArgumentException("invalid belong to and belong to id");
         }
-
-        Map<String, SkillBarItem> tmp = skillBarItem.stream().collect(Collectors.toMap(SkillBarItem::getId, Function.identity()));
-        String headId = skillBarItem.get(0).getHeadId();
-        SkillBarItem headBarItem = tmp.get(headId);
-
+        // 技能栏信息
+        String skillIdStr = skillBarItem.getSkillId();
+        List<Long> skillIdList = Arrays.stream(skillIdStr.split(",")).map(Long::parseLong).collect(Collectors.toList());
+        // 构建头
         SkillBarDTO head = new SkillBarDTO();
         head.setHead(head);
-        head.setSkillId(headBarItem.getSkillId());
-
-        SkillBarItem indexBarItem = headBarItem;
+        head.setSkillId(skillIdList.remove(0));
+        // 构建技能栏循环链
         SkillBarDTO index = head;
-        while (Objects.nonNull(indexBarItem.getNextId())) {
-            indexBarItem = tmp.get(indexBarItem.getNextId());
+        for (Long skillId : skillIdList) {
             SkillBarDTO skillBarDTO = new SkillBarDTO();
             skillBarDTO.setHead(head);
-            skillBarDTO.setSkillId(indexBarItem.getSkillId());
+            skillBarDTO.setSkillId(skillId);
             index.setNext(skillBarDTO);
             index = skillBarDTO;
         }
         return head;
     }
 
-    public static void deleteSkillBar(Long id) {
-        SKILL_CACHE.get(OrganismEnum.PLAYER.getType()).remove(id);
+    public static void deleteSkillBar(Long playerId) {
+        Map<Long, SkillBarDTO> skillBarMap = SKILL_CACHE.get(OrganismEnum.PLAYER.getType());
+        if (Objects.nonNull(skillBarMap)) {
+            skillBarMap.remove(playerId);
+        }
     }
 }

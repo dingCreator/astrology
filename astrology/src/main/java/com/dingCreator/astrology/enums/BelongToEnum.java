@@ -11,9 +11,13 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum BelongToEnum {
     /**
-     * 归属
+     * 玩家
      */
     Player("Player"),
+    /**
+     * 怪物
+     */
+    Monster("Monster"),
 
     ;
 

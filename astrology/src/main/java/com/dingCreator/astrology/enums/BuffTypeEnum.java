@@ -13,84 +13,90 @@ public enum BuffTypeEnum {
     /**
      * 物攻数值
      */
-    ATK("atk"),
+    ATK("atk", "物攻"),
     /**
      * 物攻比例
      */
-    ATK_RATE("atkRate"),
+    ATK_RATE("atkRate", "物攻比例"),
     /**
      * 物防数值
      */
-    DEF("def"),
+    DEF("def", ""),
     /**
      * 物防比例
      */
-    DEF_RATE("defRate"),
+    DEF_RATE("defRate", ""),
     /**
      * 魔攻数值
      */
-    MAGIC_ATK("magicAtk"),
+    MAGIC_ATK("magicAtk", ""),
     /**
      * 魔攻比例
      */
-    MAGIC_ATK_RATE("magicAtkRate"),
+    MAGIC_ATK_RATE("magicAtkRate", ""),
     /**
      * 魔防数值
      */
-    MAGIC_DEF("magicDef"),
+    MAGIC_DEF("magicDef", ""),
     /**
      * 魔防比例
      */
-    MAGIC_DEF_RATE("magicDefRate"),
+    MAGIC_DEF_RATE("magicDefRate", ""),
     /**
      * 速度数值
      */
-    SPEED("speed"),
+    SPEED("speed", ""),
     /**
      * 速度比例
      */
-    SPEED_RATE("speedRate"),
+    SPEED_RATE("speedRate", ""),
     /**
      * 暂停
      */
-    PAUSE("pause"),
+    PAUSE("pause", ""),
     /**
      * 嘲讽
      */
-    TAUNT("taunt"),
+    TAUNT("taunt", ""),
     /**
      * 治疗数值
      */
-    HEAL("heal"),
+    HEAL("heal", ""),
     /**
      * 治疗比例
      */
-    HEAL_RATE("healRate"),
+    HEAL_RATE("healRate", ""),
     /**
      * 生命值偷取（吸血）
      */
-    LIFE_STEAL("lifeSteal"),
+    LIFE_STEAL("lifeSteal", ""),
     /**
      * 流血
      */
-    BLEEDING("bleeding"),
+    BLEEDING("bleeding", ""),
     /**
      * 命中
      */
-    HIT("hit"),
+    HIT("hit", ""),
     /**
      * 命中比例
      */
-    HIT_RATE("hitRate"),
+    HIT_RATE("hitRate", ""),
     /**
      * 闪避
      */
-    DODGE("dodge"),
+    DODGE("dodge", ""),
     /**
      * 闪避比例
      */
-    DODGE_RATE("dodgeRate"),
+    DODGE_RATE("dodgeRate", ""),
     ;
-
+    /**
+     * buff名称
+     */
     private final String name;
+    /**
+     * 中文描述
+     */
+    private final String chnDesc;
 }

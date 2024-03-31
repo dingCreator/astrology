@@ -49,6 +49,7 @@ com\dingCreator\astrology\vo\HangUpVO.class
 com\dingCreator\astrology\behavior\DungeonBehavior.class
 com\dingCreator\astrology\util\SkillUtil.class
 com\dingCreator\astrology\behavior\TeamBehavior$Holder.class
+com\dingCreator\astrology\enums\exception\RankExceptionEnum.class
 com\dingCreator\astrology\dto\BuffDTO.class
 com\dingCreator\astrology\behavior\DungeonBehavior$Holder.class
 com\dingCreator\astrology\mapper\SkillBelongToMapper.class
@@ -56,12 +57,15 @@ com\dingCreator\astrology\mapper\SkillBarItemMapper.class
 com\dingCreator\astrology\entity\AreaBossRecord.class
 com\dingCreator\astrology\util\CdUtil.class
 com\dingCreator\astrology\entity\MonsterLoot.class
+com\dingCreator\astrology\mapper\RankUpBossMapper.class
 com\dingCreator\astrology\service\SkillBelongToService.class
 com\dingCreator\astrology\cache\SkillCache.class
+com\dingCreator\astrology\service\MonsterService.class
 com\dingCreator\astrology\enums\equipment\EquipmentEnum.class
 com\dingCreator\astrology\dto\EquipmentBarDTO.class
 com\dingCreator\astrology\entity\RankUpBoss.class
 com\dingCreator\astrology\entity\Player.class
+com\dingCreator\astrology\mapper\MonsterMapper.class
 com\dingCreator\astrology\entity\DailyTask.class
 com\dingCreator\astrology\dto\skill\SkillBarDTO.class
 com\dingCreator\astrology\behavior\ExpBehavior$1.class
@@ -73,6 +77,7 @@ com\dingCreator\astrology\behavior\TeamBehavior.class
 com\dingCreator\astrology\behavior\JobBehavior$1.class
 com\dingCreator\astrology\dto\BattleDTO.class
 com\dingCreator\astrology\database\DatabaseContext.class
+com\dingCreator\astrology\service\RankUpBossService.class
 com\dingCreator\astrology\entity\SkillBelongTo.class
 com\dingCreator\astrology\entity\WorldBossRecord.class
 com\dingCreator\astrology\entity\base\Monster.class
@@ -81,10 +86,10 @@ com\dingCreator\astrology\entity\base\Organism.class
 com\dingCreator\astrology\util\BattleUtil.class
 com\dingCreator\astrology\behavior\RankBehavior$Holder.class
 com\dingCreator\astrology\behavior\SkillBehavior$1.class
-com\dingCreator\astrology\enums\job\JobCharacteristic.class
 com\dingCreator\astrology\service\SkillBarItemService.class
 com\dingCreator\astrology\behavior\WorldBossBehavior$1.class
 com\dingCreator\astrology\behavior\WorldBossBehavior$Holder.class
+com\dingCreator\astrology\enums\exception\BattleExceptionEnum.class
 com\dingCreator\astrology\entity\base\Boss.class
 com\dingCreator\astrology\service\MapService.class
 com\dingCreator\astrology\database\DatabaseProvider.class
@@ -97,8 +102,10 @@ com\dingCreator\astrology\behavior\TeamBehavior$1.class
 com\dingCreator\astrology\behavior\PlayerBehavior.class
 com\dingCreator\astrology\enums\skill\DamageTypeEnum.class
 com\dingCreator\astrology\enums\job\JobEnum.class
+com\dingCreator\astrology\enums\exception\SkillExceptionEnum.class
 com\dingCreator\astrology\enums\skill\SkillTargetEnum.class
 com\dingCreator\astrology\util\RandomUtil.class
 com\dingCreator\astrology\util\MapUtil.class
 com\dingCreator\astrology\behavior\PlayerBehavior$Holder.class
 com\dingCreator\astrology\behavior\JobBehavior$Holder.class
+com\dingCreator\astrology\enums\exception\MonsterExceptionEnum.class

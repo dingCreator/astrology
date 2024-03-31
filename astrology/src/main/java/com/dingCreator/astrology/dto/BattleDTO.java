@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.dto;
 
+import com.dingCreator.astrology.enums.BuffTypeEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import lombok.Data;
 
@@ -28,7 +29,7 @@ public class BattleDTO implements Serializable {
     /**
      * 获得的buff
      */
-    private Map<String, List<BattleBuffDTO>> buffMap;
+    private Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap;
     /**
      * 轮次
      */
