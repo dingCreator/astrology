@@ -15,10 +15,6 @@ public class DungeonBoss {
      */
     private Long id;
     /**
-     * 刷新时间，单位：秒
-     */
-    private Integer flushTime;
-    /**
      * 所属副本ID
      */
     private Long dungeonId;
@@ -26,4 +22,8 @@ public class DungeonBoss {
      * boss的ID
      */
     private Long monsterId;
+    /**
+     * 掉落物
+     */
+    private String loot;
 }

@@ -3,12 +3,15 @@ package com.dingCreator.astrology.cache;
 import com.dingCreator.astrology.dto.PlayerDTO;
 import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
+import com.dingCreator.astrology.exception.BusinessException;
 import com.dingCreator.astrology.service.PlayerService;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -16,9 +19,15 @@ import java.util.stream.Collectors;
  * @date 2024/2/1
  */
 public class PlayerCache {
-
+    /**
+     * 玩家信息缓存
+     */
     private static final Map<Long, PlayerDTO> PLAYER_MAP = new ConcurrentHashMap<>();
 
+    /**
+     * 创建新玩家
+     * @param player 新玩家
+     */
     public static void createPlayer(Player player) {
         if (PLAYER_MAP.containsKey(player.getId()) || Objects.nonNull(PlayerService.getPlayerById(player.getId()))) {
             throw PlayerExceptionEnum.PLAYER_EXIST.getException();
@@ -56,6 +65,7 @@ public class PlayerCache {
      * @param ids 玩家ID
      */
     public static void flush(List<Long> ids) {
+        // 此处存在安全性问题，更新缓存之后，如果此条语句执行失败，会导致缓存与数据库不一致
         List<Player> players = ids.stream().map(PLAYER_MAP::get).map(PlayerDTO::getPlayer).collect(Collectors.toList());
         players.forEach(PlayerService::updatePlayerById);
     }

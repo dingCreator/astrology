@@ -11,45 +11,25 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum BuffTypeEnum {
     /**
-     * 物攻数值
+     * 物攻
      */
     ATK("atk", "物攻"),
     /**
-     * 物攻比例
+     * 物防
      */
-    ATK_RATE("atkRate", "物攻比例"),
+    DEF("def", "物防"),
     /**
-     * 物防数值
+     * 魔攻
      */
-    DEF("def", ""),
+    MAGIC_ATK("magicAtk", "法攻"),
     /**
-     * 物防比例
+     * 魔防
      */
-    DEF_RATE("defRate", ""),
+    MAGIC_DEF("magicDef", "法抗"),
     /**
-     * 魔攻数值
+     * 速度
      */
-    MAGIC_ATK("magicAtk", ""),
-    /**
-     * 魔攻比例
-     */
-    MAGIC_ATK_RATE("magicAtkRate", ""),
-    /**
-     * 魔防数值
-     */
-    MAGIC_DEF("magicDef", ""),
-    /**
-     * 魔防比例
-     */
-    MAGIC_DEF_RATE("magicDefRate", ""),
-    /**
-     * 速度数值
-     */
-    SPEED("speed", ""),
-    /**
-     * 速度比例
-     */
-    SPEED_RATE("speedRate", ""),
+    SPEED("speed", "速度"),
     /**
      * 暂停
      */
@@ -59,38 +39,43 @@ public enum BuffTypeEnum {
      */
     TAUNT("taunt", ""),
     /**
-     * 治疗数值
+     * 治疗
      */
     HEAL("heal", ""),
     /**
-     * 治疗比例
-     */
-    HEAL_RATE("healRate", ""),
-    /**
      * 生命值偷取（吸血）
      */
-    LIFE_STEAL("lifeSteal", ""),
+    LIFE_STEAL("lifeSteal", "吸血"),
     /**
      * 流血
      */
-    BLEEDING("bleeding", ""),
+    BLEEDING("bleeding", "流血"),
     /**
      * 命中
      */
-    HIT("hit", ""),
-    /**
-     * 命中比例
-     */
-    HIT_RATE("hitRate", ""),
+    HIT("hit", "命中"),
     /**
      * 闪避
      */
-    DODGE("dodge", ""),
+    DODGE("dodge", "闪避"),
     /**
-     * 闪避比例
+     * 暴击率
      */
-    DODGE_RATE("dodgeRate", ""),
+    CRITICAL("critical", "暴击率"),
+    /**
+     * 暴击率减免
+     */
+    CRITICAL_REDUCTION("critical_reduction", "暴击率减免"),
+    /**
+     * 爆伤
+     */
+    CRITICAL_DAMAGE("critical_damage", "爆伤"),
+    /**
+     * 爆伤减免
+     */
+    CRITICAL_DAMAGE_REDUCTION("critical_damage_reduction", "爆伤减免"),
     ;
+
     /**
      * buff名称
      */

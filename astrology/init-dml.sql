@@ -1,5 +1,10 @@
+-- 初始化地图
+INSERT INTO astrology_map(id,name,xPos,yPos) values
+(1,'圣城',0,0),(2,'仙庭王朝',500,200),(3,'死烬之渊',0,-300),(4,'未元之都',-500,200),(5,'邪修大本营',-1000,200),
+(6,'诡境雾霭',100,-1000);
+
 -- 初始化突破boss属性
-INSERT INTO astrology_monster(id, name,hp,maxHp,mp,maxMp,atk,magicAtk,def,magicDef,penetrate,magicPenetrate,criticalRate,
+INSERT INTO astrology_monster(id,name,hp,maxHp,mp,maxMp,atk,magicAtk,def,magicDef,penetrate,magicPenetrate,criticalRate,
                               criticalDamageReduction,criticalDamage,criticalReductionRate,behaviorSpeed,hit,dodge,
                               lifeStealing,rank,level,description) values
 (1,'天劫',20000,20000,10000,10000,600,600,150,150,0.5,0.5,0.5,0.5,3,0.5,250,1000,100,0,1,20,''),
@@ -28,42 +33,46 @@ INSERT INTO astrology_monster(id, name,hp,maxHp,mp,maxMp,atk,magicAtk,def,magicD
 (306,'天劫',3000000,3000000,500000,500000,50000,50000,8000,8000,0.8,0.8,0.8,0.7,4,0.6,18000,150000,10000,0.2,4,80,'');
 
 -- 初始化突破boss
-INSERT INTO astrology_rank_up_boss(job, rank, monsterId)
-values('XIU_ZHEN', 1, 1),('SI_DI_WU_SHI', 1, 2),('MAGICIAN', 1, 3),('GUN', 1, 4),('EVIL', 1, 5),('CHEATER', 1, 6),
-      ('XIU_ZHEN', 2, 101),('SI_DI_WU_SHI', 2, 102),('MAGICIAN', 2, 103),('GUN', 2, 104),('EVIL', 2, 105),('CHEATER', 2, 106),
-      ('XIU_ZHEN', 3, 201),('SI_DI_WU_SHI', 3, 202),('MAGICIAN', 3, 203),('GUN', 3, 204),('EVIL', 3, 205),('CHEATER', 3, 206),
-      ('XIU_ZHEN', 4, 301),('SI_DI_WU_SHI', 4, 302),('MAGICIAN', 4, 303),('GUN', 4, 304),('EVIL', 4, 305),('CHEATER', 4, 306);
+INSERT INTO astrology_rank_up_boss(job, rank, monsterId) values
+('XIU_ZHEN', 1, 1),('SI_DI_WU_SHI', 1, 2),('MAGICIAN', 1, 3),('GUN', 1, 4),('EVIL', 1, 5),('CHEATER', 1, 6),
+('XIU_ZHEN', 2, 101),('SI_DI_WU_SHI', 2, 102),('MAGICIAN', 2, 103),('GUN', 2, 104),('EVIL', 2, 105),('CHEATER', 2, 106),
+('XIU_ZHEN', 3, 201),('SI_DI_WU_SHI', 3, 202),('MAGICIAN', 3, 203),('GUN', 3, 204),('EVIL', 3, 205),('CHEATER', 3, 206),
+('XIU_ZHEN', 4, 301),('SI_DI_WU_SHI', 4, 302),('MAGICIAN', 4, 303),('GUN', 4, 304),('EVIL', 4, 305),('CHEATER', 4, 306);
 
 -- 初始化突破boss技能
-INSERT INTO astrology_skill_belong_to(belongTo, belongToId, skillId)
-VALUES ('Monster', 1, 1),('Monster', 2, 1),('Monster', 3, 1),('Monster', 4, 1),('Monster', 5, 1),('Monster', 6, 1),
-       ('Monster', 101, 1),('Monster', 102, 1),('Monster', 103, 1),('Monster', 104, 1),('Monster', 105, 1),('Monster', 106, 1),
-       ('Monster', 201, 1),('Monster', 202, 1),('Monster', 203, 1),('Monster', 204, 1),('Monster', 205, 1),('Monster', 206, 1),
-       ('Monster', 301, 1),('Monster', 302, 1),('Monster', 303, 1),('Monster', 304, 1),('Monster', 305, 1),('Monster', 306, 1);
+INSERT INTO astrology_skill_belong_to(belongTo, belongToId, skillId) VALUES
+('Monster', 1, 1),('Monster', 2, 1),('Monster', 3, 1),('Monster', 4, 1),('Monster', 5, 1),('Monster', 6, 1),
+('Monster', 101, 1),('Monster', 102, 1),('Monster', 103, 1),('Monster', 104, 1),('Monster', 105, 1),('Monster', 106, 1),
+('Monster', 201, 1),('Monster', 202, 1),('Monster', 203, 1),('Monster', 204, 1),('Monster', 205, 1),('Monster', 206, 1),
+('Monster', 301, 1),('Monster', 302, 1),('Monster', 303, 1),('Monster', 304, 1),('Monster', 305, 1),('Monster', 306, 1);
 
 -- 初始化突破boss技能栏
 insert into astrology_skill_bar_item(belongTo,belongToId,skillId) values
-('Monster',1,'1001,1000'),
-('Monster',2,'1001,1000'),
-('Monster',3,'1001,1000'),
-('Monster',4,'1001,1000'),
-('Monster',5,'1001,1000'),
-('Monster',6,'1001,1000'),
-('Monster',101,'1001,1000'),
-('Monster',102,'1001,1000'),
-('Monster',103,'1001,1000'),
-('Monster',104,'1001,1000'),
-('Monster',105,'1001,1000'),
-('Monster',106,'1001,1000'),
-('Monster',201,'1001,1000'),
-('Monster',202,'1001,1000'),
-('Monster',203,'1001,1000'),
-('Monster',204,'1001,1000'),
-('Monster',205,'1001,1000'),
-('Monster',206,'1001,1000'),
-('Monster',301,'1001,1000'),
-('Monster',302,'1001,1000'),
-('Monster',303,'1001,1000'),
-('Monster',304,'1001,1000'),
-('Monster',305,'1001,1000'),
-('Monster',306,'1001,1000');
+('Monster',1,'1001,1000'),('Monster',2,'1001,1000'),('Monster',3,'1001,1000'),
+('Monster',4,'1001,1000'),('Monster',5,'1001,1000'),('Monster',6,'1001,1000'),
+('Monster',101,'1001,1000'),('Monster',102,'1001,1000'),('Monster',103,'1001,1000'),
+('Monster',104,'1001,1000'),('Monster',105,'1001,1000'),('Monster',106,'1001,1000'),
+('Monster',201,'1001,1000'),('Monster',202,'1001,1000'),('Monster',203,'1001,1000'),
+('Monster',204,'1001,1000'),('Monster',205,'1001,1000'),('Monster',206,'1001,1000'),
+('Monster',301,'1001,1000'),('Monster',302,'1001,1000'),('Monster',303,'1001,1000'),
+('Monster',304,'1001,1000'),('Monster',305,'1001,1000'),('Monster',306,'1001,1000');
+
+-- 初始化副本
+INSERT INTO astrology_dungeon(id,name,mapId,maxRank,flushTime) values
+(1,'缘神老家1',3,3,10);
+
+-- 初始化副本boss
+INSERT INTO astrology_dungeon_boss(dungeonId,monsterId) values
+(1,10000),(1,10001);
+
+-- 初始化副本boss属性
+INSERT INTO astrology_monster(id, name,hp,maxHp,mp,maxMp,atk,magicAtk,def,magicDef,penetrate,magicPenetrate,criticalRate,
+                              criticalDamageReduction,criticalDamage,criticalReductionRate,behaviorSpeed,hit,dodge,
+                              lifeStealing,rank,level,description) values
+(10000,'叹息咏者',100000,100000,80000,80000,8000,8000,3000,1500,0,0,0.1,0,1.5,0,1300,7000,1500,0,2,40,''),
+(10001,'黯星老魔',120000,120000,100000,100000,10000,8000,4000,1600,0,0,0.1,0,1.6,0,1600,7000,1800,0,2,40,'');
+
+-- 初始化副本boss技能栏
+insert into astrology_skill_bar_item(belongTo,belongToId,skillId) values
+('Monster',10000,'1,2,3,4,5'),
+('Monster',10001,'1,2,3,4,5');

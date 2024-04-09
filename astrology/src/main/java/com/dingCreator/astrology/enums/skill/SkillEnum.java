@@ -1,7 +1,6 @@
 package com.dingCreator.astrology.enums.skill;
 
-import com.dingCreator.astrology.dto.BuffDTO;
-import com.dingCreator.astrology.dto.skill.SkillBuffDTO;
+import com.dingCreator.astrology.dto.GiveBuffDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
@@ -37,20 +36,14 @@ public enum SkillEnum {
             JobEnum.MAGICIAN.getJobCode(),
             new SkillEffectDTO(
                     SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 1F,
-                    new SkillBuffDTO(new BuffDTO(BuffTypeEnum.HIT_RATE, 0L, -0.5F), 0.1F, 1)
+                    new GiveBuffDTO(BuffTypeEnum.HIT, 0L, -0.5F, 1, 0.1F)
             )
     ),
 
     SKILL_4(4L, "速射",
             "枪炮师引动枪弹进行五次射击，每次射击造成50%物理伤害，同时该技能每次伤害命中均能触发枪炮师伪神之眼效果。",
             JobEnum.GUN.getJobCode(),
-            Arrays.asList(
-                    new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 0.5F),
-                    new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 0.5F),
-                    new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 0.5F),
-                    new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 0.5F),
-                    new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 0.5F)
-            )
+            Collections.nCopies(5, new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 0.5F))
     ),
 
     SKILL_5(5L, "汲魂之隙",
@@ -60,14 +53,20 @@ public enum SkillEnum {
     ),
 
     SKILL_6(6L, "芬芳",
-            "小嘴抹蜜口吐芬芳，对敌方全体造成80%魔法伤害并且有10%概率嘲讽对方1回合",
+            "小嘴抹蜜口吐芬芳，对敌方全体造成80%物理伤害并且有10%概率嘲讽对方1回合",
             JobEnum.CHEATER.getJobCode(),
             Arrays.asList(
                     new SkillEffectDTO(SkillTargetEnum.ALL_ENEMY, DamageTypeEnum.ATK, 0.8F),
                     new SkillEffectDTO(SkillTargetEnum.ME, DamageTypeEnum.ATK, 0F,
-                            new SkillBuffDTO(new BuffDTO(BuffTypeEnum.TAUNT, 0L, 0F), 0.1F, 1)
+                            new GiveBuffDTO(BuffTypeEnum.TAUNT, 0L, 0F, 1, 0.1F)
                     )
             )
+    ),
+
+    SKILL_7(7L, "星术师技能1",
+            "",
+            JobEnum.MAGICIAN.getJobCode(), 1000L,
+            new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 2F)
     ),
 
     SKILL_1000(1000L, "雷击",
@@ -76,24 +75,36 @@ public enum SkillEnum {
     ),
 
     SKILL_1001(1001L, "天雷化身-剑",
-            "天劫化身为剑，造成50%物理伤害，并提升5%物攻，持续3回合",
+            "天劫化身为剑，造成50%物理伤害，并提升5%物攻，持续5回合",
             "None", 100L,
             Arrays.asList(
                     new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 0.5F),
                     new SkillEffectDTO(SkillTargetEnum.ME, DamageTypeEnum.ATK, 0F,
-                            new SkillBuffDTO(new BuffDTO(BuffTypeEnum.ATK_RATE, 0L, 0.05F), 1F, 3)
+                            new GiveBuffDTO(BuffTypeEnum.ATK, 0L, 0.05F, 5, 1F)
                     )
             )
     ),
 
     SKILL_1002(1002L, "天威",
-            "天劫释放天威，降低对方10%物攻和10%法攻，持续3回合",
+            "天劫释放天威，降低对方10%物攻和10%法攻，持续5回合",
             "None", 500L,
             new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 0F,
                     Arrays.asList(
-                            new SkillBuffDTO(new BuffDTO(BuffTypeEnum.ATK_RATE, 0L, -0.1F), 1F, 3),
-                            new SkillBuffDTO(new BuffDTO(BuffTypeEnum.MAGIC_ATK_RATE, 0L, -0.1F), 1F, 3)
+                            new GiveBuffDTO(BuffTypeEnum.ATK, 0L, -0.1F, 5, 1F),
+                            new GiveBuffDTO(BuffTypeEnum.MAGIC_ATK, 0L, -0.1F, 5, 1F)
                     )
+            )
+    ),
+
+    SKILL_1003(1003L, "五雷轰顶",
+            "天劫释放五道天雷，分别造成100%，150%，200%，300%，600%物理伤害",
+            "None", 10000L,
+            Arrays.asList(
+                new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 1F),
+                new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 1.5F),
+                new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 2F),
+                new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 3F),
+                new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 6F)
             )
     ),
 
@@ -103,9 +114,7 @@ public enum SkillEnum {
             Arrays.asList(
                     new SkillEffectDTO(SkillTargetEnum.ALL_ENEMY, DamageTypeEnum.ATK, 10F),
                     new SkillEffectDTO(SkillTargetEnum.ME, DamageTypeEnum.ATK, 0F,
-                            new SkillBuffDTO(
-                                    new BuffDTO(BuffTypeEnum.ATK, 100000L, 0F), 1F, 10
-                            )
+                            new GiveBuffDTO(BuffTypeEnum.ATK, 100000L, 0F, 10, 1F)
                     )
             )
     ),

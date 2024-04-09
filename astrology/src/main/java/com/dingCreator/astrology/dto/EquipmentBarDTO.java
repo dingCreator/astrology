@@ -14,13 +14,13 @@ public class EquipmentBarDTO implements Serializable {
     /**
      * 武器
      */
-    private EquipmentBelongTo weapon;
+    private EquipmentDTO weapon;
     /**
      * 防具
      */
-    private EquipmentBelongTo armor;
+    private EquipmentDTO armor;
     /**
      * 饰品
      */
-    private EquipmentBelongTo jewelry;
+    private EquipmentDTO jewelry;
 }

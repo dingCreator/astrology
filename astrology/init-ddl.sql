@@ -94,3 +94,37 @@ CREATE TABLE astrology_rank_up_boss
     rank      INTEGER,
     monsterId INTEGER
 );
+
+CREATE TABLE astrology_dungeon
+(
+    id        INTEGER PRIMARY KEY autoincrement,
+    name      VARCHAR,
+    mapId     INTEGER,
+    maxRank   INTEGER,
+    flushTime INTEGER,
+    loot      VARCHAR
+);
+
+CREATE TABLE astrology_dungeon_boss
+(
+    id        INTEGER PRIMARY KEY autoincrement,
+    dungeonId INTEGER,
+    monsterId INTEGER,
+    loot      VARCHAR
+);
+
+CREATE TABLE astrology_dungeon_record
+(
+    id              INTEGER PRIMARY KEY autoincrement,
+    playerId        INTEGER,
+    dungeonId       INTEGER,
+    lastExploreTime DATE
+);
+
+CREATE TABLE astrology_map
+(
+    id   INTEGER PRIMARY KEY autoincrement,
+    name VARCHAR,
+    xPos INTEGER,
+    yPos INTEGER
+);

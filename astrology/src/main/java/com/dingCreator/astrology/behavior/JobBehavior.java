@@ -21,10 +21,7 @@ public class JobBehavior {
      */
     public BaseResponse<List<String>> getJob() {
         BaseResponse<List<String>> response = new BaseResponse<>();
-        final AtomicInteger index = new AtomicInteger(1);
-        response.setContent(Arrays.stream(JobEnum.values()).map(job ->
-                index.getAndAdd(1) + "." + job.getJobName()
-        ).collect(Collectors.toList()));
+        response.setContent(Arrays.stream(JobEnum.values()).map(JobEnum::getJobName).collect(Collectors.toList()));
         return response;
     }
 

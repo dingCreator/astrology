@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.dto.skill;
 
+import com.dingCreator.astrology.dto.GiveBuffDTO;
 import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
 import com.dingCreator.astrology.enums.skill.SkillConditionEnum;
 import com.dingCreator.astrology.enums.skill.SkillTargetEnum;
@@ -34,7 +35,7 @@ public class SkillEffectDTO implements Serializable {
     /**
      * buff
      */
-    private List<SkillBuffDTO> skillBuffDTOList;
+    private List<GiveBuffDTO> giveBuffDTOList;
     /**
      * 触发的被动
      */
@@ -47,14 +48,14 @@ public class SkillEffectDTO implements Serializable {
     }
 
     public SkillEffectDTO(SkillTargetEnum skillTargetEnum, DamageTypeEnum damageTypeEnum, Float damageRate,
-                          SkillBuffDTO skillBuffDTO) {
+                          GiveBuffDTO giveBuffDTO) {
         this(skillTargetEnum, damageTypeEnum, damageRate);
-        this.skillBuffDTOList = Collections.singletonList(skillBuffDTO);
+        this.giveBuffDTOList = Collections.singletonList(giveBuffDTO);
     }
 
     public SkillEffectDTO(SkillTargetEnum skillTargetEnum, DamageTypeEnum damageTypeEnum, Float damageRate,
-                          List<SkillBuffDTO> skillBuffDTOList) {
+                          List<GiveBuffDTO> giveBuffDTOList) {
         this(skillTargetEnum, damageTypeEnum, damageRate);
-        this.skillBuffDTOList = skillBuffDTOList;
+        this.giveBuffDTOList = giveBuffDTOList;
     }
 }

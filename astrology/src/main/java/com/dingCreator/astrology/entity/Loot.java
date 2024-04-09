@@ -9,13 +9,13 @@ import lombok.Data;
  * @date 2024/2/19
  */
 @Data
-public class MonsterLoot {
+public class Loot {
     /**
      * 主键ID
      */
     private Long id;
     /**
-     * 所属怪物类型
+     * 从何处掉落
      */
     private String belongTo;
     /**

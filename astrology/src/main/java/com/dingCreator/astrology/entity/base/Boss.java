@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.entity.base;
 
+import com.dingCreator.astrology.template.ExtraBattleProcessTemplate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -9,5 +10,6 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Boss extends Monster {
+public class Boss extends Monster implements ExtraBattleProcessTemplate {
+
 }

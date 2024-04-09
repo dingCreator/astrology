@@ -3,6 +3,8 @@ package com.dingCreator.astrology.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+
 /**
  * @author ding
  * @date 2024/1/30
@@ -21,4 +23,8 @@ public enum PlayerStatusEnum {
     ;
     private final String code;
     private final String name;
+
+    public static PlayerStatusEnum getByCode(String code) {
+        return Arrays.stream(PlayerStatusEnum.values()).filter(e -> e.getCode().equals(code)).findFirst().orElse(null);
+    }
 }

@@ -37,6 +37,14 @@ public class Constants {
      * 技能错误码前缀
      */
     public static final String SKILL_EXCEPTION_PREFIX = "E_SKILL_";
+    /**
+     * 技能错误码前缀
+     */
+    public static final String MAP_EXCEPTION_PREFIX = "E_MAP_";
+    /**
+     * 技能错误码前缀
+     */
+    public static final String DUNGEON_EXCEPTION_PREFIX = "E_DUNGEON_";
 
     /**
      * 组队上限

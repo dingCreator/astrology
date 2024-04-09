@@ -122,11 +122,12 @@ public class ExpBehavior {
     public void hangUp(Long id) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
         Player player = playerDTO.getPlayer();
-        if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(id))) {
+        if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(player))) {
             throw ExpExceptionEnum.CANT_HANG_UP.getException();
         }
-        player.setStatus(PlayerStatusEnum.HANG_UP.getCode());
-        player.setStatusStartTime(new Date());
+        PlayerBehavior.getInstance().updatePlayerStatus(player, PlayerStatusEnum.HANG_UP,
+                () -> PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(player)),
+                ExpExceptionEnum.CANT_HANG_UP.getException());
         PlayerCache.flush(Collections.singletonList(id));
     }
 
@@ -139,18 +140,21 @@ public class ExpBehavior {
     public BaseResponse<HangUpVO> stopHangUp(Long id) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
         Player player = playerDTO.getPlayer();
-        if (!PlayerStatusEnum.HANG_UP.getCode().equals(player.getStatus())) {
+        if (!PlayerStatusEnum.HANG_UP.getCode().equals(PlayerBehavior.getInstance().getStatus(player))) {
             throw ExpExceptionEnum.NOT_HANG_UP.getException();
         }
-        player.setStatus(PlayerStatusEnum.FREE.getCode());
+        PlayerBehavior.getInstance().updatePlayerStatus(player, PlayerStatusEnum.FREE,
+                () -> PlayerStatusEnum.HANG_UP.getCode().equals(PlayerBehavior.getInstance().getStatus(player)),
+                ExpExceptionEnum.NOT_HANG_UP.getException());
         PlayerCache.flush(Collections.singletonList(id));
 
         HangUpVO hangUpVO = new HangUpVO();
         long between = DateUtil.between(player.getStatusStartTime(), new Date(), DateUnit.MINUTE);
+        // 回显真正的挂机时间
         hangUpVO.setHangUpTime(between);
-
+        // 最长有收益挂机时间24h
         between = Math.min(between, Constants.MAX_HANG_UP_TIME);
-
+        // 回复状态
         long maxHp = player.getMaxHp();
         long oldHp = player.getHp();
         long maxMp = player.getMaxMp();
@@ -160,9 +164,10 @@ public class ExpBehavior {
         long newMp = Math.min(maxMp, oldMp + Math.round(maxMp * recharge * between));
         player.setHp(newHp);
         player.setMp(newMp);
-
-        long exp = (10 + (long) Math.pow(player.getLevel() - 1, 3)) * between;
+        // 计算经验值
+        long exp = (10 + (long) Math.pow(player.getLevel() - 1, 3) / 30) * between;
         LevelChange levelChange = getExp(id, exp);
+        // 回显实际获得的经验值以及状态变化
         hangUpVO.setExp(levelChange.getExp());
         hangUpVO.setOldLevel(levelChange.getOldLevel());
         hangUpVO.setNewLevel(levelChange.getNewLevel());

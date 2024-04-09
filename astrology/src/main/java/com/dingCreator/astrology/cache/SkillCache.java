@@ -3,14 +3,12 @@ package com.dingCreator.astrology.cache;
 import cn.hutool.core.collection.CollectionUtil;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.entity.SkillBarItem;
-import com.dingCreator.astrology.enums.OrganismEnum;
+import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.service.SkillBarItemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -84,7 +82,7 @@ public class SkillCache {
     }
 
     public static void deleteSkillBar(Long playerId) {
-        Map<Long, SkillBarDTO> skillBarMap = SKILL_CACHE.get(OrganismEnum.PLAYER.getType());
+        Map<Long, SkillBarDTO> skillBarMap = SKILL_CACHE.get(BelongToEnum.Player.getBelongTo());
         if (Objects.nonNull(skillBarMap)) {
             skillBarMap.remove(playerId);
         }

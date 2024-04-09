@@ -5,6 +5,7 @@ import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.PlayerDTO;
 import com.dingCreator.astrology.dto.TeamDTO;
+import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.exception.TeamExceptionEnum;
 import com.dingCreator.astrology.util.MapUtil;
@@ -47,16 +48,16 @@ public class TeamBehavior {
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.TEAM_NOT_EXIST.getException();
         }
-        if (!PlayerStatusEnum.FREE.getCode()
-                .equals(PlayerCache.getPlayerById(initiatorId).getPlayer().getStatus())) {
+        Player initiator = PlayerCache.getPlayerById(initiatorId).getPlayer();
+        Player captain = PlayerCache.getPlayerById(teamId).getPlayer();
+
+        if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(initiator))) {
             throw TeamExceptionEnum.PRE_JOIN_NOT_FREE.getException();
         }
-        if (!PlayerStatusEnum.FREE.getCode()
-                .equals(PlayerCache.getPlayerById(teamId).getPlayer().getStatus())) {
+        if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(captain))) {
             throw TeamExceptionEnum.TEAM_NOT_FREE.getException();
         }
-        if (!MapUtil.getNowLocation(PlayerCache.getPlayerById(initiatorId).getPlayer().getMapId())
-                .equals(MapUtil.getNowLocation(PlayerCache.getPlayerById(teamId).getPlayer().getMapId()))) {
+        if (!MapUtil.getNowLocation(initiator.getMapId()).equals(MapUtil.getNowLocation(captain.getMapId()))) {
             throw TeamExceptionEnum.NOT_IN_SAME_MAP.getException();
         }
         if (teamDTO.getMembers().size() >= Constants.TEAM_MEMBER_LIMIT) {
@@ -171,6 +172,13 @@ public class TeamBehavior {
         }
         teamDTO.getMembers().forEach(this::leaveTeam);
         TeamCache.deleteTeam(initiatorId);
+    }
+
+    public void captainOnlyValidate(long playerId) {
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId);
+        if (playerDTO.getTeam() && Objects.isNull(TeamCache.getTeamById(playerId))) {
+            throw TeamExceptionEnum.NOT_CAPTAIN.getException();
+        }
     }
 
     private static class Holder {

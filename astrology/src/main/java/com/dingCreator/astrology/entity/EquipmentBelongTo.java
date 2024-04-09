@@ -15,10 +15,6 @@ public class EquipmentBelongTo {
      */
     private Long id;
     /**
-     * 装备类型
-     */
-    private String equipmentType;
-    /**
      * 装备归属
      */
     private String belongTo;
@@ -26,4 +22,16 @@ public class EquipmentBelongTo {
      * 装备所属ID
      */
     private Long belongToId;
+    /**
+     * 装备ID
+     */
+    private Long equipmentId;
+    /**
+     * 强化等级
+     */
+    private Integer level;
+    /**
+     * 是否装备中
+     */
+    private Boolean equip;
 }

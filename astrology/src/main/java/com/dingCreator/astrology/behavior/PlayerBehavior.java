@@ -3,23 +3,27 @@ package com.dingCreator.astrology.behavior;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.dto.OrganismDTO;
 import com.dingCreator.astrology.dto.PlayerDTO;
 import com.dingCreator.astrology.dto.TeamDTO;
 import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.entity.SkillBarItem;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
+import com.dingCreator.astrology.enums.PropertiesTypeEnum;
 import com.dingCreator.astrology.enums.RankEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.enums.exception.TeamExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.job.JobInitPropertiesEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
+import com.dingCreator.astrology.exception.BusinessException;
 import com.dingCreator.astrology.response.BaseResponse;
 import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.service.SkillBarItemService;
 import com.dingCreator.astrology.service.SkillBelongToService;
 import com.dingCreator.astrology.util.BattleUtil;
+import com.dingCreator.astrology.util.EquipmentUtil;
 import com.dingCreator.astrology.util.MapUtil;
 import com.dingCreator.astrology.util.SkillUtil;
 import com.dingCreator.astrology.vo.BattleResultVO;
@@ -28,12 +32,18 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 /**
  * @author ding
  * @date 2024/2/3
  */
 public class PlayerBehavior {
+
+    /**
+     * 状态读写锁
+     */
+    private static final Object LOCK = new Object();
 
     /**
      * 创建角色
@@ -122,8 +132,13 @@ public class PlayerBehavior {
      * @return 玩家信息
      */
     public BaseResponse<List<String>> getPlayerInfoById(Long id) {
+        // 玩家信息
         PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
         Player player = playerDTO.getPlayer();
+        // 生物信息
+        OrganismDTO organismDTO = new OrganismDTO();
+        organismDTO.setOrganism(playerDTO.getPlayer());
+
         List<String> list = new ArrayList<>(16);
         list.add("昵称：" + player.getName() + " 职业：" + JobEnum.getByCode(player.getJob()).getJobName());
         list.add("阶级：" + RankEnum.getEnum(player.getJob(), player.getRank()).getRankName());
@@ -143,9 +158,22 @@ public class PlayerBehavior {
         list.add("暴击减免：" + player.getCriticalReductionRate() * 100 + "%");
         list.add("暴伤：" + player.getCriticalDamage() * 100 + "%");
         list.add("暴伤减免：" + player.getCriticalDamageReduction() * 100 + "%");
+        list.add("状态：" + PlayerStatusEnum.getByCode(getStatus(player)).getName());
+        list.add("所在地图：" + MapUtil.getMapById(MapUtil.getNowLocation(player.getId())).getName());
         BaseResponse<List<String>> baseResponse = new BaseResponse<>();
         baseResponse.setContent(list);
         return baseResponse;
+    }
+
+    public void updatePlayerStatus(Player player, PlayerStatusEnum newStatus,
+                                                       Supplier<Boolean> supplier, BusinessException exception) {
+        synchronized (LOCK) {
+            if (!supplier.get()) {
+                throw exception;
+            }
+            player.setStatus(newStatus.getCode());
+            player.setStatusStartTime(new Date());
+        }
     }
 
     /**
@@ -153,25 +181,26 @@ public class PlayerBehavior {
      *
      * @return 当前状态
      */
-    public String getStatus(Long playerId) {
-        Player player = PlayerCache.getPlayerById(playerId).getPlayer();
-        if (PlayerStatusEnum.MOVING.getCode().equals(player.getStatus())) {
-            Long targetMapId = MapUtil.getTargetLocation(playerId);
-            if (Objects.isNull(targetMapId)) {
-                player.setStatus(PlayerStatusEnum.FREE.getCode());
-                PlayerCache.flush(Collections.singletonList(playerId));
-            } else {
-                long seconds = MapUtil.moveTime(playerId, MapUtil.getNowLocation(playerId), targetMapId);
-                if (System.currentTimeMillis() >= player.getStatusStartTime().getTime() + seconds * 1000) {
-                    // 已经到了
+    public String getStatus(Player player) {
+        synchronized (LOCK) {
+            if (PlayerStatusEnum.MOVING.getCode().equals(player.getStatus())) {
+                Long targetMapId = MapUtil.getTargetLocation(player.getId());
+                if (targetMapId == 0L) {
                     player.setStatus(PlayerStatusEnum.FREE.getCode());
-                    player.setStatusStartTime(new Date());
-                    player.setMapId(MapUtil.getTargetLocation(playerId));
-                    PlayerCache.flush(Collections.singletonList(playerId));
+                    PlayerCache.flush(Collections.singletonList(player.getId()));
+                } else {
+                    long seconds = MapUtil.moveTime(player.getId(), MapUtil.getNowLocation(player.getId()), targetMapId);
+                    if (System.currentTimeMillis() >= player.getStatusStartTime().getTime() + seconds * 1000) {
+                        // 已经到了
+                        player.setStatus(PlayerStatusEnum.FREE.getCode());
+                        player.setStatusStartTime(new Date());
+                        player.setMapId(MapUtil.getTargetLocation(player.getId()));
+                        PlayerCache.flush(Collections.singletonList(player.getId()));
+                    }
                 }
             }
+            return player.getStatus();
         }
-        return PlayerCache.getPlayerById(playerId).getPlayer().getStatus();
     }
 
     /**

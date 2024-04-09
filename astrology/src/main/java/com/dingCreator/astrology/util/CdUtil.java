@@ -1,7 +1,12 @@
 package com.dingCreator.astrology.util;
 
+import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.exception.BusinessException;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,5 +41,21 @@ public class CdUtil {
      */
     public static void addCd(String key, long seconds) {
         CD_MAP.put(key, LocalDateTime.now().plusSeconds(seconds));
+    }
+
+    /**
+     * 获取CD剩余时间
+     *
+     * @param lastTime 上次参与时间
+     * @param seconds  秒
+     * @return 剩余时间
+     */
+    public static long getCd(Date lastTime, long seconds) {
+        LocalDateTime lastExploreTime = lastTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        Duration duration = Duration.between(lastExploreTime, LocalDateTime.now());
+        if (duration.getSeconds() < seconds) {
+            return seconds - duration.getSeconds();
+        }
+        return 0;
     }
 }

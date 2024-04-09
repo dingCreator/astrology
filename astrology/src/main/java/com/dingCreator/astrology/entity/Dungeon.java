@@ -15,11 +15,23 @@ public class Dungeon {
      */
     private Long id;
     /**
+     * 名称
+     */
+    private String name;
+    /**
      * 地图ID
      */
     private Long mapId;
     /**
      * 可挑战此副本的最高Rank
      */
-    private Long maxRank;
+    private Integer maxRank;
+    /**
+     * 冷却时间
+     */
+    private Long flushTime;
+    /**
+     * 掉落物
+     */
+    private String loot;
 }
