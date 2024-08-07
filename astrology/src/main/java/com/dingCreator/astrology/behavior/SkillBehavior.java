@@ -2,19 +2,18 @@ package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.cache.SkillCache;
+import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.dto.player.PlayerDTO;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.entity.Player;
-import com.dingCreator.astrology.entity.SkillBarItem;
 import com.dingCreator.astrology.entity.SkillBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.exception.SkillExceptionEnum;
-import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.service.SkillBarItemService;
 import com.dingCreator.astrology.service.SkillBelongToService;
 import com.dingCreator.astrology.util.SkillUtil;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -42,7 +41,7 @@ public class SkillBehavior {
      * @param skillIds   技能ID列表
      */
     public void createSkillBarItem(Long belongToId, List<Long> skillIds) {
-        Player player = PlayerCache.getPlayerById(belongToId).getPlayer();
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(belongToId).getPlayerDTO();
         List<Long> validSkillIds = SkillBelongToService.querySkillBelongToBySkillId(BelongToEnum.Player.getBelongTo(),
                 belongToId, skillIds).stream().map(SkillBelongTo::getSkillId).collect(Collectors.toList());
         if (skillIds.stream().distinct().count() != validSkillIds.size()) {
@@ -55,11 +54,11 @@ public class SkillBehavior {
                 throw SkillExceptionEnum.INVALID_SKILL_ID.getException();
             }
             List<String> jobEnumList = skillEnum.getJobCode();
-            if (jobEnumList.contains("None")) {
+            if (jobEnumList.contains(Constants.NONE)) {
                 throw SkillExceptionEnum.JOB_SKILL_NOT_ALLOW.getException();
-            } else if (jobEnumList.contains("All")) {
+            } else if (jobEnumList.contains(Constants.ALL)) {
                 return;
-            } else if (!jobEnumList.contains(player.getJob())) {
+            } else if (!jobEnumList.contains(playerDTO.getJob())) {
                 throw SkillExceptionEnum.JOB_SKILL_NOT_ALLOW.getException();
             }
         });

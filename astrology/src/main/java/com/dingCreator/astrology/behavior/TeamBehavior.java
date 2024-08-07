@@ -3,12 +3,14 @@ package com.dingCreator.astrology.behavior;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.dto.PlayerDTO;
+import com.dingCreator.astrology.dto.player.PlayerDTO;
+import com.dingCreator.astrology.dto.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.TeamDTO;
 import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.exception.TeamExceptionEnum;
 import com.dingCreator.astrology.util.MapUtil;
+import com.dingCreator.astrology.vo.TeamVO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +32,11 @@ public class TeamBehavior {
      * @return 小队编号
      */
     public Long buildTeam(Long initiatorId) {
-        PlayerDTO playerDTO = PlayerCache.getPlayerById(initiatorId);
-        playerDTO.setTeam(true);
+        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(initiatorId);
+        playerInfoDTO.setTeam(true);
 
         TeamCache.createTeam(initiatorId);
-        return playerDTO.getPlayer().getId();
+        return playerInfoDTO.getPlayerDTO().getId();
     }
 
     /**
@@ -48,8 +50,8 @@ public class TeamBehavior {
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.TEAM_NOT_EXIST.getException();
         }
-        Player initiator = PlayerCache.getPlayerById(initiatorId).getPlayer();
-        Player captain = PlayerCache.getPlayerById(teamId).getPlayer();
+        PlayerDTO initiator = PlayerCache.getPlayerById(initiatorId).getPlayerDTO();
+        PlayerDTO captain = PlayerCache.getPlayerById(teamId).getPlayerDTO();
 
         if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(initiator))) {
             throw TeamExceptionEnum.PRE_JOIN_NOT_FREE.getException();
@@ -63,8 +65,8 @@ public class TeamBehavior {
         if (teamDTO.getMembers().size() >= Constants.TEAM_MEMBER_LIMIT) {
             throw TeamExceptionEnum.TEAM_MEMBER_OVER_LIMIT.getException();
         }
-        PlayerDTO playerDTO = PlayerCache.getPlayerById(initiatorId);
-        playerDTO.setTeam(true);
+        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(initiatorId);
+        playerInfoDTO.setTeam(true);
 
         teamDTO.getMembers().add(initiatorId);
     }
@@ -88,8 +90,8 @@ public class TeamBehavior {
             throw TeamExceptionEnum.NOT_TEAM_MEMBER.getException();
         }
 
-        PlayerDTO playerDTO = PlayerCache.getPlayerById(removedId);
-        playerDTO.setTeam(false);
+        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(removedId);
+        playerInfoDTO.setTeam(false);
     }
 
     /**
@@ -106,8 +108,8 @@ public class TeamBehavior {
             throw TeamExceptionEnum.CAPTAIN_NOT_ALLOW.getException();
         }
 
-        PlayerDTO playerDTO = PlayerCache.getPlayerById(initiatorId);
-        playerDTO.setTeam(false);
+        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(initiatorId);
+        playerInfoDTO.setTeam(false);
     }
 
     /**
@@ -174,9 +176,28 @@ public class TeamBehavior {
         TeamCache.deleteTeam(initiatorId);
     }
 
+    /**
+     * 获取队伍信息
+     *
+     * @param playerId 玩家ID
+     * @return 队伍信息
+     */
+    public TeamVO getTeamInfo(Long playerId) {
+        PlayerCache.getPlayerById(playerId);
+        TeamDTO teamDTO = TeamCache.getTeamByPlayerId(playerId);
+        if (Objects.isNull(teamDTO)) {
+            throw TeamExceptionEnum.NOT_IN_TEAM.getException();
+        }
+
+        List<String> membersNick = teamDTO.getMembers().stream()
+                .map(id -> PlayerCache.getPlayerById(id).getPlayerDTO().getName()).collect(Collectors.toList());
+        return new TeamVO(teamDTO.getCaptainId(),
+                PlayerCache.getPlayerById(teamDTO.getCaptainId()).getPlayerDTO().getName(), membersNick);
+    }
+
     public void captainOnlyValidate(long playerId) {
-        PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId);
-        if (playerDTO.getTeam() && Objects.isNull(TeamCache.getTeamById(playerId))) {
+        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
+        if (playerInfoDTO.getTeam() && Objects.isNull(TeamCache.getTeamById(playerId))) {
             throw TeamExceptionEnum.NOT_CAPTAIN.getException();
         }
     }

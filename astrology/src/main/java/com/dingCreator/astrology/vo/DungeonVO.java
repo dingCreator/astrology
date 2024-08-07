@@ -3,6 +3,7 @@ package com.dingCreator.astrology.vo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author ding
@@ -25,5 +26,5 @@ public class DungeonVO implements Serializable {
     /**
      * 掉落物
      */
-    private String loot;
+    private List<String> loot;
 }

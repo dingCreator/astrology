@@ -15,13 +15,13 @@ public enum JobEnum {
     /**
      * 职业
      */
-    XIU_ZHEN("XIU_ZHEN", "修真者", 1L,
+    XIU_ZHEN("XIU_ZHEN", "修真者", 2L,
             "修真者来自古老而神秘的东方国度能够御空飞行，具有极高的速度，能够通过熟练的战斗技巧突破敌人的防御"),
 
-    SI_DI_WU_SHI("SI_DI_WU_SHI", "死地武士", 2L,
+    SI_DI_WU_SHI("SI_DI_WU_SHI", "死地武士", 3L,
             ""),
 
-    MAGICIAN("MAGICIAN", "星术师", 3L,
+    MAGICIAN("MAGICIAN", "星术师", 1L,
             ""),
 
     GUN("GUN", "枪炮师", 4L,
@@ -56,8 +56,8 @@ public enum JobEnum {
                 .findFirst().orElse(null);
     }
 
-    public static JobEnum getByCode(String name) {
-        return Arrays.stream(JobEnum.values()).filter(job -> job.getJobCode().equals(name))
+    public static JobEnum getByCode(String code) {
+        return Arrays.stream(JobEnum.values()).filter(job -> job.getJobCode().equals(code))
                 .findFirst().orElse(null);
     }
 }

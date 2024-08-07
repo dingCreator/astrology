@@ -47,8 +47,8 @@ public interface DungeonRecordMapper {
      * @param dungeonRecord 探索记录
      * @return rows
      */
-    @Insert("insert into astrology_dungeon_record(id,playerId,dungeonId,lastExploreTime) values"
-            + "(#{id},#{playerId},#{dungeonId},#{lastExploreTime})")
+    @Insert("insert into astrology_dungeon_record(playerId,dungeonId,lastExploreTime) values"
+            + "(#{playerId},#{dungeonId},#{lastExploreTime})")
     Integer createRecord(DungeonRecord dungeonRecord);
 
     /**
@@ -57,7 +57,7 @@ public interface DungeonRecordMapper {
      * @param dungeonRecord 探索记录
      * @return rows
      */
-    @Insert("update astrology_dungeon_record set lastExploreTime=#{lastExploreTime} where"
+    @Insert("update astrology_dungeon_record set lastExploreTime=#{lastExploreTime} where "
             + "playerId=#{playerId} and dungeonId=#{dungeonId}")
     Integer updateRecord(DungeonRecord dungeonRecord);
 }

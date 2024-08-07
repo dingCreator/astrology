@@ -16,7 +16,7 @@ public enum BattleExceptionEnum {
     /**
      * 战斗异常
      */
-    INITIATOR_LOW_HP(new BusinessException(Constants.BATTLE_EXCEPTION_PREFIX + "000", "你处于重伤状态")),
+    INITIATOR_LOW_HP(new BusinessException(Constants.BATTLE_EXCEPTION_PREFIX + "000", "你或你的队友处于重伤状态")),
     RECIPIENT_LOW_HP(new BusinessException(Constants.BATTLE_EXCEPTION_PREFIX + "001", "对方处于重伤状态")),
     ;
 

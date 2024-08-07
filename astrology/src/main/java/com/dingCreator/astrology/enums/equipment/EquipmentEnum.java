@@ -1,6 +1,6 @@
 package com.dingCreator.astrology.enums.equipment;
 
-import com.dingCreator.astrology.dto.EquipmentPropertiesDTO;
+import com.dingCreator.astrology.dto.equipment.EquipmentPropertiesDTO;
 import com.dingCreator.astrology.enums.PropertiesTypeEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.template.ExtraBattleProcessTemplate;
@@ -145,34 +145,56 @@ public enum EquipmentEnum {
             ),
             EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON
     ),
-//    EQUIPMENT_201(201L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_22(22L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_23(23L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_24(24L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_25(25L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_26(26L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_27(27L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
+    EQUIPMENT_201(201L, "精良的武士刀",
+            "商品展柜最耀眼的那把，但是中看不中用",
+            Collections.singletonList(new EquipmentPropertiesDTO(PropertiesTypeEnum.ATK, 180L)),
+            EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON
+    ),
+    EQUIPMENT_202(202L, "崭新的桃木棍",
+            "江湖神棍新做的拐杖，逃跑时不用再担心断掉",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(PropertiesTypeEnum.ATK, 80L),
+                    new EquipmentPropertiesDTO(PropertiesTypeEnum.DODGE, 80L)
+            ),
+            EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON
+    ),
+    EQUIPMENT_203(203L, "星术秘典",
+            "垫桌角的书没有被拿来垫桌角之前的样子",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(PropertiesTypeEnum.MAGIC_ATK, 160L),
+                    new EquipmentPropertiesDTO(PropertiesTypeEnum.HIT, 50L)
+            ),
+            EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON
+    ),
+    EQUIPMENT_204(204L, "崭新的格洛克手枪",
+            "新出厂的格洛克手枪，没有什么血腥的背景，但至少不会卡壳",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(PropertiesTypeEnum.ATK, 120L),
+                    new EquipmentPropertiesDTO(PropertiesTypeEnum.PENETRATE, 0.15F)
+            ),
+            EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON
+    ),
+    EQUIPMENT_205(205L, "锋利的砍柴刀",
+            "村民砍柴所用的刀，听说村民们曾经用这把刀赶跑了一个行骗的神棍",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(PropertiesTypeEnum.ATK, 80L),
+                    new EquipmentPropertiesDTO(PropertiesTypeEnum.HIT, 80L)
+            ),
+            EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON
+    ),
+    EQUIPMENT_206(206L, "喋血的钢爪",
+            "一把沾满罪恶的爪子，邪修曾用它虐杀了无数无辜的人",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(PropertiesTypeEnum.ATK, 100L),
+                    new EquipmentPropertiesDTO(PropertiesTypeEnum.CRITICAL_RATE, 0.15F)
+            ),
+            EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON
+    ),
+    EQUIPMENT_207(207L, "破损的大钟",
+            "一处废墟中找到的破损大钟，上面可识别的字迹中记载着“（此处请根据故事背景，插入一些信息）”，其中还有一丝灵力残留，修真者可引导出力量",
+            Collections.singletonList(new EquipmentPropertiesDTO(PropertiesTypeEnum.ATK, 30L)),
+            EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode()
+    ),
 //    EQUIPMENT_28(28L, "",
 //            "",
 //            EquipmentTypeEnum.WEAPON
@@ -334,7 +356,8 @@ public enum EquipmentEnum {
         this.equipmentRankEnum = equipmentRankEnum;
         this.equipmentTypeEnum = equipmentTypeEnum;
         this.limitJob = Collections.singletonList("All");
-        this.extraBattleProcessTemplate = new ExtraBattleProcessTemplate(){};
+        this.extraBattleProcessTemplate = new ExtraBattleProcessTemplate() {
+        };
     }
 
     EquipmentEnum(Long id, String name, String desc, List<EquipmentPropertiesDTO> prop,
@@ -347,7 +370,8 @@ public enum EquipmentEnum {
         this.equipmentRankEnum = equipmentRankEnum;
         this.equipmentTypeEnum = equipmentTypeEnum;
         this.limitJob = Collections.singletonList(jobCode);
-        this.extraBattleProcessTemplate = new ExtraBattleProcessTemplate(){};
+        this.extraBattleProcessTemplate = new ExtraBattleProcessTemplate() {
+        };
     }
 
     EquipmentEnum(Long id, String name, String desc, List<EquipmentPropertiesDTO> prop,
@@ -360,7 +384,8 @@ public enum EquipmentEnum {
         this.equipmentRankEnum = equipmentRankEnum;
         this.equipmentTypeEnum = equipmentTypeEnum;
         this.limitJob = jobCode;
-        this.extraBattleProcessTemplate = new ExtraBattleProcessTemplate(){};
+        this.extraBattleProcessTemplate = new ExtraBattleProcessTemplate() {
+        };
     }
 
     EquipmentEnum(Long id, String name, String desc, List<EquipmentPropertiesDTO> prop,
@@ -392,13 +417,20 @@ public enum EquipmentEnum {
     }
 
     private static final Map<Long, EquipmentEnum> EQUIPMENT_ENUM_MAP;
+    private static final Map<String, EquipmentEnum> EQUIPMENT_ENUM_NAME_MAP;
 
     public static EquipmentEnum getById(Long id) {
         return EQUIPMENT_ENUM_MAP.get(id);
     }
 
+    public static EquipmentEnum getByName(String name) {
+        return EQUIPMENT_ENUM_NAME_MAP.get(name);
+    }
+
     static {
         EQUIPMENT_ENUM_MAP = Arrays.stream(EquipmentEnum.values()).collect(Collectors.toMap(
                 EquipmentEnum::getId, Function.identity()));
+        EQUIPMENT_ENUM_NAME_MAP = Arrays.stream(EquipmentEnum.values()).collect(Collectors.toMap(
+                EquipmentEnum::getName, Function.identity()));
     }
 }

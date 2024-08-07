@@ -1,12 +1,13 @@
 package com.dingCreator.astrology.dto;
 
+import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.entity.base.Organism;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
-import com.dingCreator.astrology.template.ExtraBattleProcessTemplate;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 生物
@@ -15,7 +16,7 @@ import java.io.Serializable;
  * @date 2024/2/1
  */
 @Data
-public class OrganismDTO implements Serializable, ExtraBattleProcessTemplate {
+public class OrganismDTO implements Serializable {
     /**
      * 生物属性
      */
@@ -24,6 +25,10 @@ public class OrganismDTO implements Serializable, ExtraBattleProcessTemplate {
      * 技能组
      */
     private SkillBarDTO skillBarDTO;
+    /**
+     * 被动技能
+     */
+    private List<SkillEnum> inactiveSkills;
     /**
      * 默认技能
      */

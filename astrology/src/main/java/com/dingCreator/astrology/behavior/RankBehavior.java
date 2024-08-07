@@ -1,27 +1,18 @@
 package com.dingCreator.astrology.behavior;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.entity.Player;
-import com.dingCreator.astrology.entity.base.Monster;
-import com.dingCreator.astrology.enums.BelongToEnum;
-import com.dingCreator.astrology.enums.RankEnum;
-import com.dingCreator.astrology.enums.exception.MonsterExceptionEnum;
-import com.dingCreator.astrology.enums.exception.RankExceptionEnum;
-import com.dingCreator.astrology.enums.job.JobEnum;
-import com.dingCreator.astrology.enums.job.JobInitPropertiesEnum;
-import com.dingCreator.astrology.service.MonsterService;
-import com.dingCreator.astrology.service.RankUpBossService;
-import com.dingCreator.astrology.vo.BattleResultVO;
 import com.dingCreator.astrology.cache.PlayerCache;
-import com.dingCreator.astrology.dto.OrganismDTO;
-import com.dingCreator.astrology.dto.PlayerDTO;
+import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.dto.player.PlayerDTO;
 import com.dingCreator.astrology.entity.RankUpBoss;
+import com.dingCreator.astrology.enums.RankEnum;
+import com.dingCreator.astrology.enums.exception.RankExceptionEnum;
+import com.dingCreator.astrology.service.RankUpBossService;
 import com.dingCreator.astrology.util.BattleUtil;
+import com.dingCreator.astrology.vo.BattleResultVO;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -30,32 +21,20 @@ import java.util.stream.Collectors;
  */
 public class RankBehavior {
 
-    private static class Holder {
-        private static final RankBehavior BEHAVIOR = new RankBehavior();
-    }
-
-    private RankBehavior() {
-
-    }
-
-    public static RankBehavior getInstance() {
-        return RankBehavior.Holder.BEHAVIOR;
-    }
-
     /**
      * 突破
      *
      * @param id 突破者 ID
      */
     public BattleResultVO rankUp(Long id) {
-        Player player = PlayerCache.getPlayerById(id).getPlayer();
-        if (Constants.MAX_RANK <= player.getRank()) {
-            throw RankExceptionEnum.RANK_NOT_FOUND.getException();
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(id).getPlayerDTO();
+        if (Constants.MAX_RANK <= playerDTO.getRank()) {
+            throw RankExceptionEnum.ALREADY_MAX_RANK.getException();
         }
-        if (player.getLevel() < RankEnum.getEnum(player.getJob(), player.getRank()).getMaxLevel()) {
+        if (playerDTO.getLevel() < RankEnum.getEnum(playerDTO.getJob(), playerDTO.getRank()).getMaxLevel()) {
             throw RankExceptionEnum.LEVEL_NOT_ENOUGH.getException();
         }
-        List<RankUpBoss> rankUpBossList = RankUpBossService.getRankUpBoss(player.getJob(), player.getRank());
+        List<RankUpBoss> rankUpBossList = RankUpBossService.getRankUpBoss(playerDTO.getJob(), playerDTO.getRank());
         if (CollectionUtil.isEmpty(rankUpBossList)) {
             throw RankExceptionEnum.RANK_BOSS_NOT_FOUND.getException();
         }
@@ -64,25 +43,37 @@ public class RankBehavior {
                 .collect(Collectors.toList()), false);
         if (BattleResultVO.BattleResult.WIN.equals(response.getBattleResult())
                 || BattleResultVO.BattleResult.DRAW.equals(response.getBattleResult())) {
-            player.setRank(player.getRank() + 1);
+            playerDTO.setRank(playerDTO.getRank() + 1);
             // 突破成功赠送1经验触发升级
-            ExpBehavior.getInstance().getExp(player.getId(), 1L);
+            ExpBehavior.getInstance().getExp(playerDTO.getId(), 1L);
             // 属性提升
-            player.setHp((long) Math.round(player.getMaxHp() * 1.5F));
-            player.setMaxHp((long) Math.round(player.getMaxHp() * 1.5F));
-            player.setMp((long) Math.round(player.getMaxMp() * 1.5F));
-            player.setMaxMp((long) Math.round(player.getMaxMp() * 1.5F));
-            player.setAtk((long) Math.round(player.getAtk() * 1.5F));
-            player.setMagicAtk((long) Math.round(player.getMagicAtk() * 1.5F));
-            player.setDef((long) Math.round(player.getDef() * 1.5F));
-            player.setMagicDef((long) Math.round(player.getMagicDef() * 1.5F));
-            player.setBehaviorSpeed((long) Math.round(player.getBehaviorSpeed() * 1.5F));
-            player.setHit((long) Math.round(player.getHit() * 1.5F));
-            player.setDodge((long) Math.round(player.getDodge() * 1.5F));
+            playerDTO.setHp((long) Math.round(playerDTO.getMaxHp() * 1.5F));
+            playerDTO.setMaxHp((long) Math.round(playerDTO.getMaxHp() * 1.5F));
+            // 蓝不受突破影响
+            playerDTO.setAtk((long) Math.round(playerDTO.getAtk() * 1.5F));
+            playerDTO.setMagicAtk((long) Math.round(playerDTO.getMagicAtk() * 1.5F));
+            playerDTO.setDef((long) Math.round(playerDTO.getDef() * 1.5F));
+            playerDTO.setMagicDef((long) Math.round(playerDTO.getMagicDef() * 1.5F));
+            playerDTO.setBehaviorSpeed((long) Math.round(playerDTO.getBehaviorSpeed() * 1.5F));
+            playerDTO.setHit((long) Math.round(playerDTO.getHit() * 1.5F));
+            playerDTO.setDodge((long) Math.round(playerDTO.getDodge() * 1.5F));
         } else {
-            player.setExp((long) Math.round(player.getExp() / 2F));
+            // 突破失败扣除一半经验
+            playerDTO.setExp((long) Math.round(playerDTO.getExp() / 2F));
         }
-        PlayerCache.flush(Collections.singletonList(player.getId()));
+        PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
         return response;
+    }
+
+    public static RankBehavior getInstance() {
+        return RankBehavior.Holder.BEHAVIOR;
+    }
+
+    private static class Holder {
+        private static final RankBehavior BEHAVIOR = new RankBehavior();
+    }
+
+    private RankBehavior() {
+
     }
 }

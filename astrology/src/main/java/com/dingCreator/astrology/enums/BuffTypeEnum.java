@@ -13,15 +13,15 @@ public enum BuffTypeEnum {
     /**
      * 物攻
      */
-    ATK("atk", "物攻"),
+    ATK("atk", "攻击"),
     /**
      * 物防
      */
-    DEF("def", "物防"),
+    DEF("def", "防御"),
     /**
      * 魔攻
      */
-    MAGIC_ATK("magicAtk", "法攻"),
+    MAGIC_ATK("magicAtk", "法强"),
     /**
      * 魔防
      */
@@ -37,7 +37,7 @@ public enum BuffTypeEnum {
     /**
      * 嘲讽
      */
-    TAUNT("taunt", ""),
+    TAUNT("taunt", "嘲讽"),
     /**
      * 治疗
      */
@@ -61,11 +61,11 @@ public enum BuffTypeEnum {
     /**
      * 暴击率
      */
-    CRITICAL("critical", "暴击率"),
+    CRITICAL("critical", "暴击"),
     /**
      * 暴击率减免
      */
-    CRITICAL_REDUCTION("critical_reduction", "暴击率减免"),
+    CRITICAL_REDUCTION("critical_reduction", "抗暴"),
     /**
      * 爆伤
      */
@@ -73,7 +73,19 @@ public enum BuffTypeEnum {
     /**
      * 爆伤减免
      */
-    CRITICAL_DAMAGE_REDUCTION("critical_damage_reduction", "爆伤减免"),
+    CRITICAL_DAMAGE_REDUCTION("critical_damage_reduction", "爆免"),
+    /**
+     * 伤害
+     */
+    DAMAGE("damage", "伤害"),
+    /**
+     * 法伤
+     */
+    MAGIC_DAMAGE("magic_damage", "法伤"),
+    /**
+     * 反伤
+     */
+    REFLECT_DAMAGE("reflect_damage", "反伤"),
     ;
 
     /**

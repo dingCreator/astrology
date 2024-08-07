@@ -17,7 +17,7 @@ public enum TeamExceptionEnum {
      * 业务异常
      */
     ALREADY_IN_TEAM(new BusinessException(TEAM_EXCEPTION_PREFIX + "000", "已经处于组队状态")),
-    NOT_IN_TEAM(new BusinessException(TEAM_EXCEPTION_PREFIX + "001", "没有加入小队")),
+    NOT_IN_TEAM(new BusinessException(TEAM_EXCEPTION_PREFIX + "001", "你没有加入小队")),
     TEAM_NOT_EXIST(new BusinessException(TEAM_EXCEPTION_PREFIX + "002", "小队不存在")),
     NOT_CAPTAIN(new BusinessException(TEAM_EXCEPTION_PREFIX + "003", "非小队队长，无权操作")),
     NOT_TEAM_MEMBER(new BusinessException(TEAM_EXCEPTION_PREFIX + "004", "该成员不在小队中")),

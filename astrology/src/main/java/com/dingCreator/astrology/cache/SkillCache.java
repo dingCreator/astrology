@@ -3,8 +3,11 @@ package com.dingCreator.astrology.cache;
 import cn.hutool.core.collection.CollectionUtil;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.entity.SkillBarItem;
+import com.dingCreator.astrology.entity.SkillBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
+import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.service.SkillBarItemService;
+import com.dingCreator.astrology.service.SkillBelongToService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +32,17 @@ public class SkillCache {
      * }
      */
     private static final Map<String, Map<Long, SkillBarDTO>> SKILL_CACHE = new HashMap<>(64);
+
+    /**
+     * 被动技能缓存
+     * 格式
+     * {
+     *      "player": {
+     *          1: [1,2,3]
+     *      }
+     * }
+     */
+    private static final Map<String, Map<Long, List<Long>>> INACTIVE_SKILL_CACHE = new HashMap<>(64);
 
     /**
      * 获取技能栏
@@ -81,10 +95,63 @@ public class SkillCache {
         return head;
     }
 
+    /**
+     * 删除技能栏缓存
+     *
+     * @param playerId 玩家ID
+     */
     public static void deleteSkillBar(Long playerId) {
         Map<Long, SkillBarDTO> skillBarMap = SKILL_CACHE.get(BelongToEnum.Player.getBelongTo());
         if (Objects.nonNull(skillBarMap)) {
             skillBarMap.remove(playerId);
         }
     }
+
+    /**
+     * 获取被动技能
+     *
+     * @param belongTo   技能归属
+     * @param belongToId 技能归属ID
+     * @return 被动技能
+     */
+    public static List<Long> getInactiveSkill(String belongTo, Long belongToId) {
+        List<Long> inactiveSkillIds;
+        Map<Long, List<Long>> belongToMap = INACTIVE_SKILL_CACHE.getOrDefault(belongTo, new HashMap<>());
+        if (CollectionUtil.isEmpty(belongToMap) || !belongToMap.containsKey(belongToId)) {
+            inactiveSkillIds = initInactiveSkill(belongTo, belongToId);
+            belongToMap.put(belongToId, inactiveSkillIds);
+            INACTIVE_SKILL_CACHE.put(belongTo, belongToMap);
+        } else {
+            inactiveSkillIds = INACTIVE_SKILL_CACHE.get(belongTo).get(belongToId);
+        }
+        return inactiveSkillIds;
+    }
+
+    /**
+     * 初始化技能栏
+     *
+     * @param belongTo   player/boss
+     * @param belongToId 对应的Id
+     */
+    public static List<Long> initInactiveSkill(String belongTo, Long belongToId) {
+        List<SkillBelongTo> belongToList = SkillBelongToService.querySkillBelongToList(belongTo, belongToId);
+        if (Objects.isNull(belongToList) || belongToList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return belongToList.stream().map(SkillBelongTo::getSkillId).map(SkillEnum::getById)
+                .filter(skillEnum -> !skillEnum.getActive()).map(SkillEnum::getId).collect(Collectors.toList());
+    }
+
+    /**
+     * 删除技能栏缓存
+     *
+     * @param playerId 玩家ID
+     */
+    public static void deleteInactiveSkill(Long playerId) {
+        Map<Long, List<Long>> skillBarMap = INACTIVE_SKILL_CACHE.get(BelongToEnum.Player.getBelongTo());
+        if (Objects.nonNull(skillBarMap)) {
+            skillBarMap.remove(playerId);
+        }
+    }
+
 }

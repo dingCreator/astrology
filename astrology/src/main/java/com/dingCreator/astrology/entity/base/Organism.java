@@ -35,15 +35,15 @@ public class Organism {
      */
     private Long atk;
     /**
-     * 魔攻
+     * 法强
      */
     private Long magicAtk;
     /**
-     * 防御力
+     * 防御
      */
     private Long def;
     /**
-     * 魔抗
+     * 法抗
      */
     private Long magicDef;
     /**

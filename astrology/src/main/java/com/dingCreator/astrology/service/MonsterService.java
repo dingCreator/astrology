@@ -3,8 +3,10 @@ package com.dingCreator.astrology.service;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.entity.base.Monster;
 import com.dingCreator.astrology.mapper.MonsterMapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author ding
@@ -19,8 +21,40 @@ public class MonsterService {
      * @return 怪物信息
      */
     public static Monster getMonsterById(Long id) {
-        return (Monster) DatabaseProvider.getInstance().doExecute(sqlSession -> sqlSession
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession
                 .getMapper(MonsterMapper.class).getMonsterById(id));
+    }
+
+    /**
+     * 查询怪物
+     *
+     * @param index 下标
+     * @param size  尺寸
+     * @return 怪物列表
+     */
+    public static List<Monster> listMonster(int index, int size) {
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession.getMapper(MonsterMapper.class)
+                .listMonster(index + 1, size));
+    }
+
+    /**
+     * 新建怪物信息
+     *
+     * @param monster 怪物信息
+     */
+    public static void createMonster(Monster monster) {
+        DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(MonsterMapper.class)
+                .createMonster(monster));
+    }
+
+    /**
+     * 编辑怪物信息
+     *
+     * @param monster 怪物信息
+     */
+    public static void updateMonster(Monster monster) {
+        DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(MonsterMapper.class)
+                .updateMonsterById(monster.getId()));
     }
 
     /**
@@ -30,7 +64,7 @@ public class MonsterService {
      * @return 怪物信息
      */
     public static List<Monster> getMonsterByIds(List<Long> ids) {
-        return (List<Monster>) DatabaseProvider.getInstance().doExecute(sqlSession -> sqlSession
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession
                 .getMapper(MonsterMapper.class).getMonsterByIds(ids));
     }
 }

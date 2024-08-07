@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -9,6 +10,7 @@ import java.io.Serializable;
  * @date 2024/2/26
  */
 @Data
+@Builder
 public class BattleBuffDTO implements Serializable {
     /**
      * buff内容

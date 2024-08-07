@@ -22,18 +22,18 @@ public enum JobInitPropertiesEnum {
             0F, 0F,
             0.01F, 0F,
             1.5F, 0F,
-            5L, 10L, 10L, 0F),
+            200L, 10L, 10L, 0F),
     /**
      * 死地武士
      */
     SI_DI_WU_SHI("SI_DI_WU_SHI",
-            400L, 100L,
+            400L, 150L,
             15L, 15L,
             15L, 6L,
             0F, 0F,
             0.01F, 0F,
             1.5F, 0F,
-            2L, 10L, 10L, 0F),
+            110L, 10L, 10L, 0F),
     /**
      * 星术师
      */
@@ -44,40 +44,40 @@ public enum JobInitPropertiesEnum {
             0F, 0F,
             0.01F, 0F,
             1.5F, 0F,
-            2L, 10L, 10L, 0F),
+            120L, 10L, 10L, 0F),
     /**
      * 枪炮师
      */
     GUN("GUN",
-            250L, 150L,
+            250L, 100L,
             20L, 7L,
             15L, 4L,
             0.02F, 0F,
             0.01F, 0F,
             1.5F, 0F,
-            3L, 10L, 10L, 0F),
+            150L, 10L, 10L, 0F),
     /**
      * 邪魔外道
      */
     EVIL("EVIL",
-            260L, 180L,
-            20L, 10L,
-            0L, 5L,
+            260L, 120L,
+            35L, 20L,
+            0L, 10L,
             0F, 0F,
             0.01F, 0F,
             1.5F, 0F,
-            3L, 10L, 10L, 0F),
+            120L, 10L, 10L, 0F),
     /**
      * 神棍
      */
     CHEATER("CHEATER",
-            300L, 80L,
+            300L, 180L,
             20L, 10L,
             0L, 5L,
             0F, 0F,
             0.01F, 0F,
             1.5F, 0F,
-            2L, 10L, 20L, 0F),
+            100L, 10L, 20L, 0F),
     ;
     /**
      * 职业编号

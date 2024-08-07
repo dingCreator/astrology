@@ -22,6 +22,7 @@ public enum PlayerExceptionEnum {
     IN_BATTLE(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "004", "决斗尚未结束，不能发起新的决斗")),
     NO_BATTLE(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "005", "没有人向你发起决斗")),
     BATTLE_EXPIRED(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "006", "决斗已过期")),
+    RECIPIENT_NOT_FOUND(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "007", "对方未创建角色")),
     ;
     private final BusinessException exception;
 }

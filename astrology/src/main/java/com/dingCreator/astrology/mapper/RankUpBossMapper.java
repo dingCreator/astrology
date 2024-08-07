@@ -21,6 +21,6 @@ public interface RankUpBossMapper {
      * @param rank 突破前阶级
      * @return 突破boss信息
      */
-    @Select("select * from astrology_rank_up_boss where job=#{job} and rank=#{rank}")
+    @Select("select * from astrology_rank_up_boss where job=#{job} and `rank`=#{rank}")
     List<RankUpBoss> getRankUpBoss(@Param("job") String job, @Param("rank") Integer rank);
 }

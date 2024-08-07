@@ -30,7 +30,7 @@ public interface SkillBarItemMapper {
      */
     @Insert("INSERT INTO astrology_skill_bar_item (belongTo, belongToId, skillId) VALUES"
             + "(#{belongTo}, #{belongToId}, #{skillId})")
-    Integer insertSkillBarItem(SkillBarItem skillBarItem);
+    void insertSkillBarItem(SkillBarItem skillBarItem);
 
     /**
      * 插入新技能栏信息
@@ -46,7 +46,7 @@ public interface SkillBarItemMapper {
             "</foreach>",
             "</script>"
     })
-    Integer batchInsertSkillBarItem(List<SkillBarItem> list);
+    void batchInsertSkillBarItem(List<SkillBarItem> list);
 
     /**
      * 删除技能栏信息
@@ -55,5 +55,5 @@ public interface SkillBarItemMapper {
      * @param belongToId 归属ID
      */
     @Delete("delete from astrology_skill_bar_item where belongTo=#{belongTo} and belongToId=#{belongToId}")
-    Integer deleteSkillBarItem(@Param("belongTo") String belongTo, @Param("belongToId") Long belongToId);
+    void deleteSkillBarItem(@Param("belongTo") String belongTo, @Param("belongToId") Long belongToId);
 }

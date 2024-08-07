@@ -25,10 +25,13 @@ public class BuffUtil {
      */
     public static void addBuff(BattleDTO target, BuffDTO buffDTO, Integer round) {
         List<BattleBuffDTO> buffList = target.getBuffMap().getOrDefault(buffDTO.getBuffType(), new ArrayList<>());
-        BattleBuffDTO battleBuffDTO = new BattleBuffDTO();
-        battleBuffDTO.setBuffDTO(buffDTO);
-        battleBuffDTO.setRound(round);
-        buffList.add(battleBuffDTO);
+        BattleBuffDTO now = BattleBuffDTO.builder().buffDTO(buffDTO).round(round).build();
+        if (buffDTO.getBuffName().length() > 0) {
+            // 有特殊名称的buff，会有覆盖策略
+            buffDTO.getBuffOverrideStrategyEnum().getDoOverride().accept(now, buffList);
+        } else {
+            buffList.add(now);
+        }
         target.getBuffMap().put(buffDTO.getBuffType(), buffList);
     }
 
@@ -58,8 +61,8 @@ public class BuffUtil {
         if (CollectionUtil.isEmpty(buffList)) {
             return val;
         }
-        long buffVal = Math.round(val * buffList.stream().mapToDouble(buff -> buff.getBuffDTO().getRate())
-                .reduce(1, Double::sum));
+        long buffVal = Math.round(val * (1 + buffList.stream().mapToDouble(buff -> buff.getBuffDTO().getRate())
+                .reduce(1, Double::sum)));
         return buffVal < 0 ? 0 : buffVal;
     }
 
@@ -145,5 +148,30 @@ public class BuffUtil {
     public static Long getDodge(long val, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
         List<BattleBuffDTO> dodgeBuffList = buffMap.get(BuffTypeEnum.DODGE);
         return buffRate(dodgeBuffList, buffVal(dodgeBuffList, val));
+    }
+
+    /**
+     * 根据buff名称获取累计buff
+     *
+     * @param name buff名称
+     * @return buff
+     */
+    public static BuffDTO getBuffByName(String name, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
+        return null;
+    }
+
+    /**
+     * 根据buff类型获取累计buff
+     *
+     * @param buffTypeEnum buff类型
+     * @return buff
+     */
+    public static BuffDTO getBuffByType(BuffTypeEnum buffTypeEnum, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
+        List<BattleBuffDTO> list = buffMap.getOrDefault(buffTypeEnum, new ArrayList<>());
+        return list.stream().map(BattleBuffDTO::getBuffDTO).reduce((buff1, buff2) -> {
+            buff2.setValue(buff1.getValue() + buff2.getValue());
+            buff2.setRate(buff1.getRate() + buff2.getRate());
+            return buff2;
+        }).orElse(new BuffDTO(buffTypeEnum, "tmp", 0L, 0F));
     }
 }

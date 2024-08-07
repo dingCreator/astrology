@@ -14,19 +14,18 @@ import java.util.Objects;
  */
 public class SkillBarItemService {
 
-    @SuppressWarnings({"unchecked"})
     public static SkillBarItem getSkillBarItemByBelongToId(String belongTo, Long belongToId) {
-        return (SkillBarItem) DatabaseProvider.getInstance().doExecute(sqlSession ->
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(SkillBarItemMapper.class).querySkillBarItemByBelongToId(belongTo, belongToId));
     }
 
     public static void addSkillBarItem(SkillBarItem skillBarItem) {
-        DatabaseProvider.getInstance().doExecute(sqlSession ->
+        DatabaseProvider.getInstance().execute(sqlSession ->
                 sqlSession.getMapper(SkillBarItemMapper.class).insertSkillBarItem(skillBarItem));
     }
 
     public static void deleteSkillBarItem(String belongTo, Long belongToId) {
-        DatabaseProvider.getInstance().doExecute(sqlSession ->
+        DatabaseProvider.getInstance().execute(sqlSession ->
                 sqlSession.getMapper(SkillBarItemMapper.class).deleteSkillBarItem(belongTo, belongToId));
     }
 }

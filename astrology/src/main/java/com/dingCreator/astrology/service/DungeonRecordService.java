@@ -23,7 +23,7 @@ public class DungeonRecordService {
      * @return 记录
      */
     public static DungeonRecord query(Long playerId, Long dungeonId) {
-        return (DungeonRecord) DatabaseProvider.getInstance().doExecute(sqlSession ->
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(DungeonRecordMapper.class).query(playerId, dungeonId));
     }
 
@@ -34,9 +34,8 @@ public class DungeonRecordService {
      * @param dungeonId    副本ID
      * @return 探索副本记录
      */
-    @SuppressWarnings("unchecked")
     public static List<DungeonRecord> queryList(List<Long> playerIdList, Long dungeonId) {
-        return (List<DungeonRecord>) DatabaseProvider.getInstance().doExecute(sqlSession ->
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(DungeonRecordMapper.class).queryList(playerIdList, dungeonId));
     }
 
@@ -51,7 +50,7 @@ public class DungeonRecordService {
         List<DungeonRecord> dungeonRecordList = queryList(playerIds, dungeonId);
         dungeonRecordList.forEach(dungeonRecord -> {
             dungeonRecord.setLastExploreTime(exploreTime);
-            DatabaseProvider.getInstance().doExecute(sqlSession -> sqlSession.getMapper(DungeonRecordMapper.class)
+            DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession.getMapper(DungeonRecordMapper.class)
                     .updateRecord(dungeonRecord));
         });
 
@@ -60,10 +59,10 @@ public class DungeonRecordService {
                     .noneMatch(recPlayerId -> recPlayerId.equals(playerId))
             ).forEach(playerId -> {
                 DungeonRecord record = new DungeonRecord();
-                record.setId(playerId);
+                record.setPlayerId(playerId);
                 record.setDungeonId(dungeonId);
                 record.setLastExploreTime(exploreTime);
-                DatabaseProvider.getInstance().doExecute(sqlSession ->
+                DatabaseProvider.getInstance().execute(sqlSession ->
                         sqlSession.getMapper(DungeonRecordMapper.class).createRecord(record));
             });
         }

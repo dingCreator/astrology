@@ -38,5 +38,6 @@ public class SkillBuffDTO implements Serializable {
         this.buffDTO = buffDTO;
         this.effectRate = effectRate;
         this.round = round;
+        this.clear = true;
     }
 }

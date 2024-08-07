@@ -6,12 +6,16 @@ import com.dingCreator.astrology.cache.SkillCache;
 import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.*;
+import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
+import com.dingCreator.astrology.dto.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
+import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import com.dingCreator.astrology.entity.base.Monster;
 import com.dingCreator.astrology.entity.base.Organism;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
 import com.dingCreator.astrology.enums.PropertiesTypeEnum;
+import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
 import com.dingCreator.astrology.enums.exception.BattleExceptionEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.enums.exception.TeamExceptionEnum;
@@ -19,12 +23,15 @@ import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.enums.skill.SkillTargetEnum;
 import com.dingCreator.astrology.exception.BusinessException;
+import com.dingCreator.astrology.service.EquipmentBelongToService;
 import com.dingCreator.astrology.service.MonsterService;
 import com.dingCreator.astrology.template.ExtraBattleProcessTemplate;
 import com.dingCreator.astrology.vo.BattleResultVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -44,10 +51,16 @@ public class BattleUtil {
      * 决斗请求
      */
     private static final Map<Long, BattleRequest> BATTLE_REQUEST_MAP = new ConcurrentHashMap<>();
+
     /**
-     * 战斗事件插入列表
+     * 战斗过程缓存
      */
-    private static final List<ExtraBattleProcessTemplate> EXTRA_BATTLE_PROCESS = new ArrayList<>();
+    private static final Map<Long, List<String>> BATTLE_PROCESS_RECORD = new HashMap<>(256);
+
+    /**
+     * 日志打印
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(BattleUtil.class);
 
     /**
      * 清除锁缓存
@@ -63,15 +76,24 @@ public class BattleUtil {
      * @return 决斗超时时间
      */
     public static int createBattle(Long initiatorId, Long recipientId) {
-        long seconds = CdUtil.getCd(Constants.CD_BATTLE_PREFIX + initiatorId);
+        long seconds = CdUtil.getAndSetCd(Constants.CD_BATTLE_PREFIX + initiatorId, Constants.BATTLE_CD);
         if (seconds > 0) {
             throw new BusinessException(Constants.CD_EXCEPTION_PREFIX + "000", "CD:" + seconds + "s");
         }
 
         // 获取玩家信息
-        PlayerDTO initiatorPlayer = PlayerCache.getPlayerById(initiatorId);
-        PlayerDTO recipientPlayer = PlayerCache.getPlayerById(recipientId);
+        PlayerInfoDTO initiatorPlayer = PlayerCache.getPlayerById(initiatorId);
+        PlayerInfoDTO recipientPlayer;
+        try {
+            recipientPlayer = PlayerCache.getPlayerById(recipientId);
+        } catch (BusinessException e) {
+            if (e.equals(PlayerExceptionEnum.PLAYER_NOT_FOUND.getException())) {
+                throw PlayerExceptionEnum.RECIPIENT_NOT_FOUND.getException();
+            }
+            throw e;
+        }
 
+        List<Long> playerIds = new ArrayList<>(6);
         // 发起方
         List<Long> initiatorTeamPlayers = new ArrayList<>(3);
         if (initiatorPlayer.getTeam()) {
@@ -93,15 +115,16 @@ public class BattleUtil {
         } else {
             recipientTeamPlayers.add(recipientId);
         }
-
-        // 锁
-        acquired(initiatorId);
-        acquired(recipientId);
-        lock(initiatorTeamPlayers, initiatorId);
-        lock(recipientTeamPlayers, initiatorId);
-        // cd
-        CdUtil.addCd(Constants.CD_BATTLE_PREFIX + initiatorId, Constants.BATTLE_CD);
-        return Constants.ACCEPT_BATTLE_TIME_OUT;
+        
+        // 尝试获取决斗锁
+        if (tryAcquired(initiatorId)) {
+            // 获取成功，表明可以决斗，尝试上锁
+            addBattleRequest(initiatorId, recipientTeamPlayers);
+            addBattleRequest(recipientId, initiatorTeamPlayers);
+            // 返回决斗响应时间
+            return Constants.ACCEPT_BATTLE_TIME_OUT;
+        }
+        throw PlayerExceptionEnum.IN_BATTLE.getException();
     }
 
     /**
@@ -111,7 +134,7 @@ public class BattleUtil {
      * @return 战斗结果
      */
     public static BattleResultVO acceptBattle(Long recipientId) {
-        BattleRequest request = validateAndLock(recipientId);
+        BattleRequest request = validateAndUnlock(recipientId);
         return battlePVP(request.getInitiatorId(), recipientId);
     }
 
@@ -122,7 +145,7 @@ public class BattleUtil {
      * @return 发起者ID
      */
     public static long refuseBattle(Long recipientId) {
-        BattleRequest request = validateAndLock(recipientId);
+        BattleRequest request = validateAndUnlock(recipientId);
         return request.getInitiatorId();
     }
 
@@ -132,8 +155,8 @@ public class BattleUtil {
      * @param recipientId 接受方ID
      * @return 决斗信息
      */
-    private static BattleRequest validateAndLock(long recipientId) {
-        PlayerDTO playerDTO = PlayerCache.getPlayerById(recipientId);
+    private static BattleRequest validateAndUnlock(long recipientId) {
+        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(recipientId);
         // 获取决斗信息
         BattleRequest request = BATTLE_REQUEST_MAP.get(recipientId);
         if (Objects.isNull(request)) {
@@ -142,7 +165,7 @@ public class BattleUtil {
 
         List<Long> initiatorIds, recipientIds;
         // 获取接收方
-        if (playerDTO.getTeam()) {
+        if (playerInfoDTO.getTeam()) {
             TeamDTO teamDTO = TeamCache.getTeamById(recipientId);
             // 若为组队状态
             if (Objects.isNull(teamDTO)) {
@@ -179,7 +202,7 @@ public class BattleUtil {
         BattleRequest request = BATTLE_REQUEST_MAP.get(playerId);
         if (Objects.nonNull(request)) {
             Duration duration = Duration.between(request.getRequestTime(), LocalDateTime.now());
-            // 决斗尚未超时
+            // 决斗超时获取锁成功
             return duration.getSeconds() > Constants.ACCEPT_BATTLE_TIME_OUT;
         }
         return true;
@@ -203,12 +226,13 @@ public class BattleUtil {
     }
 
     /**
-     * 锁
+     * 决斗信息
      *
-     * @param playerIds   需要上锁的玩家ID
      * @param initiatorId 发起者ID
+     * @param playerIds   参与玩家ID
      */
-    public static void lock(List<Long> playerIds, Long initiatorId) {
+    public static synchronized void addBattleRequest(Long initiatorId, List<Long> playerIds) {
+        acquired(initiatorId);
         playerIds.forEach(playerId ->
                 BATTLE_REQUEST_MAP.put(playerId, new BattleRequest(LocalDateTime.now(), initiatorId)));
     }
@@ -230,8 +254,8 @@ public class BattleUtil {
      * @return 战斗结果
      */
     public static BattleResultVO battlePVP(Long initiatorId, Long recipientId) {
-        PlayerDTO initiatorDTO = PlayerCache.getPlayerById(initiatorId);
-        PlayerDTO recipientDTO = PlayerCache.getPlayerById(recipientId);
+        PlayerInfoDTO initiatorDTO = PlayerCache.getPlayerById(initiatorId);
+        PlayerInfoDTO recipientDTO = PlayerCache.getPlayerById(recipientId);
 
         List<OrganismDTO> initiatorList;
         List<OrganismDTO> recipientList;
@@ -257,12 +281,14 @@ public class BattleUtil {
 
         if (initiatorList.stream().map(OrganismDTO::getOrganism)
                 .anyMatch(o -> (float) o.getHp() / (float) o.getMaxHp() < 0.1)) {
-            throw BattleExceptionEnum.INITIATOR_LOW_HP.getException();
+            // 因为是艾特接受决斗的人，所以此处应该是对方处于重伤状态
+            throw BattleExceptionEnum.RECIPIENT_LOW_HP.getException();
         }
 
         if (recipientList.stream().map(OrganismDTO::getOrganism)
                 .anyMatch(o -> (float) o.getHp() / (float) o.getMaxHp() < 0.1)) {
-            throw BattleExceptionEnum.RECIPIENT_LOW_HP.getException();
+            // 因为是艾特接受决斗的人，所以此处应该是己方处于重伤状态
+            throw BattleExceptionEnum.INITIATOR_LOW_HP.getException();
         }
 
         BattleResultVO vo = battle(initiatorList, recipientList);
@@ -271,6 +297,10 @@ public class BattleUtil {
 
         PlayerCache.flush(initiatorIds);
         PlayerCache.flush(recipientIds);
+
+        // 异步写对战详情到缓存（大概率没人看的，异步执行就可以了）
+        ThreadPoolUtil.executeBiConsumer(BattleUtil::writeBattleProcess, initiatorIds, vo.getInfo());
+        ThreadPoolUtil.executeBiConsumer(BattleUtil::writeBattleProcess, recipientIds, vo.getInfo());
         return vo;
     }
 
@@ -282,9 +312,9 @@ public class BattleUtil {
      * @return 战斗结果
      */
     public static BattleResultVO battlePVE(Long playerId, List<Long> monsterIdList, boolean allowTeam) {
-        PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId);
+        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
         List<Long> playerIds;
-        if (allowTeam && playerDTO.getTeam()) {
+        if (allowTeam && playerInfoDTO.getTeam()) {
             TeamDTO playerTeam = TeamCache.getTeamByPlayerId(playerId);
             playerIds = playerTeam.getMembers();
         } else {
@@ -300,7 +330,29 @@ public class BattleUtil {
 
         BattleResultVO vo = battle(playerList, monsterList);
         PlayerCache.flush(playerIds);
+        // 异步写对战详情到缓存（大概率没人看的，异步执行就可以了）
+        ThreadPoolUtil.executeBiConsumer(BattleUtil::writeBattleProcess, playerIds, vo.getInfo());
         return vo;
+    }
+
+    /**
+     * 获取最后一次对战详情
+     *
+     * @param playerId 玩家ID
+     * @return 对战详情
+     */
+    public static List<String> getBattleProcess(Long playerId) {
+        return BATTLE_PROCESS_RECORD.get(playerId);
+    }
+
+    /**
+     * 对战详情写入缓存
+     *
+     * @param playerIds 玩家ID
+     * @param battleMsg 对战详情
+     */
+    private static void writeBattleProcess(List<Long> playerIds, List<String> battleMsg) {
+        playerIds.forEach(playerId -> BATTLE_PROCESS_RECORD.put(playerId, battleMsg));
     }
 
     /**
@@ -314,7 +366,12 @@ public class BattleUtil {
         return monsterList.stream().map(monster -> {
             OrganismDTO organismDTO = new OrganismDTO();
             organismDTO.setOrganism(monster);
+            // 技能栏
             organismDTO.setSkillBarDTO(SkillCache.getSkillBarItem(BelongToEnum.Monster.getBelongTo(), monster.getId()));
+            // 被动技能
+            List<Long> inactiveSkills = SkillCache.getInactiveSkill(BelongToEnum.Monster.getBelongTo(), monster.getId());
+            organismDTO.setInactiveSkills(CollectionUtil.isEmpty(inactiveSkills) ? new ArrayList<>() :
+                    inactiveSkills.stream().map(SkillEnum::getById).collect(Collectors.toList()));
             return organismDTO;
         }).collect(Collectors.toList());
     }
@@ -327,18 +384,42 @@ public class BattleUtil {
      */
     private static List<OrganismDTO> getOrganismByPlayerId(List<Long> ids) {
         return ids.stream().map(id -> {
-            PlayerDTO playerDTO = PlayerCache.getPlayerById(id);
+            PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(id);
             OrganismDTO organismDTO = new OrganismDTO();
-            organismDTO.setOrganism(playerDTO.getPlayer());
-            organismDTO.setSkillBarDTO(SkillCache.getSkillBarItem(BelongToEnum.Player.getBelongTo(), playerDTO.getPlayer().getId()));
+            organismDTO.setOrganism(playerInfoDTO.getPlayerDTO());
+            // 技能栏
+            organismDTO.setSkillBarDTO(SkillCache.getSkillBarItem(BelongToEnum.Player.getBelongTo(), id));
+            // 被动技能
+            List<Long> inactiveSkills = SkillCache.getInactiveSkill(BelongToEnum.Player.getBelongTo(), id);
+            organismDTO.setInactiveSkills(CollectionUtil.isEmpty(inactiveSkills) ? new ArrayList<>() :
+                    inactiveSkills.stream().map(SkillEnum::getById).collect(Collectors.toList()));
+            // 获取已穿戴的装备
+            List<EquipmentBelongTo> equipmentBelongToList = EquipmentBelongToService
+                    .getBelongToIdEquip(BelongToEnum.Player.getBelongTo(), id, true);
+            EquipmentBarDTO equipmentBarDTO = new EquipmentBarDTO();
+            equipmentBelongToList.forEach(e -> {
+                EquipmentEnum equipmentEnum = EquipmentEnum.getById(e.getEquipmentId());
+                if (Objects.nonNull(equipmentEnum)) {
+                    EquipmentUtil.setEquipmentBarDTO(equipmentBarDTO, equipmentEnum, e);
+                }
+            });
+            organismDTO.setEquipmentBarDTO(equipmentBarDTO);
             return organismDTO;
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 战斗
+     *
+     * @param initiator 发起方
+     * @param recipient 接收方
+     * @return 战斗信息
+     */
     public static BattleResultVO battle(List<OrganismDTO> initiator, List<OrganismDTO> recipient) {
         List<BattleDTO> initiatorBattleTmp = new ArrayList<>(initiator.size());
         List<BattleDTO> recipientBattleTmp = new ArrayList<>(recipient.size());
-
+        // 初始化插入结算列表
+        List<ExtraBattleProcessTemplate> extraBattleProcessTemplateList = new ArrayList<>();
         // 包装
         long totalBehaviorSpeed = 0;
         for (OrganismDTO o : initiator) {
@@ -351,7 +432,7 @@ public class BattleUtil {
         }
 
         int maxRound = (initiator.size() + recipient.size()) * 50;
-        return battle(initiatorBattleTmp, recipientBattleTmp, totalBehaviorSpeed, maxRound);
+        return battle(initiatorBattleTmp, recipientBattleTmp, totalBehaviorSpeed, maxRound, extraBattleProcessTemplateList);
     }
 
     /**
@@ -361,21 +442,29 @@ public class BattleUtil {
      * @param recipientBattleTmp 接收方战斗信息
      * @return 战斗结果
      */
-    public static synchronized BattleResultVO battle(List<BattleDTO> initiatorBattleTmp,
-                                                     List<BattleDTO> recipientBattleTmp,
-                                                     final long totalBehavior, final int maxRound) {
+    public static BattleResultVO battle(List<BattleDTO> initiatorBattleTmp, List<BattleDTO> recipientBattleTmp,
+                                        final long totalBehavior, final int maxRound,
+                                        final List<ExtraBattleProcessTemplate> extraBattleProcessTemplateList) {
+        long startTime = System.currentTimeMillis();
         final AtomicInteger round = new AtomicInteger(0);
-        List<String> battleMsg = new ArrayList<>(maxRound);
+        List<String> battleMsg = new ArrayList<>(maxRound + 2);
+        // 插入被动技能效果结算
+        initiatorBattleTmp.forEach(from -> initExtraProcess(from, initiatorBattleTmp, recipientBattleTmp, extraBattleProcessTemplateList));
+        recipientBattleTmp.forEach(from -> initExtraProcess(from, recipientBattleTmp, initiatorBattleTmp, extraBattleProcessTemplateList));
+        // 战斗前
+        extraBattleProcessTemplateList.forEach(ext -> ext.beforeBattle(battleMsg));
+        // 战斗中
         while (round.get() < maxRound
                 && initiatorBattleTmp.stream().mapToLong(o -> o.getOrganismDTO().getOrganism().getHp()).sum() > 0
                 && recipientBattleTmp.stream().mapToLong(o -> o.getOrganismDTO().getOrganism().getHp()).sum() > 0) {
-            battleProcess(initiatorBattleTmp, recipientBattleTmp, totalBehavior, round, battleMsg);
-            battleProcess(recipientBattleTmp, initiatorBattleTmp, totalBehavior, round, battleMsg);
+            battleProcess(initiatorBattleTmp, recipientBattleTmp, totalBehavior, round, battleMsg, extraBattleProcessTemplateList);
+            battleProcess(recipientBattleTmp, initiatorBattleTmp, totalBehavior, round, battleMsg, extraBattleProcessTemplateList);
         }
+        // 战斗后
+        extraBattleProcessTemplateList.forEach(ext -> ext.afterBattle(battleMsg));
         // 判断胜负
         long initiatorAliveNum = initiatorBattleTmp.stream().filter(o -> o.getOrganismDTO().getOrganism().getHp() > 0).count();
         long recipientAliveNum = recipientBattleTmp.stream().filter(o -> o.getOrganismDTO().getOrganism().getHp() > 0).count();
-
         BattleResultVO response = new BattleResultVO();
         response.setInfo(battleMsg);
         if (initiatorAliveNum > recipientAliveNum) {
@@ -385,7 +474,38 @@ public class BattleUtil {
         } else {
             response.setBattleResult(BattleResultVO.BattleResult.LOSE);
         }
+        LOGGER.info("battle process cost: {} ms", System.currentTimeMillis() - startTime);
         return response;
+    }
+
+    /**
+     * 初始化插入结算
+     *
+     * @param from  当前目标
+     * @param our   友方
+     * @param enemy 敌方
+     */
+    private static void initExtraProcess(BattleDTO from, List<BattleDTO> our, List<BattleDTO> enemy,
+                                         List<ExtraBattleProcessTemplate> extraBattleProcessTemplateList) {
+        // 被动技能
+        from.getOrganismDTO().getInactiveSkills().forEach(skill -> {
+            ExtraBattleProcessTemplate process = skill.getExtraProcess();
+            process.setFrom(from);
+            process.setOur(our);
+            process.setEnemy(enemy);
+            extraBattleProcessTemplateList.add(process);
+        });
+
+        // 主动技能
+        SkillBarDTO skillBarDTO = from.getOrganismDTO().getSkillBarDTO();
+        do {
+            ExtraBattleProcessTemplate process = SkillEnum.getById(skillBarDTO.getSkillId()).getExtraProcess();
+            process.setFrom(from);
+            process.setOur(our);
+            process.setEnemy(enemy);
+            extraBattleProcessTemplateList.add(process);
+            skillBarDTO = skillBarDTO.getNext();
+        } while (Objects.nonNull(skillBarDTO));
     }
 
     /**
@@ -412,22 +532,29 @@ public class BattleUtil {
      * @param round         轮次
      */
     private static void battleProcess(List<BattleDTO> from, List<BattleDTO> to,
-                                      final long totalBehavior, final AtomicInteger round, List<String> battleMsg) {
+                                      final long totalBehavior, final AtomicInteger round, List<String> battleMsg,
+                                      List<ExtraBattleProcessTemplate> extraBattleProcessTemplateList) {
         from.stream().filter(f -> to.stream().mapToLong(t -> t.getOrganismDTO().getOrganism().getHp()).sum() > 0)
                 .forEach(o -> {
-            long behavior = o.getBehavior() + BuffUtil.getSpeed(o.getOrganismDTO().getOrganism().getBehaviorSpeed(),
-                    o.getBuffMap());
-            if (behavior > totalBehavior && o.getOrganismDTO().getOrganism().getHp() > 0) {
-                attackBehavior(o, from, to, battleMsg);
-                behavior -= totalBehavior;
-                round.addAndGet(1);
-                // buff轮次-1 并清除所有过期buff
-                o.getBuffMap().values().stream()
-                        .peek(buffList -> buffList.forEach(buff -> buff.setRound(buff.getRound() - 1)))
-                        .forEach(buffList -> buffList.removeIf(buffDTO -> buffDTO.getRound() < 0));
-            }
-            o.setBehavior(behavior);
-        });
+                    long behavior = o.getBehavior() + BuffUtil.getSpeed(o.getOrganismDTO().getOrganism().getBehaviorSpeed(),
+                            o.getBuffMap());
+                    if (behavior > totalBehavior && o.getOrganismDTO().getOrganism().getHp() > 0) {
+                        extraBattleProcessTemplateList.forEach(ext -> ext.beforeEachRound(battleMsg));
+                        extraBattleProcessTemplateList.stream().filter(ext -> o.equals(ext.getFrom()))
+                                .forEach(ext -> ext.beforeMyRound(battleMsg));
+                        attackBehavior(o, from, to, battleMsg, extraBattleProcessTemplateList);
+                        behavior -= totalBehavior;
+                        round.addAndGet(1);
+                        // buff轮次-1 并清除所有过期buff
+                        o.getBuffMap().values().stream()
+                                .peek(buffList -> buffList.forEach(buff -> buff.setRound(buff.getRound() - 1)))
+                                .forEach(buffList -> buffList.removeIf(buffDTO -> buffDTO.getRound() < 0));
+                        extraBattleProcessTemplateList.stream().filter(ext -> o.equals(ext.getFrom()))
+                                .forEach(ext -> ext.afterMyRound(battleMsg));
+                        extraBattleProcessTemplateList.forEach(ext -> ext.afterEachRound(battleMsg));
+                    }
+                    o.setBehavior(behavior);
+                });
     }
 
     /**
@@ -437,7 +564,8 @@ public class BattleUtil {
      * @param our   使用技能者队友
      * @param enemy 使用技能者敌人
      */
-    private static void attackBehavior(BattleDTO from, List<BattleDTO> our, List<BattleDTO> enemy, List<String> battleMsg) {
+    private static void attackBehavior(BattleDTO from, List<BattleDTO> our, List<BattleDTO> enemy, List<String> battleMsg,
+                                       List<ExtraBattleProcessTemplate> extraBattleProcessTemplateList) {
         StringBuilder builder = new StringBuilder();
         // 获取技能
         SkillBarDTO bar = from.getOrganismDTO().getSkillBarDTO();
@@ -468,6 +596,7 @@ public class BattleUtil {
         }
         builder.append("使用技能【").append(skillEnum.getName()).append("】");
 
+        final SkillEnum nowSkill = skillEnum;
         skillEnum.getSkillEffects().forEach(skillEffect -> {
             // 选择技能目标
             List<BattleDTO> target = getSkillTarget(skillEffect.getSkillTargetEnum(), from, our, enemy);
@@ -488,52 +617,14 @@ public class BattleUtil {
                     float hitRate = 1 + (fromHit - targetDodge) / targetDodge;
                     boolean isHit = RandomUtil.isHit(RandomUtil.format(hitRate, 4));
                     if (!isHit) {
+                        // 未命中插入结算
+                        extraBattleProcessTemplateList.forEach(ext -> ext.ifNotHit(nowSkill, builder));
                         builder.append(",没有命中").append(tarOrganism.getName());
                         return;
                     }
                 }
-
-                // 1.计算伤害
-                long realAtk, realDef;
-                float realPenetrate;
-                // 根据伤害类型区分
-                if (DamageTypeEnum.ATK.equals(skillEffect.getDamageTypeEnum())) {
-                    // 1.基础属性
-                    realAtk = fromOrganism.getAtk();
-                    realPenetrate = fromOrganism.getPenetrate();
-                    realDef = tarOrganism.getDef();
-                    // 2.装备加成
-                    realAtk = EquipmentUtil.getVal(realAtk, PropertiesTypeEnum.ATK, from.getOrganismDTO());
-                    realDef = EquipmentUtil.getVal(realDef, PropertiesTypeEnum.DEF, tar.getOrganismDTO());
-                    // 3.buff
-                    realAtk = BuffUtil.getAtk(realAtk, from.getBuffMap());
-                    realDef = BuffUtil.getDef(realDef, tar.getBuffMap());
-                } else if (DamageTypeEnum.MAGIC.equals(skillEffect.getDamageTypeEnum())) {
-                    // 1.基础属性
-                    realAtk = fromOrganism.getMagicAtk();
-                    realPenetrate = fromOrganism.getMagicPenetrate();
-                    realDef = tarOrganism.getMagicDef();
-                    // 2.装备加成
-                    realAtk = EquipmentUtil.getVal(realAtk, PropertiesTypeEnum.MAGIC_ATK, from.getOrganismDTO());
-                    realDef = EquipmentUtil.getVal(realDef, PropertiesTypeEnum.MAGIC_DEF, tar.getOrganismDTO());
-                    // 3.buff
-                    realAtk = BuffUtil.getMagicAtk(realAtk, from.getBuffMap());
-                    realDef = BuffUtil.getMagicDef(realDef, tar.getBuffMap());
-                } else {
-                    return;
-                }
-
-                // 境界压制
-                realAtk = RankUtil.getRankSupression(fromOrganism.getRank(), highestRank, realAtk);
-                realDef = RankUtil.getRankSupression(tarOrganism.getRank(),
-                        fromOrganism.getRank(), realDef);
-
-                // damage = realAtk - realDef * (1 - realPenetrate)
-                // 技能倍率
-                long damage = Math.round((realAtk - realDef * (1 - realPenetrate)) * skillEffect.getDamageRate());
-                // 伤害最低为0
-                damage = Math.max(damage, 0L);
-
+                long damage = getDamage(from, tar, fromOrganism, tarOrganism, skillEffect.getDamageTypeEnum(),
+                        highestRank, skillEffect.getDamageRate());
                 // 若伤害不为0，计算是否暴击
                 if (damage > 0 && RandomUtil.isHit(Math.max(fromOrganism.getCriticalRate()
                         - tarOrganism.getCriticalReductionRate(), 0))) {
@@ -542,36 +633,50 @@ public class BattleUtil {
                     builder.append("，伤害提升至").append(realCriticalDamage * 100).append("%");
                     damage *= realCriticalDamage;
                 }
-
-                long hp = tarOrganism.getHp() - damage;
+                final long finalDamage = damage;
+                // 命中插入结算
+                extraBattleProcessTemplateList.forEach(ext -> ext.ifHit(from, nowSkill, finalDamage, builder));
+                long hp = tarOrganism.getHp() - finalDamage;
                 hp = hp > 0 ? hp : 0;
                 tarOrganism.setHp(hp);
 
                 if (skillEffect.getDamageRate() > 0) {
-                    // 没有伤害的不需要此段信息
+                    // 没有伤害倍率的技能不需要此段信息
                     builder.append("，对").append(tarOrganism.getName())
-                            .append("造成").append(damage).append("点伤害")
+                            .append("造成").append(finalDamage).append("点伤害")
                             .append("，").append(tarOrganism.getName())
                             .append("剩余生命值：").append(tarOrganism.getHp());
+                }
+                // 若对方仍有存活，且出手方身上有反伤buff，计算反伤
+                List<BattleBuffDTO> reflectDamageBuffList = from.getBuffMap().get(BuffTypeEnum.REFLECT_DAMAGE);
+                if (CollectionUtil.isNotEmpty(reflectDamageBuffList)
+                        && enemy.stream().anyMatch(battleDTO -> battleDTO.getOrganismDTO().getOrganism().getHp() > 0)) {
+                    long fromHp = fromOrganism.getHp();
+
                 }
                 // 若对方没死，计算buff
                 if (hp > 0) {
                     List<GiveBuffDTO> giveBuffDTOList = skillEffect.getGiveBuffDTOList();
                     if (CollectionUtil.isNotEmpty(giveBuffDTOList)) {
                         // 概率附加buff
-                        skillEffect.getGiveBuffDTOList().stream().filter(buff -> RandomUtil.isHit(buff.getEffectedRate()))
-                                .peek(buff ->{
-                                            builder.append("，").append(tarOrganism.getName())
-                                                    .append(buff.getBuffType().getChnDesc());
-                                            if (buff.getValue() != 0) {
-                                                builder.append(buff.getValue() > 0 ? "增加了" : "减少了")
-                                                        .append(buff.getValue());
-                                            }
-                                            if (buff.getRate() != 0) {
-                                                builder.append(buff.getRate() > 0 ? "增加了" : "减少了")
-                                                        .append(Math.abs(buff.getRate()) * 100).append("%");
-                                            }
-                                        })
+                        skillEffect.getGiveBuffDTOList().stream()
+                                .filter(buff -> {
+                                    // todo buff上限
+                                    return true;
+                                })
+                                .filter(buff -> RandomUtil.isHit(buff.getEffectedRate()))
+                                .peek(buff -> {
+                                    builder.append("，").append(tarOrganism.getName())
+                                            .append(buff.getBuffType().getChnDesc());
+                                    if (buff.getValue() != 0) {
+                                        builder.append(buff.getValue() > 0 ? "增加了" : "减少了")
+                                                .append(buff.getValue());
+                                    }
+                                    if (buff.getRate() != 0) {
+                                        builder.append(buff.getRate() > 0 ? "增加了" : "减少了")
+                                                .append(Math.abs(buff.getRate()) * 100).append("%");
+                                    }
+                                })
                                 .forEach(buff -> BuffUtil.addBuff(tar, buildBuffDTO(buff, from), buff.getRound()));
                     }
                 }
@@ -619,15 +724,13 @@ public class BattleUtil {
             } else {
                 target = Collections.singletonList(target.get(0));
             }
-        } else if (SkillTargetEnum.ALL_ENEMY.equals(skillTargetEnum)) {
-            // 全体敌方
+        } else if (SkillTargetEnum.ALL_ENEMY.equals(skillTargetEnum)
+                || SkillTargetEnum.ALL_OUR.equals(skillTargetEnum)) {
+            // 全体敌方 & 全体我方
             // 无需处理
         } else if (SkillTargetEnum.ANY_OUR.equals(skillTargetEnum)) {
             // 任意我方
             // todo
-        } else if (SkillTargetEnum.ALL_OUR.equals(skillTargetEnum)) {
-            // 全体我方
-            // 无需处理
         } else if (SkillTargetEnum.ME.equals(skillTargetEnum)) {
             // 自己
             target = Collections.singletonList(from);
@@ -647,7 +750,7 @@ public class BattleUtil {
     private static BuffDTO buildBuffDTO(GiveBuffDTO buff, BattleDTO from) {
         BuffDTO buffDTO;
         if (Objects.isNull(buff.getDependsBuffType())) {
-            buffDTO = new BuffDTO(buff.getBuffType(), buff.getValue(), buff.getRate());
+            buffDTO = new BuffDTO(buff.getBuffType(), buff.getBuffName(), buff.getValue(), buff.getRate());
         } else {
             Organism organism = from.getOrganismDTO().getOrganism();
             long buffVal;
@@ -665,9 +768,64 @@ public class BattleUtil {
             } else {
                 buffVal = 0L;
             }
-            buffDTO = new BuffDTO(buff.getBuffType(), buff.getValue() + buffVal, 0F);
+            buffDTO = new BuffDTO(buff.getBuffType(), buff.getBuffName(), buff.getValue() + buffVal);
         }
         return buffDTO;
+    }
+
+    /**
+     * 计算伤害值
+     *
+     * @param from           来源方
+     * @param tar            目标方
+     * @param fromOrganism   来源方生物信息
+     * @param tarOrganism    目标方生物信息
+     * @param damageTypeEnum 伤害类型
+     * @param highestRank    最高rank
+     * @param damageRate     伤害倍率
+     * @return 伤害值
+     */
+    private static long getDamage(BattleDTO from, BattleDTO tar, Organism fromOrganism,
+                                  Organism tarOrganism, DamageTypeEnum damageTypeEnum,
+                                  long highestRank, float damageRate) {
+        // 1.计算伤害
+        long realAtk, realDef;
+        float realPenetrate;
+        // 根据伤害类型区分
+        if (DamageTypeEnum.ATK.equals(damageTypeEnum)) {
+            // 1.基础属性
+            realAtk = fromOrganism.getAtk();
+            realPenetrate = fromOrganism.getPenetrate();
+            realDef = tarOrganism.getDef();
+            // 2.装备加成
+            realAtk = EquipmentUtil.getVal(realAtk, PropertiesTypeEnum.ATK, from.getOrganismDTO());
+            realDef = EquipmentUtil.getVal(realDef, PropertiesTypeEnum.DEF, tar.getOrganismDTO());
+            // 3.buff
+            realAtk = BuffUtil.getAtk(realAtk, from.getBuffMap());
+            realDef = BuffUtil.getDef(realDef, tar.getBuffMap());
+        } else if (DamageTypeEnum.MAGIC.equals(damageTypeEnum)) {
+            // 1.基础属性
+            realAtk = fromOrganism.getMagicAtk();
+            realPenetrate = fromOrganism.getMagicPenetrate();
+            realDef = tarOrganism.getMagicDef();
+            // 2.装备加成
+            realAtk = EquipmentUtil.getVal(realAtk, PropertiesTypeEnum.MAGIC_ATK, from.getOrganismDTO());
+            realDef = EquipmentUtil.getVal(realDef, PropertiesTypeEnum.MAGIC_DEF, tar.getOrganismDTO());
+            // 3.buff
+            realAtk = BuffUtil.getMagicAtk(realAtk, from.getBuffMap());
+            realDef = BuffUtil.getMagicDef(realDef, tar.getBuffMap());
+        } else {
+            return 0;
+        }
+        // 境界压制
+        realAtk = RankUtil.getRankSupression(fromOrganism.getRank(), highestRank, realAtk);
+        realDef = RankUtil.getRankSupression(tarOrganism.getRank(),
+                fromOrganism.getRank(), realDef);
+        // damage = realAtk - realDef * (1 - realPenetrate)
+        // 技能倍率
+        long damage = Math.round((realAtk - realDef * (1 - realPenetrate)) * damageRate);
+        // 伤害最低为0
+        return Math.max(damage, 0L);
     }
 
     /**

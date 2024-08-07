@@ -1,18 +1,12 @@
 package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.PlayerCache;
-import com.dingCreator.astrology.cache.TeamCache;
-import com.dingCreator.astrology.dto.PlayerDTO;
-import com.dingCreator.astrology.dto.TeamDTO;
 import com.dingCreator.astrology.entity.Map;
 import com.dingCreator.astrology.enums.exception.MapExceptionEnum;
-import com.dingCreator.astrology.enums.exception.TeamExceptionEnum;
 import com.dingCreator.astrology.service.MapService;
 import com.dingCreator.astrology.util.MapUtil;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -29,7 +23,7 @@ public class MapBehavior {
      * @return 距离
      */
     public long getDistance(Long playerId, String mapName) {
-        long fromMapId = PlayerCache.getPlayerById(playerId).getPlayer().getMapId();
+        long fromMapId = PlayerCache.getPlayerById(playerId).getPlayerDTO().getMapId();
         Map target = MapService.getMapByName(mapName);
         return MapUtil.manhattanDistance(fromMapId, target.getId());
     }
@@ -43,6 +37,10 @@ public class MapBehavior {
      */
     public long getMoveSeconds(Long playerId, String mapName) {
         Map target = MapService.getMapByName(mapName);
+        if (MapUtil.getNowLocation(playerId).equals(target.getId())) {
+            throw MapExceptionEnum.SAME_MAP.getException();
+        }
+        PlayerBehavior.getInstance().flushStatus(PlayerCache.getPlayerById(playerId).getPlayerDTO());
         return MapUtil.moveTime(playerId, target.getId());
     }
 
@@ -54,6 +52,10 @@ public class MapBehavior {
      */
     public long startMove(Long playerId, String mapName) {
         Map target = MapService.getMapByName(mapName);
+        if (MapUtil.getNowLocation(playerId).equals(target.getId())) {
+            throw MapExceptionEnum.SAME_MAP.getException();
+        }
+        PlayerBehavior.getInstance().flushStatus(PlayerCache.getPlayerById(playerId).getPlayerDTO());
         MapUtil.startMove(playerId, target.getId());
         return MapUtil.moveTime(playerId, target.getId());
     }
@@ -63,10 +65,13 @@ public class MapBehavior {
      *
      * @return 地图列表
      */
-    public List<String> listMap() {
+    public List<String> listMap(Long playerId) {
         List<Map> mapList = MapService.listMap();
-        return mapList.stream().map(m -> m.getName() + "(" + m.getXPos() + "," + m.getYPos() + ")")
+        List<String> info = mapList.stream().map(m -> m.getName() + "(" + m.getXPos() + "," + m.getYPos() + ") 距离你" +
+                MapUtil.manhattanDistance(MapUtil.getNowLocation(playerId), m.getId()))
                 .collect(Collectors.toList());
+        info.add("你当前位于：" + MapUtil.getMapById(MapUtil.getNowLocation(playerId)).getName());
+        return info;
     }
 
     private static class Holder {

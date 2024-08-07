@@ -20,7 +20,7 @@ public class RankUpBossService {
      * @return 怪物信息
      */
     public static List<RankUpBoss> getRankUpBoss(String job, Integer rank) {
-        return (List<RankUpBoss>) DatabaseProvider.getInstance().doExecute(sqlSession -> sqlSession
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession
                 .getMapper(RankUpBossMapper.class).getRankUpBoss(job, rank));
     }
 }

@@ -21,7 +21,7 @@ public class MapService {
      * @return 地图信息
      */
     public static Map getMapById(Long mapId) {
-        return (Map) DatabaseProvider.getInstance().doExecute(sqlSession ->
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(MapDataMapper.class).getMapById(mapId));
     }
 
@@ -32,7 +32,7 @@ public class MapService {
      * @return 地图信息
      */
     public static Map getMapByName(String name) {
-        Map map = (Map) DatabaseProvider.getInstance().doExecute(sqlSession ->
+        Map map = DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(MapDataMapper.class).getMapByName(name));
         if (Objects.isNull(map)) {
             throw MapExceptionEnum.MAP_NOT_FOUND.getException();
@@ -45,9 +45,8 @@ public class MapService {
      *
      * @return 地图列表
      */
-    @SuppressWarnings("unchecked")
     public static List<Map> listMap() {
-        return (List<Map>) DatabaseProvider.getInstance().doExecute(sqlSession ->
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(MapDataMapper.class).listMap());
     }
 }

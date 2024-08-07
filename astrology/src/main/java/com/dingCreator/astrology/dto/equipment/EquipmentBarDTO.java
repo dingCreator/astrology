@@ -1,6 +1,5 @@
-package com.dingCreator.astrology.dto;
+package com.dingCreator.astrology.dto.equipment;
 
-import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import lombok.Data;
 
 import java.io.Serializable;

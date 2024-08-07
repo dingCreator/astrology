@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ding
@@ -17,9 +18,10 @@ public class DungeonResultVO implements Serializable {
      */
     private BattleResultVO.BattleResult exploreResult;
     /**
-     * 副本掉落物
+     * 获得的掉落物汇总
+     * playerId : LootVO
      */
-    private Loot dungeonLoot;
+    private Map<Long, LootVO> lootMap;
     /**
      * 副本boss挑战详情
      */

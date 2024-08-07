@@ -4,7 +4,8 @@ import com.dingCreator.astrology.behavior.PlayerBehavior;
 import com.dingCreator.astrology.behavior.TeamBehavior;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.cache.TeamCache;
-import com.dingCreator.astrology.dto.PlayerDTO;
+import com.dingCreator.astrology.dto.player.PlayerDTO;
+import com.dingCreator.astrology.dto.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.TeamDTO;
 import com.dingCreator.astrology.entity.Map;
 import com.dingCreator.astrology.entity.Player;
@@ -29,12 +30,14 @@ public class MapUtil {
 
     /**
      * 获取玩家当前位置
+     * 移动中但未到达的，视为还在原处
      *
      * @param playerId 玩家ID
      * @return 地图ID
      */
     public static Long getNowLocation(long playerId) {
-        long mapId = PlayerCache.getPlayerById(playerId).getPlayer().getMapId();
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId).getPlayerDTO();
+        long mapId = playerDTO.getMapId();
         return mapId << 32 >> 32;
     }
 
@@ -45,8 +48,8 @@ public class MapUtil {
      * @return 地图ID 如果不是移动中，则返回0
      */
     public static Long getTargetLocation(long playerId) {
-        Player player = PlayerCache.getPlayerById(playerId).getPlayer();
-        long mapId = player.getMapId();
+        PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId).getPlayerDTO();
+        long mapId = playerDTO.getMapId();
         return mapId >> 32;
     }
 
@@ -60,17 +63,17 @@ public class MapUtil {
     public static long manhattanDistance(long map1Id, long map2Id) {
         Map startMap = MapService.getMapById(map1Id);
         Map endMap = MapService.getMapById(map2Id);
+        if (Objects.isNull(startMap) || Objects.isNull(endMap)) {
+            return 0;
+        }
         return Math.abs(startMap.getXPos() - endMap.getXPos()) + Math.abs(startMap.getYPos() - endMap.getYPos());
     }
 
-    public static long moveTime(Long playerId) {
-        if (!moving(playerId)) {
-            throw MapExceptionEnum.NOT_MOVING.getException();
-        }
+    public static long moveTime(long playerId) {
         return moveTime(playerId, getNowLocation(playerId), getTargetLocation(playerId));
     }
 
-    public static long moveTime(Long playerId, Long endMapId) {
+    public static long moveTime(long playerId, long endMapId) {
         return moveTime(playerId, getNowLocation(playerId), endMapId);
     }
 
@@ -80,19 +83,19 @@ public class MapUtil {
      * @param endMapId   终点地图ID
      * @return 移动时间（s）
      */
-    public static long moveTime(Long playerId, Long startMapId, Long endMapId) {
-        PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId);
+    public static long moveTime(long playerId, long startMapId, long endMapId) {
+        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
         if (endMapId == 0L) {
-            throw MapExceptionEnum.NOT_MOVING.getException();
+            return 0;
         }
         long speed;
-        if (playerDTO.getTeam()) {
+        if (playerInfoDTO.getTeam()) {
             // 组队情况下，根据最慢的人计算
             TeamDTO teamDTO = TeamCache.getTeamByPlayerId(playerId);
-            speed = teamDTO.getMembers().stream().map(PlayerCache::getPlayerById).map(PlayerDTO::getPlayer)
-                    .mapToLong(Player::getBehaviorSpeed).min().orElse(1);
+            speed = teamDTO.getMembers().stream().map(PlayerCache::getPlayerById).map(PlayerInfoDTO::getPlayerDTO)
+                    .mapToLong(PlayerDTO::getBehaviorSpeed).min().orElse(1);
         } else {
-            speed = playerDTO.getPlayer().getBehaviorSpeed();
+            speed = playerInfoDTO.getPlayerDTO().getBehaviorSpeed();
         }
         if (speed <= 0) {
             throw new IllegalArgumentException("获取速度失败");
@@ -108,7 +111,7 @@ public class MapUtil {
      * @return 是/否
      */
     public static boolean moving(long playerId) {
-        String status = PlayerBehavior.getInstance().getStatus(PlayerCache.getPlayerById(playerId).getPlayer());
+        String status = PlayerBehavior.getInstance().getStatus(PlayerCache.getPlayerById(playerId).getPlayerDTO());
         return PlayerStatusEnum.MOVING.getCode().equals(status);
     }
 
@@ -118,18 +121,18 @@ public class MapUtil {
      * @param playerId 玩家ID
      */
     public static void startMove(long playerId, long mapId) {
-        PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId);
-        Player player = playerDTO.getPlayer();
-        if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(player))) {
+        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
+        PlayerDTO playerDTO = playerInfoDTO.getPlayerDTO();
+        if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(playerDTO))) {
             throw MapExceptionEnum.NOT_FREE.getException();
         }
         TeamBehavior.getInstance().captainOnlyValidate(playerId);
-        List<Player> playerList;
-        if (playerDTO.getTeam()) {
+        List<PlayerDTO> playerList;
+        if (playerInfoDTO.getTeam()) {
             playerList = TeamCache.getTeamById(playerId).getMembers().stream().map(PlayerCache::getPlayerById)
-                    .map(PlayerDTO::getPlayer).collect(Collectors.toList());
+                    .map(PlayerInfoDTO::getPlayerDTO).collect(Collectors.toList());
         } else {
-            playerList = Collections.singletonList(player);
+            playerList = Collections.singletonList(playerDTO);
         }
 
         playerList.forEach(p -> {
@@ -138,7 +141,7 @@ public class MapUtil {
                             MapExceptionEnum.NOT_FREE.getException());
             p.setMapId(getMovingMapId(p.getMapId(), mapId));
         });
-        PlayerCache.flush(playerList.stream().map(Player::getId).collect(Collectors.toList()));
+        PlayerCache.flush(playerList.stream().map(PlayerDTO::getId).collect(Collectors.toList()));
     }
 
     public static long getMovingMapId(long startMapId, long endMapId) {

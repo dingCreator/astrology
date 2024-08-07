@@ -10,6 +10,6 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Boss extends Monster implements ExtraBattleProcessTemplate {
+public class Boss extends Monster {
 
 }

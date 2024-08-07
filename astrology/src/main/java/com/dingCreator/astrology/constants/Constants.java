@@ -5,6 +5,7 @@ package com.dingCreator.astrology.constants;
  * @date 2023/4/19
  */
 public class Constants {
+    // **----** 错误码前缀 **----**
     /**
      * 组队错误码前缀
      */
@@ -45,19 +46,16 @@ public class Constants {
      * 技能错误码前缀
      */
     public static final String DUNGEON_EXCEPTION_PREFIX = "E_DUNGEON_";
-
     /**
-     * 组队上限
+     * 装备错误码前缀
      */
-    public static final int TEAM_MEMBER_LIMIT = 3;
-
+    public static final String EQUIPMENT_EXCEPTION_PREFIX = "E_EQUIPMENT_";
     /**
-     * 时间格式
+     * 任务错误码前缀
      */
-    public static final String DATE_FORMAT = "yyyy-MM-dd";
-    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String TASK_EXCEPTION_PREFIX = "E_TASK_";
 
-    // 经验相关配置
+    // **----** 经验相关配置 **----**
     /**
      * 最长挂机时间
      */
@@ -93,9 +91,53 @@ public class Constants {
      */
     public static final int BATTLE_CD = 30;
 
-    // CD key前缀
+    // **----** CD key前缀 **----**
     /**
      * 战斗CD前缀
      */
     public static final String CD_BATTLE_PREFIX = "cd_battle_";
+
+    // **----** 组队配置 **----**
+    /**
+     * 组队上限
+     */
+    public static final int TEAM_MEMBER_LIMIT = 3;
+
+
+
+
+    // **----** 系统配置 **----**
+    /**
+     * 默认页码大小
+     */
+    public static final int DEFAULT_PAGE_SIZE = 10;
+    /**
+     * 最低概率
+     */
+    public static final float MIN_RATE = 0F;
+    /**
+     * 最高概率
+     */
+    public static final float MAX_RATE = 1F;
+    /**
+     * 均不可
+     */
+    public static final String NONE = "None";
+    /**
+     * 均可
+     */
+    public static final String ALL = "All";
+    /**
+     * 时间格式
+     */
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
+    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    /**
+     * 获取key锁超时时间默认时长
+     */
+    public static final long GET_LOCK_TIME_OUT = 5 * 1000L;
+    /**
+     * 锁前缀-玩家
+     */
+    public static final String PLAYER_LOCK_PREFIX = "LOCK_PLAYER_";
 }

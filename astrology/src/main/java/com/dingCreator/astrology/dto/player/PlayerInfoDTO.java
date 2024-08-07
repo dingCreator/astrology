@@ -1,21 +1,24 @@
-package com.dingCreator.astrology.dto;
+package com.dingCreator.astrology.dto.player;
 
+import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.entity.Player;
+import com.dingCreator.astrology.enums.TitleEnum;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author ding
  * @date 2023/4/18
  */
 @Data
-public class PlayerDTO implements Serializable {
+public class PlayerInfoDTO implements Serializable {
     /**
      * 玩家基础属性
      */
-    private Player player;
+    private PlayerDTO playerDTO;
     /**
      * 是否在小队中
      */
@@ -28,4 +31,8 @@ public class PlayerDTO implements Serializable {
      * 装备栏
      */
     private EquipmentBarDTO equipmentBarDTO;
+    /**
+     * 称号
+     */
+    private List<TitleEnum> titleList;
 }

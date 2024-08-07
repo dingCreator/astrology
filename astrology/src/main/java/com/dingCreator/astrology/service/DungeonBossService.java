@@ -19,7 +19,7 @@ public class DungeonBossService {
      * @return boss
      */
     public static DungeonBoss getById(Long id) {
-        return (DungeonBoss) DatabaseProvider.getInstance().doExecute(sqlSession ->
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(DungeonBossMapper.class).getById(id));
     }
 
@@ -29,9 +29,8 @@ public class DungeonBossService {
      * @param dungeonId 副本ID
      * @return boss
      */
-    @SuppressWarnings("unchecked")
     public static List<DungeonBoss> getByDungeonId(Long dungeonId) {
-        return (List<DungeonBoss>) DatabaseProvider.getInstance().doExecute(sqlSession ->
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(DungeonBossMapper.class).getByDungeonId(dungeonId));
     }
 }

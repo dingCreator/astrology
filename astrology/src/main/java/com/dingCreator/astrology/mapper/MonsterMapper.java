@@ -1,9 +1,7 @@
 package com.dingCreator.astrology.mapper;
 
 import com.dingCreator.astrology.entity.base.Monster;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -24,6 +22,16 @@ public interface MonsterMapper {
     Monster getMonsterById(@Param("id") Long id);
 
     /**
+     * 获取怪物列表
+     *
+     * @param index index
+     * @param size  size
+     * @return 怪物信息
+     */
+    @Select("select * from astrology_monster limit #{index},#{size}")
+    List<Monster> listMonster(@Param("index") int index, @Param("size") int size);
+
+    /**
      * 获取怪物信息
      *
      * @param list IDs
@@ -36,4 +44,13 @@ public interface MonsterMapper {
             "</foreach>)",
             "</script>"})
     List<Monster> getMonsterByIds(@Param("list") List<Long> list);
+
+    /**
+     * 新建怪物
+     *
+     * @param monster
+     */
+    void createMonster(@Param("monster") Monster monster);
+
+    void updateMonsterById(@Param("id") Long id);
 }

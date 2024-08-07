@@ -10,7 +10,6 @@ import lombok.Data;
  * @date 2024/2/1
  */
 @Data
-@AllArgsConstructor
 public class BusinessException extends RuntimeException {
 
     /**
@@ -21,4 +20,14 @@ public class BusinessException extends RuntimeException {
      * 错误描述
      */
     private String desc;
+
+    public BusinessException(String code, String desc) {
+        this.code = code;
+        this.desc = desc;
+    }
+
+    public BusinessException(String code, String desc, Object[] args) {
+        this.code = code;
+        this.desc = String.format(desc, args);
+    }
 }

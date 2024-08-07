@@ -21,7 +21,11 @@ public enum DamageTypeEnum {
     /**
      * 特殊攻击
      */
-    SPECIAL("SPECIAL");
+    SPECIAL("SPECIAL"),
+    /**
+     * 真实伤害
+     */
+    REAL("REAL"),
     ;
 
     private final String typeName;

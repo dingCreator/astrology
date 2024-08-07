@@ -1,10 +1,16 @@
 package com.dingCreator.astrology.service;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.database.DatabaseProvider;
+import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
+import com.dingCreator.astrology.dto.player.PlayerDTO;
+import com.dingCreator.astrology.enums.BelongToEnum;
+import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
 import com.dingCreator.astrology.mapper.PlayerDataMapper;
-import com.dingCreator.astrology.dto.PlayerDTO;
+import com.dingCreator.astrology.dto.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Player;
+import com.dingCreator.astrology.util.EquipmentUtil;
 
 import java.util.Objects;
 
@@ -20,7 +26,7 @@ public class PlayerService {
      * @return 玩家基本信息
      */
     public static Player getPlayerById(Long id) {
-        return (Player) DatabaseProvider.getInstance().doExecute(sqlSession ->
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(PlayerDataMapper.class).getPlayerById(id));
     }
 
@@ -31,7 +37,7 @@ public class PlayerService {
      * @return 玩家基本信息
      */
     public static Player getPlayerByName(String name) {
-        return (Player) DatabaseProvider.getInstance().doExecute(sqlSession ->
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(PlayerDataMapper.class).getPlayerByName(name));
     }
 
@@ -41,12 +47,24 @@ public class PlayerService {
      * @param id 玩家ID
      * @return 玩家信息
      */
-    public static PlayerDTO getPlayerDTOById(Long id) {
-        PlayerDTO playerDTO = new PlayerDTO();
+    public static PlayerInfoDTO getPlayerDTOById(Long id) {
+        PlayerInfoDTO playerInfoDTO = new PlayerInfoDTO();
+        // 初始化装备
+        EquipmentBarDTO barDTO = new EquipmentBarDTO();
+        EquipmentBelongToService.getBelongToIdEquip(BelongToEnum.Player.getBelongTo(), id, true)
+                .forEach(equipmentBelongTo -> {
+                    EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentBelongTo.getEquipmentId());
+                    EquipmentUtil.setEquipmentBarDTO(barDTO, equipmentEnum, equipmentBelongTo);
+                });
+        playerInfoDTO.setEquipmentBarDTO(barDTO);
+        // 初始化称号
+
         Player player = getPlayerById(id);
-        playerDTO.setPlayer(player);
-        playerDTO.setTeam(Objects.nonNull(TeamCache.getTeamById(id)));
-        return playerDTO;
+        PlayerDTO playerDTO = new PlayerDTO();
+        BeanUtil.copyProperties(player, playerDTO);
+        playerInfoDTO.setPlayerDTO(playerDTO);
+        playerInfoDTO.setTeam(Objects.nonNull(TeamCache.getTeamById(id)));
+        return playerInfoDTO;
     }
 
     /**
@@ -55,8 +73,8 @@ public class PlayerService {
      * @param player 玩家基础信息
      * @return 是否创建成功
      */
-    public static boolean createPlayer(Player player) {
-        return (Boolean) DatabaseProvider.getInstance().doExecute(sqlSession ->
+    public static synchronized boolean createPlayer(Player player) {
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(PlayerDataMapper.class).createPlayer(player));
     }
 
@@ -64,10 +82,9 @@ public class PlayerService {
      * 根据ID更新玩家信息
      *
      * @param player 玩家基本信息
-     * @return 是否更新成功
      */
-    public static boolean updatePlayerById(Player player) {
-        return (Boolean) DatabaseProvider.getInstance().doExecute(sqlSession ->
+    public static void updatePlayerById(Player player) {
+        DatabaseProvider.getInstance().execute(sqlSession ->
                 sqlSession.getMapper(PlayerDataMapper.class).updateById(player));
     }
 }

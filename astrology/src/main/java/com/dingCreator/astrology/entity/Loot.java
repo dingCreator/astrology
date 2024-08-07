@@ -2,6 +2,8 @@ package com.dingCreator.astrology.entity;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 击败怪物后的掉落物
  *
@@ -19,19 +21,19 @@ public class Loot {
      */
     private String belongTo;
     /**
-     * 所属怪物ID
+     * 所属ID
      */
     private Long belongToId;
     /**
-     * 爆率
+     * 货币
      */
-    private Float rate;
+    private Long money;
     /**
-     * 掉落物类型
+     * 经验值
      */
-    private String type;
+    private Long exp;
     /**
-     * 掉落物ID
+     * 掉落物集合json
      */
-    private Long lootId;
+    private String lootItemList;
 }
