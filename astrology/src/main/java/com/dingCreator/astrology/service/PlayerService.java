@@ -1,15 +1,14 @@
 package com.dingCreator.astrology.service;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
-import com.dingCreator.astrology.dto.player.PlayerDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
+import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
 import com.dingCreator.astrology.mapper.PlayerDataMapper;
-import com.dingCreator.astrology.dto.player.PlayerInfoDTO;
-import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.util.EquipmentUtil;
 
 import java.util.Objects;
@@ -61,7 +60,7 @@ public class PlayerService {
 
         Player player = getPlayerById(id);
         PlayerDTO playerDTO = new PlayerDTO();
-        BeanUtil.copyProperties(player, playerDTO);
+        playerDTO.copyProperties(player);
         playerInfoDTO.setPlayerDTO(playerDTO);
         playerInfoDTO.setTeam(Objects.nonNull(TeamCache.getTeamById(id)));
         return playerInfoDTO;

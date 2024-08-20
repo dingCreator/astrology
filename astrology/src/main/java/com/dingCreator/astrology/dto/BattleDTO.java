@@ -1,13 +1,12 @@
 package com.dingCreator.astrology.dto;
 
+import com.dingCreator.astrology.dto.organism.OrganismInfoDTO;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
-import com.dingCreator.astrology.enums.skill.SkillEnum;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 战斗包装类，用于存储一些中间过程
@@ -21,7 +20,7 @@ public class BattleDTO implements Serializable {
     /**
      * 生物属性
      */
-    private OrganismDTO organismDTO;
+    private OrganismInfoDTO organismInfoDTO;
     /**
      * 行动值
      */

@@ -2,7 +2,8 @@ package com.dingCreator.astrology.util;
 
 import cn.hutool.core.collection.ConcurrentHashSet;
 import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.util.function.Executor;
+import com.dingCreator.astrology.enums.exception.SysExceptionEnum;
+import com.dingCreator.astrology.util.function.FunctionExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,34 +24,36 @@ public class LockUtil {
 
     public static <T> T execute(String lockKey, Supplier<T> supplier) {
         long startTime = System.currentTimeMillis();
+        // 检查是否有锁，有锁等待50-150ms再次检查是否有锁
+        // 超时仍未获取到锁的，直接失败
         while (System.currentTimeMillis() - startTime <= Constants.GET_LOCK_TIME_OUT) {
-            if (!LOCK_SET.contains(lockKey)) {
-                synchronized (MONITOR) {
-                    if (!LOCK_SET.contains(lockKey)) {
-                        LOCK_SET.add(lockKey);
-                        try {
-                            LOG.info("线程【" + Thread.currentThread().getName() + "】获取key为【" + lockKey + "】的锁成功");
-                            return supplier.get();
-                        } finally {
-                            LOCK_SET.remove(lockKey);
-                            LOG.info("线程【" + Thread.currentThread().getName() + "】释放key为【" + lockKey + "】的锁");
-                        }
+            synchronized (MONITOR) {
+                if (LOCK_SET.contains(lockKey)) {
+                    try {
+                        Thread.sleep(RandomUtil.rangeIntRandom(50, 150));
+                    } catch (InterruptedException ite) {
+                        LOG.info("线程【" + Thread.currentThread().getName() + "】中止获取key为【" + lockKey + "】的锁");
+                        break;
                     }
+                    continue;
                 }
+                LOCK_SET.add(lockKey);
             }
             try {
-                Thread.sleep(200);
-            } catch (InterruptedException ite) {
-                LOG.info("线程【" + Thread.currentThread().getName() + "】中止获取key为【" + lockKey + "】的锁");
-                break;
+                LOG.info("线程【" + Thread.currentThread().getName() + "】获取key为【" + lockKey + "】的锁成功");
+                return supplier.get();
+            } finally {
+                LOCK_SET.remove(lockKey);
+                LOG.info("线程【" + Thread.currentThread().getName() + "】释放key为【" + lockKey + "】的锁");
             }
         }
-        throw new RuntimeException("获取key为【" + lockKey + "】的锁失败");
+        LOG.error("线程【{}】获取key为【{}】的锁失败", Thread.currentThread().getName(), lockKey);
+        throw SysExceptionEnum.SYS_BUSY.getException();
     }
 
-    public static void execute(String lockKey, Executor executor) {
+    public static void execute(String lockKey, FunctionExecutor functionExecutor) {
         execute(lockKey, () -> {
-            executor.execute();
+            functionExecutor.execute();
             return null;
         });
     }

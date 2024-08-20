@@ -3,6 +3,7 @@ package com.dingCreator.astrology.enums.skill;
 import com.dingCreator.astrology.dto.BattleDTO;
 import com.dingCreator.astrology.dto.BuffDTO;
 import com.dingCreator.astrology.dto.GiveBuffDTO;
+import com.dingCreator.astrology.dto.organism.OrganismDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
 import com.dingCreator.astrology.entity.base.Organism;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
@@ -63,10 +64,10 @@ public enum SkillEnum {
         @Override
         public void ifHit(BattleDTO from, SkillEnum skillEnum, Long damage, StringBuilder builder) {
             if (from.equals(this.getFrom()) && skillEnum.getId().equals(SKILL_5.getId())) {
-                Organism organism = this.getFrom().getOrganismDTO().getOrganism();
-                long newHp = Math.min(organism.getMaxHp(), organism.getHp() + Math.round(damage * 0.12F));
-                builder.append("，血量恢复了").append(newHp - organism.getHp());
-                organism.setHp(newHp);
+                OrganismDTO organism = this.getFrom().getOrganismInfoDTO().getOrganismDTO();
+                long newHp = Math.min(organism.getMaxHpWithAddition(), organism.getHpWithAddition() + Math.round(damage * 0.12F));
+                builder.append("，血量恢复了").append(newHp - organism.getHpWithAddition());
+                organism.setHpWithAddition(newHp);
             }
         }
     }),
@@ -111,7 +112,7 @@ public enum SkillEnum {
             "All", false, new ExtraBattleProcessTemplate() {
         @Override
         public void beforeBattle(List<String> battleMsg) {
-            Organism organism = this.getFrom().getOrganismDTO().getOrganism();
+            OrganismDTO organism = this.getFrom().getOrganismInfoDTO().getOrganismDTO();
             organism.setPenetrate(organism.getPenetrate() + 0.25F);
             organism.setMagicPenetrate(organism.getMagicPenetrate() + 0.25F);
         }
@@ -262,22 +263,6 @@ public enum SkillEnum {
                             )
                     )
             )
-    ),
-
-    SKILL_1006(1006L, "霸刀罡气",
-            "霸刀门独门绝技，能透过防御直达实体，增加自身25%穿透与25%法穿",
-            "None", false, new ExtraBattleProcessTemplate() {
-        @Override
-        public void beforeBattle(List<String> battleMsg) {
-            Organism organism = this.getFrom().getOrganismDTO().getOrganism();
-            organism.setPenetrate(organism.getPenetrate() + 0.25F);
-            organism.setMagicPenetrate(organism.getMagicPenetrate() + 0.25F);
-        }
-    }),
-
-    SKILL_1007(1007L, "普通攻击",
-            "造成110%物理伤害",
-            "None", new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 1.1F)
     ),
 
     SKILL_1008(1008L, "技能1008",

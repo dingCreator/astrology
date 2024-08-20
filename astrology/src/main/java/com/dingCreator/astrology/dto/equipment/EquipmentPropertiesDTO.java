@@ -1,9 +1,8 @@
 package com.dingCreator.astrology.dto.equipment;
 
-import com.dingCreator.astrology.enums.PropertiesTypeEnum;
+import com.dingCreator.astrology.enums.equipment.EquipmentPropertiesTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -16,23 +15,23 @@ public class EquipmentPropertiesDTO implements Serializable {
     /**
      * 属性类型
      */
-    private PropertiesTypeEnum equipmentPropertiesTypeEnum;
+    private EquipmentPropertiesTypeEnum equipmentPropertiesTypeEnum;
     /**
      * 属性值
      */
     private Prop prop;
 
-    public EquipmentPropertiesDTO(PropertiesTypeEnum equipmentPropertiesTypeEnum, Long val) {
+    public EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum equipmentPropertiesTypeEnum, Long val) {
         this.equipmentPropertiesTypeEnum = equipmentPropertiesTypeEnum;
         this.prop = new Prop(val, 0F);
     }
 
-    public EquipmentPropertiesDTO(PropertiesTypeEnum equipmentPropertiesTypeEnum, Float rate) {
+    public EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum equipmentPropertiesTypeEnum, Float rate) {
         this.equipmentPropertiesTypeEnum = equipmentPropertiesTypeEnum;
         this.prop = new Prop(0L, rate);
     }
 
-    public EquipmentPropertiesDTO(PropertiesTypeEnum equipmentPropertiesTypeEnum, Long val, Float rate) {
+    public EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum equipmentPropertiesTypeEnum, Long val, Float rate) {
         this.equipmentPropertiesTypeEnum = equipmentPropertiesTypeEnum;
         this.prop = new Prop(val, rate);
     }

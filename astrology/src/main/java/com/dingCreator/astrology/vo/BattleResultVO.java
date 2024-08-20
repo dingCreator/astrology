@@ -38,7 +38,7 @@ public class BattleResultVO implements Serializable {
      */
     @AllArgsConstructor
     @Getter
-    public static enum BattleResult {
+    public enum BattleResult {
         /**
          * 胜平负
          */

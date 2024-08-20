@@ -29,7 +29,7 @@ public interface MapDataMapper {
      * @param name 地图名称
      * @return 地图信息
      */
-    @Select("select * from astrology_map where name=#{name}")
+    @Select("select * from astrology_map where `name`=#{name}")
     Map getMapByName(@Param("name") String name);
 
     /**

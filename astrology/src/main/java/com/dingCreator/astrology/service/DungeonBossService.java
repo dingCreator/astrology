@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.entity.DungeonBoss;
 import com.dingCreator.astrology.mapper.DungeonBossMapper;
@@ -20,7 +21,7 @@ public class DungeonBossService {
      */
     public static DungeonBoss getById(Long id) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
-                sqlSession.getMapper(DungeonBossMapper.class).getById(id));
+                sqlSession.getMapper(DungeonBossMapper.class).selectById(id));
     }
 
     /**
@@ -30,7 +31,10 @@ public class DungeonBossService {
      * @return boss
      */
     public static List<DungeonBoss> getByDungeonId(Long dungeonId) {
-        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
-                sqlSession.getMapper(DungeonBossMapper.class).getByDungeonId(dungeonId));
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
+            QueryWrapper<DungeonBoss> queryWrapper = new QueryWrapper<DungeonBoss>()
+                    .eq(DungeonBoss.DUNGEON_ID, dungeonId);
+            return sqlSession.getMapper(DungeonBossMapper.class).selectList(queryWrapper);
+        });
     }
 }

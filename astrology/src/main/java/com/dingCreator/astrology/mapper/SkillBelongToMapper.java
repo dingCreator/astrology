@@ -21,7 +21,7 @@ public interface SkillBelongToMapper {
      * @param skillBelongTo 实体类
      * @return 是否成功
      */
-    @Insert("INSERT INTO astrology_skill_belong_to (belongTo, belongToId, skillId) VALUES (#{belongTo}, #{belongToId}, #{skillId})")
+    @Insert("INSERT INTO astrology_skill_belong_to (belong_to, belong_to_id, skill_id) VALUES (#{belongTo}, #{belongToId}, #{skillId})")
     Boolean createSkillBelongTo(SkillBelongTo skillBelongTo);
 
     /**
@@ -31,7 +31,7 @@ public interface SkillBelongToMapper {
      * @param belongToId 归属ID
      * @return 技能列表
      */
-    @Select("select * from astrology_skill_belong_to where belongTo=#{belongTo} and belongToId=#{belongToId}")
+    @Select("select * from astrology_skill_belong_to where belong_to=#{belongTo} and belong_to_id=#{belongToId}")
     List<SkillBelongTo> querySkillBelongToList(@Param("belongTo") String belongTo, @Param("belongToId") Long belongToId);
 
     /**
@@ -44,8 +44,8 @@ public interface SkillBelongToMapper {
      */
     @Select({
             "<script>",
-            "select * from astrology_skill_belong_to where belongTo=#{belongTo} and belongToId=#{belongToId}",
-            "and skillId IN(",
+            "select * from astrology_skill_belong_to where belong_to=#{belongTo} and belong_to_id=#{belongToId}",
+            "and skill_id IN(",
             "<foreach collection='skillIds' item='item' index='index' separator=','>",
             "#{item}",
             "</foreach>",

@@ -1,5 +1,9 @@
 package com.dingCreator.astrology.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.util.List;
@@ -11,29 +15,36 @@ import java.util.List;
  * @date 2024/2/19
  */
 @Data
+@TableName("astrology_loot")
 public class Loot {
     /**
      * 主键ID
      */
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
      * 从何处掉落
      */
+    @TableField("belong_to")
     private String belongTo;
     /**
      * 所属ID
      */
+    @TableField("belong_to_id")
     private Long belongToId;
     /**
      * 货币
      */
+    @TableField("money")
     private Long money;
     /**
      * 经验值
      */
+    @TableField("exp")
     private Long exp;
     /**
      * 掉落物集合json
      */
+    @TableField("loot_item_list")
     private String lootItemList;
 }

@@ -2,14 +2,15 @@ package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.dto.OrganismDTO;
-import com.dingCreator.astrology.dto.player.PlayerDTO;
-import com.dingCreator.astrology.dto.player.PlayerInfoDTO;
+import com.dingCreator.astrology.dto.organism.OrganismInfoDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.entity.SkillBarItem;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.RankEnum;
+import com.dingCreator.astrology.enums.equipment.EquipmentPropertiesTypeEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.job.JobInitPropertiesEnum;
@@ -20,6 +21,7 @@ import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.service.SkillBarItemService;
 import com.dingCreator.astrology.service.SkillBelongToService;
 import com.dingCreator.astrology.util.BattleUtil;
+import com.dingCreator.astrology.util.EquipmentUtil;
 import com.dingCreator.astrology.util.MapUtil;
 import com.dingCreator.astrology.util.SkillUtil;
 import com.dingCreator.astrology.vo.BattleResultVO;
@@ -128,32 +130,43 @@ public class PlayerBehavior {
         // 玩家信息
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(id);
         PlayerDTO PlayerDTO = playerInfoDTO.getPlayerDTO();
-        // 生物信息
-        OrganismDTO organismDTO = new OrganismDTO();
-        organismDTO.setOrganism(playerInfoDTO.getPlayerDTO());
 
         List<String> list = new ArrayList<>(16);
         list.add("昵称：" + PlayerDTO.getName() + " 职业：" + JobEnum.getByCode(PlayerDTO.getJob()).getJobName());
         list.add("阶级：" + RankEnum.getEnum(PlayerDTO.getJob(), PlayerDTO.getRank()).getRankName());
         list.add("等级：" + PlayerDTO.getLevel() + " 经验：" + PlayerDTO.getExp()
                 + "/" + ExpBehavior.getInstance().getCurrentLevelMaxExp(PlayerDTO.getLevel()));
-        list.add("血量：" + PlayerDTO.getHp() + "/" + PlayerDTO.getMaxHp());
-        list.add("蓝量：" + PlayerDTO.getMp() + "/" + PlayerDTO.getMaxMp());
-        list.add("攻击：" + PlayerDTO.getAtk());
-        list.add("防御：" + PlayerDTO.getDef());
-        list.add("法强：" + PlayerDTO.getMagicAtk());
-        list.add("法抗：" + PlayerDTO.getMagicDef());
-        list.add("穿甲：" + PlayerDTO.getPenetrate() * 100 + "%");
-        list.add("法穿：" + PlayerDTO.getMagicPenetrate() * 100 + "%");
-        list.add("命中：" + PlayerDTO.getHit());
-        list.add("闪避：" + PlayerDTO.getDodge());
-        list.add("速度：" + PlayerDTO.getBehaviorSpeed());
-        list.add("暴击：" + PlayerDTO.getCriticalRate() * 100 + "%");
-        list.add("抗暴：" + PlayerDTO.getCriticalReductionRate() * 100 + "%");
-        list.add("暴伤：" + PlayerDTO.getCriticalDamage() * 100 + "%");
-        list.add("暴免：" + PlayerDTO.getCriticalDamageReduction() * 100 + "%");
+        list.add("血量：" + PlayerDTO.getHpWithAddition() + "/" + PlayerDTO.getMaxHpWithAddition());
+        list.add("蓝量：" + PlayerDTO.getMpWithAddition() + "/" + PlayerDTO.getMaxMpWithAddition());
+        list.add("攻击：" + EquipmentUtil.getLongVal(PlayerDTO.getAtk(), EquipmentPropertiesTypeEnum.ATK,
+                playerInfoDTO.getEquipmentBarDTO()));
+        list.add("防御：" + EquipmentUtil.getLongVal(PlayerDTO.getDef(), EquipmentPropertiesTypeEnum.DEF,
+                playerInfoDTO.getEquipmentBarDTO()));
+        list.add("法强：" + EquipmentUtil.getLongVal(PlayerDTO.getMagicAtk(), EquipmentPropertiesTypeEnum.DEF,
+                playerInfoDTO.getEquipmentBarDTO()));
+        list.add("法抗：" + EquipmentUtil.getLongVal(PlayerDTO.getMagicDef(), EquipmentPropertiesTypeEnum.DEF,
+                playerInfoDTO.getEquipmentBarDTO()));
+        list.add("穿甲：" + EquipmentUtil.getFloatVal(PlayerDTO.getPenetrate(), EquipmentPropertiesTypeEnum.PENETRATE,
+                playerInfoDTO.getEquipmentBarDTO()) * 100 + "%");
+        list.add("法穿：" + EquipmentUtil.getFloatVal(PlayerDTO.getMagicPenetrate(), EquipmentPropertiesTypeEnum.DEF,
+                playerInfoDTO.getEquipmentBarDTO()) * 100 + "%");
+        list.add("命中：" + EquipmentUtil.getLongVal(PlayerDTO.getHit(), EquipmentPropertiesTypeEnum.DEF,
+                playerInfoDTO.getEquipmentBarDTO()));
+        list.add("闪避：" + EquipmentUtil.getLongVal(PlayerDTO.getDodge(), EquipmentPropertiesTypeEnum.DEF,
+                playerInfoDTO.getEquipmentBarDTO()));
+        list.add("速度：" + EquipmentUtil.getLongVal(PlayerDTO.getBehaviorSpeed(), EquipmentPropertiesTypeEnum.DEF,
+                playerInfoDTO.getEquipmentBarDTO()));
+        list.add("暴击：" + EquipmentUtil.getFloatVal(PlayerDTO.getCriticalRate(), EquipmentPropertiesTypeEnum.DEF,
+                playerInfoDTO.getEquipmentBarDTO()) * 100 + "%");
+        list.add("抗暴：" + EquipmentUtil.getFloatVal(PlayerDTO.getCriticalReductionRate(), EquipmentPropertiesTypeEnum.DEF,
+                playerInfoDTO.getEquipmentBarDTO()) * 100 + "%");
+        list.add("暴伤：" + EquipmentUtil.getFloatVal(PlayerDTO.getCriticalDamage(), EquipmentPropertiesTypeEnum.DEF,
+                playerInfoDTO.getEquipmentBarDTO()) * 100 + "%");
+        list.add("暴免：" + EquipmentUtil.getFloatVal(PlayerDTO.getCriticalDamageReduction(), EquipmentPropertiesTypeEnum.DEF,
+                playerInfoDTO.getEquipmentBarDTO()) * 100 + "%");
         list.add("状态：" + PlayerStatusEnum.getByCode(getStatus(PlayerDTO)).getName());
         list.add("所在地图：" + MapUtil.getMapById(MapUtil.getNowLocation(PlayerDTO.getId())).getName());
+
         BaseResponse<List<String>> baseResponse = new BaseResponse<>();
         baseResponse.setContent(list);
         return baseResponse;
@@ -270,24 +283,22 @@ public class PlayerBehavior {
     /**
      * 刷新状态
      */
-    public void flushStatus(PlayerDTO playerDTO) {
-        synchronized (LOCK) {
-            if (PlayerStatusEnum.MOVING.getCode().equals(playerDTO.getStatus())) {
-                long targetMapId = MapUtil.getTargetLocation(playerDTO.getId());
-                if (targetMapId == 0L) {
+    public synchronized void flushStatus(PlayerDTO playerDTO) {
+        if (PlayerStatusEnum.MOVING.getCode().equals(playerDTO.getStatus())) {
+            long targetMapId = MapUtil.getTargetLocation(playerDTO.getId());
+            if (targetMapId == 0L) {
+                playerDTO.setStatus(PlayerStatusEnum.FREE.getCode());
+                PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
+            } else {
+                long seconds = MapUtil.moveTime(playerDTO.getId(), MapUtil.getNowLocation(playerDTO.getId()), targetMapId);
+                long statusEndTime = Objects.isNull(playerDTO.getStatusStartTime()) ?
+                        0 : playerDTO.getStatusStartTime().getTime() + seconds * 1000;
+                if (System.currentTimeMillis() >= statusEndTime) {
+                    // 已经到了
                     playerDTO.setStatus(PlayerStatusEnum.FREE.getCode());
+                    playerDTO.setStatusStartTime(new Date());
+                    playerDTO.setMapId(MapUtil.getTargetLocation(playerDTO.getId()));
                     PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
-                } else {
-                    long seconds = MapUtil.moveTime(playerDTO.getId(), MapUtil.getNowLocation(playerDTO.getId()), targetMapId);
-                    long statusEndTime = Objects.isNull(playerDTO.getStatusStartTime()) ?
-                            0 : playerDTO.getStatusStartTime().getTime() + seconds * 1000;
-                    if (System.currentTimeMillis() >= statusEndTime) {
-                        // 已经到了
-                        playerDTO.setStatus(PlayerStatusEnum.FREE.getCode());
-                        playerDTO.setStatusStartTime(new Date());
-                        playerDTO.setMapId(MapUtil.getTargetLocation(playerDTO.getId()));
-                        PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
-                    }
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.entity.base;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 /**
@@ -13,85 +14,106 @@ public class Organism {
     /**
      * 名称
      */
-    private String name;
+    @TableField("`name`")
+    protected String name;
     /**
      * 血量
      */
-    private Long hp;
+    @TableField("hp")
+    protected Long hp;
     /**
      * 血量上限
      */
-    private Long maxHp;
+    @TableField("max_hp")
+    protected Long maxHp;
     /**
      * 蓝
      */
-    private Long mp;
+    @TableField("mp")
+    protected Long mp;
     /**
      * 蓝上限
      */
-    private Long maxMp;
+    @TableField("max_mp")
+    protected Long maxMp;
     /**
      * 攻击力
      */
-    private Long atk;
+    @TableField("atk")
+    protected Long atk;
     /**
      * 法强
      */
-    private Long magicAtk;
+    @TableField("magic_atk")
+    protected Long magicAtk;
     /**
      * 防御
      */
-    private Long def;
+    @TableField("def")
+    protected Long def;
     /**
      * 法抗
      */
-    private Long magicDef;
+    @TableField("magic_def")
+    protected Long magicDef;
     /**
      * 穿透
      */
-    private Float penetrate;
+    @TableField("penetrate")
+    protected Float penetrate;
     /**
      * 法穿
      */
-    private Float magicPenetrate;
+    @TableField("magic_penetrate")
+    protected Float magicPenetrate;
     /**
      * 暴击率
      */
-    private Float criticalRate;
+    @TableField("critical_rate")
+    protected Float criticalRate;
     /**
      * 抗暴率
      */
-    private Float criticalReductionRate;
+    @TableField("critical_reduction_rate")
+    protected Float criticalReductionRate;
     /**
      * 爆伤倍率
      */
-    private Float criticalDamage;
+    @TableField("critical_damage")
+    protected Float criticalDamage;
     /**
      * 爆伤减免
      */
-    private Float criticalDamageReduction;
+    @TableField("critical_damage_reduction")
+    protected Float criticalDamageReduction;
     /**
      * 行动速度
      */
-    private Long behaviorSpeed;
+    @TableField("behavior_speed")
+    protected Long behaviorSpeed;
     /**
      * 命中率
      */
-    private Long hit;
+    @TableField("hit")
+    protected Long hit;
     /**
      * 闪避率
      */
-    private Long dodge;
+    @TableField("dodge")
+    protected Long dodge;
     /**
      * 吸血
      */
-    private Float lifeStealing;
+    @TableField("life_stealing")
+    protected Float lifeStealing;
     /**
      * 阶段
      */
-    private Integer rank;
+    @TableField("`rank`")
+    protected Integer rank;
     /**
      * 等级
      */
-    private Integer level;
+    @TableField("`level`")
+    protected Integer level;
 }

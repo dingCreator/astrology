@@ -1,8 +1,10 @@
 package com.dingCreator.astrology.service;
 
 import com.dingCreator.astrology.database.DatabaseProvider;
+import com.dingCreator.astrology.entity.WorldBoss;
 import com.dingCreator.astrology.entity.base.Monster;
 import com.dingCreator.astrology.mapper.MonsterMapper;
+import com.dingCreator.astrology.mapper.WorldBossMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -48,13 +50,26 @@ public class MonsterService {
     }
 
     /**
+     * 更新怪物血量
+     *
+     * @param id 怪物id
+     * @param hp 怪物血量
+     */
+    public static void updateHpById(long id, long hp) {
+        Monster monster = new Monster();
+        monster.setId(id);
+        monster.setHp(hp);
+        DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(MonsterMapper.class).updateById(monster));
+    }
+
+
+    /**
      * 编辑怪物信息
      *
      * @param monster 怪物信息
      */
     public static void updateMonster(Monster monster) {
-        DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(MonsterMapper.class)
-                .updateMonsterById(monster.getId()));
+        DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(MonsterMapper.class).updateById(monster));
     }
 
     /**

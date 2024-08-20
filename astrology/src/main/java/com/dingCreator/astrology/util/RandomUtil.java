@@ -14,7 +14,7 @@ public class RandomUtil {
      * 将概率标准化到0-1,并保留n位小数
      *
      * @param rate 转化前的概率
-     * @param n 小数点后位数
+     * @param n    小数点后位数
      * @return 转化后的概率
      */
     public static float format(float rate, int n) {
@@ -38,5 +38,16 @@ public class RandomUtil {
      */
     public static boolean isHit(float rate) {
         return RAND.nextFloat() < rate;
+    }
+
+    /**
+     * 生成范围内的随机整形
+     *
+     * @param start 最小值
+     * @param end   最大值
+     * @return 随机数
+     */
+    public static int rangeIntRandom(int start, int end) {
+        return start + RAND.nextInt(end - start);
     }
 }

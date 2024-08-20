@@ -1,12 +1,12 @@
 -- 初始化地图
-INSERT INTO astrology_map(id,name,xPos,yPos) values
+INSERT INTO astrology_map(id,`name`,x_pos,y_pos) values
 (1,'圣城',0,0),(2,'仙庭王朝',500,200),(3,'死烬之渊',0,-300),(4,'未元之都',-500,200),(5,'邪修大本营',-1000,200),
 (6,'诡境雾霭',100,-1000);
 
 -- 初始化突破boss属性
-INSERT INTO astrology_monster(id,name,hp,maxHp,mp,maxMp,atk,magicAtk,def,magicDef,penetrate,magicPenetrate,criticalRate,
-                              criticalDamageReduction,criticalDamage,criticalReductionRate,behaviorSpeed,hit,dodge,
-                              lifeStealing,rank,level,description) values
+INSERT INTO astrology_monster(id,`name`,hp,max_hp,mp,max_mp,atk,magic_atk,def,magic_def,penetrate,magic_penetrate,critical_rate,
+                              critical_damage_reduction,critical_damage,critical_reduction_rate,behavior_speed,hit,dodge,
+                              life_stealing,rank,`level`,description) values
 (100001,'天劫',20000,20000,10000,10000,600,600,150,150,0.5,0.5,0.5,0.5,3,0.5,250,1000,100,0,1,20,''),
 (100002,'天劫',20000,20000,10000,10000,600,600,150,150,0.5,0.5,0.5,0.5,3,0.5,250,1000,100,0,1,20,''),
 (100003,'天劫',20000,20000,10000,10000,600,600,150,150,0.5,0.5,0.5,0.5,3,0.5,250,1000,100,0,1,20,''),
@@ -33,7 +33,7 @@ INSERT INTO astrology_monster(id,name,hp,maxHp,mp,maxMp,atk,magicAtk,def,magicDe
 (100306,'天劫',3000000,3000000,500000,500000,50000,50000,8000,8000,0.8,0.8,0.8,0.7,4,0.6,18000,150000,10000,0.2,4,80,'');
 
 -- 初始化突破boss
-INSERT INTO astrology_rank_up_boss(job, rank, monsterId) values
+INSERT INTO astrology_rank_up_boss(job, rank, monster_id) values
 ('XIU_ZHEN', 1, 100001),('SI_DI_WU_SHI', 1, 100002),('MAGICIAN', 1, 100003),('GUN', 1, 100004),('EVIL', 1, 100005),('CHEATER', 1, 100006),
 ('XIU_ZHEN', 2, 200001),('SI_DI_WU_SHI', 2, 200002),('MAGICIAN', 2, 200003),('GUN', 2, 200004),('EVIL', 2, 200005),('CHEATER', 2, 200006),
 ('XIU_ZHEN', 3, 300001),('SI_DI_WU_SHI', 3, 300002),('MAGICIAN', 3, 300003),('GUN', 3, 300004),('EVIL', 3, 300005),('CHEATER', 3, 300006),
@@ -47,7 +47,7 @@ INSERT INTO astrology_rank_up_boss(job, rank, monsterId) values
 -- ('Monster', 400001, 1),('Monster', 400002, 1),('Monster', 400003, 1),('Monster', 400004, 1),('Monster', 400005, 1),('Monster', 400006, 1);
 
 -- 初始化突破boss技能栏
-insert into astrology_skill_bar_item(belongTo,belongToId,skillId) values
+insert into astrology_skill_bar_item(belong_to,belong_to_id,skill_id) values
 ('Monster',100001,'1001,1000'),('Monster',100002,'1001,1000'),('Monster',100003,'1001,1000'),
 ('Monster',100004,'1001,1000'),('Monster',100005,'1001,1000'),('Monster',100006,'1001,1000'),
 ('Monster',200001,'1001,1000'),('Monster',200002,'1001,1000'),('Monster',200003,'1001,1000'),
@@ -58,37 +58,37 @@ insert into astrology_skill_bar_item(belongTo,belongToId,skillId) values
 ('Monster',400004,'1001,1000'),('Monster',400005,'1001,1000'),('Monster',400006,'1001,1000');
 
 -- 初始化副本
-INSERT INTO astrology_dungeon(id,name,mapId,maxRank,flushTime) values
+INSERT INTO astrology_dungeon(id,`name`,map_id,max_rank,flush_time) values
 (1,'缘神老家1',3,3,10),(2,'缘神老家2',3,3,60);
 
 -- 初始化副本boss
-INSERT INTO astrology_dungeon_boss(id,dungeonId,monsterId) values
+INSERT INTO astrology_dungeon_boss(id,dungeon_id,monster_id) values
 (1,1,10000),(2,1,10001),(3,2,10002);
 
 -- 初始化boss属性
-INSERT INTO astrology_monster(id, name,hp,maxHp,mp,maxMp,atk,magicAtk,def,magicDef,penetrate,magicPenetrate,criticalRate,
-                              criticalDamageReduction,criticalDamage,criticalReductionRate,behaviorSpeed,hit,dodge,
-                              lifeStealing,rank,level,description) values
+INSERT INTO astrology_monster(id,`name`,hp,max_hp,mp,max_mp,atk,magic_atk,def,magic_def,penetrate,magic_penetrate,critical_rate,
+                              critical_damage_reduction,critical_damage,critical_reduction_rate,behavior_speed,hit,dodge,
+                              life_stealing,rank,`level`,description) values
 (1,'叹息咏者',100000,100000,80000,80000,8000,8000,3000,1500,0,0,0.1,0,1.5,0,1300,7000,1500,0,2,40,''),
 (2,'黯星老魔',120000,120000,100000,100000,10000,8000,4000,1600,0,0,0.1,0,1.6,0,1600,7000,1800,0,2,40,''),
 (3,'缘神分身',30000,30000,10000,10000,1000,2000,500,1000,0,0,0.2,0,1.8,0,1000,3000,1000,0,1,40,'');
 
 -- 初始化任务boss属性
-INSERT INTO astrology_monster(id, name,hp,maxHp,mp,maxMp,atk,magicAtk,def,magicDef,penetrate,magicPenetrate,criticalRate,
-                              criticalDamageReduction,criticalDamage,criticalReductionRate,behaviorSpeed,hit,dodge,
-                              lifeStealing,rank,level,description) values
+INSERT INTO astrology_monster(id,`name`,hp,max_hp,mp,max_mp,atk,magic_atk,def,magic_def,penetrate,magic_penetrate,critical_rate,
+                              critical_damage_reduction,critical_damage,critical_reduction_rate,behavior_speed,hit,dodge,
+                              life_stealing,rank,`level`,description) values
 (200001,'莫子锋',100000,100000,80000,80000,8000,8000,3000,1500,0,0,0.1,0,1.5,0,1300,7000,1500,0,2,40,''),
 (200002,'黯星老魔',120000,120000,100000,100000,10000,8000,4000,1600,0,0,0.1,0,1.6,0,1600,7000,1800,0,2,40,''),
 (200003,'缘神分身',30000,30000,10000,10000,1000,2000,500,1000,0,0,0.2,0,1.8,0,1000,3000,1000,0,1,40,'');
 
 -- 初始化boss技能栏
-insert into astrology_skill_bar_item(belongTo,belongToId,skillId) values
+insert into astrology_skill_bar_item(belong_to,belong_to_id,skill_id) values
 ('Monster',1,'1,2,3,4,5'),
 ('Monster',2,'1,2,3,4,5'),
 ('Monster',3,'1,2,3,4,5');
 
 -- 初始化掉落物
-insert into astrology_loot(belongTo,belongToId,money,exp) values
+insert into astrology_loot(belong_to,belong_to_id,money,exp) values
 ('DungeonBoss',1,0,2000),
 ('DungeonBoss',2,0,4000),
 ('DungeonBoss',3,0,500),

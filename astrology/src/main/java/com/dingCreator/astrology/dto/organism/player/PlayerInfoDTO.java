@@ -1,8 +1,7 @@
-package com.dingCreator.astrology.dto.player;
+package com.dingCreator.astrology.dto.organism.player;
 
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
-import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.enums.TitleEnum;
 import lombok.Data;
 

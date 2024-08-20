@@ -3,7 +3,7 @@ package com.dingCreator.astrology.behavior;
 import cn.hutool.core.collection.CollectionUtil;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.dto.player.PlayerDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.entity.RankUpBoss;
 import com.dingCreator.astrology.enums.RankEnum;
 import com.dingCreator.astrology.enums.exception.RankExceptionEnum;

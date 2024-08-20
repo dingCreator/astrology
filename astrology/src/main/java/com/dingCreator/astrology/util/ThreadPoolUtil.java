@@ -1,6 +1,6 @@
 package com.dingCreator.astrology.util;
 
-import com.dingCreator.astrology.util.function.Executor;
+import com.dingCreator.astrology.util.function.FunctionExecutor;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -23,8 +23,8 @@ public class ThreadPoolUtil {
     /**
      * 线程池执行consumer
      */
-    public static void execute(Executor executor) {
-        EXECUTOR.execute(executor::execute);
+    public static void execute(FunctionExecutor functionExecutor) {
+        EXECUTOR.execute(functionExecutor::execute);
     }
 
     /**

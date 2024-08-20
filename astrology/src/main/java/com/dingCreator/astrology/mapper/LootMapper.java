@@ -22,7 +22,7 @@ public interface LootMapper {
      * @return
      */
     @Select({"<script>",
-            "select * from astrology_loot where belongTo=#{belongTo} and belongToId IN(",
+            "select * from astrology_loot where belong_to=#{belongTo} and belong_to_id IN(",
             "<foreach collection='belongToIdList' item='belongToId' index='belongToId' separator=','>",
             "#{belongToId}",
             "</foreach>)",

@@ -29,7 +29,7 @@ public interface EquipmentBelongToMapper {
      * @param belongToId 归属ID
      * @return 装备列表
      */
-    @Select("select * from astrology_equipment_belong_to where belongTo=#{belongTo} and belongToId=#{belongToId}")
+    @Select("select * from astrology_equipment_belong_to where belong_to=#{belongTo} and belong_to_id=#{belongToId}")
     List<EquipmentBelongTo> listByBelongToId(@Param("belongTo") String belongTo, @Param("belongToId") Long belongToId);
 
     /**
@@ -40,8 +40,8 @@ public interface EquipmentBelongToMapper {
      * @param equipmentId 装备ID
      * @return 装备列表
      */
-    @Select("select * from astrology_equipment_belong_to where belongTo=#{belongTo} and belongToId=#{belongToId} " +
-            "and equipmentId=#{equipmentId}")
+    @Select("select * from astrology_equipment_belong_to where belong_to=#{belongTo} and belong_to_id=#{belongToId} " +
+            "and equipment_id=#{equipmentId}")
     List<EquipmentBelongTo> getByBelongToIdAndEquipmentId(@Param("belongTo") String belongTo,
                                                           @Param("belongToId") Long belongToId,
                                                           @Param("equipmentId") Long equipmentId);
@@ -53,8 +53,8 @@ public interface EquipmentBelongToMapper {
      * @param belongToId 归属ID
      * @return 装备列表
      */
-    @Select("select equipmentId,count(1) equipmentCount from astrology_equipment_belong_to where belongTo=#{belongTo} " +
-            "and belongToId=#{belongToId} group by equipmentId")
+    @Select("select equipmentId,count(1) equipmentCount from astrology_equipment_belong_to where belong_to=#{belongTo} " +
+            "and belong_to_id=#{belongToId} group by equipment_id")
     List<EquipmentGroupQueryDTO> listGroupByBelongToId(@Param("belongTo") String belongTo,
                                                        @Param("belongToId") Long belongToId);
 
@@ -66,7 +66,7 @@ public interface EquipmentBelongToMapper {
      * @param equip      是否已装备
      * @return 装备列表
      */
-    @Select("select * from astrology_equipment_belong_to where belongTo=#{belongTo} and belongToId=#{belongToId} " +
+    @Select("select * from astrology_equipment_belong_to where belong_to=#{belongTo} and belong_to_id=#{belongToId} " +
             "and equip=#{equip}")
     List<EquipmentBelongTo> getBelongToIdEquip(@Param("belongTo") String belongTo, @Param("belongToId") Long belongToId,
                                                @Param("equip") Integer equip);
@@ -76,7 +76,7 @@ public interface EquipmentBelongToMapper {
      *
      * @param equipmentBelongTo 装备归属
      */
-    @Insert("INSERT INTO astrology_equipment_belong_to(belongTo, belongToId, equipmentId, level, equip)" +
+    @Insert("INSERT INTO astrology_equipment_belong_to(belong_to, belong_to_id, equipment_id, `level`, equip)" +
             "VALUES (#{belongTo}, #{belongToId}, #{equipmentId}, #{level}, #{equip})")
     void addBelongTo(EquipmentBelongTo equipmentBelongTo);
 
@@ -88,7 +88,7 @@ public interface EquipmentBelongToMapper {
      * @param belongToId 归属ID
      * @return 1
      */
-    @Update("update astrology_equipment_belong_to set belongTo=#{belongTo},belongToId=#{belongToId} where id=#{id}")
+    @Update("update astrology_equipment_belong_to set belong_to=#{belongTo},belong_to_id=#{belongToId} where id=#{id}")
     int updateBelongToId(@Param("id") Long id, @Param("belongTo") String belongTo, @Param("belongToId") Long belongToId);
 
     /**

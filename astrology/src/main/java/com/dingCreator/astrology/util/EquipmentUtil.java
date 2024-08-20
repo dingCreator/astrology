@@ -1,13 +1,13 @@
 package com.dingCreator.astrology.util;
 
 import com.dingCreator.astrology.cache.PlayerCache;
-import com.dingCreator.astrology.dto.player.PlayerInfoDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.equipment.EquipmentDTO;
-import com.dingCreator.astrology.dto.OrganismDTO;
+import com.dingCreator.astrology.dto.organism.OrganismInfoDTO;
 import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
-import com.dingCreator.astrology.enums.PropertiesTypeEnum;
+import com.dingCreator.astrology.enums.equipment.EquipmentPropertiesTypeEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentTypeEnum;
 import com.dingCreator.astrology.enums.exception.EquipmentExceptionEnum;
@@ -53,36 +53,74 @@ public class EquipmentUtil {
     /**
      * 获取指定属性
      *
-     * @param val                原属性
-     * @param propertiesTypeEnum 属性类型
-     * @param organismDTO        生物属性
+     * @param val                         原属性
+     * @param equipmentPropertiesTypeEnum 属性类型
+     * @param equipmentBarDTO             装备栏
      * @return 计算装备后的属性
      */
-    public static long getVal(long val, PropertiesTypeEnum propertiesTypeEnum, OrganismDTO organismDTO) {
-        if (Objects.isNull(organismDTO.getEquipmentBarDTO())) {
+    public static Long getLongVal(Long val, EquipmentPropertiesTypeEnum equipmentPropertiesTypeEnum,
+                                  EquipmentBarDTO equipmentBarDTO) {
+        if (Objects.isNull(equipmentBarDTO)) {
             return val;
         }
         // 武器
-        val = getVal(val, propertiesTypeEnum, organismDTO.getEquipmentBarDTO().getWeapon());
+        val = getLongVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getWeapon());
         // 防具
-        val = getVal(val, propertiesTypeEnum, organismDTO.getEquipmentBarDTO().getArmor());
+        val = getLongVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getArmor());
         // 饰品
-        val = getVal(val, propertiesTypeEnum, organismDTO.getEquipmentBarDTO().getJewelry());
+        val = getLongVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getJewelry());
         return val;
     }
 
-    public static long getVal(long src, PropertiesTypeEnum propertiesTypeEnum, EquipmentDTO equipmentDTO) {
+    public static Long getLongVal(Long src, EquipmentPropertiesTypeEnum equipmentPropertiesTypeEnum,
+                                  EquipmentDTO equipmentDTO) {
         if (Objects.isNull(equipmentDTO)) {
             return src;
         }
         EquipmentEnum equipEnum = EquipmentEnum.getById(equipmentDTO.getEquipmentId());
         AtomicLong atomicLong = new AtomicLong(src);
-        equipEnum.getProp().stream().filter(equip -> propertiesTypeEnum.equals(equip.getEquipmentPropertiesTypeEnum()))
+        equipEnum.getProp().stream()
+                .filter(equip -> equipmentPropertiesTypeEnum.equals(equip.getEquipmentPropertiesTypeEnum()))
                 .forEach(prop -> {
                     atomicLong.addAndGet(prop.getProp().getVal());
                     atomicLong.updateAndGet(prev -> Math.round(prev * (1 + prop.getProp().getRate())));
                 });
         return atomicLong.get();
+    }
+
+    /**
+     * 获取指定属性
+     *
+     * @param val                         原属性
+     * @param equipmentPropertiesTypeEnum 属性类型
+     * @param equipmentBarDTO             装备栏
+     * @return 计算装备后的属性
+     */
+    public static Float getFloatVal(Float val, EquipmentPropertiesTypeEnum equipmentPropertiesTypeEnum,
+                                  EquipmentBarDTO equipmentBarDTO) {
+        if (Objects.isNull(equipmentBarDTO)) {
+            return val;
+        }
+        // 武器
+        val = getFloatVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getWeapon());
+        // 防具
+        val = getFloatVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getArmor());
+        // 饰品
+        val = getFloatVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getJewelry());
+        return val;
+    }
+
+    public static Float getFloatVal(final Float src, EquipmentPropertiesTypeEnum equipmentPropertiesTypeEnum,
+                                  EquipmentDTO equipmentDTO) {
+        if (Objects.isNull(equipmentDTO)) {
+            return src;
+        }
+
+        EquipmentEnum equipEnum = EquipmentEnum.getById(equipmentDTO.getEquipmentId());
+        return equipEnum.getProp().stream()
+                .filter(equip -> equipmentPropertiesTypeEnum.equals(equip.getEquipmentPropertiesTypeEnum()))
+                .map(prop -> prop.getProp().getRate())
+                .reduce(src, Float::sum);
     }
 
     /**

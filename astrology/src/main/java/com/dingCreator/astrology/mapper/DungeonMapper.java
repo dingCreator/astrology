@@ -30,7 +30,7 @@ public interface DungeonMapper {
      * @param name  副本名称
      * @return 副本
      */
-    @Select("select * from astrology_dungeon where mapId=#{mapId} and name=#{name}")
+    @Select("select * from astrology_dungeon where map_id=#{mapId} and `name`=#{name}")
     Dungeon getByName(@Param("mapId") Long mapId, @Param("name") String name);
 
     /**
@@ -39,6 +39,6 @@ public interface DungeonMapper {
      * @param mapId 地图ID
      * @return 副本列表
      */
-    @Select("select * from astrology_dungeon where mapId=#{mapId}")
+    @Select("select * from astrology_dungeon where map_id=#{mapId}")
     List<Dungeon> list(@Param("mapId") Long mapId);
 }

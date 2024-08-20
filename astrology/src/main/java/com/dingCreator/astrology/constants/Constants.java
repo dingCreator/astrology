@@ -54,6 +54,14 @@ public class Constants {
      * 任务错误码前缀
      */
     public static final String TASK_EXCEPTION_PREFIX = "E_TASK_";
+    /**
+     * 系统错误码前缀
+     */
+    public static final String SYS_EXCEPTION_PREFIX = "E_SYS_";
+    /**
+     * 世界boss错误码前缀
+     */
+    public static final String WORLD_BOSS_EXCEPTION_PREFIX = "E_WORLD_BOSS_";
 
     // **----** 经验相关配置 **----**
     /**
@@ -90,12 +98,20 @@ public class Constants {
      * 发起决斗冷却时间
      */
     public static final int BATTLE_CD = 30;
+    /**
+     * 讨伐世界boss CD
+     */
+    public static final int ATTACK_WORLD_BOSS_CD = 60;
 
     // **----** CD key前缀 **----**
     /**
      * 战斗CD前缀
      */
     public static final String CD_BATTLE_PREFIX = "cd_battle_";
+    /**
+     * 讨伐世界boss CD前缀
+     */
+    public static final String CD_WORLD_BOSS_PREFIX = "cd_world_boss_";
 
     // **----** 组队配置 **----**
     /**
@@ -140,4 +156,8 @@ public class Constants {
      * 锁前缀-玩家
      */
     public static final String PLAYER_LOCK_PREFIX = "LOCK_PLAYER_";
+    /**
+     * 每日最多攻击世界boss次数
+     */
+    public static final int WORLD_BOSS_MAX_ATK_TIMES = 3;
 }

@@ -33,11 +33,11 @@ public interface DungeonRecordMapper {
      * @return rows
      */
     @Select({"<script>",
-            "select * from astrology_dungeon_record where playerId IN (",
+            "select * from astrology_dungeon_record where player_id IN (",
             "<foreach collection='playerIdList' item='playerId' index='playerId' separator=','>",
             "#{playerId}",
             "</foreach>",
-            ") and dungeonId=#{dungeonId}",
+            ") and dungeon_id=#{dungeonId}",
             "</script>"})
     List<DungeonRecord> queryList(@Param("playerIdList") List<Long> playerIdList, @Param("dungeonId") Long dungeonId);
 
@@ -47,7 +47,7 @@ public interface DungeonRecordMapper {
      * @param dungeonRecord 探索记录
      * @return rows
      */
-    @Insert("insert into astrology_dungeon_record(playerId,dungeonId,lastExploreTime) values"
+    @Insert("insert into astrology_dungeon_record(player_id,dungeon_id,last_explore_time) values"
             + "(#{playerId},#{dungeonId},#{lastExploreTime})")
     Integer createRecord(DungeonRecord dungeonRecord);
 
@@ -57,7 +57,7 @@ public interface DungeonRecordMapper {
      * @param dungeonRecord 探索记录
      * @return rows
      */
-    @Insert("update astrology_dungeon_record set lastExploreTime=#{lastExploreTime} where "
-            + "playerId=#{playerId} and dungeonId=#{dungeonId}")
+    @Insert("updateHpById astrology_dungeon_record set last_explore_time=#{lastExploreTime} where "
+            + "player_id=#{playerId} and dungeon_id=#{dungeonId}")
     Integer updateRecord(DungeonRecord dungeonRecord);
 }

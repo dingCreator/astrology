@@ -1,4 +1,4 @@
-package com.dingCreator.astrology.dto;
+package com.dingCreator.astrology.dto.organism;
 
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
@@ -16,11 +16,11 @@ import java.util.List;
  * @date 2024/2/1
  */
 @Data
-public class OrganismDTO implements Serializable {
+public class OrganismInfoDTO implements Serializable {
     /**
      * 生物属性
      */
-    private Organism organism;
+    private OrganismDTO organismDTO;
     /**
      * 技能组
      */

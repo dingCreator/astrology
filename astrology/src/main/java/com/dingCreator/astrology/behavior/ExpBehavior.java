@@ -5,9 +5,8 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.dto.player.PlayerDTO;
-import com.dingCreator.astrology.dto.player.PlayerInfoDTO;
-import com.dingCreator.astrology.entity.Player;
+import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.RankEnum;
 import com.dingCreator.astrology.enums.exception.ExpExceptionEnum;
@@ -66,6 +65,9 @@ public class ExpBehavior {
                 playerDTO.setMaxHp(playerDTO.getMaxHp() + getLevelUpIncrease(base.getInitHp(), playerDTO.getLevel()));
                 playerDTO.setMp(playerDTO.getMaxMp() + getLevelUpIncrease(playerDTO.getMaxMp(), 0.03F));
                 playerDTO.setMaxMp(playerDTO.getMaxMp() + getLevelUpIncrease(playerDTO.getMaxMp(), 0.03F));
+                // 四种特殊属性赋空值，下次获取时重新计算
+                playerDTO.clearAdditionVal();
+
                 playerDTO.setAtk(playerDTO.getAtk() + getLevelUpIncrease(base.getInitAtk(), playerDTO.getLevel()));
                 playerDTO.setMagicAtk(playerDTO.getMagicAtk() + getLevelUpIncrease(base.getInitMagicAtk(), playerDTO.getLevel()));
                 playerDTO.setDef(playerDTO.getDef() + getLevelUpIncrease(base.getInitDef(), playerDTO.getLevel()));
@@ -167,16 +169,20 @@ public class ExpBehavior {
         hangUpVO.setHangUpTime(between);
         // 最长有收益挂机时间24h
         between = Math.min(between, Constants.MAX_HANG_UP_TIME);
+        // 记录值
+        long oldHpWithAddition = playerDTO.getHpWithAddition();
+        long oldMpWithAddition = playerDTO.getMpWithAddition();
         // 回复状态
-        long maxHp = playerDTO.getMaxHpWithAddition();
-        long oldHp = playerDTO.getHpWithAddition();
-        long maxMp = playerDTO.getMaxMpWithAddition();
-        long oldMp = playerDTO.getMpWithAddition();
+        long oldHp = playerDTO.getHp();
+        long maxHp = playerDTO.getMaxHp();
+        long oldMp = playerDTO.getMp();
+        long maxMp = playerDTO.getMaxMp();
         float recharge = RankEnum.getEnum(playerDTO.getJob(), playerDTO.getRank()).getRechargeRatePerMin();
         long newHp = Math.min(maxHp, oldHp + Math.round(maxHp * recharge * between));
         long newMp = Math.min(maxMp, oldMp + Math.round(maxMp * recharge * between));
         playerDTO.setHp(newHp);
         playerDTO.setMp(newMp);
+        playerDTO.clearAdditionVal();
         // 计算经验值
         long exp = (10 + (long) Math.pow(playerDTO.getLevel() - 1, 3) / 30) * between;
         LevelChange levelChange = getExp(id, exp);
@@ -184,8 +190,8 @@ public class ExpBehavior {
         hangUpVO.setExp(levelChange.getExp());
         hangUpVO.setOldLevel(levelChange.getOldLevel());
         hangUpVO.setNewLevel(levelChange.getNewLevel());
-        hangUpVO.setHp(newHp - oldHp);
-        hangUpVO.setMp(newMp - oldMp);
+        hangUpVO.setHp(playerDTO.getHpWithAddition() - oldHpWithAddition);
+        hangUpVO.setMp(playerDTO.getMpWithAddition() - oldMpWithAddition);
         BaseResponse<HangUpVO> response = new BaseResponse<>();
         response.setContent(hangUpVO);
         return response;

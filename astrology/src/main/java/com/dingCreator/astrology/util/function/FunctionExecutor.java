@@ -5,7 +5,7 @@ package com.dingCreator.astrology.util.function;
  * @date 2024/8/3
  */
 @FunctionalInterface
-public interface Executor {
+public interface FunctionExecutor {
     /**
      * 执行命令
      */

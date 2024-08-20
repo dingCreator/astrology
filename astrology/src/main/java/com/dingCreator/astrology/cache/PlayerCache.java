@@ -1,11 +1,10 @@
 package com.dingCreator.astrology.cache;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.ConcurrentHashSet;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
-import com.dingCreator.astrology.dto.player.PlayerDTO;
-import com.dingCreator.astrology.dto.player.PlayerInfoDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.service.PlayerService;
@@ -47,7 +46,7 @@ public class PlayerCache {
             playerInfoDTO.setTeam(false);
 
             PlayerDTO playerDTO = new PlayerDTO();
-            BeanUtil.copyProperties(player, playerDTO);
+            playerDTO.copyProperties(player);
             playerInfoDTO.setPlayerDTO(playerDTO);
             PLAYER_MAP.put(player.getId(), playerInfoDTO);
         });
@@ -60,17 +59,21 @@ public class PlayerCache {
      * @return 玩家数据
      */
     public static PlayerInfoDTO getPlayerById(Long id) {
-        return LockUtil.execute(Constants.PLAYER_LOCK_PREFIX + id, () -> {
-            PlayerInfoDTO playerInfoDTO = PLAYER_MAP.getOrDefault(id, null);
-            if (Objects.isNull(playerInfoDTO)) {
-                playerInfoDTO = PlayerService.getPlayerDTOById(id);
-                if (Objects.isNull(playerInfoDTO.getPlayerDTO())) {
-                    throw PlayerExceptionEnum.PLAYER_NOT_FOUND.getException();
+        PlayerInfoDTO playerInfoDTO = PLAYER_MAP.getOrDefault(id, null);
+        if (Objects.isNull(playerInfoDTO)) {
+            return LockUtil.execute(Constants.PLAYER_LOCK_PREFIX + id, () -> {
+                PlayerInfoDTO temp = PLAYER_MAP.getOrDefault(id, null);
+                if (Objects.isNull(temp)) {
+                    temp = PlayerService.getPlayerDTOById(id);
+                    if (Objects.isNull(temp.getPlayerDTO())) {
+                        throw PlayerExceptionEnum.PLAYER_NOT_FOUND.getException();
+                    }
+                    PLAYER_MAP.put(id, temp);
                 }
-                PLAYER_MAP.put(id, playerInfoDTO);
-            }
-            return playerInfoDTO;
-        });
+                return temp;
+            });
+        }
+        return playerInfoDTO;
     }
 
     /**
@@ -95,7 +98,7 @@ public class PlayerCache {
                 .map(PlayerInfoDTO::getPlayerDTO)
                 .map(playerDTO -> {
                     Player player = new Player();
-                    BeanUtil.copyProperties(playerDTO, player);
+                    BeanUtil.copyProperties(playerDTO, player, true);
                     return player;
                 }).collect(Collectors.toList());
         players.forEach(player -> ThreadPoolUtil.executeConsumer(PlayerService::updatePlayerById, player));

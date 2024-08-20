@@ -3,8 +3,8 @@ package com.dingCreator.astrology.behavior;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.dto.player.PlayerDTO;
-import com.dingCreator.astrology.dto.player.PlayerInfoDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.TeamDTO;
 import com.dingCreator.astrology.entity.*;
 import com.dingCreator.astrology.enums.LootBelongToEnum;
@@ -61,27 +61,20 @@ public class DungeonBehavior {
         List<Long> playerIds;
         // CD计算
         if (playerInfoDTO.getTeam()) {
+            TeamBehavior.getInstance().captainOnlyValidate(playerId);
             TeamDTO teamDTO = TeamCache.getTeamByPlayerId(playerId);
             playerIds = teamDTO.getMembers();
-
-            List<DungeonRecord> dungeonRecordList = DungeonRecordService.queryList(playerIds, dungeon.getId());
-            if (Objects.nonNull(dungeonRecordList) && !dungeonRecordList.isEmpty()) {
-                dungeonRecordList.forEach(rec -> {
-                    long cd = CdUtil.getDuration(rec.getLastExploreTime(), dungeon.getFlushTime());
-                    if (cd > 0) {
-                        throw new BusinessException(Constants.CD_EXCEPTION_PREFIX + "001", "CD:" + cd + "s");
-                    }
-                });
-            }
         } else {
             playerIds = Collections.singletonList(playerId);
-            DungeonRecord record = DungeonRecordService.query(playerId, dungeon.getId());
-            if (Objects.nonNull(record)) {
-                long cd = CdUtil.getDuration(record.getLastExploreTime(), dungeon.getFlushTime());
+        }
+        List<DungeonRecord> dungeonRecordList = DungeonRecordService.queryList(playerIds, dungeon.getId());
+        if (Objects.nonNull(dungeonRecordList) && !dungeonRecordList.isEmpty()) {
+            dungeonRecordList.forEach(rec -> {
+                long cd = CdUtil.getDuration(rec.getLastExploreTime(), dungeon.getFlushTime());
                 if (cd > 0) {
                     throw new BusinessException(Constants.CD_EXCEPTION_PREFIX + "001", "CD:" + cd + "s");
                 }
-            }
+            });
         }
         // 新增探索记录
         DungeonRecordService.insertOrUpdate(playerIds, dungeon.getId(), new Date());

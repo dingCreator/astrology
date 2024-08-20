@@ -4,11 +4,10 @@ import com.dingCreator.astrology.behavior.PlayerBehavior;
 import com.dingCreator.astrology.behavior.TeamBehavior;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.cache.TeamCache;
-import com.dingCreator.astrology.dto.player.PlayerDTO;
-import com.dingCreator.astrology.dto.player.PlayerInfoDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.TeamDTO;
 import com.dingCreator.astrology.entity.Map;
-import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.exception.MapExceptionEnum;
 import com.dingCreator.astrology.service.MapService;
@@ -39,6 +38,19 @@ public class MapUtil {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId).getPlayerDTO();
         long mapId = playerDTO.getMapId();
         return mapId << 32 >> 32;
+    }
+
+    /**
+     * 获取两名玩家是否在同个地图
+     *
+     * @return 是/否
+     */
+    public static boolean inSameMap(long playerId1, long playerId2) {
+        PlayerDTO playerDto1 = PlayerCache.getPlayerById(playerId1).getPlayerDTO();
+        PlayerDTO playerDto2 = PlayerCache.getPlayerById(playerId2).getPlayerDTO();
+        return !PlayerStatusEnum.MOVING.getCode().equals(playerDto1.getStatus())
+                && !PlayerStatusEnum.MOVING.getCode().equals(playerDto2.getStatus())
+                && getNowLocation(playerId1).equals(getNowLocation(playerId2));
     }
 
     /**
@@ -80,7 +92,7 @@ public class MapUtil {
     /**
      * 计算移动时间
      *
-     * @param endMapId   终点地图ID
+     * @param endMapId 终点地图ID
      * @return 移动时间（s）
      */
     public static long moveTime(long playerId, long startMapId, long endMapId) {
@@ -137,8 +149,8 @@ public class MapUtil {
 
         playerList.forEach(p -> {
             PlayerBehavior.getInstance().updatePlayerStatus(p, PlayerStatusEnum.MOVING,
-                            () -> PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(p)),
-                            MapExceptionEnum.NOT_FREE.getException());
+                    () -> PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(p)),
+                    MapExceptionEnum.NOT_FREE.getException());
             p.setMapId(getMovingMapId(p.getMapId(), mapId));
         });
         PlayerCache.flush(playerList.stream().map(PlayerDTO::getId).collect(Collectors.toList()));

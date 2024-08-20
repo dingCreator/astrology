@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.PlayerCache;
+import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
@@ -100,6 +101,16 @@ public class EquipmentBehavior {
             equipmentVO.setEquip(equipmentBelongTo.getEquip() ? "已装备" : "未装备");
             return equipmentVO;
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * 查询装备栏
+     *
+     * @param playerId 玩家ID
+     * @return 装备栏
+     */
+    public EquipmentBarDTO getEquipmentBar(long playerId) {
+        return PlayerCache.getPlayerById(playerId).getEquipmentBarDTO();
     }
 
     private static class Holder {

@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.dingCreator.astrology.entity.DungeonBoss;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -12,23 +13,6 @@ import java.util.List;
  * @date 2024/4/7
  */
 @Mapper
-public interface DungeonBossMapper {
+public interface DungeonBossMapper extends BaseMapper<DungeonBoss> {
 
-    /**
-     * 根据ID获取boss
-     *
-     * @param id ID
-     * @return boss
-     */
-    @Select("select * from astrology_dungeon_boss where id=#{id}")
-    DungeonBoss getById(@Param("id") Long id);
-
-    /**
-     * 根据副本ID获取boss
-     *
-     * @param dungeonId 副本ID
-     * @return boss信息
-     */
-    @Select("select * from astrology_dungeon_boss where dungeonId=#{dungeonId}")
-    List<DungeonBoss> getByDungeonId(@Param("dungeonId") Long dungeonId);
 }

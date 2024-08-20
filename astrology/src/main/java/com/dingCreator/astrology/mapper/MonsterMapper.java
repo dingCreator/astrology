@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.dingCreator.astrology.entity.base.Monster;
 import org.apache.ibatis.annotations.*;
 
@@ -10,7 +11,7 @@ import java.util.List;
  * @date 2024/3/29
  */
 @Mapper
-public interface MonsterMapper {
+public interface MonsterMapper extends BaseMapper<Monster> {
 
     /**
      * 获取怪物信息
@@ -48,9 +49,7 @@ public interface MonsterMapper {
     /**
      * 新建怪物
      *
-     * @param monster
+     * @param monster 怪物信息
      */
     void createMonster(@Param("monster") Monster monster);
-
-    void updateMonsterById(@Param("id") Long id);
 }
