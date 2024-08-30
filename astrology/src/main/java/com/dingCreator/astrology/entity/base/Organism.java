@@ -116,4 +116,6 @@ public class Organism {
      */
     @TableField("`level`")
     protected Integer level;
+
+    public static final String NAME = "name";
 }

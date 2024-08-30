@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.database;
 
 import lombok.Getter;
+import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 
 import java.util.List;
@@ -27,6 +28,12 @@ public class DatabaseProvider {
         return Holder.PROVIDER;
     }
 
+    private void validateSqlSessionFactory() {
+        if (Objects.isNull(DatabaseContext.getSqlSessionFactory())) {
+            throw new NullPointerException("sql session factory may not initial");
+        }
+    }
+
     /**
      * 执行SQL
      *
@@ -34,45 +41,32 @@ public class DatabaseProvider {
      * @return 处理结果
      */
     public <T> T executeReturn(Function<SqlSession, T> function) {
-        if (Objects.isNull(DatabaseContext.getSqlSessionFactory())) {
-            throw new NullPointerException("sql session factory may not initial");
-        }
-        try (SqlSession sqlSession = DatabaseContext.getSqlSessionFactory().openSession()) {
+        validateSqlSessionFactory();
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = DatabaseContext.getSqlSessionFactory().openSession(ExecutorType.BATCH, false);
             return function.apply(sqlSession);
+        } catch (Exception e) {
+            if (sqlSession != null) {
+                sqlSession.rollback();
+            }
+            throw e;
+        } finally {
+            if (sqlSession != null) {
+                sqlSession.close();
+            }
         }
     }
 
     /**
      * 执行SQL
+     *
      * @param consumer 执行操作
      */
     public void execute(Consumer<SqlSession> consumer) {
-        if (Objects.isNull(DatabaseContext.getSqlSessionFactory())) {
-            throw new NullPointerException("sql session factory may not initial");
-        }
-        try (SqlSession sqlSession = DatabaseContext.getSqlSessionFactory().openSession()) {
+        executeReturn(sqlSession -> {
             consumer.accept(sqlSession);
-        }
-    }
-
-    public <T> T doExecuteTransaction(Function<SqlSession, T> function) {
-        if (Objects.isNull(DatabaseContext.getSqlSessionFactory())) {
-            throw new NullPointerException("sql session factory may not initial");
-        }
-
-        try (SqlSession sqlSession = DatabaseContext.getSqlSessionFactory().openSession()) {
-            sqlSession.getConnection().setAutoCommit(false);
-            try {
-                return function.apply(sqlSession);
-            } catch (Exception e) {
-                sqlSession.rollback();
-                throw e;
-            } finally {
-                sqlSession.getConnection().setAutoCommit(true);
-            }
-        } catch (Exception e) {
-
-        }
-        return null;
+            return null;
+        });
     }
 }

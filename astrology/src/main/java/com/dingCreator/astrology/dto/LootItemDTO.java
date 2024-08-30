@@ -1,40 +1,19 @@
 package com.dingCreator.astrology.dto;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-import java.io.Serializable;
 
 /**
  * @author ding
- * @date 2024/4/10
+ * @date 2024/8/27
  */
 @Data
-public class LootItemDTO implements Serializable {
+public class LootItemDTO {
     /**
-     * 掉落物类型
+     * 掉落率
      */
-    protected String lootItemType;
+    private Float rate;
     /**
-     * 爆率
+     * 掉落物
      */
-    protected Float rate;
-
-    @Data
-    @EqualsAndHashCode(callSuper = true)
-    public static class EquipmentItem extends LootItemDTO {
-        /**
-         * 装备ID
-         */
-        private Long equipmentId;
-    }
-
-    @Data
-    @EqualsAndHashCode(callSuper = true)
-    public static class TitleItem extends LootItemDTO {
-        /**
-         * 称号ID
-         */
-        private Long titleId;
-    }
+    private ArticleItemDTO articleItem;
 }

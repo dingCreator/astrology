@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.dingCreator.astrology.entity.RankUpBoss;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -12,7 +13,7 @@ import java.util.List;
  * @date 2024/3/29
  */
 @Mapper
-public interface RankUpBossMapper {
+public interface RankUpBossMapper extends BaseMapper<RankUpBoss> {
 
     /**
      * 获取突破boss

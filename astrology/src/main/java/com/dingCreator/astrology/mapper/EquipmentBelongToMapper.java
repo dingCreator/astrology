@@ -53,7 +53,7 @@ public interface EquipmentBelongToMapper {
      * @param belongToId 归属ID
      * @return 装备列表
      */
-    @Select("select equipmentId,count(1) equipmentCount from astrology_equipment_belong_to where belong_to=#{belongTo} " +
+    @Select("select equipment_id,count(1) equipmentCount from astrology_equipment_belong_to where belong_to=#{belongTo} " +
             "and belong_to_id=#{belongToId} group by equipment_id")
     List<EquipmentGroupQueryDTO> listGroupByBelongToId(@Param("belongTo") String belongTo,
                                                        @Param("belongToId") Long belongToId);

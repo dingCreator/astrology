@@ -4,6 +4,7 @@ import com.dingCreator.astrology.entity.Loot;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,21 +22,20 @@ public class DungeonResultVO implements Serializable {
      * 获得的掉落物汇总
      * playerId : LootVO
      */
-    private Map<Long, LootVO> lootMap;
-    /**
-     * 副本boss挑战详情
-     */
-    private List<DungeonBossResult> dungeonBossResultList;
+    private Map<Long, LootVO> playerLootMap;
 
-    @Data
-    public static class DungeonBossResult implements Serializable {
-        /**
-         * 战斗信息
-         */
-        private BattleResultVO battleResultVO;
-        /**
-         * boss掉落物
-         */
-        private Loot loot;
+    public DungeonResultVO() {
+        playerLootMap = new HashMap<>();
+    }
+
+    public void addLoot(Map<Long, LootVO> lootVOMap) {
+        lootVOMap.forEach(this::addLoot);
+    }
+
+    public void addLoot(Long id, LootVO vo) {
+        LootVO exist = playerLootMap.getOrDefault(id, new LootVO());
+        exist.setMoney(exist.getMoney() + vo.getMoney());
+        exist.setExp(exist.getExp() + vo.getExp());
+        exist.getLootItemNameList().addAll(vo.getLootItemNameList());
     }
 }

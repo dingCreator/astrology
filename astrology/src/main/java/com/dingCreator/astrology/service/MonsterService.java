@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.entity.WorldBoss;
 import com.dingCreator.astrology.entity.base.Monster;
@@ -28,6 +29,19 @@ public class MonsterService {
     }
 
     /**
+     * 通过怪物名称获取怪物信息
+     *
+     * @param name 怪物名
+     * @return 怪物信息
+     */
+    public static List<Monster> listMonsterByName(String name) {
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
+            QueryWrapper<Monster> wrapper = new QueryWrapper<Monster>().eq(Monster.NAME, name);
+            return sqlSession.getMapper(MonsterMapper.class).selectList(wrapper);
+        });
+    }
+
+    /**
      * 查询怪物
      *
      * @param index 下标
@@ -36,7 +50,7 @@ public class MonsterService {
      */
     public static List<Monster> listMonster(int index, int size) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession.getMapper(MonsterMapper.class)
-                .listMonster(index + 1, size));
+                .listMonster(index - 1, size));
     }
 
     /**
@@ -44,9 +58,9 @@ public class MonsterService {
      *
      * @param monster 怪物信息
      */
-    public static void createMonster(Monster monster) {
-        DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(MonsterMapper.class)
-                .createMonster(monster));
+    public static long createMonster(Monster monster) {
+        DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(MonsterMapper.class).insert(monster));
+        return monster.getId();
     }
 
     /**
@@ -79,7 +93,31 @@ public class MonsterService {
      * @return 怪物信息
      */
     public static List<Monster> getMonsterByIds(List<Long> ids) {
-        return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession
+        return getMonsterByIds(ids, true);
+    }
+
+    /**
+     * 通过怪物ID获取怪物信息
+     *
+     * @param ids        IDs
+     * @param fullStatus 是否满状态
+     * @return 怪物信息
+     */
+    public static List<Monster> getMonsterByIds(List<Long> ids, boolean fullStatus) {
+        List<Monster> monsterList = DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession
                 .getMapper(MonsterMapper.class).getMonsterByIds(ids));
+        if (fullStatus) {
+            monsterList.forEach(monster -> {
+                monster.setHp(monster.getMaxHp());
+                monster.setMp(monster.getMaxMp());
+            });
+        }
+        return monsterList;
+    }
+
+    public static int count() {
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
+            sqlSession.getMapper(MonsterMapper.class).selectCount(new QueryWrapper<>())
+        );
     }
 }

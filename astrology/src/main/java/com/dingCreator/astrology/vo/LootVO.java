@@ -1,6 +1,5 @@
 package com.dingCreator.astrology.vo;
 
-import com.dingCreator.astrology.dto.LootItemDTO;
 import lombok.Data;
 
 import java.io.Serializable;

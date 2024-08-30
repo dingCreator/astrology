@@ -1,8 +1,10 @@
 package com.dingCreator.astrology.behavior;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.dto.LootDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.TeamDTO;
@@ -16,6 +18,7 @@ import com.dingCreator.astrology.exception.BusinessException;
 import com.dingCreator.astrology.service.DungeonBossService;
 import com.dingCreator.astrology.service.DungeonRecordService;
 import com.dingCreator.astrology.service.DungeonService;
+import com.dingCreator.astrology.service.LootService;
 import com.dingCreator.astrology.util.BattleUtil;
 import com.dingCreator.astrology.util.CdUtil;
 import com.dingCreator.astrology.util.LootUtil;
@@ -23,6 +26,7 @@ import com.dingCreator.astrology.util.MapUtil;
 import com.dingCreator.astrology.vo.BattleResultVO;
 import com.dingCreator.astrology.vo.DungeonResultVO;
 import com.dingCreator.astrology.vo.DungeonVO;
+import com.dingCreator.astrology.vo.LootVO;
 
 import java.util.*;
 import java.util.Map;
@@ -78,12 +82,12 @@ public class DungeonBehavior {
         }
         // 新增探索记录
         DungeonRecordService.insertOrUpdate(playerIds, dungeon.getId(), new Date());
+        // 初始化掉落物记录
+        Map<LootBelongToEnum, List<Long>> belongToMap = new HashMap<>();
+        // 初始化对战结果
+        DungeonResultVO dungeonResultVO = new DungeonResultVO();
         // 处理对战
         List<DungeonBoss> bossList = DungeonBossService.getByDungeonId(dungeon.getId());
-        DungeonResultVO dungeonResultVO = new DungeonResultVO();
-        List<DungeonResultVO.DungeonBossResult> dungeonBossResultList = new ArrayList<>(bossList.size());
-
-        Map<LootBelongToEnum, List<Long>> lootMap = new HashMap<>(bossList.size() + 1);
         boolean lose = false;
         for (DungeonBoss boss : bossList) {
             BattleResultVO resultVO;
@@ -97,16 +101,11 @@ public class DungeonBehavior {
                 }
                 throw e;
             }
-            DungeonResultVO.DungeonBossResult bossResult = new DungeonResultVO.DungeonBossResult();
-            bossResult.setBattleResultVO(resultVO);
-            dungeonBossResultList.add(bossResult);
 
             if (BattleResultVO.BattleResult.WIN.equals(resultVO.getBattleResult())) {
-                List<Long> belongToIdList = lootMap.getOrDefault(LootBelongToEnum.DungeonBoss, new ArrayList<>());
-                belongToIdList.add(boss.getId());
-                if (!lootMap.containsKey(LootBelongToEnum.DungeonBoss)) {
-                    lootMap.put(LootBelongToEnum.DungeonBoss, belongToIdList);
-                }
+                List<Long> bossIds = belongToMap.getOrDefault(LootBelongToEnum.DUNGEON_BOSS, new ArrayList<>());
+                bossIds.add(boss.getId());
+                belongToMap.put(LootBelongToEnum.DUNGEON_BOSS, bossIds);
             } else {
                 dungeonResultVO.setExploreResult(BattleResultVO.BattleResult.LOSE);
                 lose = true;
@@ -115,14 +114,14 @@ public class DungeonBehavior {
         }
         dungeonResultVO.setExploreResult(lose ? BattleResultVO.BattleResult.LOSE : BattleResultVO.BattleResult.WIN);
         if (!lose) {
-            List<Long> belongToIdList = lootMap.getOrDefault(LootBelongToEnum.Dungeon, new ArrayList<>());
-            belongToIdList.add(dungeon.getId());
-            if (!lootMap.containsKey(LootBelongToEnum.Dungeon)) {
-                lootMap.put(LootBelongToEnum.Dungeon, belongToIdList);
-            }
+            belongToMap.put(LootBelongToEnum.DUNGEON, Collections.singletonList(dungeon.getId()));
         }
-        dungeonResultVO.setLootMap(LootUtil.getLoot(lootMap, playerIds));
-        dungeonResultVO.setDungeonBossResultList(dungeonBossResultList);
+        belongToMap.forEach(((lootBelongToEnum, belongToIds) -> {
+            List<Loot> lootList = LootService.getByBelongToId(lootBelongToEnum.getBelongTo(), belongToIds);
+            if (CollectionUtil.isNotEmpty(lootList)) {
+                lootList.forEach(loot -> dungeonResultVO.addLoot(LootUtil.sendLoot(loot, playerIds)));
+            }
+        }));
         return dungeonResultVO;
     }
 

@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +17,9 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("astrology_task_schedule")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TaskSchedule {
     /**
      * 主键
@@ -26,17 +32,10 @@ public class TaskSchedule {
     @TableField("player_id")
     private Long playerId;
     /**
-     * 父任务ID
+     * 任务模板ID
      */
-    @TableField("parent_task_id")
-    private Long parentTaskId;
-    /**
-     * 任务类型
-     *
-     * @see com.dingCreator.astrology.enums.task.TaskTypeEnum
-     */
-    @TableField("task_type")
-    private String taskType;
+    @TableField("task_template_id")
+    private Long taskTemplateId;
     /**
      * 任务进度
      *
@@ -45,18 +44,14 @@ public class TaskSchedule {
     @TableField("task_schedule")
     private String taskSchedule;
     /**
-     * 任务目标数量
-     */
-    @TableField("target")
-    private Integer target;
-    /**
-     * 已完成数量
-     */
-    @TableField("complete")
-    private Integer complete;
-    /**
      * 状态更新时间
      */
     @TableField("update_time")
     private LocalDateTime updateTime;
+
+    public static final String ID = "id";
+    public static final String PLAYER_ID = "player_id";
+    public static final String TASK_TEMPLATE_ID = "task_template_id";
+    public static final String TASK_SCHEDULE = "task_schedule";
+    public static final String UPDATE_TIME = "update_time";
 }

@@ -1,6 +1,5 @@
 package com.dingCreator.astrology.cache;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dingCreator.astrology.constants.Constants;
@@ -46,6 +45,11 @@ public class WorldBossCache {
     private static Map<Long, Integer> preAtkTimesMap = new HashMap<>();
 
     /**
+     * 世界boss是否已初始化
+     */
+    private static volatile boolean worldBossInitFlag = false;
+
+    /**
      * 攻击次数缓存是否已初始化
      */
     private static volatile boolean atkTimesInitFlag = false;
@@ -56,7 +60,7 @@ public class WorldBossCache {
      * @return BOSS属性
      */
     public static BossPropDTO getBossProp() {
-        if (!WORLD_BOSS_MAP.containsKey(LocalDate.now())) {
+        if (!worldBossInitFlag) {
             initBoss();
         }
         return WORLD_BOSS_MAP.get(LocalDate.now());
@@ -79,11 +83,16 @@ public class WorldBossCache {
      * 初始化世界boss
      */
     private static synchronized void initBoss() {
-        if (!WORLD_BOSS_MAP.containsKey(LocalDate.now())) {
+        if (!worldBossInitFlag) {
             WorldBoss todayBoss = WorldBossService.getTodayBoss();
-            List<Long> bossIds = Arrays.stream(todayBoss.getMonsterId().split(",")).map(Long::parseLong)
+            if (Objects.isNull(todayBoss)) {
+                worldBossInitFlag = true;
+                return;
+            }
+
+            List<Long> bossIds = Arrays.stream(todayBoss.getMonsterId().split(Constants.COMMA)).map(Long::parseLong)
                     .collect(Collectors.toList());
-            List<Monster> monsterList = MonsterService.getMonsterByIds(bossIds);
+            List<Monster> monsterList = MonsterService.getMonsterByIds(bossIds, false);
             if (CollectionUtil.isEmpty(monsterList)) {
                 return;
             }
@@ -99,8 +108,8 @@ public class WorldBossCache {
 
                         OrganismInfoDTO organismInfoDTO = new OrganismInfoDTO();
                         organismInfoDTO.setOrganismDTO(monsterDTO);
-                        organismInfoDTO.setSkillBarDTO(SkillCache.getSkillBarItem(BelongToEnum.Monster.getBelongTo(), monster.getId()));
-                        organismInfoDTO.setInactiveSkills(SkillCache.getInactiveSkill(BelongToEnum.Monster.getBelongTo(), monster.getId())
+                        organismInfoDTO.setSkillBarDTO(SkillCache.getSkillBarItem(BelongToEnum.MONSTER.getBelongTo(), monster.getId()));
+                        organismInfoDTO.setInactiveSkills(SkillCache.getInactiveSkill(BelongToEnum.MONSTER.getBelongTo(), monster.getId())
                                 .stream().map(SkillEnum::getById).collect(Collectors.toList()));
                         return organismInfoDTO;
                     },
@@ -138,7 +147,18 @@ public class WorldBossCache {
         return ATK_TIMES_MAP.getOrDefault(LocalDate.now(), new HashMap<>()).getOrDefault(playerId, 0);
     }
 
+    /**
+     * 增加攻击次数
+     *
+     * @param playerIdList 玩家id
+     */
     public static synchronized void increaseAtkTimes(List<Long> playerIdList) {
+        if (!worldBossInitFlag) {
+            initBoss();
+        }
+        if (Objects.isNull(WORLD_BOSS_MAP.get(LocalDate.now()))) {
+            throw WorldBossExceptionEnum.NOT_EXIST.getException();
+        }
         playerIdList.forEach(playerId -> {
             if (!WORLD_BOSS_MAP.containsKey(LocalDate.now())) {
                 throw WorldBossExceptionEnum.NOT_EXIST.getException();
@@ -152,10 +172,16 @@ public class WorldBossCache {
         });
     }
 
+    /**
+     * 提交攻击次数增加后的结果
+     */
     public static synchronized void commitAtkTimes() {
         ATK_TIMES_MAP.put(LocalDate.now(), preAtkTimesMap);
     }
 
+    /**
+     * 初始化攻击次数
+     */
     private static synchronized void initAtkTimes() {
         if (!atkTimesInitFlag) {
             // 只初始化当天的记录即可
@@ -186,6 +212,18 @@ public class WorldBossCache {
                         return m1;
                     }
             )));
+            atkTimesInitFlag = true;
         }
+    }
+
+    /**
+     * 清除所有世界boss缓存
+     */
+    public static void clearCache() {
+        WORLD_BOSS_MAP.clear();
+        ATK_TIMES_MAP.clear();
+        preAtkTimesMap.clear();
+        worldBossInitFlag = false;
+        atkTimesInitFlag = false;
     }
 }

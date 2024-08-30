@@ -4,7 +4,6 @@ import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.equipment.EquipmentDTO;
-import com.dingCreator.astrology.dto.organism.OrganismInfoDTO;
 import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentPropertiesTypeEnum;
@@ -32,7 +31,7 @@ public class EquipmentUtil {
         if (Objects.isNull(equipmentBelongTo)) {
             throw EquipmentExceptionEnum.EQUIPMENT_NOT_EXIST.getException();
         }
-        if (!BelongToEnum.Player.getBelongTo().equals(equipmentBelongTo.getBelongTo())
+        if (!BelongToEnum.PLAYER.getBelongTo().equals(equipmentBelongTo.getBelongTo())
                 || !equipmentBelongTo.getBelongToId().equals(playerId)) {
             throw EquipmentExceptionEnum.NOT_YOUR_EQUIPMENT.getException();
         }

@@ -65,7 +65,7 @@ public class PlayerCache {
                 PlayerInfoDTO temp = PLAYER_MAP.getOrDefault(id, null);
                 if (Objects.isNull(temp)) {
                     temp = PlayerService.getPlayerDTOById(id);
-                    if (Objects.isNull(temp.getPlayerDTO())) {
+                    if (Objects.isNull(temp)) {
                         throw PlayerExceptionEnum.PLAYER_NOT_FOUND.getException();
                     }
                     PLAYER_MAP.put(id, temp);

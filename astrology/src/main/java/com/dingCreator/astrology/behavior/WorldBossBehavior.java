@@ -118,7 +118,7 @@ public class WorldBossBehavior {
     /**
      * 查询排行榜
      *
-     * @return
+     * @return 排行榜
      */
     public List<WorldBossChartVO> queryWorldBossCharts(int pageIndex, int pageSize) {
         List<WorldBossChartVO> voList = new ArrayList<>();
@@ -142,6 +142,13 @@ public class WorldBossBehavior {
             voList.add(vo);
         }
         return voList;
+    }
+
+    /**
+     * 清除所有世界boss缓存
+     */
+    public void clearCache() {
+        WorldBossCache.clearCache();
     }
 
     private static class Holder {

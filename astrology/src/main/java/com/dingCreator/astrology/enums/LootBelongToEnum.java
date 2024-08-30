@@ -13,19 +13,23 @@ public enum LootBelongToEnum {
     /**
      * 副本
      */
-    Dungeon("Dungeon"),
+    DUNGEON("Dungeon"),
     /**
      * 副本怪物
      */
-    DungeonBoss("DungeonBoss"),
+    DUNGEON_BOSS("DungeonBoss"),
     /**
      * 守关boss
      */
-    MapBoss("MapBoss"),
+    MAP_BOSS("MapBoss"),
     /**
      * 世界boss
      */
-    WorldBoss("WorldBoss"),
+    WORLD_BOSS("WorldBoss"),
+    /**
+     * 任务
+     */
+    TASK("task"),
     ;
 
     private final String belongTo;

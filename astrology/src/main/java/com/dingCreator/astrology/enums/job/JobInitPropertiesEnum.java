@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.enums.job;
 
+import com.dingCreator.astrology.enums.skill.SkillEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -22,7 +23,7 @@ public enum JobInitPropertiesEnum {
             0F, 0F,
             0.01F, 0F,
             1.5F, 0F,
-            200L, 10L, 10L, 0F),
+            200L, 10L, 10L, 0F, SkillEnum.SKILL_1),
     /**
      * 死地武士
      */
@@ -33,7 +34,7 @@ public enum JobInitPropertiesEnum {
             0F, 0F,
             0.01F, 0F,
             1.5F, 0F,
-            110L, 10L, 10L, 0F),
+            110L, 10L, 10L, 0F, SkillEnum.SKILL_2),
     /**
      * 星术师
      */
@@ -44,7 +45,7 @@ public enum JobInitPropertiesEnum {
             0F, 0F,
             0.01F, 0F,
             1.5F, 0F,
-            120L, 10L, 10L, 0F),
+            120L, 10L, 10L, 0F, SkillEnum.SKILL_3),
     /**
      * 枪炮师
      */
@@ -55,7 +56,7 @@ public enum JobInitPropertiesEnum {
             0.02F, 0F,
             0.01F, 0F,
             1.5F, 0F,
-            150L, 10L, 10L, 0F),
+            150L, 10L, 10L, 0F, SkillEnum.SKILL_4),
     /**
      * 邪魔外道
      */
@@ -66,7 +67,7 @@ public enum JobInitPropertiesEnum {
             0F, 0F,
             0.01F, 0F,
             1.5F, 0F,
-            120L, 10L, 10L, 0F),
+            120L, 10L, 10L, 0F, SkillEnum.SKILL_5),
     /**
      * 神棍
      */
@@ -77,7 +78,7 @@ public enum JobInitPropertiesEnum {
             0F, 0F,
             0.01F, 0F,
             1.5F, 0F,
-            100L, 10L, 20L, 0F),
+            100L, 10L, 20L, 0F, SkillEnum.SKILL_6),
     ;
     /**
      * 职业编号
@@ -147,9 +148,13 @@ public enum JobInitPropertiesEnum {
      * 吸血
      */
     private final Float initLifeStealing;
+    /**
+     * 默认技能
+     */
+    private final SkillEnum defaultSkillEnum;
 
-    public static JobInitPropertiesEnum getByCode(String name) {
-        return Arrays.stream(JobInitPropertiesEnum.values()).filter(job -> job.getJobCode().equals(name))
+    public static JobInitPropertiesEnum getByCode(String jobCode) {
+        return Arrays.stream(JobInitPropertiesEnum.values()).filter(job -> job.getJobCode().equals(jobCode))
                 .findFirst().orElse(null);
     }
 }

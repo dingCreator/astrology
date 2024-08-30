@@ -5,7 +5,6 @@ import com.dingCreator.astrology.dto.BuffDTO;
 import com.dingCreator.astrology.dto.GiveBuffDTO;
 import com.dingCreator.astrology.dto.organism.OrganismDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
-import com.dingCreator.astrology.entity.base.Organism;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.template.ExtraBattleProcessTemplate;
@@ -62,7 +61,7 @@ public enum SkillEnum {
             new GiveBuffDTO(BuffTypeEnum.DEF, "汲魂之隙", -0.01F, 5)
     ), new ExtraBattleProcessTemplate() {
         @Override
-        public void ifHit(BattleDTO from, SkillEnum skillEnum, Long damage, StringBuilder builder) {
+        public void ifHit(BattleDTO from, BattleDTO tar, SkillEnum skillEnum, Long damage, StringBuilder builder) {
             if (from.equals(this.getFrom()) && skillEnum.getId().equals(SKILL_5.getId())) {
                 OrganismDTO organism = this.getFrom().getOrganismInfoDTO().getOrganismDTO();
                 long newHp = Math.min(organism.getMaxHpWithAddition(), organism.getHpWithAddition() + Math.round(damage * 0.12F));
@@ -99,10 +98,13 @@ public enum SkillEnum {
             "星术师作为星术界天才中的天才，他天生拥有对星术的超强控制力，每场战斗开始时能够免疫10%法术伤害，同时提高自身15%法强，持续整场战斗",
             JobEnum.MAGICIAN.getJobCode(), false, new ExtraBattleProcessTemplate() {
         @Override
-        public void beforeBattle(List<String> msgList) {
+        public void beforeBattle(List<String> battleMsg) {
             if (Objects.nonNull(this.getFrom())) {
-                BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.MAGIC_ATK, "", 0.15F), 1000);
-                BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.MAGIC_DAMAGE, "", -0.1F), 1000);
+                StringBuilder builder = new StringBuilder(getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                        .append("的被动技能【").append(SKILL_9.getName()).append("】被触发");
+                BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.MAGIC_ATK, "", 0.15F), 1000, builder);
+                BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.MAGIC_DAMAGE, "", -0.1F), 1000, builder);
+                battleMsg.add(builder.toString());
             }
         }
     }),
@@ -112,13 +114,15 @@ public enum SkillEnum {
             "All", false, new ExtraBattleProcessTemplate() {
         @Override
         public void beforeBattle(List<String> battleMsg) {
-            OrganismDTO organism = this.getFrom().getOrganismInfoDTO().getOrganismDTO();
-            organism.setPenetrate(organism.getPenetrate() + 0.25F);
-            organism.setMagicPenetrate(organism.getMagicPenetrate() + 0.25F);
+            StringBuilder builder = new StringBuilder(getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                    .append("的被动技能【").append(SKILL_10.getName()).append("】被触发");
+            BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.PENETRATE, "", 0.25F), 1000, builder);
+            BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.MAGIC_DAMAGE, "", 0.25F), 1000, builder);
+            battleMsg.add(builder.toString());
         }
     }),
 
-    SKILL_11(11L, "普通攻击",
+    SKILL_11(11L, "普通攻击（物）",
             "造成110%物理伤害",
             "All", new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 1.1F)
     ),
@@ -141,10 +145,10 @@ public enum SkillEnum {
             "攻击命中敌人时有30%概率使敌方进入回音状态，持续2回合。回音：造成伤害时受到造成伤害量15%的真实伤害（反伤）",
             JobEnum.MAGICIAN.getJobCode(), false, new ExtraBattleProcessTemplate() {
         @Override
-        public void ifHit(BattleDTO from, SkillEnum skillEnum, Long damage, StringBuilder builder) {
-            if (RandomUtil.isHit(0.3F)) {
+        public void ifHit(BattleDTO from, BattleDTO tar, SkillEnum skillEnum, Long damage, StringBuilder builder) {
+            if (from.equals(this.getFrom()) && RandomUtil.isHit(0.3F)) {
                 BuffUtil.addBuff(this.getEnemy().get(0),
-                        new BuffDTO(BuffTypeEnum.REFLECT_DAMAGE, "回音", 0.15F), 2);
+                        new BuffDTO(BuffTypeEnum.REFLECT_DAMAGE, "回音", 0.15F), 2, builder);
             }
         }
     }),
@@ -171,16 +175,26 @@ public enum SkillEnum {
             ))
     ),
 
-    SKILL_18(18L, "技能18",
-            "",
-            JobEnum.MAGICIAN.getJobCode(), 0L,
-            new SkillEffectDTO()
+    SKILL_18(18L, "普通攻击（法）",
+            "造成100%法术伤害",
+            "All", 0L,
+            new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 1F)
     ),
 
-    SKILL_19(19L, "技能19",
-            "",
-            JobEnum.MAGICIAN.getJobCode(), 0L,
-            new SkillEffectDTO()
+    SKILL_19(19L, "汲咀之源",
+            "造成200%法术伤害，技能命中时降低敌方10%法强，同时提高自身10%法强持续1回合",
+            "All", 25L,
+            new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 2F),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void ifHit(BattleDTO from, BattleDTO tar, SkillEnum skillEnum, Long damage, StringBuilder builder) {
+                    if (from.equals(this.getFrom()) && skillEnum.getId().equals(SKILL_19.getId())) {
+                        BuffUtil.addBuff(from, new BuffDTO(BuffTypeEnum.MAGIC_ATK, "",  0.1F), 1, builder);
+                        BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.MAGIC_ATK, "",  -0.1F), 1, builder);
+                        builder.append(from.getOrganismInfoDTO().getOrganismDTO().getName());
+                    }
+                }
+            }
     ),
 
     SKILL_20(20L, "技能20",
@@ -563,6 +577,20 @@ public enum SkillEnum {
         this.skillEffects = Collections.singletonList(skillEffect);
         this.extraProcess = new ExtraBattleProcessTemplate() {
         };
+    }
+
+    SkillEnum(Long id, String name, String desc, String jobCode, Long mp, SkillEffectDTO skillEffect,
+              ExtraBattleProcessTemplate process) {
+        this.id = id;
+        this.name = name;
+        this.desc = desc;
+        this.jobCode = Collections.singletonList(jobCode);
+        this.active = true;
+        this.mp = mp;
+        this.mpRate = 0F;
+        this.cd = 0;
+        this.skillEffects = Collections.singletonList(skillEffect);
+        this.extraProcess = process;
     }
 
     SkillEnum(Long id, String name, String desc, String jobCode, Long mp, List<SkillEffectDTO> skillEffects) {

@@ -2,7 +2,6 @@ package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.dto.organism.OrganismInfoDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Player;
@@ -90,13 +89,13 @@ public class PlayerBehavior {
         PlayerCache.createPlayer(player);
 
         // 赠送默认技能
-        SkillBelongToService.createSkillBelongTo(BelongToEnum.Player.getBelongTo(), id,
+        SkillBelongToService.createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), id,
                 SkillEnum.getDefaultSkillByJob(job.getJobCode()).getId());
 
         // 将默认技能装备到技能栏
         List<Long> skillIds = new ArrayList<>();
         skillIds.add(SkillEnum.getDefaultSkillByJob(job.getJobCode()).getId());
-        SkillBarItem skillBarItem = SkillUtil.buildSkillBarItemChain(skillIds, BelongToEnum.Player, id);
+        SkillBarItem skillBarItem = SkillUtil.buildSkillBarItemChain(skillIds, BelongToEnum.PLAYER, id);
         SkillBarItemService.addSkillBarItem(skillBarItem);
     }
 

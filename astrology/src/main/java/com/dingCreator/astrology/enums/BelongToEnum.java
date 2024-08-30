@@ -13,11 +13,11 @@ public enum BelongToEnum {
     /**
      * 玩家
      */
-    Player("Player"),
+    PLAYER("Player"),
     /**
      * 怪物
      */
-    Monster("Monster"),
+    MONSTER("Monster"),
 
     ;
 

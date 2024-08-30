@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.PlayerCache;
+import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.entity.Map;
 import com.dingCreator.astrology.enums.exception.MapExceptionEnum;
 import com.dingCreator.astrology.service.MapService;
@@ -67,7 +68,7 @@ public class MapBehavior {
      */
     public List<String> listMap(Long playerId) {
         List<Map> mapList = MapService.listMap();
-        List<String> info = mapList.stream().map(m -> m.getName() + "(" + m.getXPos() + "," + m.getYPos() + ") 距离你" +
+        List<String> info = mapList.stream().map(m -> m.getName() + "(" + m.getXPos() + Constants.COMMA + m.getYPos() + ") 距离你" +
                 MapUtil.manhattanDistance(MapUtil.getNowLocation(playerId), m.getId()))
                 .collect(Collectors.toList());
         info.add("你当前位于：" + MapUtil.getMapById(MapUtil.getNowLocation(playerId)).getName());

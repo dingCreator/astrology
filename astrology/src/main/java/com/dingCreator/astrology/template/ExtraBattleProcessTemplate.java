@@ -76,7 +76,7 @@ public abstract class ExtraBattleProcessTemplate {
     /**
      * 技能命中时
      */
-    public void ifHit(BattleDTO from, SkillEnum skillEnum, Long damage, StringBuilder builder) {
+    public void ifHit(BattleDTO from, BattleDTO tar, SkillEnum skillEnum, Long damage, StringBuilder builder) {
 
     }
 

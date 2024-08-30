@@ -19,11 +19,11 @@ public enum BuffTypeEnum {
      */
     DEF("def", "防御"),
     /**
-     * 魔攻
+     * 法强
      */
     MAGIC_ATK("magicAtk", "法强"),
     /**
-     * 魔防
+     * 法抗
      */
     MAGIC_DEF("magicDef", "法抗"),
     /**
@@ -86,6 +86,9 @@ public enum BuffTypeEnum {
      * 反伤
      */
     REFLECT_DAMAGE("reflect_damage", "反伤"),
+
+    PENETRATE("penetrate", "穿甲"),
+    MAGIC_PENETRATE("magic_penetrate", "法穿"),
     ;
 
     /**

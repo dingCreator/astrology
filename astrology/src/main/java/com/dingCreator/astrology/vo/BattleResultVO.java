@@ -33,6 +33,7 @@ public class BattleResultVO implements Serializable {
      * 接收方ID
      */
     private Long recipientId;
+
     /**
      * 战斗结果
      */
@@ -42,7 +43,7 @@ public class BattleResultVO implements Serializable {
         /**
          * 胜平负
          */
-        WIN("WIN","胜"),
+        WIN("WIN", "胜"),
         DRAW("DRAW", "平"),
         LOSE("LOSE", "负"),
         TIME_OUT("TIME_OUT", "超时"),

@@ -50,7 +50,7 @@ public class PlayerService {
         PlayerInfoDTO playerInfoDTO = new PlayerInfoDTO();
         // 初始化装备
         EquipmentBarDTO barDTO = new EquipmentBarDTO();
-        EquipmentBelongToService.getBelongToIdEquip(BelongToEnum.Player.getBelongTo(), id, true)
+        EquipmentBelongToService.getBelongToIdEquip(BelongToEnum.PLAYER.getBelongTo(), id, true)
                 .forEach(equipmentBelongTo -> {
                     EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentBelongTo.getEquipmentId());
                     EquipmentUtil.setEquipmentBarDTO(barDTO, equipmentEnum, equipmentBelongTo);
@@ -59,6 +59,9 @@ public class PlayerService {
         // 初始化称号
 
         Player player = getPlayerById(id);
+        if (Objects.isNull(player)) {
+            return null;
+        }
         PlayerDTO playerDTO = new PlayerDTO();
         playerDTO.copyProperties(player);
         playerInfoDTO.setPlayerDTO(playerDTO);

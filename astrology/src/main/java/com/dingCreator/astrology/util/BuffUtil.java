@@ -23,7 +23,7 @@ public class BuffUtil {
      *
      * @param target 目标
      */
-    public static void addBuff(BattleDTO target, BuffDTO buffDTO, Integer round) {
+    public static void addBuff(BattleDTO target, BuffDTO buffDTO, Integer round, StringBuilder builder) {
         List<BattleBuffDTO> buffList = target.getBuffMap().getOrDefault(buffDTO.getBuffType(), new ArrayList<>());
         BattleBuffDTO now = BattleBuffDTO.builder().buffDTO(buffDTO).round(round).build();
         if (buffDTO.getBuffName().length() > 0) {
@@ -31,6 +31,15 @@ public class BuffUtil {
             buffDTO.getBuffOverrideStrategyEnum().getDoOverride().accept(now, buffList);
         } else {
             buffList.add(now);
+        }
+
+        builder.append("，").append(target.getOrganismInfoDTO().getOrganismDTO().getName())
+                .append(buffDTO.getBuffType().getChnDesc());
+        if (buffDTO.getValue() != 0) {
+            builder.append(buffDTO.getValue() > 0 ? "增加了" : "减少了").append(buffDTO.getValue());
+        }
+        if (buffDTO.getRate() != 0) {
+            builder.append(buffDTO.getRate() > 0 ? "增加了" : "减少了").append(Math.abs(buffDTO.getRate()) * 100).append("%");
         }
         target.getBuffMap().put(buffDTO.getBuffType(), buffList);
     }

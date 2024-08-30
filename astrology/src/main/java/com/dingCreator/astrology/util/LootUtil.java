@@ -1,16 +1,14 @@
 package com.dingCreator.astrology.util;
 
-import com.alibaba.fastjson.JSONArray;
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.dingCreator.astrology.behavior.ExpBehavior;
+import com.dingCreator.astrology.dto.LootDTO;
 import com.dingCreator.astrology.dto.LootItemDTO;
 import com.dingCreator.astrology.entity.Loot;
-import com.dingCreator.astrology.enums.LootBelongToEnum;
-import com.dingCreator.astrology.enums.LootItemTypeEnum;
-import com.dingCreator.astrology.service.LootService;
 import com.dingCreator.astrology.vo.LootVO;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,50 +22,66 @@ import java.util.stream.Collectors;
 public class LootUtil {
 
     /**
+     * 转化掉落物信息
+     *
+     * @param loot 掉落物
+     * @return 掉落物
+     */
+    public static LootDTO convertLoot(Loot loot) {
+        if (Objects.isNull(loot)) {
+            return null;
+        }
+        LootDTO lootDTO = new LootDTO();
+        lootDTO.setMoney(loot.getMoney());
+        lootDTO.setExp(loot.getExp());
+        // 转化实物
+        String itemListJson = loot.getLootItemList();
+        if (StringUtils.isNotBlank(itemListJson)) {
+            lootDTO.setItemList(JSONObject.parseArray(loot.getLootItemList(), LootItemDTO.class));
+        }
+        return lootDTO;
+    }
+
+    public static LootVO sendLoot(Loot loot, Long playerId) {
+        LootDTO lootDTO = convertLoot(loot);
+        return sendLoot(lootDTO, playerId);
+    }
+
+    public static Map<Long, LootVO> sendLoot(Loot loot, List<Long> playerIds) {
+        LootDTO lootDTO = convertLoot(loot);
+        return sendLoot(lootDTO, playerIds);
+    }
+
+    public static LootVO sendLoot(LootDTO lootDTO, Long playerId) {
+        LootVO vo = new LootVO();
+        if (Objects.isNull(lootDTO)) {
+            return vo;
+        }
+        // todo 钱
+        vo.setMoney(lootDTO.getMoney());
+        ExpBehavior.getInstance().getExp(playerId, lootDTO.getExp());
+        vo.setExp(lootDTO.getExp());
+        if (!CollectionUtil.isEmpty(lootDTO.getItemList())) {
+            vo.setLootItemNameList(lootDTO.getItemList().stream()
+                    .filter(loot -> RandomUtil.isHit(loot.getRate()))
+                    .map(loot -> {
+                        // 发送
+                        loot.getArticleItem().send2Player(playerId);
+                        // 获取名字
+                        return loot.getArticleItem().view().getName();
+                    }).collect(Collectors.toList()));
+        }
+        return vo;
+    }
+
+
+    /**
      * 获取掉落物并发放掉落物
      *
-     * @param lootMap 掉落物
      * @return 掉落物汇总
      */
-    public static Map<Long, LootVO> getLoot(Map<LootBelongToEnum, List<Long>> lootMap, List<Long> playerIdList) {
-        return playerIdList.stream().collect(Collectors.toMap(Function.identity(), playerId -> {
-            LootVO lootVO = new LootVO();
-            for (Map.Entry<LootBelongToEnum, List<Long>> entry : lootMap.entrySet()) {
-                List<Loot> lootList = LootService.getByBelongToId(entry.getKey().getBelongTo(), entry.getValue());
-                if (!lootList.isEmpty()) {
-                    lootList.forEach(loot -> {
-                        // 处理货币和经验
-                        lootVO.setMoney(lootVO.getMoney() + loot.getMoney());
-                        lootVO.setExp(lootVO.getExp() + loot.getExp());
-                        // 处理实物
-                        String itemListJson = loot.getLootItemList();
-                        if (Objects.nonNull(itemListJson) && !"".equals(itemListJson)) {
-                            JSONArray array = JSONObject.parseArray(loot.getLootItemList());
-                            List<String> lootItemNameList = new ArrayList<>();
-                            for (int i = 0; i < array.size(); i++) {
-                                LootItemDTO item = array.getJSONObject(i).toJavaObject(LootItemDTO.class);
-                                // 判断是否掉落
-                                if (!RandomUtil.isHit(item.getRate())) {
-                                    continue;
-                                }
-                                // 选择策略
-                                LootItemTypeEnum lootType = LootItemTypeEnum.getByName(item.getLootItemType());
-                                if (Objects.isNull(lootType)) {
-                                    return;
-                                }
-                                // 发放掉落物
-                                lootType.getDistributionMethod().accept(array.getJSONObject(i), playerId);
-                                lootItemNameList.add(lootType.getViewLoot().apply(array.getJSONObject(i)));
-                            }
-                            lootVO.setLootItemNameList(lootItemNameList);
-                        }
-                        // 发放经验值
-                        ExpBehavior.getInstance().getExp(playerId, loot.getExp());
-                    });
-                }
-            }
-            return lootVO;
-        }));
+    public static Map<Long, LootVO> sendLoot(LootDTO lootDTO, List<Long> playerIdList) {
+        return playerIdList.stream().collect(Collectors.toMap(Function.identity(), playerId -> sendLoot(lootDTO, playerId)));
     }
 
 }

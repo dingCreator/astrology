@@ -120,8 +120,6 @@ public class Constants {
     public static final int TEAM_MEMBER_LIMIT = 3;
 
 
-
-
     // **----** 系统配置 **----**
     /**
      * 默认页码大小
@@ -144,10 +142,21 @@ public class Constants {
      */
     public static final String ALL = "All";
     /**
-     * 时间格式
+     * 时间配置
      */
-    public static final String DATE_FORMAT = "yyyy-MM-dd";
-    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String DATE_FORMAT_1 = "yyyy-MM-dd";
+    public static final String DATE_FORMAT_2 = "yyyy/MM/dd";
+    public static final String DATE_FORMAT_3 = "yyyy年MM月dd日";
+    public static final String DATE_FORMAT_4 = "yyyy.MM.dd";
+    public static final String TIME_FORMAT = "HH:mm:ss";
+
+    public static final int MAX_HOUR = 23;
+    public static final int MAX_MINUTE = 59;
+    public static final int MAX_SECOND = 59;
+
+    public static final int MIN_HOUR = 0;
+    public static final int MIN_MINUTE = 0;
+    public static final int MIN_SECOND = 0;
     /**
      * 获取key锁超时时间默认时长
      */
@@ -160,4 +169,62 @@ public class Constants {
      * 每日最多攻击世界boss次数
      */
     public static final int WORLD_BOSS_MAX_ATK_TIMES = 3;
+
+    // **----** 符号 **----**
+    /**
+     * 冒号
+     */
+    public final static String COLON = ":";
+    /**
+     * 破折号
+     */
+    public final static String DASH = "-";
+    /**
+     * 双引号
+     */
+    public static final String QUOTE = "";
+    /**
+     * 逗号
+     */
+    public static final String COMMA = ",";
+    /**
+     * 下划线
+     */
+    public static final String UNDERLINE = "_";
+    /**
+     * #号
+     */
+    public static final String SHARP = "#";
+    /**
+     * 分号
+     */
+    public static final String SEMICOLON = ";";
+    /**
+     * ~号
+     */
+    public static final String TILDE = "~";
+    /**
+     * ···省略号
+     */
+    public static final String ELLIPSIS = " · · ·";
+    /**
+     * 星号
+     */
+    public static final String ASTERISK = "*";
+    /**
+     * 箭头
+     */
+    public static final String ARROW_1 = "=>";
+    /**
+     * 箭头
+     */
+    public static final String ARROW_2 = "->";
+    /**
+     * 空格
+     */
+    public static final String BLANK = " ";
+    /**
+     * 点
+     */
+    public static final String DOT = ".";
 }

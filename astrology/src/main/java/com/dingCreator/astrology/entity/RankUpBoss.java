@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 突破boss
@@ -13,6 +16,9 @@ import lombok.Data;
  * @date 2024/2/2
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @TableName("astrology_rank_up_boss")
 public class RankUpBoss {
     /**
@@ -28,11 +34,16 @@ public class RankUpBoss {
     /**
      * 突破前阶级
      */
-    @TableField("rank")
+    @TableField("`rank`")
     private Integer rank;
     /**
      * boss的ID
      */
     @TableField("monster_id")
     private Long monsterId;
+
+    public static final String ID = "id";
+    public static final String JOB = "job";
+    public static final String RANK = "`rank`";
+    public static final String MONSTER_ID = "monster_id";
 }

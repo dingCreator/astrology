@@ -45,11 +45,4 @@ public interface MonsterMapper extends BaseMapper<Monster> {
             "</foreach>)",
             "</script>"})
     List<Monster> getMonsterByIds(@Param("list") List<Long> list);
-
-    /**
-     * 新建怪物
-     *
-     * @param monster 怪物信息
-     */
-    void createMonster(@Param("monster") Monster monster);
 }

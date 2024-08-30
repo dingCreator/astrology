@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.cache;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.entity.SkillBarItem;
 import com.dingCreator.astrology.entity.SkillBelongTo;
@@ -26,9 +27,9 @@ public class SkillCache {
      * 技能栏缓存
      * 格式
      * {
-     *      "player": {
-     *          1: SkillBarDTO
-     *      }
+     * "player": {
+     * 1: SkillBarDTO
+     * }
      * }
      */
     private static final Map<String, Map<Long, SkillBarDTO>> SKILL_CACHE = new HashMap<>(64);
@@ -37,9 +38,9 @@ public class SkillCache {
      * 被动技能缓存
      * 格式
      * {
-     *      "player": {
-     *          1: [1,2,3]
-     *      }
+     * "player": {
+     * 1: [1,2,3]
+     * }
      * }
      */
     private static final Map<String, Map<Long, List<Long>>> INACTIVE_SKILL_CACHE = new HashMap<>(64);
@@ -78,7 +79,7 @@ public class SkillCache {
         }
         // 技能栏信息
         String skillIdStr = skillBarItem.getSkillId();
-        List<Long> skillIdList = Arrays.stream(skillIdStr.split(",")).map(Long::parseLong).collect(Collectors.toList());
+        List<Long> skillIdList = Arrays.stream(skillIdStr.split(Constants.COMMA)).map(Long::parseLong).collect(Collectors.toList());
         // 构建头
         SkillBarDTO head = new SkillBarDTO();
         head.setHead(head);
@@ -101,9 +102,19 @@ public class SkillCache {
      * @param playerId 玩家ID
      */
     public static void deleteSkillBar(Long playerId) {
-        Map<Long, SkillBarDTO> skillBarMap = SKILL_CACHE.get(BelongToEnum.Player.getBelongTo());
+        deleteSkillBar(BelongToEnum.PLAYER.getBelongTo(), playerId);
+    }
+
+    /**
+     * 删除技能栏缓存
+     *
+     * @param belongTo   归属
+     * @param belongToId 归属ID
+     */
+    public static void deleteSkillBar(String belongTo, Long belongToId) {
+        Map<Long, SkillBarDTO> skillBarMap = SKILL_CACHE.get(belongTo);
         if (Objects.nonNull(skillBarMap)) {
-            skillBarMap.remove(playerId);
+            skillBarMap.remove(belongToId);
         }
     }
 
@@ -147,10 +158,20 @@ public class SkillCache {
      *
      * @param playerId 玩家ID
      */
-    public static void deleteInactiveSkill(Long playerId) {
-        Map<Long, List<Long>> skillBarMap = INACTIVE_SKILL_CACHE.get(BelongToEnum.Player.getBelongTo());
+    public static void deleteInactiveSkillCache(Long playerId) {
+        deleteInactiveSkillCache(BelongToEnum.PLAYER.getBelongTo(), playerId);
+    }
+
+    /**
+     * 删除技能栏缓存
+     *
+     * @param belongTo   技能归属
+     * @param belongToId 技能归属ID
+     */
+    public static void deleteInactiveSkillCache(String belongTo, Long belongToId) {
+        Map<Long, List<Long>> skillBarMap = INACTIVE_SKILL_CACHE.get(belongTo);
         if (Objects.nonNull(skillBarMap)) {
-            skillBarMap.remove(playerId);
+            skillBarMap.remove(belongToId);
         }
     }
 

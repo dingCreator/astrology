@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.util;
 
+import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.entity.SkillBarItem;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
@@ -30,7 +31,7 @@ public class SkillUtil {
         StringBuilder builder = new StringBuilder(skillIdList.remove(0).toString());
         if (skillIdList.size() > 0) {
             for (Long id : skillIdList) {
-                builder.append(",").append(id);
+                builder.append(Constants.COMMA).append(id);
             }
         }
 
