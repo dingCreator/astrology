@@ -349,7 +349,7 @@ public enum EquipmentEnum {
                   EquipmentRankEnum equipmentRankEnum, EquipmentTypeEnum equipmentTypeEnum) {
         this.id = id;
         this.name = name;
-        this.limitLevel = equipmentRankEnum.getDefaultLimitLevel();
+        this.limitLevel = equipmentRankEnum.getDefaultPlayerLimitLevel();
         this.desc = desc;
         this.prop = prop;
         this.equipmentRankEnum = equipmentRankEnum;
@@ -363,7 +363,7 @@ public enum EquipmentEnum {
                   EquipmentRankEnum equipmentRankEnum, EquipmentTypeEnum equipmentTypeEnum, String jobCode) {
         this.id = id;
         this.name = name;
-        this.limitLevel = equipmentRankEnum.getDefaultLimitLevel();
+        this.limitLevel = equipmentRankEnum.getDefaultPlayerLimitLevel();
         this.desc = desc;
         this.prop = prop;
         this.equipmentRankEnum = equipmentRankEnum;
@@ -377,7 +377,7 @@ public enum EquipmentEnum {
                   EquipmentRankEnum equipmentRankEnum, EquipmentTypeEnum equipmentTypeEnum, List<String> jobCode) {
         this.id = id;
         this.name = name;
-        this.limitLevel = equipmentRankEnum.getDefaultLimitLevel();
+        this.limitLevel = equipmentRankEnum.getDefaultPlayerLimitLevel();
         this.desc = desc;
         this.prop = prop;
         this.equipmentRankEnum = equipmentRankEnum;
@@ -392,7 +392,7 @@ public enum EquipmentEnum {
                   ExtraBattleProcessTemplate extraBattleProcessTemplate) {
         this.id = id;
         this.name = name;
-        this.limitLevel = equipmentRankEnum.getDefaultLimitLevel();
+        this.limitLevel = equipmentRankEnum.getDefaultPlayerLimitLevel();
         this.desc = desc;
         this.prop = prop;
         this.equipmentRankEnum = equipmentRankEnum;
@@ -406,7 +406,7 @@ public enum EquipmentEnum {
                   ExtraBattleProcessTemplate extraBattleProcessTemplate) {
         this.id = id;
         this.name = name;
-        this.limitLevel = equipmentRankEnum.getDefaultLimitLevel();
+        this.limitLevel = equipmentRankEnum.getDefaultPlayerLimitLevel();
         this.desc = desc;
         this.prop = prop;
         this.equipmentRankEnum = equipmentRankEnum;

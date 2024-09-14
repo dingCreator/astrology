@@ -7,6 +7,7 @@ import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
 import com.dingCreator.astrology.enums.exception.EquipmentExceptionEnum;
+import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.service.EquipmentBelongToService;
 import com.dingCreator.astrology.util.EquipmentUtil;
 import com.dingCreator.astrology.vo.EquipmentGroupVO;
@@ -122,8 +123,14 @@ public class EquipmentBehavior {
      * @param pageSize  页码大小
      * @return 装备
      */
-    public List<EquipmentEnum> queryPage(int pageIndex, int pageSize) {
-        return Arrays.stream(EquipmentEnum.values()).skip(pageIndex * pageSize).limit(pageSize).collect(Collectors.toList());
+    public PageResponse<EquipmentEnum> queryPage(int pageIndex, int pageSize) {
+        PageResponse<EquipmentEnum> response = new PageResponse<>();
+        EquipmentEnum[] array = EquipmentEnum.values();
+        response.setData(Arrays.stream(array).skip((pageIndex - 1) * pageSize).limit(pageSize).collect(Collectors.toList()));
+        response.setPageIndex(pageIndex);
+        response.setPageSize(pageSize);
+        response.setTotal(array.length);
+        return response;
     }
 
     /**

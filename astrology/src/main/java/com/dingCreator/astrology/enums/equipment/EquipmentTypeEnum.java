@@ -13,15 +13,16 @@ public enum EquipmentTypeEnum {
     /**
      * 武器
      */
-    WEAPON("weapon"),
+    WEAPON("weapon", "武器"),
     /**
      * 防具
      */
-    ARMOR("armor"),
+    ARMOR("armor", "防具"),
     /**
      * 饰品
      */
-    JEWELRY("jewelry"),
+    JEWELRY("jewelry", "饰品"),
     ;
     private final String type;
+    private final String chnDesc;
 }

@@ -28,7 +28,7 @@ public enum EquipmentRankEnum {
 
     private final String rankChnDesc;
 
-    private final Integer maxLevel;
+    private final Integer maxEquipmentLevel;
 
-    private final Integer defaultLimitLevel;
+    private final Integer defaultPlayerLimitLevel;
 }

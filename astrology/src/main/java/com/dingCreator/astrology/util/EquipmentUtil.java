@@ -35,6 +35,18 @@ public class EquipmentUtil {
                 || !equipmentBelongTo.getBelongToId().equals(playerId)) {
             throw EquipmentExceptionEnum.NOT_YOUR_EQUIPMENT.getException();
         }
+        EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentBelongTo.getEquipmentId());
+        if (Objects.isNull(equipmentEnum)) {
+            throw EquipmentExceptionEnum.DATA_ERROR.getException();
+        }
+
+        PlayerInfoDTO infoDTO = PlayerCache.getPlayerById(playerId);
+        if (!equipmentEnum.getLimitJob().contains(infoDTO.getPlayerDTO().getJob())) {
+            throw EquipmentExceptionEnum.INVALID_JOB.getException();
+        }
+        if (equipmentEnum.getLimitLevel() > infoDTO.getPlayerDTO().getLevel()) {
+            throw EquipmentExceptionEnum.LEVEL_TOO_LOW.getException();
+        }
     }
 
     /**
@@ -147,6 +159,7 @@ public class EquipmentUtil {
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
         EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentBelongTo.getEquipmentId());
         EquipmentBarDTO equipmentBarDTO = playerInfoDTO.getEquipmentBarDTO();
+
         if (EquipmentTypeEnum.WEAPON.equals(equipmentEnum.getEquipmentTypeEnum())) {
             if (Objects.nonNull(equipmentBarDTO.getWeapon())) {
                 EquipmentBelongToService.updateEquipment(equipmentBarDTO.getWeapon().getId(), false);
