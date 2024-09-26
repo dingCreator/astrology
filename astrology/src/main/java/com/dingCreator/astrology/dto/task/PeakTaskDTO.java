@@ -29,5 +29,5 @@ public class PeakTaskDTO {
     /**
      * 基础信息
      */
-    private TaskBaseDTO base;
+    private TaskTemplateTitleDTO taskTitle;
 }

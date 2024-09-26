@@ -10,6 +10,7 @@ import com.dingCreator.astrology.enums.exception.EquipmentExceptionEnum;
 import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.service.EquipmentBelongToService;
 import com.dingCreator.astrology.util.EquipmentUtil;
+import com.dingCreator.astrology.util.PageUtil;
 import com.dingCreator.astrology.vo.EquipmentGroupVO;
 import com.dingCreator.astrology.vo.EquipmentVO;
 
@@ -50,9 +51,12 @@ public class EquipmentBehavior {
      * @param playerId 玩家ID
      * @return 装备概览
      */
-    public List<EquipmentGroupVO> listEquipmentGroup(long playerId) {
+    public PageResponse<EquipmentGroupVO> listEquipmentGroup(long playerId, int pageIndex, int pageSize) {
+        PageResponse<EquipmentGroupVO> response = new PageResponse<>();
+        // 校验一下有没有创建角色
         PlayerCache.getPlayerById(playerId);
-        return EquipmentBelongToService.listGroupByBelongToId(BelongToEnum.PLAYER.getBelongTo(), playerId);
+        List<EquipmentGroupVO> list = EquipmentBelongToService.listGroupByBelongToId(BelongToEnum.PLAYER.getBelongTo(), playerId);
+        return PageUtil.buildPage(list, pageIndex, pageSize);
     }
 
     /**
@@ -65,9 +69,6 @@ public class EquipmentBehavior {
     public List<EquipmentVO> listPlayerEquipmentByName(long playerId, String equipmentName) {
         PlayerCache.getPlayerById(playerId);
         EquipmentEnum equipmentEnum = EquipmentEnum.getByName(equipmentName);
-        if (Objects.isNull(equipmentEnum)) {
-            throw EquipmentExceptionEnum.EQUIPMENT_NOT_EXIST.getException();
-        }
 
         List<EquipmentBelongTo> equipmentBelongToList = EquipmentBelongToService.getByBelongToIdAndEquipmentId(
                 BelongToEnum.PLAYER.getBelongTo(), playerId, equipmentEnum.getId());
@@ -124,13 +125,8 @@ public class EquipmentBehavior {
      * @return 装备
      */
     public PageResponse<EquipmentEnum> queryPage(int pageIndex, int pageSize) {
-        PageResponse<EquipmentEnum> response = new PageResponse<>();
         EquipmentEnum[] array = EquipmentEnum.values();
-        response.setData(Arrays.stream(array).skip((pageIndex - 1) * pageSize).limit(pageSize).collect(Collectors.toList()));
-        response.setPageIndex(pageIndex);
-        response.setPageSize(pageSize);
-        response.setTotal(array.length);
-        return response;
+        return PageUtil.buildPage(array, pageIndex, pageSize);
     }
 
     /**

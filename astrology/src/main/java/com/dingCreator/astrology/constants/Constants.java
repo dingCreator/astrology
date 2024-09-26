@@ -122,9 +122,21 @@ public class Constants {
 
     // **----** 系统配置 **----**
     /**
-     * 默认页码大小
+     * 最小页码
+     */
+    public static final int MIN_PAGE_INDEX = 1;
+    /**
+     * 默认页大小
      */
     public static final int DEFAULT_PAGE_SIZE = 10;
+    /**
+     * 最大页大小
+     */
+    public static final int MAX_PAGE_SIZE = 50;
+    /**
+     * 最小页大小
+     */
+    public static final int MIN_PAGE_SIZE = 1;
     /**
      * 最低概率
      */
@@ -165,6 +177,10 @@ public class Constants {
      * 锁前缀-玩家
      */
     public static final String PLAYER_LOCK_PREFIX = "LOCK_PLAYER_";
+    /**
+     * 锁前缀-任务进度
+     */
+    public static final String TASK_SCHEDULE_LOCK_PREFIX = "LOCK_TASK_SCHEDULE_";
     /**
      * 每日最多攻击世界boss次数
      */

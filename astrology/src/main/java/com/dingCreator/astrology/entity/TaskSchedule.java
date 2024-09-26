@@ -34,8 +34,8 @@ public class TaskSchedule {
     /**
      * 任务模板ID
      */
-    @TableField("task_template_id")
-    private Long taskTemplateId;
+    @TableField("task_template_title_id")
+    private Long taskTemplateTitleId;
     /**
      * 任务进度
      *
@@ -43,15 +43,9 @@ public class TaskSchedule {
      */
     @TableField("task_schedule")
     private String taskSchedule;
-    /**
-     * 状态更新时间
-     */
-    @TableField("update_time")
-    private LocalDateTime updateTime;
 
     public static final String ID = "id";
     public static final String PLAYER_ID = "player_id";
     public static final String TASK_TEMPLATE_ID = "task_template_id";
     public static final String TASK_SCHEDULE = "task_schedule";
-    public static final String UPDATE_TIME = "update_time";
 }

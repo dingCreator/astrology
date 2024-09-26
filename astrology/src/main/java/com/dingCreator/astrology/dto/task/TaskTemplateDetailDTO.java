@@ -15,7 +15,19 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TaskDetailDTO {
+public class TaskTemplateDetailDTO {
+    /**
+     * ID
+     */
+    private Long id;
+    /**
+     * 标题ID
+     */
+    private Long titleId;
+    /**
+     * 模板id
+     */
+    private Long templateId;
     /**
      * 目标类型
      */
@@ -35,8 +47,8 @@ public class TaskDetailDTO {
      * @param detail 实体
      * @return dto
      */
-    public static TaskDetailDTO convert(TaskTemplateDetail detail) {
-        return TaskDetailDTO.builder()
+    public static TaskTemplateDetailDTO convert(TaskTemplateDetail detail) {
+        return TaskTemplateDetailDTO.builder()
                 .target(TaskTargetTypeEnum.getByCode(detail.getTargetType()))
                 .targetCnt(detail.getTargetCnt())
                 .targetId(detail.getTargetId()).build();

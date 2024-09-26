@@ -1,33 +1,22 @@
 package com.dingCreator.astrology.util;
 
-import cn.hutool.core.collection.CollectionUtil;
-import com.dingCreator.astrology.behavior.PlayerBehavior;
-import com.dingCreator.astrology.behavior.TeamBehavior;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.dingCreator.astrology.cache.PlayerCache;
-import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.LootDTO;
-import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
-import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
-import com.dingCreator.astrology.dto.task.PeakTaskDTO;
-import com.dingCreator.astrology.dto.task.TaskBaseDTO;
-import com.dingCreator.astrology.dto.task.TaskDetailDTO;
-import com.dingCreator.astrology.entity.PeakTaskTemplate;
-import com.dingCreator.astrology.entity.TaskSchedule;
-import com.dingCreator.astrology.entity.TaskScheduleDetail;
-import com.dingCreator.astrology.entity.TaskTemplate;
-import com.dingCreator.astrology.enums.PlayerStatusEnum;
+import com.dingCreator.astrology.dto.task.*;
+import com.dingCreator.astrology.entity.*;
 import com.dingCreator.astrology.enums.RankEnum;
-import com.dingCreator.astrology.enums.exception.TaskExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.task.TaskScheduleEnum;
+import com.dingCreator.astrology.enums.task.TaskTargetTypeEnum;
 import com.dingCreator.astrology.enums.task.TaskTypeEnum;
-import com.dingCreator.astrology.service.PeakTaskTemplateService;
-import com.dingCreator.astrology.service.TaskScheduleDetailService;
-import com.dingCreator.astrology.service.TaskScheduleService;
-import lombok.Data;
+import com.dingCreator.astrology.util.ability.TaskUtilAbility;
+import com.dingCreator.astrology.util.context.TaskContext;
 
 import java.util.*;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -39,44 +28,148 @@ public class TaskUtil {
     /**
      * 组装巅峰任务对象
      */
-    public static PeakTaskDTO convertPeakTaskTpl2DTO(PeakTaskTemplate peakTaskTpl, TaskTemplate taskTpl,
-                                                     Map<Long, LootDTO> lootMap, List<TaskTemplate> children) {
-        TaskBaseDTO base = convertTaskTpl2DTO(taskTpl, lootMap, children);
+    public static PeakTaskDTO constructPeakTaskDTO(PeakTaskTemplate peakTaskTpl, TaskTemplateTitleDTO title) {
         return PeakTaskDTO.builder()
                 .jobEnum(JobEnum.getByCode(peakTaskTpl.getJob()))
                 .rankEnum(RankEnum.getEnum(peakTaskTpl.getJob(), peakTaskTpl.getRank()))
-                .base(base)
+                .taskTitle(title)
                 .build();
     }
 
     /**
      * 组装任务对象
      *
-     * @param taskTpl  任务模板
-     * @param lootMap  掉落物
-     * @param children 子任务
+     * @param titleList    任务标题
+     * @param titleLootMap 全任务完成后掉落物
+     * @param lootMap      任务掉落物
      * @return 组装好的任务
      */
-    public static TaskBaseDTO convertTaskTpl2DTO(TaskTemplate taskTpl, Map<Long, LootDTO> lootMap, List<TaskTemplate> children) {
-        TaskBaseDTO.TaskBaseDTOBuilder builder = TaskBaseDTO.builder()
-                .id(taskTpl.getId())
-                .taskTypeEnum(TaskTypeEnum.getByCode(taskTpl.getTaskType()))
-                .taskName(taskTpl.getTaskName())
-                .description(taskTpl.getDescription())
-                .limitMapId(Arrays.stream(taskTpl.getLimitMapId().split(Constants.COMMA)).map(Long::parseLong).collect(Collectors.toList()))
-                .childrenSort(taskTpl.getChildrenSort())
-                .lootDTO(lootMap.get(taskTpl.getId()))
-                .mutualExclusion(taskTpl.getMutualExclusion())
-                .allowTeam(taskTpl.getAllowTeam());
-        if (CollectionUtil.isNotEmpty(taskTpl.getDetails())) {
-            builder.details(taskTpl.getDetails().stream().map(TaskDetailDTO::convert).collect(Collectors.toList()));
-        }
-        if (CollectionUtil.isNotEmpty(children)) {
-            builder.children(children.stream().map(childTpl ->
-                    convertTaskTpl2DTO(childTpl, lootMap, null))
-                    .collect(Collectors.toList()));
-        }
-        return builder.build();
+    public static List<TaskTemplateTitleDTO> constructTaskTemplateTitleDTOList(
+            List<TaskTemplateTitle> titleList, Map<Long, LootDTO> titleLootMap, Map<Long, LootDTO> lootMap) {
+        return titleList.stream().map(title -> constructTaskTemplateTitleDTO(title, titleLootMap.get(title.getId()), lootMap))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 组装任务对象
+     *
+     * @param title     任务标题
+     * @param titleLoot 全任务完成后掉落物
+     * @param lootMap   任务掉落物
+     * @return 组装好的任务
+     */
+    public static TaskTemplateTitleDTO constructTaskTemplateTitleDTO(TaskTemplateTitle title, LootDTO titleLoot,
+                                                                     Map<Long, LootDTO> lootMap) {
+        return TaskTemplateTitleDTO.builder()
+                .id(title.getId())
+                .title(title.getTitle())
+                .description(title.getDescription())
+                .taskTypeEnum(TaskTypeEnum.getByCode(title.getTaskType()))
+                .limitMapId(StringUtils.isBlank(title.getLimitMapId()) ? null : Arrays.stream(title.getLimitMapId()
+                        .split(Constants.COMMA)).map(Long::parseLong).collect(Collectors.toList()))
+                .childrenSort(title.getChildrenSort())
+                .mutualExclusion(title.getMutualExclusion())
+                .allowTeam(title.getAllowTeam())
+                .allowRepeatableReceive(title.getAllowRepeatableReceive())
+                .lootDTO(titleLoot)
+                .templateList(title.getTemplateList().stream().map(tpl ->
+                        constructTaskTemplateDTO(tpl, lootMap.get(tpl.getId()))).collect(Collectors.toList()))
+                .build();
+    }
+
+    public static TaskTemplateDTO constructTaskTemplateDTO(TaskTemplate tpl, LootDTO loot) {
+        return TaskTemplateDTO.builder()
+                .id(tpl.getId())
+                .description(tpl.getDescription())
+                .titleId(tpl.getTitleId())
+                .lootDTO(loot)
+                .details(tpl.getDetailList().stream().map(TaskUtil::constructTaskTemplateDetailDTO).collect(Collectors.toList()))
+                .build();
+    }
+
+    public static TaskTemplateDetailDTO constructTaskTemplateDetailDTO(TaskTemplateDetail detail) {
+        return TaskTemplateDetailDTO.builder()
+                .id(detail.getId())
+                .templateId(detail.getTaskTemplateId())
+                .target(TaskTargetTypeEnum.getByCode(detail.getTargetType()))
+                .targetId(detail.getTargetId())
+                .targetCnt(detail.getTargetCnt())
+                .build();
+    }
+
+    /**
+     * 构建任务进度
+     *
+     * @param titleList  模板标题
+     * @param detailList 进度详情
+     * @param playerId   玩家ID
+     * @return 任务进度
+     */
+    public static List<TaskScheduleTitleDTO> constructTaskScheduleTitleDTOList(List<TaskTemplateTitleDTO> titleList,
+                                                                               List<TaskScheduleDetail> detailList, Long playerId) {
+        Map<Long, List<TaskScheduleDetail>> titleIdScheduleMap = detailList.stream()
+                .filter(detail -> detail.getPlayerId().equals(playerId))
+                .collect(Collectors.groupingBy(TaskScheduleDetail::getTaskTitleId));
+        return titleList.stream().map(title -> constructTaskScheduleTitleDTO(title, titleIdScheduleMap
+                .getOrDefault(title.getId(), new ArrayList<>()), playerId)).collect(Collectors.toList());
+    }
+
+    /**
+     * 构建任务进度
+     *
+     * @param title      模板标题
+     * @param detailList 进度详情
+     * @return 任务进度
+     */
+    public static TaskScheduleTitleDTO constructTaskScheduleTitleDTO(TaskTemplateTitleDTO title,
+                                                                     List<TaskScheduleDetail> detailList, Long playerId) {
+        List<TaskScheduleDetailDTO> detailDTOList = constructTaskScheduleDetailDTO(detailList, playerId);
+        List<TaskScheduleDTO> scheduleDTOList = constructTaskScheduleDTO(title, detailDTOList, playerId);
+        return TaskScheduleTitleDTO.builder()
+                .playerId(playerId)
+                .taskTemplateTitleId(title.getId())
+                .title(title.getTitle())
+                .description(title.getDescription())
+                .scheduleList(scheduleDTOList)
+                .taskScheduleEnum(TaskScheduleEnum.getWholeSchedule(
+                        scheduleDTOList.stream().map(TaskScheduleDTO::getTaskScheduleEnum).collect(Collectors.toList())))
+                .build();
+    }
+
+    public static List<TaskScheduleDetailDTO> constructTaskScheduleDetailDTO(List<TaskScheduleDetail> detailList, Long playerId) {
+        return detailList.stream()
+                .filter(detail -> detail.getPlayerId().equals(playerId))
+                .map(detail -> TaskScheduleDetailDTO.builder()
+                        .id(detail.getId())
+                        .playerId(detail.getPlayerId())
+                        .taskTitleId(detail.getTaskTitleId())
+                        .taskTemplateId(detail.getTaskTemplateId())
+                        .taskTemplateDetailId(detail.getTaskTemplateDetailId())
+                        .targetId(detail.getTargetId())
+                        .completeCnt(detail.getCompleteCnt())
+                        .targetCnt(detail.getTargetCnt())
+                        .taskScheduleType(TaskScheduleEnum.getByType(detail.getTaskScheduleType()))
+                        .build()
+                ).collect(Collectors.toList());
+    }
+
+
+    public static List<TaskScheduleDTO> constructTaskScheduleDTO(TaskTemplateTitleDTO title,
+                                                                 List<TaskScheduleDetailDTO> detailList, Long playerId) {
+        Map<Long, TaskTemplateDTO> tplMap = title.getTemplateList().stream()
+                .collect(Collectors.toMap(TaskTemplateDTO::getId, Function.identity()));
+
+        List<TaskScheduleDTO> scheduleDTOList = new ArrayList<>(detailList.size());
+        detailList.stream().collect(Collectors.groupingBy(TaskScheduleDetailDTO::getTaskTemplateId))
+                .forEach((tplId, scheduleList) -> TaskScheduleDTO.builder().playerId(playerId)
+                        .taskTemplateId(tplId)
+                        .description(tplMap.getOrDefault(tplId, new TaskTemplateDTO()).getDescription())
+                        .detailList(scheduleList)
+                        .taskScheduleEnum(TaskScheduleEnum.getWholeSchedule(
+                                scheduleList.stream().map(TaskScheduleDetailDTO::getTaskScheduleType).collect(Collectors.toList())))
+                        .build()
+                );
+        return scheduleDTOList;
     }
 
     /**
@@ -85,118 +178,41 @@ public class TaskUtil {
      * @param playerId 玩家ID
      */
     public static void receivePeakTask(long playerId) {
-        ReceiveValidateContext context = new ReceiveValidateContext();
-        initPlayerInfo(playerId, context);
-        validatePlayer(context);
-        initTaskDTO(context);
-        initTaskSchedule(context);
-        validateTask(context);
-        validatePeakTask(context);
-        createSchedule(context);
+        PeakTaskDTO peakTaskDTO = TaskUtilAbility.initPeakTaskTplDTO(PlayerCache.getPlayerById(playerId));
+        // 任务校验
+        validateTask(playerId, peakTaskDTO.getTaskTitle().getId());
+        // 校验巅峰任务信息
+        TaskUtilAbility.validatePeakTask(PlayerCache.getPlayerById(playerId));
+        // 创建任务进度
+//        TaskUtilAbility.createSchedule();
     }
 
-    private static void initPlayerInfo(long playerId, ReceiveValidateContext context) {
-        PlayerInfoDTO info = PlayerCache.getPlayerById(playerId);
-        context.setPlayerInfoDTO(info);
-        context.setPlayerIdList(info.getTeam() ? Collections.singletonList(info.getPlayerDTO().getId())
-                : TeamCache.getTeamByPlayerId(info.getPlayerDTO().getId()).getMembers());
+    public static void completeTask(long playerId, long tplTitleId) {
+
     }
 
-    private static void validatePlayer(ReceiveValidateContext context) {
-        PlayerInfoDTO infoDTO = context.getPlayerInfoDTO();
-        PlayerDTO playerDTO = infoDTO.getPlayerDTO();
-        if (playerDTO.getLevel() < RankEnum.getEnum(playerDTO.getJob(), playerDTO.getRank()).getMaxLevel()) {
-            throw TaskExceptionEnum.PEAK_LOW_LEVEL.getException();
-        }
-        if (PlayerBehavior.getInstance().getStatus(playerDTO).equals(PlayerStatusEnum.MOVING.getCode())) {
-            throw TaskExceptionEnum.PEAK_PLAYER_IS_MOVING.getException();
-        }
-        if (infoDTO.getTeam()) {
-            TeamBehavior.getInstance().captainOnlyValidate(playerDTO.getId());
-        }
-    }
+    /**
+     * 校验任务信息
+     *
+     * @param playerId   玩家id
+     * @param tplTitleId 任务模板id
+     */
+    public static void validateTask(long playerId, long tplTitleId) {
+        // 初始化上下文
+        TaskContext context = new TaskContext();
+        // 初始化玩家信息
+        context.setPlayerInfo(TaskUtilAbility.initPlayerInfo(playerId));
+        // 初始化玩家队伍信息
+        context.setTeamPlayerInfo(TaskUtilAbility.initPlayerTeamInfo(context.getPlayerInfo()));
+        // 校验玩家信息
+        TaskUtilAbility.validatePlayer(context.getPlayerInfo(), context.getTeamPlayerInfo());
 
-    private static void initTaskDTO(ReceiveValidateContext context) {
-        PlayerDTO playerDTO = context.getPlayerInfoDTO().getPlayerDTO();
-        PeakTaskDTO task = PeakTaskTemplateService.getPeakTaskDTO(playerDTO.getJob(), playerDTO.getRank());
-        if (Objects.isNull(task)) {
-            throw TaskExceptionEnum.PEAK_TASK_NOT_EXIST.getException();
-        }
-        context.setTaskBaseDTO(task.getBase());
-    }
-
-    private static void initTaskSchedule(ReceiveValidateContext context) {
-        List<TaskSchedule> scheduleList = TaskScheduleService.getInProgressTask(context.getPlayerIdList());
-        context.setScheduleList(scheduleList);
-    }
-
-    private static void validateTask(ReceiveValidateContext context) {
-        PlayerInfoDTO info = context.getPlayerInfoDTO();
-        TaskBaseDTO taskBaseDTO = context.getTaskBaseDTO();
-
-        if (CollectionUtil.isNotEmpty(context.getScheduleList())) {
-            boolean isInProgress = context.getScheduleList().stream().anyMatch(schedule ->
-                    context.getPlayerIdList().stream().anyMatch(playerId ->
-                            schedule.getPlayerId().equals(playerId) && schedule.getTaskTemplateId().equals(taskBaseDTO.getId())));
-            if (isInProgress) {
-                throw TaskExceptionEnum.ALREADY_IN_PROGRESS.getException();
-            }
-        }
-        if (info.getTeam() && !taskBaseDTO.getAllowTeam()) {
-            throw TaskExceptionEnum.NOT_ALLOW_TEAM.getException();
-        }
-        if (taskBaseDTO.getMutualExclusion()) {
-            if (CollectionUtil.isNotEmpty(context.getScheduleList())) {
-                throw TaskExceptionEnum.NOT_ALLOW_MUTUAL.getException();
-            }
-        }
-        if (CollectionUtil.isNotEmpty(taskBaseDTO.getLimitMapId())
-                && !taskBaseDTO.getLimitMapId().contains(info.getPlayerDTO().getMapId())) {
-            throw TaskExceptionEnum.NOT_ALLOW_MAP.getException();
-        }
-    }
-
-    private static void validatePeakTask(ReceiveValidateContext context) {
-        if (CollectionUtil.isNotEmpty(context.getScheduleList())) {
-            Long playerId = context.getPlayerInfoDTO().getPlayerDTO().getId();
-            TaskSchedule schedule = context.getScheduleList().stream().filter(s -> s.getPlayerId().equals(playerId))
-                    .filter(s -> s.getTaskTemplateId().equals(context.getTaskBaseDTO().getId())).findFirst().orElse(null);
-            if (Objects.nonNull(schedule)) {
-                if (TaskScheduleEnum.IN_PROGRESS.getType().equals(schedule.getTaskSchedule())) {
-                    throw TaskExceptionEnum.ALREADY_IN_PROGRESS.getException();
-                } else if (TaskScheduleEnum.COMPLETE.getType().equals(schedule.getTaskSchedule())) {
-                    throw TaskExceptionEnum.ALREADY_COMPLETE.getException();
-                } else if (TaskScheduleEnum.FAILED.getType().equals(schedule.getTaskSchedule())) {
-                    throw TaskExceptionEnum.ALREADY_FAILED.getException();
-                }
-            }
-        }
-    }
-
-    private static void createSchedule(ReceiveValidateContext context) {
-        TaskScheduleService.createTaskSchedule(context.getTaskBaseDTO().getId(), context.getPlayerIdList());
-        List<TaskScheduleDetail> details = context.getTaskBaseDTO().getDetails().stream()
-                .map(dto -> new TaskScheduleDetail(context.getTaskBaseDTO().getId(), dto.getTargetId(), dto.getTargetCnt()))
-                .collect(Collectors.toList());
-        TaskScheduleDetailService.createTaskScheduleDetail(details);
-        if (CollectionUtil.isNotEmpty(context.getTaskBaseDTO().getChildren())) {
-            context.getTaskBaseDTO().getChildren()
-                    .forEach(t -> TaskScheduleService.createTaskSchedule(t.getId(), context.getPlayerIdList()));
-            List<TaskDetailDTO> detailDTOList = context.getTaskBaseDTO().getChildren().stream().map(TaskBaseDTO::getDetails)
-                    .reduce((d1, d2) -> {
-                        d2.addAll(d1);
-                        return d2;
-                    }).orElse(new ArrayList<>());
-
-
-        }
-    }
-
-    @Data
-    private static class ReceiveValidateContext {
-        private PlayerInfoDTO playerInfoDTO;
-        private TaskBaseDTO taskBaseDTO;
-        private List<TaskSchedule> scheduleList;
-        private List<Long> playerIdList;
+        // 初始化任务信息
+        context.setTitle(TaskUtilAbility.initTaskTplDTO(tplTitleId));
+        // 初始化任务进度
+        context.setScheduleList(TaskUtilAbility.initTaskSchedule(context.getTeamPlayerInfo()));
+        // 校验任务信息
+        TaskUtilAbility.validateTask(context.getPlayerInfo(), context.getTeamPlayerInfo(),
+                context.getTitle(), context.getScheduleList());
     }
 }

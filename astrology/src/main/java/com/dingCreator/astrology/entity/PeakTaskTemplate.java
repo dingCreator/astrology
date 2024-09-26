@@ -31,8 +31,8 @@ public class PeakTaskTemplate {
     /**
      * 任务模板ID
      */
-    @TableField("task_template_id")
-    private Long taskTemplateId;
+    @TableField("task_template_title_id")
+    private Long taskTemplateTitleId;
 
     public static final String ID = "id";
 
@@ -40,5 +40,5 @@ public class PeakTaskTemplate {
 
     public static final String RANK = "`rank`";
 
-    public static final String TASK_TEMPLATE_ID= "task_template_id";
+    public static final String TASK_TEMPLATE_TITLE_ID= "task_template_title_id";
 }

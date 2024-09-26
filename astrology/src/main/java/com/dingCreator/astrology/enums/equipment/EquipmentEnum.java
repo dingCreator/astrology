@@ -1,15 +1,13 @@
 package com.dingCreator.astrology.enums.equipment;
 
 import com.dingCreator.astrology.dto.equipment.EquipmentPropertiesDTO;
+import com.dingCreator.astrology.enums.exception.EquipmentExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.template.ExtraBattleProcessTemplate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -419,11 +417,19 @@ public enum EquipmentEnum {
     private static final Map<String, EquipmentEnum> EQUIPMENT_ENUM_NAME_MAP;
 
     public static EquipmentEnum getById(Long id) {
-        return EQUIPMENT_ENUM_MAP.get(id);
+        EquipmentEnum equipmentEnum = EQUIPMENT_ENUM_MAP.get(id);
+        if (Objects.isNull(equipmentEnum)) {
+            throw EquipmentExceptionEnum.EQUIPMENT_NOT_EXIST.getException();
+        }
+        return equipmentEnum;
     }
 
     public static EquipmentEnum getByName(String name) {
-        return EQUIPMENT_ENUM_NAME_MAP.get(name);
+        EquipmentEnum equipmentEnum = EQUIPMENT_ENUM_NAME_MAP.get(name);
+        if (Objects.isNull(equipmentEnum)) {
+            throw EquipmentExceptionEnum.EQUIPMENT_NOT_EXIST.getException();
+        }
+        return equipmentEnum;
     }
 
     static {

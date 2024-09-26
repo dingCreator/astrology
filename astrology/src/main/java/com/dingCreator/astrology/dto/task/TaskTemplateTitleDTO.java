@@ -1,8 +1,6 @@
 package com.dingCreator.astrology.dto.task;
 
-import com.dingCreator.astrology.dto.ArticleItemDTO;
 import com.dingCreator.astrology.dto.LootDTO;
-import com.dingCreator.astrology.enums.task.TaskTargetTypeEnum;
 import com.dingCreator.astrology.enums.task.TaskTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,21 +11,21 @@ import java.util.List;
 
 /**
  * @author ding
- * @date 2024/7/24
+ * @date 2024/9/23
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TaskBaseDTO {
+public class TaskTemplateTitleDTO {
     /**
-     * 模板ID
+     * 主键
      */
     private Long id;
     /**
-     * 任务名称
+     * 任务标题
      */
-    private String taskName;
+    private String title;
     /**
      * 任务描述
      */
@@ -41,14 +39,6 @@ public class TaskBaseDTO {
      */
     private List<Long> limitMapId;
     /**
-     * 任务内容
-     */
-    private List<TaskDetailDTO> details;
-    /**
-     * 子任务
-     */
-    private List<TaskBaseDTO> children;
-    /**
      * 子任务是否必须按顺序完成
      */
     private Boolean childrenSort;
@@ -61,7 +51,15 @@ public class TaskBaseDTO {
      */
     private Boolean allowTeam;
     /**
-     * 任务奖励
+     * 是否允许多次接取
+     */
+    private Boolean allowRepeatableReceive;
+    /**
+     * 掉落物
      */
     private LootDTO lootDTO;
+    /**
+     * 子任务
+     */
+    private List<TaskTemplateDTO> templateList;
 }

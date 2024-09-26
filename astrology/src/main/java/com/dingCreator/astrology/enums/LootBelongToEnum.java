@@ -27,9 +27,13 @@ public enum LootBelongToEnum {
      */
     WORLD_BOSS("WorldBoss"),
     /**
+     * 任务标题（相当于完成整个任务）
+     */
+    TASK_TITLE("TaskTitle"),
+    /**
      * 任务
      */
-    TASK("task"),
+    TASK("Task"),
     ;
 
     private final String belongTo;

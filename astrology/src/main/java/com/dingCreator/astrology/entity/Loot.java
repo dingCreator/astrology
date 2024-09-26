@@ -47,4 +47,8 @@ public class Loot {
      */
     @TableField("loot_item_list")
     private String lootItemList;
+
+    public static final String BELONG_TO = "belong_to";
+
+    public static final String BELONG_TO_ID = "belong_to_id";
 }

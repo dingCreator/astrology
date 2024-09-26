@@ -1,10 +1,7 @@
 package com.dingCreator.astrology.enums.task;
 
-import com.dingCreator.astrology.dto.ArticleItemDTO;
 import com.dingCreator.astrology.dto.task.PeakTaskDTO;
-import com.dingCreator.astrology.dto.task.TaskBaseDTO;
 import com.dingCreator.astrology.enums.RankEnum;
-import com.dingCreator.astrology.enums.TitleEnum;
 import com.dingCreator.astrology.enums.exception.TaskExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
 import lombok.AllArgsConstructor;

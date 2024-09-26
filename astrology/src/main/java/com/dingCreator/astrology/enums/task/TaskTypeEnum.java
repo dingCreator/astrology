@@ -15,10 +15,6 @@ import java.util.Arrays;
 @AllArgsConstructor
 public enum TaskTypeEnum {
     /**
-     * 主任务
-     */
-    PARENT("parent"),
-    /**
      * 巅峰任务
      */
     PEAK("peak"),

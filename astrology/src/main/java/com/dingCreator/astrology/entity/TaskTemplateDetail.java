@@ -20,6 +20,11 @@ public class TaskTemplateDetail {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
+     * 任务模板ID
+     */
+    @TableField("task_template_id")
+    private Long taskTemplateId;
+    /**
      * 任务目标
      * @see TaskTargetTypeEnum
      */
@@ -35,4 +40,9 @@ public class TaskTemplateDetail {
      */
     @TableField("target_cnt")
     private Integer targetCnt;
+    /**
+     * 优先级
+     */
+    @TableField("priority")
+    private Integer priority;
 }

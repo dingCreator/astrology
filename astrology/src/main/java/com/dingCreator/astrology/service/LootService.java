@@ -1,5 +1,8 @@
 package com.dingCreator.astrology.service;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dingCreator.astrology.database.DatabaseContext;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.entity.Loot;
 import com.dingCreator.astrology.mapper.LootMapper;
@@ -12,6 +15,23 @@ import java.util.List;
  * @date 2024/4/11
  */
 public class LootService {
+    /**
+     * 获取掉落物配置
+     *
+     * @param belongTo   归属
+     * @param belongToId 归属ID
+     * @return 掉落物配置
+     */
+    public static Loot getByBelongToId(String belongTo, Long belongToId) {
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
+                    Wrapper<Loot> wrapper = new QueryWrapper<Loot>()
+                            .eq(Loot.BELONG_TO, belongTo)
+                            .eq(Loot.BELONG_TO_ID, belongToId);
+                    return sqlSession.getMapper(LootMapper.class).selectOne(wrapper);
+                }
+        );
+    }
+
     /**
      * 获取掉落物配置
      *

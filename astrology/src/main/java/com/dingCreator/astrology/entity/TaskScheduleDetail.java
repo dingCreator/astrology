@@ -19,10 +19,25 @@ public class TaskScheduleDetail {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
-     * 任务ID
+     * 玩家ID
      */
-    @TableField("task_id")
-    private Long taskId;
+    @TableField("player_id")
+    private Long playerId;
+    /**
+     * 任务模板标题id
+     */
+    @TableField("task_title_id")
+    private Long taskTitleId;
+    /**
+     * 任务模板ID
+     */
+    @TableField("task_template_id")
+    private Long taskTemplateId;
+    /**
+     * 任务模板详情ID
+     */
+    @TableField("task_template_detail_id")
+    private Long taskTemplateDetailId;
     /**
      * 任务目标ID
      */
@@ -38,11 +53,18 @@ public class TaskScheduleDetail {
      */
     @TableField("complete_cnt")
     private Integer completeCnt;
+    /**
+     * 任务进度
+     */
+    @TableField("task_schedule_type")
+    private String taskScheduleType;
 
-    public TaskScheduleDetail(Long taskId, Long targetId, Integer targetCnt) {
-        this.taskId = taskId;
+    public TaskScheduleDetail(Long taskTemplateDetailId, Long targetId, Integer targetCnt) {
+        this.taskTemplateDetailId = taskTemplateDetailId;
         this.targetId = targetId;
         this.targetCnt = targetCnt;
         this.completeCnt = 0;
     }
+
+    public static final String PLAYER_ID = "player_id";
 }
