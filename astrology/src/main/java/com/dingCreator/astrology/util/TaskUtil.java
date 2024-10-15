@@ -11,8 +11,12 @@ import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.task.TaskScheduleEnum;
 import com.dingCreator.astrology.enums.task.TaskTargetTypeEnum;
 import com.dingCreator.astrology.enums.task.TaskTypeEnum;
+import com.dingCreator.astrology.event.EventHelper;
+import com.dingCreator.astrology.event.listener.TaskLootListener;
 import com.dingCreator.astrology.util.ability.TaskUtilAbility;
-import com.dingCreator.astrology.util.context.TaskContext;
+import com.dingCreator.astrology.util.context.CompleteTaskContext;
+import com.dingCreator.astrology.util.context.ReceiveTaskContext;
+import com.dingCreator.astrology.vo.TaskResultVO;
 
 import java.util.*;
 import java.util.Map;
@@ -24,6 +28,10 @@ import java.util.stream.Collectors;
  * @date 2024/8/29
  */
 public class TaskUtil {
+
+    static {
+        EventHelper.addListener(new TaskLootListener());
+    }
 
     /**
      * 组装巅峰任务对象
@@ -60,9 +68,14 @@ public class TaskUtil {
      */
     public static TaskTemplateTitleDTO constructTaskTemplateTitleDTO(TaskTemplateTitle title, LootDTO titleLoot,
                                                                      Map<Long, LootDTO> lootMap) {
+        List<TaskTemplateDTO> tplList = title.getTemplateList().stream()
+                .sorted(Comparator.comparing(TaskTemplate::getPriority))
+                .map(tpl -> constructTaskTemplateDTO(tpl, lootMap.get(tpl.getId())))
+                .collect(Collectors.toList());
+
         return TaskTemplateTitleDTO.builder()
                 .id(title.getId())
-                .title(title.getTitle())
+                .name(title.getName())
                 .description(title.getDescription())
                 .taskTypeEnum(TaskTypeEnum.getByCode(title.getTaskType()))
                 .limitMapId(StringUtils.isBlank(title.getLimitMapId()) ? null : Arrays.stream(title.getLimitMapId()
@@ -72,8 +85,7 @@ public class TaskUtil {
                 .allowTeam(title.getAllowTeam())
                 .allowRepeatableReceive(title.getAllowRepeatableReceive())
                 .lootDTO(titleLoot)
-                .templateList(title.getTemplateList().stream().map(tpl ->
-                        constructTaskTemplateDTO(tpl, lootMap.get(tpl.getId()))).collect(Collectors.toList()))
+                .templateList(tplList)
                 .build();
     }
 
@@ -83,6 +95,7 @@ public class TaskUtil {
                 .description(tpl.getDescription())
                 .titleId(tpl.getTitleId())
                 .lootDTO(loot)
+                .priority(tpl.getPriority())
                 .details(tpl.getDetailList().stream().map(TaskUtil::constructTaskTemplateDetailDTO).collect(Collectors.toList()))
                 .build();
     }
@@ -92,6 +105,7 @@ public class TaskUtil {
                 .id(detail.getId())
                 .templateId(detail.getTaskTemplateId())
                 .target(TaskTargetTypeEnum.getByCode(detail.getTargetType()))
+                .allowFailed(detail.getAllowFailed())
                 .targetId(detail.getTargetId())
                 .targetCnt(detail.getTargetCnt())
                 .build();
@@ -128,7 +142,7 @@ public class TaskUtil {
         return TaskScheduleTitleDTO.builder()
                 .playerId(playerId)
                 .taskTemplateTitleId(title.getId())
-                .title(title.getTitle())
+                .title(title.getName())
                 .description(title.getDescription())
                 .scheduleList(scheduleDTOList)
                 .taskScheduleEnum(TaskScheduleEnum.getWholeSchedule(
@@ -184,11 +198,38 @@ public class TaskUtil {
         // 校验巅峰任务信息
         TaskUtilAbility.validatePeakTask(PlayerCache.getPlayerById(playerId));
         // 创建任务进度
-//        TaskUtilAbility.createSchedule();
+        TaskUtilAbility.createSchedule(playerId, peakTaskDTO.getTaskTitle());
     }
 
-    public static void completeTask(long playerId, long tplTitleId) {
-
+    /**
+     * 完成任务
+     *
+     * @param playerId         玩家id
+     * @param scheduleDetailId 进度详情ID
+     */
+    public static TaskResultVO completeTask(long playerId, long scheduleDetailId) {
+        return LockUtil.execute(Constants.TASK_SCHEDULE_LOCK_PREFIX + playerId + Constants.UNDERLINE + scheduleDetailId, () -> {
+            // 初始化上下文
+            CompleteTaskContext context = new CompleteTaskContext();
+            // 初始化进度详情
+            context.setScheduleDetail(TaskUtilAbility.initScheduleDetailById(playerId, scheduleDetailId));
+            // 初始化总进度
+            context.setScheduleTitleDTO(TaskUtilAbility.initScheduleTitleByDetailId(playerId, scheduleDetailId));
+            // 初始化模板标题
+            context.setTplTitle(TaskUtilAbility.initTaskTplDTO(context.getScheduleDetail().getTaskTitleId()));
+            // 校验任务信息
+            TaskUtilAbility.validateCompleteTask(context.getScheduleDetail(), context.getScheduleTitleDTO(), context.getTplTitle());
+            // 初始化模板详情
+            context.setTplDetail(TaskUtilAbility.initTplDetail(context.getTplTitle(), context.getScheduleDetail()));
+            // 任务过程
+            context.setTaskResultVO(TaskUtilAbility.completeTask(context.getTplTitle(), context.getScheduleDetail(), context.getTplDetail(), playerId));
+            // 持久化任务信息
+            TaskUtilAbility.updateTaskSchedule(context.getScheduleDetail());
+            // 刷新任务进度
+            TaskUtilAbility.flushScheduleEnum(context.getTplTitle(), context.getScheduleTitleDTO(), context.getScheduleDetail());
+            // 返回结果
+            return context.getTaskResultVO();
+        });
     }
 
     /**
@@ -199,7 +240,7 @@ public class TaskUtil {
      */
     public static void validateTask(long playerId, long tplTitleId) {
         // 初始化上下文
-        TaskContext context = new TaskContext();
+        ReceiveTaskContext context = new ReceiveTaskContext();
         // 初始化玩家信息
         context.setPlayerInfo(TaskUtilAbility.initPlayerInfo(playerId));
         // 初始化玩家队伍信息

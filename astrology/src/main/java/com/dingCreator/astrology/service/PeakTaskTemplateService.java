@@ -42,4 +42,9 @@ public class PeakTaskTemplateService {
             return sqlSession.getMapper(PeakTaskTemplateMapper.class).selectOne(wrapper);
         });
     }
+
+    public static void createPeakTaskTemplate(PeakTaskTemplate peakTaskTemplate) {
+        DatabaseProvider.getInstance().execute(sqlSession ->
+                sqlSession.getMapper(PeakTaskTemplateMapper.class).insert(peakTaskTemplate));
+    }
 }

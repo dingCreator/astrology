@@ -1,10 +1,13 @@
 package com.dingCreator.astrology.constants;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author ding
  * @date 2023/4/19
  */
-public class Constants {
+public final class Constants {
     // **----** 错误码前缀 **----**
     /**
      * 组队错误码前缀
@@ -200,6 +203,10 @@ public class Constants {
      */
     public static final String QUOTE = "";
     /**
+     * 中文逗号
+     */
+    public static final String CHN_COMMA = "，";
+    /**
      * 逗号
      */
     public static final String COMMA = ",";
@@ -243,4 +250,24 @@ public class Constants {
      * 点
      */
     public static final String DOT = ".";
+
+    /**
+     * 是/否
+     */
+    private static final Map<String, Boolean> WHETHER_MAP = new HashMap<>();
+
+    static {
+        WHETHER_MAP.put("Y", true);
+        WHETHER_MAP.put("y", true);
+        WHETHER_MAP.put("是", true);
+        WHETHER_MAP.put("1", true);
+        WHETHER_MAP.put("N", false);
+        WHETHER_MAP.put("n", false);
+        WHETHER_MAP.put("否", false);
+        WHETHER_MAP.put("0", false);
+    }
+
+    public static Boolean getWhether(String str) {
+        return WHETHER_MAP.getOrDefault(str, false);
+    }
 }

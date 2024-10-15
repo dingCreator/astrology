@@ -13,7 +13,7 @@ import java.util.List;
  * @date 2024/9/24
  */
 @Data
-public class TaskContext {
+public class ReceiveTaskContext {
     /**
      * 玩家信息
      */

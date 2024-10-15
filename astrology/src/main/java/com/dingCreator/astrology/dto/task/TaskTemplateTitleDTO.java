@@ -25,7 +25,7 @@ public class TaskTemplateTitleDTO {
     /**
      * 任务标题
      */
-    private String title;
+    private String name;
     /**
      * 任务描述
      */

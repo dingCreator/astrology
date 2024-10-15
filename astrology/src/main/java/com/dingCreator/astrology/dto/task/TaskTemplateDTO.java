@@ -1,7 +1,6 @@
 package com.dingCreator.astrology.dto.task;
 
 import com.dingCreator.astrology.dto.LootDTO;
-import com.dingCreator.astrology.enums.task.TaskTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,6 +33,10 @@ public class TaskTemplateDTO {
      * 任务奖励
      */
     private LootDTO lootDTO;
+    /**
+     * 优先级
+     */
+    private Integer priority;
     /**
      * 任务内容
      */

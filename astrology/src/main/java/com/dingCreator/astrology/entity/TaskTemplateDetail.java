@@ -31,6 +31,11 @@ public class TaskTemplateDetail {
     @TableField("target_type")
     private String targetType;
     /**
+     * 此任务是否允许失败（即失败后是否直接导致任务失败）
+     */
+    @TableField("allow_failed")
+    private Boolean allowFailed;
+    /**
      * 目标ID
      */
     @TableField("target_id")
@@ -41,8 +46,13 @@ public class TaskTemplateDetail {
     @TableField("target_cnt")
     private Integer targetCnt;
     /**
-     * 优先级
+     * 完成任务返回信息
      */
-    @TableField("priority")
-    private Integer priority;
+    @TableField("success_msg")
+    private String successMsg;
+    /**
+     * 任务失败返回信息
+     */
+    @TableField("fail_msg")
+    private String failMsg;
 }

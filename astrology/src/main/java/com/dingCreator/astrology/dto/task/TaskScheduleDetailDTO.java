@@ -1,8 +1,5 @@
 package com.dingCreator.astrology.dto.task;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.dingCreator.astrology.enums.task.TaskScheduleEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

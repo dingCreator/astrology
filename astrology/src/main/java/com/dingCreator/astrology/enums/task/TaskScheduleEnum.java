@@ -43,4 +43,8 @@ public enum TaskScheduleEnum {
     public static TaskScheduleEnum getWholeSchedule(List<TaskScheduleEnum> scheduleEnumList) {
         return scheduleEnumList.stream().max(Comparator.comparing(TaskScheduleEnum::getCode)).orElseThrow(NullPointerException::new);
     }
+
+    public static boolean canComplete(TaskScheduleEnum scheduleEnum) {
+        return TaskScheduleEnum.NOT_START.equals(scheduleEnum) || TaskScheduleEnum.IN_PROGRESS.equals(scheduleEnum);
+    }
 }
