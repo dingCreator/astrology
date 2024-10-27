@@ -3,6 +3,7 @@ package com.dingCreator.astrology.behavior;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.dingCreator.astrology.cache.TaskCache;
 import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.dto.task.PeakTaskDTO;
 import com.dingCreator.astrology.dto.task.TaskScheduleTitleDTO;
 import com.dingCreator.astrology.dto.task.TaskTemplateTitleDTO;
 import com.dingCreator.astrology.entity.PeakTaskTemplate;
@@ -40,8 +41,8 @@ public class TaskBehavior {
      *
      * @param playerId 玩家ID
      */
-    public void startPeakTask(Long playerId) {
-        TaskUtil.receivePeakTask(playerId);
+    public PeakTaskDTO startPeakTask(Long playerId) {
+        return TaskUtil.receivePeakTask(playerId);
     }
 
     /**

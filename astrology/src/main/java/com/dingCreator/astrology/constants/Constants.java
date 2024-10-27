@@ -65,6 +65,10 @@ public final class Constants {
      * 世界boss错误码前缀
      */
     public static final String WORLD_BOSS_EXCEPTION_PREFIX = "E_WORLD_BOSS_";
+    /**
+     * 商店错误码前缀
+     */
+    public static final String SHOP_ITEM_EXCEPTION_PREFIX = "E_SHOP_ITEM_";
 
     // **----** 经验相关配置 **----**
     /**
@@ -184,6 +188,10 @@ public final class Constants {
      * 锁前缀-任务进度
      */
     public static final String TASK_SCHEDULE_LOCK_PREFIX = "LOCK_TASK_SCHEDULE_";
+    /**
+     * 锁前缀-商店
+     */
+    public static final String SHOP_BUY_LOCK_PREFIX = "LOCK_SHOP_BUY_";
     /**
      * 每日最多攻击世界boss次数
      */

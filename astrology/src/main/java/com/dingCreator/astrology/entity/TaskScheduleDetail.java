@@ -45,6 +45,11 @@ public class TaskScheduleDetail {
     @TableField("task_template_detail_id")
     private Long taskTemplateDetailId;
     /**
+     * 目标类型
+     */
+    @TableField("target")
+    private String target;
+    /**
      * 任务目标ID
      */
     @TableField("target_id")

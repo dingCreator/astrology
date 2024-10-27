@@ -17,6 +17,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 
@@ -159,7 +161,7 @@ public class ExpBehavior {
         }
 
         HangUpVO hangUpVO = new HangUpVO();
-        long between = DateUtil.between(playerDTO.getStatusStartTime(), new Date(), DateUnit.MINUTE);
+        long between = Duration.between(playerDTO.getStatusStartTime(), LocalDateTime.now()).toMinutes();
         PlayerBehavior.getInstance().updatePlayerStatus(playerDTO, PlayerStatusEnum.FREE,
                 () -> PlayerStatusEnum.HANG_UP.getCode().equals(PlayerBehavior.getInstance().getStatus(playerDTO)),
                 ExpExceptionEnum.NOT_HANG_UP.getException());

@@ -20,6 +20,11 @@ public class TaskTemplateDetail {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
+     * 模板标题ID
+     */
+    @TableField("task_template_title_id")
+    private Long taskTemplateTitleId;
+    /**
      * 任务模板ID
      */
     @TableField("task_template_id")

@@ -9,6 +9,7 @@ import com.dingCreator.astrology.util.EquipmentUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -41,7 +42,7 @@ public class PlayerDTO extends OrganismDTO {
     /**
      * 进入此状态时间
      */
-    private Date statusStartTime;
+    private LocalDateTime statusStartTime;
     /**
      * 是否可用
      */

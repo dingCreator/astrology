@@ -1,13 +1,8 @@
 package com.dingCreator.astrology.event.listener;
 
-import com.dingCreator.astrology.cache.TaskCache;
 import com.dingCreator.astrology.dto.task.TaskScheduleDetailDTO;
-import com.dingCreator.astrology.dto.task.TaskScheduleTitleDTO;
 import com.dingCreator.astrology.dto.task.TaskTemplateDTO;
 import com.dingCreator.astrology.dto.task.TaskTemplateTitleDTO;
-import com.dingCreator.astrology.entity.TaskSchedule;
-import com.dingCreator.astrology.entity.TaskScheduleDetail;
-import com.dingCreator.astrology.entity.TaskTemplate;
 import com.dingCreator.astrology.enums.task.TaskScheduleEnum;
 import com.dingCreator.astrology.event.event.TaskEvent;
 import com.dingCreator.astrology.util.LootUtil;

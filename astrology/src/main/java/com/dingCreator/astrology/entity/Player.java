@@ -7,6 +7,7 @@ import com.dingCreator.astrology.entity.base.Organism;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -48,7 +49,7 @@ public class Player extends Organism {
      * 进入此状态时间
      */
     @TableField("status_start_time")
-    private Date statusStartTime;
+    private LocalDateTime statusStartTime;
     /**
      * 是否可用
      */

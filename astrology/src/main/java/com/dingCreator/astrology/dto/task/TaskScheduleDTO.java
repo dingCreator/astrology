@@ -30,6 +30,10 @@ public class TaskScheduleDTO {
      */
     private String description;
     /**
+     * 优先级
+     */
+    private Integer priority;
+    /**
      * 进度
      */
     private TaskScheduleEnum taskScheduleEnum;

@@ -6,6 +6,7 @@ import com.dingCreator.astrology.behavior.TeamBehavior;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.cache.TaskCache;
 import com.dingCreator.astrology.cache.TeamCache;
+import com.dingCreator.astrology.dto.TeamDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.task.*;
@@ -177,7 +178,13 @@ public class TaskUtilAbility {
      * @param title    任务模板标题
      */
     public static void createSchedule(Long playerId, TaskTemplateTitleDTO title) {
-        List<Long> teamPlayerIds = TeamCache.getTeamByPlayerId(playerId).getMembers();
+        TeamDTO teamDTO = TeamCache.getTeamByPlayerId(playerId);
+        List<Long> teamPlayerIds;
+        if (Objects.nonNull(teamDTO)) {
+            teamPlayerIds = teamDTO.getMembers();
+        } else {
+            teamPlayerIds = Collections.singletonList(playerId);
+        }
         TaskCache.createTaskSchedule(teamPlayerIds, title);
     }
 
@@ -293,14 +300,10 @@ public class TaskUtilAbility {
     public static TaskTemplateDetailDTO initTplDetail(TaskTemplateTitleDTO tplTitle, TaskScheduleDetailDTO scheduleDetail) {
         TaskTemplateDTO tplDTO = tplTitle.getTemplateList().stream()
                 .filter(tpl -> tpl.getId().equals(scheduleDetail.getTaskTemplateId())).findFirst()
-                .orElseThrow(() -> {
-                    throw TaskExceptionEnum.TASK_TPL_NOT_EXIST.getException();
-                });
+                .orElseThrow(TaskExceptionEnum.TASK_TPL_NOT_EXIST::getException);
         return tplDTO.getDetails().stream()
                 .filter(detail -> detail.getId().equals(scheduleDetail.getTaskTemplateDetailId())).findFirst()
-                .orElseThrow(() -> {
-                    throw TaskExceptionEnum.TASK_TPL_NOT_EXIST.getException();
-                });
+                .orElseThrow(TaskExceptionEnum.TASK_TPL_NOT_EXIST::getException);
     }
 
     /**
@@ -324,9 +327,9 @@ public class TaskUtilAbility {
                                             TaskTemplateDetailDTO tplDetail, long playerId) {
         TaskScheduleEnum oldSchedule = scheduleDetail.getTaskScheduleType();
         int completeTimes = scheduleDetail.getCompleteCnt();
-        while (completeTimes < tplDetail.getTargetCnt()) {
+        while (completeTimes < scheduleDetail.getTargetCnt()) {
             // 判断是否成功
-            boolean success = tplDetail.getTarget().getBiFunction().apply(playerId, tplDetail.getTargetId());
+            boolean success = scheduleDetail.getTarget().getBiFunction().apply(playerId, scheduleDetail.getTargetId());
             if (success) {
                 completeTimes++;
                 scheduleDetail.setCompleteCnt(completeTimes);

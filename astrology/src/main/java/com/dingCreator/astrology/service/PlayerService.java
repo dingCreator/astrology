@@ -77,7 +77,7 @@ public class PlayerService {
      */
     public static synchronized boolean createPlayer(Player player) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
-                sqlSession.getMapper(PlayerDataMapper.class).createPlayer(player));
+                sqlSession.getMapper(PlayerDataMapper.class).insert(player) > 0);
     }
 
     /**

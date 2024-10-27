@@ -37,17 +37,55 @@ public class DatabaseProvider {
     /**
      * 执行SQL
      *
-     * @param function 执行SQL后的处理方法
+     * @param function 执行SQL
      * @return 处理结果
      */
     public <T> T executeReturn(Function<SqlSession, T> function) {
+        return executeReturn(function, false, true);
+    }
+
+    /**
+     * 执行SQL
+     *
+     * @param function 执行SQL
+     * @return 处理结果
+     */
+    public <T> T batchExecuteReturn(Function<SqlSession, T> function) {
+        return executeReturn(function, true, true);
+    }
+
+    /**
+     * 执行SQL
+     *
+     * @param function 执行SQL
+     * @return 处理结果
+     */
+    public <T> T batchTransactionExecuteReturn(Function<SqlSession, T> function) {
+        return executeReturn(function, true, false);
+    }
+
+    /**
+     * 执行SQL
+     *
+     * @param function 执行SQL
+     * @return 处理结果
+     */
+    public <T> T executeReturn(Function<SqlSession, T> function, boolean batch, boolean autoCommit) {
         validateSqlSessionFactory();
         SqlSession sqlSession = null;
         try {
-            sqlSession = DatabaseContext.getSqlSessionFactory().openSession(ExecutorType.BATCH, false);
-            return function.apply(sqlSession);
+            if (batch) {
+                sqlSession = DatabaseContext.getSqlSessionFactory().openSession(ExecutorType.BATCH, autoCommit);
+            } else {
+                sqlSession = DatabaseContext.getSqlSessionFactory().openSession(ExecutorType.SIMPLE, autoCommit);
+            }
+            T result = function.apply(sqlSession);
+            if (!autoCommit) {
+                sqlSession.commit();
+            }
+            return result;
         } catch (Exception e) {
-            if (sqlSession != null) {
+            if (sqlSession != null && !autoCommit) {
                 sqlSession.rollback();
             }
             throw e;

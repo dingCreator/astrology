@@ -2,6 +2,7 @@ package com.dingCreator.astrology.util;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.dingCreator.astrology.cache.PlayerCache;
+import com.dingCreator.astrology.cache.TaskCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.LootDTO;
 import com.dingCreator.astrology.dto.task.*;
@@ -69,6 +70,11 @@ public class TaskUtil {
     public static TaskTemplateTitleDTO constructTaskTemplateTitleDTO(TaskTemplateTitle title, LootDTO titleLoot,
                                                                      Map<Long, LootDTO> lootMap) {
         List<TaskTemplateDTO> tplList = title.getTemplateList().stream()
+                .peek(tpl -> {
+                    if (Objects.isNull(tpl.getPriority())) {
+                        tpl.setPriority(1);
+                    }
+                })
                 .sorted(Comparator.comparing(TaskTemplate::getPriority))
                 .map(tpl -> constructTaskTemplateDTO(tpl, lootMap.get(tpl.getId())))
                 .collect(Collectors.toList());
@@ -103,6 +109,7 @@ public class TaskUtil {
     public static TaskTemplateDetailDTO constructTaskTemplateDetailDTO(TaskTemplateDetail detail) {
         return TaskTemplateDetailDTO.builder()
                 .id(detail.getId())
+                .titleId(detail.getTaskTemplateTitleId())
                 .templateId(detail.getTaskTemplateId())
                 .target(TaskTargetTypeEnum.getByCode(detail.getTargetType()))
                 .allowFailed(detail.getAllowFailed())
@@ -159,6 +166,7 @@ public class TaskUtil {
                         .taskTitleId(detail.getTaskTitleId())
                         .taskTemplateId(detail.getTaskTemplateId())
                         .taskTemplateDetailId(detail.getTaskTemplateDetailId())
+                        .target(TaskTargetTypeEnum.getByCode(detail.getTarget()))
                         .targetId(detail.getTargetId())
                         .completeCnt(detail.getCompleteCnt())
                         .targetCnt(detail.getTargetCnt())
@@ -175,14 +183,17 @@ public class TaskUtil {
 
         List<TaskScheduleDTO> scheduleDTOList = new ArrayList<>(detailList.size());
         detailList.stream().collect(Collectors.groupingBy(TaskScheduleDetailDTO::getTaskTemplateId))
-                .forEach((tplId, scheduleList) -> TaskScheduleDTO.builder().playerId(playerId)
-                        .taskTemplateId(tplId)
-                        .description(tplMap.getOrDefault(tplId, new TaskTemplateDTO()).getDescription())
-                        .detailList(scheduleList)
-                        .taskScheduleEnum(TaskScheduleEnum.getWholeSchedule(
-                                scheduleList.stream().map(TaskScheduleDetailDTO::getTaskScheduleType).collect(Collectors.toList())))
-                        .build()
-                );
+                .forEach((tplId, scheduleList) -> {
+                            TaskScheduleDTO schedule = TaskScheduleDTO.builder().playerId(playerId)
+                            .taskTemplateId(tplId)
+                            .description(tplMap.getOrDefault(tplId, new TaskTemplateDTO()).getDescription())
+                            .priority(tplMap.getOrDefault(tplId, new TaskTemplateDTO()).getPriority())
+                            .detailList(scheduleList)
+                            .taskScheduleEnum(TaskScheduleEnum.getWholeSchedule(
+                                    scheduleList.stream().map(TaskScheduleDetailDTO::getTaskScheduleType).collect(Collectors.toList())))
+                            .build();
+                            scheduleDTOList.add(schedule);
+                });
         return scheduleDTOList;
     }
 
@@ -191,7 +202,7 @@ public class TaskUtil {
      *
      * @param playerId 玩家ID
      */
-    public static void receivePeakTask(long playerId) {
+    public static PeakTaskDTO receivePeakTask(long playerId) {
         PeakTaskDTO peakTaskDTO = TaskUtilAbility.initPeakTaskTplDTO(PlayerCache.getPlayerById(playerId));
         // 任务校验
         validateTask(playerId, peakTaskDTO.getTaskTitle().getId());
@@ -199,6 +210,7 @@ public class TaskUtil {
         TaskUtilAbility.validatePeakTask(PlayerCache.getPlayerById(playerId));
         // 创建任务进度
         TaskUtilAbility.createSchedule(playerId, peakTaskDTO.getTaskTitle());
+        return peakTaskDTO;
     }
 
     /**

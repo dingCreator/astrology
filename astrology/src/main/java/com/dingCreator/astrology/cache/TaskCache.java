@@ -105,6 +105,7 @@ public class TaskCache {
                             .taskTitleId(tplDetail.getTitleId())
                             .taskTemplateId(tplDetail.getTemplateId())
                             .taskTemplateDetailId(tplDetail.getId())
+                            .target(tplDetail.getTarget().getCode())
                             .targetId(tplDetail.getTargetId())
                             .targetCnt(tplDetail.getTargetCnt())
                             .completeCnt(0)

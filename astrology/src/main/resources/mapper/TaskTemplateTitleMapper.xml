@@ -1,55 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dingCreator.astrology.mapper.TaskTemplateTitleMapper">
+
     <resultMap id="baseResultMap" type="com.dingCreator.astrology.entity.TaskTemplateTitle">
-        <id property="id" column="title_id" />
-        <result property="title" column="title_title" />
-        <result property="description" column="title_description" />
-        <result property="taskType" column="title_task_type" />
-        <result property="limitMapId" column="title_limit_map_id" />
-        <result property="childrenSort" column="title_children_sort" />
-        <result property="mutualExclusion" column="title_mutual_exclusion" />
-        <result property="allowTeam" column="title_allow_team" />
-        <result property="allowRepeatableReceive" column="title_allow_repeatable_receive" />
+        <id property="id" column="title_id"/>
+        <result property="name" column="title_name"/>
+        <result property="description" column="title_description"/>
+        <result property="taskType" column="title_task_type"/>
+        <result property="limitMapId" column="title_limit_map_id"/>
+        <result property="childrenSort" column="title_children_sort"/>
+        <result property="mutualExclusion" column="title_mutual_exclusion"/>
+        <result property="allowTeam" column="title_allow_team"/>
+        <result property="allowRepeatableReceive" column="title_allow_repeatable_receive"/>
 
-        <collection property="templateList" ofType="com.dingCreator.astrology.entity.TaskTemplate">
-            <id property="id" column="tpl_id" />
-            <result property="description" column="tpl_description" />
-            <result property="titleId" column="tpl_title_id" />
+        <collection property="templateList" javaType="java.util.List" ofType="com.dingCreator.astrology.entity.TaskTemplate">
+            <id property="id" column="tpl_id"/>
+            <result property="description" column="tpl_description"/>
+            <result property="titleId" column="tpl_title_id"/>
+            <result property="priority" column="tpl_priority"/>
 
-            <collection property="detailList" javaType="com.dingCreator.astrology.entity.TaskTemplateDetail">
-                <id property="id" column="detail_id" />
-                <result property="taskTemplateId" column="detail_task_template_id" />
-                <result property="targetType" column="detail_target_type" />
-                <result property="targetId" column="detail_target_id" />
-                <result property="targetCnt" column="detail_target_cnt" />
+            <collection property="detailList" javaType="java.util.List" ofType="com.dingCreator.astrology.entity.TaskTemplateDetail">
+                <id property="id" column="detail_id"/>
+                <result property="taskTemplateTitleId" column="detail_task_template_title_id"/>
+                <result property="taskTemplateId" column="detail_task_template_id"/>
+                <result property="targetType" column="detail_target_type"/>
+                <result property="targetId" column="detail_target_id"/>
+                <result property="allowFailed" column="detail_allow_failed"/>
+                <result property="targetCnt" column="detail_target_cnt"/>
+                <result property="successMsg" column="detail_success_msg"/>
+                <result property="failMsg" column="detail_fail_msg"/>
             </collection>
         </collection>
     </resultMap>
 
-    <select id="getTaskTemplateTitleById" resultMap="baseResultMap">
+    <select id="listTaskTemplate" parameterType="com.dingCreator.astrology.request.TaskTemplateTitleQryReq"
+            resultMap="baseResultMap">
         select
-            title.id title_id,
-            title.description title_description,
-            title.task_type title_task_type,
-            title.limit_map_id title_limit_map_id,
-            title.children_sort title_children_sort,
-            title.mutual_exclusion title_mutual_exclusion,
-            title.allow_team title_allow_team,
-            title.allow_repeatable_reveive title_allow_repeatable_receive,
-            tpl.id tpl_id,
-            tpl.description tpl_description,
-            tpl.title_id tpl_title_id,
-            detail.task_template_id detail_task_template_id,
-            detail.target_type detail_target_type,
-            detail.target_id detail_target_id,
-            detail.target_cnt detail_target_cnt
+        title.id title_id,
+        title.name title_name,
+        title.description title_description,
+        title.task_type title_task_type,
+        title.limit_map_id title_limit_map_id,
+        title.children_sort title_children_sort,
+        title.mutual_exclusion title_mutual_exclusion,
+        title.allow_team title_allow_team,
+        title.allow_repeatable_receive title_allow_repeatable_receive,
+        tpl.id tpl_id,
+        tpl.description tpl_description,
+        tpl.title_id tpl_title_id,
+        tpl.priority tpl_priority,
+        detail.id detail_id,
+        detail.task_template_title_id detail_task_template_title_id,
+        detail.task_template_id detail_task_template_id,
+        detail.target_type detail_target_type,
+        detail.allow_failed detail_allow_failed,
+        detail.target_id detail_target_id,
+        detail.target_cnt detail_target_cnt,
+        detail.success_msg detail_success_msg,
+        detail.fail_msg detail_fail_msg
         from
-            astrology_task_template_title title
+        bot.astrology_task_template_title title
         left join
-            astrology_task_template tpl on tpl.title_id=title.id
+        bot.astrology_task_template tpl on tpl.title_id = title.id
         left join
-            astrology_task_template_detail detail on detail.task_template_id=tpl.id
+        bot.astrology_task_template_detail detail on detail.task_template_id = tpl.id
         <where>
             <if test="req.titleId != null">
                 and title.id=#{titleId}

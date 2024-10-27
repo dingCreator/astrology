@@ -5,7 +5,9 @@ import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
 import com.dingCreator.astrology.service.EquipmentBelongToService;
 import com.dingCreator.astrology.vo.ArticleItemVO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -35,6 +37,8 @@ public abstract class ArticleItemDTO implements Serializable {
     public abstract ArticleItemVO view();
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class EquipmentItem extends ArticleItemDTO {
         /**
          * 装备ID
@@ -60,6 +64,8 @@ public abstract class ArticleItemDTO implements Serializable {
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class TitleItem extends ArticleItemDTO {
         /**
          * 称号ID
@@ -78,6 +84,8 @@ public abstract class ArticleItemDTO implements Serializable {
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class SkillItem extends ArticleItemDTO {
         /**
          * 技能ID

@@ -27,7 +27,7 @@ public class PageUtil {
         }
 
         int size = list.size();
-        int maxPageIndex = (int) Math.floor((float) size / (float) pageSize);
+        int maxPageIndex = (int) Math.ceil((float) size / (float) pageSize);
         pageIndex = Math.min(pageIndex, maxPageIndex);
 
         PageResponse<T> page = new PageResponse<>();
