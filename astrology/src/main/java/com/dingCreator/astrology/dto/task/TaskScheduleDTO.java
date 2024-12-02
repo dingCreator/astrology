@@ -18,10 +18,6 @@ import java.util.List;
 @Builder
 public class TaskScheduleDTO {
     /**
-     * 主键
-     */
-    private Long id;
-    /**
      * 玩家ID
      */
     private Long playerId;
@@ -33,6 +29,10 @@ public class TaskScheduleDTO {
      * 描述
      */
     private String description;
+    /**
+     * 优先级
+     */
+    private Integer priority;
     /**
      * 进度
      */

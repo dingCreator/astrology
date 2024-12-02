@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.dto.task;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.dingCreator.astrology.entity.TaskTemplateDetail;
 import com.dingCreator.astrology.enums.task.TaskTargetTypeEnum;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,10 @@ public class TaskTemplateDetailDTO {
      */
     private TaskTargetTypeEnum target;
     /**
+     * 此任务是否允许失败（即失败后是否直接导致任务失败）
+     */
+    private Boolean allowFailed;
+    /**
      * 目标ID
      */
     private Long targetId;
@@ -40,17 +45,12 @@ public class TaskTemplateDetailDTO {
      * 数量
      */
     private Integer targetCnt;
-
     /**
-     * 转化为dto
-     *
-     * @param detail 实体
-     * @return dto
+     * 完成任务返回信息
      */
-    public static TaskTemplateDetailDTO convert(TaskTemplateDetail detail) {
-        return TaskTemplateDetailDTO.builder()
-                .target(TaskTargetTypeEnum.getByCode(detail.getTargetType()))
-                .targetCnt(detail.getTargetCnt())
-                .targetId(detail.getTargetId()).build();
-    }
+    private String successMsg;
+    /**
+     * 任务失败返回信息
+     */
+    private String failMsg;
 }

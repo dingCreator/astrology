@@ -31,6 +31,11 @@ public class TaskTemplate {
     @TableField("description")
     private String description;
     /**
+     * 优先级
+     */
+    @TableField("priority")
+    private Integer priority;
+    /**
      * 任务详情
      */
     private List<TaskTemplateDetail> detailList;

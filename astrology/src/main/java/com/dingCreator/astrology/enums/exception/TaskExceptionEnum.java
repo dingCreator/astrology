@@ -25,6 +25,14 @@ public enum TaskExceptionEnum {
     ALREADY_COMPLETE(new BusinessException(Constants.TASK_EXCEPTION_PREFIX + "008", "任务已完成，请不要重复接取")),
     ALREADY_FAILED(new BusinessException(Constants.TASK_EXCEPTION_PREFIX + "009", "任务已失败，无法再次接取")),
     TASK_TPL_NOT_EXIST(new BusinessException(Constants.TASK_EXCEPTION_PREFIX + "010", "任务模板不存在")),
+    NO_NEED_COMPLETE_TASK_SCHEDULE(new BusinessException(Constants.TASK_EXCEPTION_PREFIX + "011", "你无需完成该任务")),
+    MUST_COMPLETE_TASK_AS_SORT(new BusinessException(Constants.TASK_EXCEPTION_PREFIX + "012", "你必须按指定顺序完成任务")),
+    TASK_TYPE_ERR(new BusinessException(Constants.TASK_EXCEPTION_PREFIX + "013", "任务类型输入有误")),
+    TASK_MAP_ERR(new BusinessException(Constants.TASK_EXCEPTION_PREFIX + "014", "地图输入有误")),
+    INVALID_TASK_SCHEDULE_TITLE_NO(new BusinessException(Constants.TASK_EXCEPTION_PREFIX + "015", "任务编号输入有误")),
+    INVALID_JOB_NAME(new BusinessException(Constants.TASK_EXCEPTION_PREFIX + "016", "职业配置有误")),
+    INVALID_RANK(new BusinessException(Constants.TASK_EXCEPTION_PREFIX + "017", "阶级配置有误")),
+    INVALID_TASK_TPL_TITLE_ID(new BusinessException(Constants.TASK_EXCEPTION_PREFIX + "018", "任务模板配置有误")),
     ;
     private final BusinessException exception;
 }

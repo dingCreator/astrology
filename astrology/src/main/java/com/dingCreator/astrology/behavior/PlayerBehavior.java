@@ -25,7 +25,11 @@ import com.dingCreator.astrology.util.MapUtil;
 import com.dingCreator.astrology.util.SkillUtil;
 import com.dingCreator.astrology.vo.BattleResultVO;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -195,7 +199,7 @@ public class PlayerBehavior {
                 throw exception;
             }
             playerDTO.setStatus(newStatus.getCode());
-            playerDTO.setStatusStartTime(new Date());
+            playerDTO.setStatusStartTime(LocalDateTime.now());
             PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
         }
     }
@@ -217,7 +221,7 @@ public class PlayerBehavior {
                 throw exception;
             }
             playerDTO.setStatus(newStatus.getCode());
-            playerDTO.setStatusStartTime(new Date());
+            playerDTO.setStatusStartTime(LocalDateTime.now());
             PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
         }
     }
@@ -290,12 +294,12 @@ public class PlayerBehavior {
                 PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
             } else {
                 long seconds = MapUtil.moveTime(playerDTO.getId(), MapUtil.getNowLocation(playerDTO.getId()), targetMapId);
-                long statusEndTime = Objects.isNull(playerDTO.getStatusStartTime()) ?
-                        0 : playerDTO.getStatusStartTime().getTime() + seconds * 1000;
-                if (System.currentTimeMillis() >= statusEndTime) {
+                LocalDateTime statusEndTime = Objects.isNull(playerDTO.getStatusStartTime()) ?
+                        LocalDateTime.MIN : playerDTO.getStatusStartTime().plusSeconds(seconds);
+                if (LocalDateTime.now().isAfter(statusEndTime)) {
                     // 已经到了
                     playerDTO.setStatus(PlayerStatusEnum.FREE.getCode());
-                    playerDTO.setStatusStartTime(new Date());
+                    playerDTO.setStatusStartTime(LocalDateTime.now());
                     playerDTO.setMapId(MapUtil.getTargetLocation(playerDTO.getId()));
                     PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
                 }

@@ -4,13 +4,19 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author ding
  * @date 2024/8/27
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @TableName("astrology_task_schedule_detail")
 public class TaskScheduleDetail {
     /**
@@ -38,6 +44,11 @@ public class TaskScheduleDetail {
      */
     @TableField("task_template_detail_id")
     private Long taskTemplateDetailId;
+    /**
+     * 目标类型
+     */
+    @TableField("target")
+    private String target;
     /**
      * 任务目标ID
      */

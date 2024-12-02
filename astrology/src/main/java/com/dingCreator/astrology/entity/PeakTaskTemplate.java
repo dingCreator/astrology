@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author ding
@@ -12,6 +15,9 @@ import lombok.Data;
  */
 @Data
 @TableName("astrology_peak_task_template")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PeakTaskTemplate {
     /**
      * 主键

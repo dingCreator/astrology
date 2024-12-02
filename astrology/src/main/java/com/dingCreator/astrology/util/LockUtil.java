@@ -32,7 +32,9 @@ public class LockUtil {
                     try {
                         Thread.sleep(RandomUtil.rangeIntRandom(50, 150));
                     } catch (InterruptedException ite) {
-                        LOG.info("线程【" + Thread.currentThread().getName() + "】中止获取key为【" + lockKey + "】的锁");
+                        if (LOG.isDebugEnabled()) {
+                            LOG.info("线程【{}】中止获取key为【{}】的锁", Thread.currentThread().getName(), lockKey);
+                        }
                         break;
                     }
                     continue;
@@ -40,11 +42,20 @@ public class LockUtil {
                 LOCK_SET.add(lockKey);
             }
             try {
-                LOG.info("线程【" + Thread.currentThread().getName() + "】获取key为【" + lockKey + "】的锁成功");
+                if (LOG.isDebugEnabled()) {
+                    LOG.info("线程【{}】获取key为【{}】的锁成功", Thread.currentThread().getName(), lockKey);
+                }
                 return supplier.get();
+            } catch (Throwable e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.error("线程【{}】出现错误", Thread.currentThread().getName(), e);
+                }
+                throw e;
             } finally {
                 LOCK_SET.remove(lockKey);
-                LOG.info("线程【" + Thread.currentThread().getName() + "】释放key为【" + lockKey + "】的锁");
+                if (LOG.isDebugEnabled()) {
+                    LOG.info("线程【{}】释放key为【{}】的锁", Thread.currentThread().getName(), lockKey);
+                }
             }
         }
         LOG.error("线程【{}】获取key为【{}】的锁失败", Thread.currentThread().getName(), lockKey);

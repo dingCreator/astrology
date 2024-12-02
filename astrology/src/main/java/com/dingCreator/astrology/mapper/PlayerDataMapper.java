@@ -35,7 +35,7 @@ public interface PlayerDataMapper extends BaseMapper<Player> {
      * @param player 玩家基本信息
      * @return 是否新增成功
      */
-    @Insert("INSERT INTO astrology_player (id, name, hp, max_hp, mp, max_mp, atk, magic_atk, def, magic_def, penetrate, " +
+    @Insert("INSERT INTO astrology_player (id, `name`, hp, max_hp, mp, max_mp, atk, magic_atk, def, magic_def, penetrate, " +
             "magic_penetrate, critical_rate, critical_reduction_rate, critical_damage, critical_damage_reduction, " +
             "behavior_speed, hit, dodge, life_stealing, `rank`, `level`, `exp`, job, map_id, status, status_start_time, enabled" +
             ") VALUES (" +

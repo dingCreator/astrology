@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -13,7 +16,10 @@ import java.util.List;
  * @date 2024/9/23
  */
 @Data
-@TableName("astrology_task_template_head")
+@TableName("astrology_task_template_title")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TaskTemplateTitle {
     /**
      * 主键
@@ -21,10 +27,10 @@ public class TaskTemplateTitle {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
-     * 任务标题
+     * 任务名称
      */
-    @TableField("title")
-    private String title;
+    @TableField("`name`")
+    private String name;
     /**
      * 任务描述
      */

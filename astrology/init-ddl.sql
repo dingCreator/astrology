@@ -192,3 +192,58 @@ CREATE TABLE astrology_world_boss_record
     PRIMARY KEY (`id`) using btree,
     key idx_player_id_list (`player_id_list`)
 ) engine = innodb comment ='世界boss挑战记录表';
+
+CREATE TABLE astrology_task_template_detail
+(
+    id               BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    task_template_id BIGINT COMMENT '任务模板ID',
+    target_type      VARCHAR(255) COMMENT '任务目标',
+    allow_failed     BOOLEAN COMMENT '此任务是否允许失败（即失败后是否直接导致任务失败）',
+    target_id        BIGINT COMMENT '目标ID',
+    target_cnt       INT COMMENT '目标数量',
+    success_msg      VARCHAR(255) COMMENT '完成任务返回信息',
+    fail_msg         VARCHAR(255) COMMENT '任务失败返回信息'
+) ENGINE = InnoDB COMMENT ='任务详情表';
+
+CREATE TABLE astrology_task_template
+(
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    title_id    BIGINT COMMENT '任务标题ID',
+    description TEXT COMMENT '任务描述',
+    priority    INT COMMENT '优先级'
+) ENGINE = InnoDB COMMENT ='任务模板表';
+
+CREATE TABLE astrology_task_template_title
+(
+    id                       BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    `name`                   VARCHAR(255) NOT NULL COMMENT '任务名称',
+    description              TEXT COMMENT '任务描述',
+    task_type                VARCHAR(50) COMMENT '任务类型',
+    limit_map_id             VARCHAR(255) COMMENT '可完成任务的地图，逗号分隔，为空表示无限制',
+    children_sort            BOOLEAN COMMENT '任务是否必须按顺序完成',
+    mutual_exclusion         BOOLEAN COMMENT '是否与其他任务互斥',
+    allow_team               BOOLEAN COMMENT '是否允许组队',
+    allow_repeatable_receive BOOLEAN COMMENT '是否允许多次接取'
+) ENGINE = InnoDB COMMENT ='任务模板标题表';
+
+CREATE TABLE astrology_task_schedule_detail
+(
+    id                      BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    player_id               BIGINT COMMENT '玩家ID',
+    task_title_id           BIGINT COMMENT '任务模板标题ID',
+    task_template_id        BIGINT COMMENT '任务模板ID',
+    task_template_detail_id BIGINT COMMENT '任务模板详情ID',
+    target                  VARCHAR(32) NOT NULL COMMENT '任务目标类型',
+    target_id               BIGINT COMMENT '任务目标ID',
+    target_cnt              INT COMMENT '任务目标数量',
+    complete_cnt            INT COMMENT '已完成数量',
+    task_schedule_type      VARCHAR(50) COMMENT '任务进度类型'
+) ENGINE = InnoDB COMMENT ='任务调度详情表';
+
+CREATE TABLE astrology_peak_task_template
+(
+    id                     BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    job                    VARCHAR(255) COMMENT '职业',
+    `rank`                 INT COMMENT '阶级',
+    task_template_title_id BIGINT COMMENT '任务模板ID'
+) ENGINE = InnoDB COMMENT ='巅峰任务模板表';

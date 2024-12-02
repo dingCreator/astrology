@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -34,10 +33,6 @@ public class TaskScheduleTitleDTO {
      * 描述
      */
     private String description;
-    /**
-     * 接取任务时间
-     */
-    private LocalDateTime receiveTime;
     /**
      * 进度
      */

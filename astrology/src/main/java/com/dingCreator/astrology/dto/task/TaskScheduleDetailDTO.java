@@ -1,9 +1,7 @@
 package com.dingCreator.astrology.dto.task;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.dingCreator.astrology.enums.task.TaskScheduleEnum;
+import com.dingCreator.astrology.enums.task.TaskTargetTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,6 +36,10 @@ public class TaskScheduleDetailDTO {
      * 任务模板详情ID
      */
     private Long taskTemplateDetailId;
+    /**
+     * 目标类型
+     */
+    private TaskTargetTypeEnum target;
     /**
      * 任务目标ID
      */

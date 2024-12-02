@@ -32,6 +32,7 @@ import com.dingCreator.astrology.template.ExtraBattleProcessTemplate;
 import com.dingCreator.astrology.util.function.FunctionExecutor;
 import com.dingCreator.astrology.vo.BattleResultVO;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
@@ -97,7 +98,6 @@ public class BattleUtil {
             throw e;
         }
 
-        List<Long> playerIds = new ArrayList<>(6);
         // 发起方
         List<Long> initiatorTeamPlayers = new ArrayList<>(3);
         if (initiatorPlayer.getTeam()) {
@@ -123,8 +123,7 @@ public class BattleUtil {
         // 尝试获取决斗锁
         if (tryAcquired(initiatorId)) {
             // 获取成功，表明可以决斗，尝试上锁
-            addBattleRequest(initiatorId, recipientTeamPlayers);
-            addBattleRequest(recipientId, initiatorTeamPlayers);
+            addBattleRequest(initiatorId, recipientId, initiatorTeamPlayers, recipientTeamPlayers);
             // 返回决斗响应时间
             return Constants.ACCEPT_BATTLE_TIME_OUT;
         }
@@ -139,7 +138,7 @@ public class BattleUtil {
      */
     public static BattleResultVO acceptBattle(Long recipientId) {
         BattleRequest request = validateAndUnlock(recipientId);
-        return battlePVP(request.getInitiatorId(), recipientId);
+        return battlePVP(request.getOpponentId(), recipientId);
     }
 
     /**
@@ -150,7 +149,7 @@ public class BattleUtil {
      */
     public static long refuseBattle(Long recipientId) {
         BattleRequest request = validateAndUnlock(recipientId);
-        return request.getInitiatorId();
+        return request.getOpponentId();
     }
 
     /**
@@ -180,11 +179,11 @@ public class BattleUtil {
             recipientIds = Collections.singletonList(recipientId);
         }
         // 获取发起方
-        TeamDTO initiatorTeam = TeamCache.getTeamById(request.initiatorId);
+        TeamDTO initiatorTeam = TeamCache.getTeamById(request.getOpponentId());
         if (Objects.nonNull(initiatorTeam)) {
             initiatorIds = initiatorTeam.getMembers();
         } else {
-            initiatorIds = Collections.singletonList(request.getInitiatorId());
+            initiatorIds = Collections.singletonList(request.getOpponentId());
         }
 
         // 释放锁
@@ -232,13 +231,25 @@ public class BattleUtil {
     /**
      * 决斗信息
      *
-     * @param initiatorId 发起者ID
-     * @param playerIds   参与玩家ID
+     * @param initiatorId            发起者ID
+     * @param recipientId            接受者ID
+     * @param initiatorTeamMemberIds 发起者小队
+     * @param recipientTeamMemberIds 接受者小队
      */
-    public static synchronized void addBattleRequest(Long initiatorId, List<Long> playerIds) {
+    public static synchronized void addBattleRequest(Long initiatorId, Long recipientId,
+                                                     List<Long> initiatorTeamMemberIds, List<Long> recipientTeamMemberIds) {
         acquired(initiatorId);
-        playerIds.forEach(playerId ->
-                BATTLE_REQUEST_MAP.put(playerId, new BattleRequest(LocalDateTime.now(), initiatorId)));
+        acquired(recipientId);
+
+        initiatorTeamMemberIds.forEach(playerId ->
+                BATTLE_REQUEST_MAP.put(playerId, BattleRequest.builder()
+                        .requestTime(LocalDateTime.now())
+                        .opponentId(recipientId).build()));
+
+        recipientTeamMemberIds.forEach(playerId ->
+                BATTLE_REQUEST_MAP.put(playerId, BattleRequest.builder()
+                        .requestTime(LocalDateTime.now())
+                        .opponentId(initiatorId).build()));
     }
 
     /**
@@ -935,14 +946,15 @@ public class BattleUtil {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @Builder
     public static class BattleRequest implements Serializable {
         /**
          * 发起决斗的时间
          */
         private LocalDateTime requestTime;
         /**
-         * 发起者ID
+         * 敌方ID
          */
-        private Long initiatorId;
+        private Long opponentId;
     }
 }

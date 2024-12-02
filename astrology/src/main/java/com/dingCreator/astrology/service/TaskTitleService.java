@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.service;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.dto.LootDTO;
 import com.dingCreator.astrology.dto.task.TaskTemplateTitleDTO;
@@ -71,6 +72,15 @@ public class TaskTitleService {
         List<Long> titleIdList = titleList.stream().map(TaskTemplateTitle::getId).collect(Collectors.toList());
         List<Long> templateIdList = titleList.stream().flatMap(title -> title.getTemplateList().stream())
                 .map(TaskTemplate::getId).collect(Collectors.toList());
+        // 不完整的任务不转化
+        if (CollectionUtils.isEmpty(templateIdList)) {
+            return new ArrayList<>();
+        }
+        if (titleList.stream().anyMatch(title ->
+                title.getTemplateList().stream().anyMatch(tpl ->
+                        CollectionUtil.isEmpty(tpl.getDetailList())))) {
+            return new ArrayList<>();
+        }
         // 获取掉落物
         List<Loot> titleLootList = LootService.getByBelongToId(LootBelongToEnum.TASK_TITLE.getBelongTo(), titleIdList);
         List<Loot> lootList = LootService.getByBelongToId(LootBelongToEnum.TASK.getBelongTo(), templateIdList);
