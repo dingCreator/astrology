@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dingCreator.astrology.mapper.LootMapper">
+
+    <resultMap id="baseResultMap" type="com.dingCreator.astrology.entity.Loot">
+        <id column="id" property="id"/>
+        <result column="belong_to" property="belongTo" />
+        <result column="belong_to_id" property="belongToId" />
+        <result column="exp" property="exp" />
+        <result column="money" property="money" />
+        <collection property="itemList" ofType="com.dingCreator.astrology.entity.LootItem">
+            <id column="item_id" property="id" />
+            <result column="item_loot_id" property="lootId" />
+            <result column="item_article_json" property="articleJson" />
+            <result column="item_rate" property="rate" />
+        </collection>
+    </resultMap>
+
+    <select id="getByBelongToId" resultMap="baseResultMap">
+        select
+            loot.id as id,
+            loot.belong_to as belong_to,
+            loot.belong_to_id as belong_to_id,
+            loot.exp as exp,
+            loot.money as money,
+            item.id as item_id,
+            item.loot_id as item_loot_id,
+            item.article_json as item_article_json,
+            item.rate as item_rate
+        from
+            astrology_loot loot
+        inner join
+            astrology_loot_item item on loot.id=item.loot_id
+        where
+            belong_to=#{belongTo} and
+            belong_to_id IN
+            <foreach collection='belongToIdList' item='belongToId' index='belongToId' separator=',' open="(" close=")">,
+                #{belongToId}
+            </foreach>
+    </select>
+</mapper>

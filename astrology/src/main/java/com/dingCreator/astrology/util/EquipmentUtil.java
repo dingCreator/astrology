@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class EquipmentUtil {
 
+    static EquipmentBelongToService equipmentBelongToService = EquipmentBelongToService.getInstance();
+
     /**
      * 校验
      *
@@ -162,23 +164,23 @@ public class EquipmentUtil {
 
         if (EquipmentTypeEnum.WEAPON.equals(equipmentEnum.getEquipmentTypeEnum())) {
             if (Objects.nonNull(equipmentBarDTO.getWeapon())) {
-                EquipmentBelongToService.updateEquipment(equipmentBarDTO.getWeapon().getId(), false);
+                equipmentBelongToService.updateEquipment(equipmentBarDTO.getWeapon().getId(), false);
             }
             equipmentBarDTO.setWeapon(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
                     equipmentBelongTo.getLevel()));
         } else if (EquipmentTypeEnum.ARMOR.equals(equipmentEnum.getEquipmentTypeEnum())) {
             if (Objects.nonNull(equipmentBarDTO.getArmor())) {
-                EquipmentBelongToService.updateEquipment(equipmentBarDTO.getArmor().getId(), false);
+                equipmentBelongToService.updateEquipment(equipmentBarDTO.getArmor().getId(), false);
             }
             equipmentBarDTO.setArmor(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
                     equipmentBelongTo.getLevel()));
         } else if (EquipmentTypeEnum.JEWELRY.equals(equipmentEnum.getEquipmentTypeEnum())) {
             if (Objects.nonNull(equipmentBarDTO.getJewelry())) {
-                EquipmentBelongToService.updateEquipment(equipmentBarDTO.getJewelry().getId(), false);
+                equipmentBelongToService.updateEquipment(equipmentBarDTO.getJewelry().getId(), false);
             }
             equipmentBarDTO.setJewelry(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
                     equipmentBelongTo.getLevel()));
         }
-        EquipmentBelongToService.updateEquipment(equipmentBelongTo.getId(), equip);
+        equipmentBelongToService.updateEquipment(equipmentBelongTo.getId(), equip);
     }
 }

@@ -34,6 +34,10 @@ import java.util.stream.Collectors;
  */
 public class TaskBehavior {
 
+    private final TaskTitleService taskTitleService = TaskTitleService.getInstance();
+
+    private final PeakTaskTemplateService peakTaskTemplateService = PeakTaskTemplateService.getInstance();
+
     static Logger logger = LoggerFactory.getLogger(TaskBehavior.class);
 
     /**
@@ -163,7 +167,7 @@ public class TaskBehavior {
                 .childrenSort(childrenSort)
                 .mutualExclusion(mutualExclusion)
                 .build();
-        TaskTitleService.constructTaskTitleDTO(tplTitle);
+        taskTitleService.constructTaskTitleDTO(tplTitle);
     }
 
     public void createPeakTask(String jobName, Integer rank, Long taskTplTitleId) {
@@ -182,7 +186,7 @@ public class TaskBehavior {
                 .job(job.getJobCode())
                 .rank(rank)
                 .taskTemplateTitleId(taskTplTitleId).build();
-        PeakTaskTemplateService.createPeakTaskTemplate(peakTaskTemplate);
+        peakTaskTemplateService.createPeakTaskTemplate(peakTaskTemplate);
     }
 
     private static class Holder {

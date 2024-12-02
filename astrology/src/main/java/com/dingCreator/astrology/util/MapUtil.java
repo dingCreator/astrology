@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class MapUtil {
 
     public static Map getMapById(long mapId) {
-        return MapService.getMapById(mapId);
+        return MapService.getInstance().getMapById(mapId);
     }
 
     /**
@@ -73,8 +73,8 @@ public class MapUtil {
      * @return 曼哈顿距离
      */
     public static long manhattanDistance(long map1Id, long map2Id) {
-        Map startMap = MapService.getMapById(map1Id);
-        Map endMap = MapService.getMapById(map2Id);
+        Map startMap = MapService.getInstance().getMapById(map1Id);
+        Map endMap = MapService.getInstance().getMapById(map2Id);
         if (Objects.isNull(startMap) || Objects.isNull(endMap)) {
             return 0;
         }

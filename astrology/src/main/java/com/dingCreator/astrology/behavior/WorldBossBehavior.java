@@ -25,6 +25,10 @@ import java.util.stream.Collectors;
  */
 public class WorldBossBehavior {
 
+    private final MonsterService monsterService = MonsterService.getInstance();
+
+    private final WorldBossRecordService worldBossRecordService = WorldBossRecordService.getInstance();
+
     private static final Object MONITOR = new Object();
 
     /**
@@ -74,7 +78,7 @@ public class WorldBossBehavior {
             // 开打
             BattleUtil.battlePVE(playerId, new ArrayList<>(prop.getMonsterMap().values()), true, () ->
                     prop.getMonsterMap().forEach((key, value) ->
-                            MonsterService.updateHpById(key, value.getOrganismDTO().getHp()))
+                            monsterService.updateHpById(key, value.getOrganismDTO().getHp()))
             );
             WorldBossCache.commitAtkTimes();
             // 战斗后boss血量总值
@@ -83,7 +87,7 @@ public class WorldBossBehavior {
             damage = hpBeforeBattle - hpAfterBattle;
             worldBossRecord.setDamage(damage);
         }
-        WorldBossRecordService.insert(worldBossRecord);
+        worldBossRecordService.insert(worldBossRecord);
         return damage;
     }
 
@@ -94,7 +98,7 @@ public class WorldBossBehavior {
      */
     public List<WorldBossChartVO> queryPlayerCharts(Long playerId) {
         List<WorldBossChartVO> voList = new ArrayList<>();
-        List<WorldBossRecord> worldBossRecordList = WorldBossRecordService.queryTodayWorldBossRecordList();
+        List<WorldBossRecord> worldBossRecordList = worldBossRecordService.queryTodayWorldBossRecordList();
         if (CollectionUtils.isEmpty(worldBossRecordList)) {
             return voList;
         }
@@ -122,12 +126,12 @@ public class WorldBossBehavior {
      */
     public List<WorldBossChartVO> queryWorldBossCharts(int pageIndex, int pageSize) {
         List<WorldBossChartVO> voList = new ArrayList<>();
-        List<WorldBossRecord> worldBossRecordList = WorldBossRecordService.queryTodayWorldBossRecordList();
+        List<WorldBossRecord> worldBossRecordList = worldBossRecordService.queryTodayWorldBossRecordList();
         if (CollectionUtils.isEmpty(worldBossRecordList)) {
             return voList;
         }
 
-        Page<WorldBossRecord> page = WorldBossRecordService.queryTodayWorldBossRecordPage(pageIndex, pageSize);
+        Page<WorldBossRecord> page = worldBossRecordService.queryTodayWorldBossRecordPage(pageIndex, pageSize);
         List<WorldBossRecord> recordList = page.getRecords();
         for (int i = 0; i < recordList.size(); i++) {
             WorldBossRecord record = worldBossRecordList.get(i);

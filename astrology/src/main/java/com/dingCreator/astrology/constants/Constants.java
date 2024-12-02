@@ -161,6 +161,10 @@ public final class Constants {
      */
     public static final String ALL = "All";
     /**
+     * 物品类型
+     */
+    public static final String ITEM_TYPE = "itemType";
+    /**
      * 时间配置
      */
     public static final String DATE_FORMAT_1 = "yyyy-MM-dd";
@@ -192,6 +196,10 @@ public final class Constants {
      * 锁前缀-商店
      */
     public static final String SHOP_BUY_LOCK_PREFIX = "LOCK_SHOP_BUY_";
+    /**
+     * 锁前缀-参加活动
+     */
+    public static final String JOIN_ACTIVITY_LOCK_PREFIX = "LOCK_ACTIVITY_";
     /**
      * 每日最多攻击世界boss次数
      */

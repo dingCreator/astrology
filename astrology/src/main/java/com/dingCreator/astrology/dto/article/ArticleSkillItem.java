@@ -1,0 +1,40 @@
+package com.dingCreator.astrology.dto.article;
+
+import com.dingCreator.astrology.enums.ArticleTypeEnum;
+import com.dingCreator.astrology.enums.BelongToEnum;
+import com.dingCreator.astrology.enums.skill.SkillEnum;
+import com.dingCreator.astrology.service.SkillBelongToService;
+import com.dingCreator.astrology.vo.ArticleItemVO;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+/**
+ * @author ding
+ * @date 2024/10/28
+ */
+@Getter
+@Setter
+@ToString
+public class ArticleSkillItem extends ArticleItemDTO {
+    /**
+     * 技能ID
+     */
+    private Long skillId;
+
+    public ArticleSkillItem() {
+        super(ArticleTypeEnum.SKILL.getType());
+    }
+
+    @Override
+    public void send2Player(Long playerId) {
+        SkillEnum.getById(skillId);
+        SkillBelongToService.getInstance().createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), playerId, skillId);
+    }
+
+    @Override
+    public ArticleItemVO view() {
+        SkillEnum skillEnum = SkillEnum.getById(skillId);
+        return ArticleItemVO.builder().name(skillEnum.getName()).description(skillEnum.getDesc()).build();
+    }
+}

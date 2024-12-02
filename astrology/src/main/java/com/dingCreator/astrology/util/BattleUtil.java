@@ -413,7 +413,7 @@ public class BattleUtil {
      * @return 怪物信息
      */
     private static List<OrganismInfoDTO> getOrganismByMonsterId(List<Long> ids) {
-        List<Monster> monsterList = MonsterService.getMonsterByIds(ids);
+        List<Monster> monsterList = MonsterService.getInstance().getMonsterByIds(ids);
         return monsterList.stream().map(monster -> {
             MonsterDTO monsterDTO = new MonsterDTO();
             monsterDTO.copyProperties(monster);
@@ -452,7 +452,7 @@ public class BattleUtil {
             organismInfoDTO.setInactiveSkills(CollectionUtil.isEmpty(inactiveSkills) ? new ArrayList<>() :
                     inactiveSkills.stream().map(SkillEnum::getById).collect(Collectors.toList()));
             // 获取已穿戴的装备
-            List<EquipmentBelongTo> equipmentBelongToList = EquipmentBelongToService
+            List<EquipmentBelongTo> equipmentBelongToList = EquipmentBelongToService.getInstance()
                     .getBelongToIdEquip(BelongToEnum.PLAYER.getBelongTo(), id, true);
             EquipmentBarDTO equipmentBarDTO = new EquipmentBarDTO();
             equipmentBelongToList.forEach(e -> {

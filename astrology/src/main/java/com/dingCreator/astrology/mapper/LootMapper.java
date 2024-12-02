@@ -22,11 +22,5 @@ public interface LootMapper extends BaseMapper<Loot> {
      * @param belongToIdList 归属ID
      * @return 掉落物
      */
-    @Select({"<script>",
-            "select * from astrology_loot where belong_to=#{belongTo} and belong_to_id IN(",
-            "<foreach collection='belongToIdList' item='belongToId' index='belongToId' separator=','>",
-            "#{belongToId}",
-            "</foreach>)",
-            "</script>"})
     List<Loot> getByBelongToId(@Param("belongTo") String belongTo, @Param("belongToIdList") List<Long> belongToIdList);
 }

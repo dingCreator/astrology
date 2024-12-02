@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dingCreator.astrology.behavior.DungeonBehavior;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.entity.WorldBoss;
@@ -22,7 +23,7 @@ public class WorldBossService {
      *
      * @return boss
      */
-    public static WorldBoss getTodayBoss() {
+    public WorldBoss getTodayBoss() {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(WorldBossMapper.class).selectOne(
                         new QueryWrapper<WorldBoss>().ge(WorldBoss.APPEAR_DATE, LocalDate.now())));
@@ -36,7 +37,7 @@ public class WorldBossService {
      * @param endHours   结束时间（整点）
      * @param monsterId  怪物ID
      */
-    public static void insertOrUpdateWorldBoss(LocalDate appearDate, int startHours, int endHours, String monsterId) {
+    public void insertOrUpdateWorldBoss(LocalDate appearDate, int startHours, int endHours, String monsterId) {
         LocalDateTime startTime = appearDate.atTime(startHours, 0);
         LocalDateTime endTime = endHours > Constants.MAX_HOUR ?
                 appearDate.atTime(Constants.MAX_HOUR, Constants.MAX_MINUTE, Constants.MAX_SECOND) :
@@ -58,5 +59,17 @@ public class WorldBossService {
                 mapper.insert(worldBoss);
             }
         });
+    }
+
+    private static class Holder {
+        private static final WorldBossService SERVICE = new WorldBossService();
+    }
+
+    private WorldBossService() {
+
+    }
+
+    public static WorldBossService getInstance() {
+        return WorldBossService.Holder.SERVICE;
     }
 }

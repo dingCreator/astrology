@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
  */
 public class RankBehavior {
 
+    private final RankUpBossService rankUpBossService = RankUpBossService.getInstance();
+
     /**
      * 突破
      *
@@ -34,7 +36,7 @@ public class RankBehavior {
         if (playerDTO.getLevel() < RankEnum.getEnum(playerDTO.getJob(), playerDTO.getRank()).getMaxLevel()) {
             throw RankExceptionEnum.LEVEL_NOT_ENOUGH.getException();
         }
-        List<RankUpBoss> rankUpBossList = RankUpBossService.getRankUpBoss(playerDTO.getJob(), playerDTO.getRank());
+        List<RankUpBoss> rankUpBossList = rankUpBossService.getRankUpBoss(playerDTO.getJob(), playerDTO.getRank());
         if (CollectionUtil.isEmpty(rankUpBossList)) {
             throw RankExceptionEnum.RANK_BOSS_NOT_FOUND.getException();
         }

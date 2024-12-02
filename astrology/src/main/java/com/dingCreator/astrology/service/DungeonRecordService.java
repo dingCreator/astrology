@@ -22,7 +22,7 @@ public class DungeonRecordService {
      * @param dungeonId 副本ID
      * @return 记录
      */
-    public static DungeonRecord query(Long playerId, Long dungeonId) {
+    public DungeonRecord query(Long playerId, Long dungeonId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(DungeonRecordMapper.class).query(playerId, dungeonId));
     }
@@ -34,7 +34,7 @@ public class DungeonRecordService {
      * @param dungeonId    副本ID
      * @return 探索副本记录
      */
-    public static List<DungeonRecord> queryList(List<Long> playerIdList, Long dungeonId) {
+    public List<DungeonRecord> queryList(List<Long> playerIdList, Long dungeonId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(DungeonRecordMapper.class).queryList(playerIdList, dungeonId));
     }
@@ -46,7 +46,7 @@ public class DungeonRecordService {
      * @param dungeonId   副本ID
      * @param exploreTime 探索时间
      */
-    public static void insertOrUpdate(List<Long> playerIds, Long dungeonId, Date exploreTime) {
+    public void insertOrUpdate(List<Long> playerIds, Long dungeonId, Date exploreTime) {
         List<DungeonRecord> dungeonRecordList = queryList(playerIds, dungeonId);
         dungeonRecordList.forEach(dungeonRecord -> {
             dungeonRecord.setLastExploreTime(exploreTime);
@@ -66,5 +66,18 @@ public class DungeonRecordService {
                         sqlSession.getMapper(DungeonRecordMapper.class).createRecord(record));
             });
         }
+    }
+
+
+    private static class Holder {
+        private static final DungeonRecordService SERVICE = new DungeonRecordService();
+    }
+
+    private DungeonRecordService() {
+
+    }
+
+    public static DungeonRecordService getInstance() {
+        return DungeonRecordService.Holder.SERVICE;
     }
 }

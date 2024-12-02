@@ -4,7 +4,6 @@ import lombok.Getter;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -62,6 +61,18 @@ public class DatabaseProvider {
      */
     public <T> T batchTransactionExecuteReturn(Function<SqlSession, T> function) {
         return executeReturn(function, true, false);
+    }
+
+    /**
+     * 执行SQL
+     *
+     * @param consumer 执行SQL
+     */
+    public void batchTransactionExecute(Consumer<SqlSession> consumer) {
+        batchTransactionExecuteReturn(sqlSession -> {
+            consumer.accept(sqlSession);
+            return null;
+        });
     }
 
     /**

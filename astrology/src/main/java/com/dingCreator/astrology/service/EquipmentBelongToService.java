@@ -22,7 +22,7 @@ public class EquipmentBelongToService {
      * @param id ID
      * @return 信息
      */
-    public static EquipmentBelongTo getById(Long id) {
+    public EquipmentBelongTo getById(Long id) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(EquipmentBelongToMapper.class).getById(id));
     }
@@ -34,7 +34,7 @@ public class EquipmentBelongToService {
      * @param belongToId 归属ID
      * @return 装备列表
      */
-    public static List<EquipmentBelongTo> listByBelongToId(String belongTo, Long belongToId) {
+    public List<EquipmentBelongTo> listByBelongToId(String belongTo, Long belongToId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(EquipmentBelongToMapper.class).listByBelongToId(belongTo, belongToId));
     }
@@ -46,7 +46,7 @@ public class EquipmentBelongToService {
      * @param belongToId 归属ID
      * @return 装备列表
      */
-    public static List<EquipmentBelongTo> getByBelongToIdAndEquipmentId(String belongTo, Long belongToId, Long equipmentId) {
+    public List<EquipmentBelongTo> getByBelongToIdAndEquipmentId(String belongTo, Long belongToId, Long equipmentId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(EquipmentBelongToMapper.class)
                         .getByBelongToIdAndEquipmentId(belongTo, belongToId, equipmentId));
@@ -59,7 +59,7 @@ public class EquipmentBelongToService {
      * @param belongToId 归属ID
      * @return 装备列表
      */
-    public static List<EquipmentGroupVO> listGroupByBelongToId(String belongTo, Long belongToId) {
+    public List<EquipmentGroupVO> listGroupByBelongToId(String belongTo, Long belongToId) {
         List<EquipmentGroupQueryDTO> queryDTOList = DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(EquipmentBelongToMapper.class).listGroupByBelongToId(belongTo, belongToId));
         return queryDTOList.stream().map(query -> {
@@ -80,7 +80,7 @@ public class EquipmentBelongToService {
      * @param equip      是否已装备
      * @return 装备列表
      */
-    public static List<EquipmentBelongTo> getBelongToIdEquip(String belongTo, Long belongToId, boolean equip) {
+    public List<EquipmentBelongTo> getBelongToIdEquip(String belongTo, Long belongToId, boolean equip) {
         int equipNum = equip ? 1 : 0;
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(EquipmentBelongToMapper.class).getBelongToIdEquip(belongTo, belongToId, equipNum));
@@ -91,7 +91,7 @@ public class EquipmentBelongToService {
      *
      * @param equipmentBelongTo 装备归属
      */
-    public static void addBelongTo(EquipmentBelongTo equipmentBelongTo) {
+    public void addBelongTo(EquipmentBelongTo equipmentBelongTo) {
         DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(EquipmentBelongToMapper.class)
                 .addBelongTo(equipmentBelongTo));
     }
@@ -101,7 +101,7 @@ public class EquipmentBelongToService {
      *
      * @param id ID
      */
-    public static void updateEquipment(Long id, boolean equip) {
+    public void updateEquipment(Long id, boolean equip) {
         DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(EquipmentBelongToMapper.class)
                 .equipEquipment(id, equip ? 1 : 0));
     }
@@ -113,7 +113,7 @@ public class EquipmentBelongToService {
      * @param belongTo   归属
      * @param belongToId 归属ID
      */
-    public static void updateBelongToId(Long id, String belongTo, Long belongToId) {
+    public void updateBelongToId(Long id, String belongTo, Long belongToId) {
         DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(EquipmentBelongToMapper.class)
                 .updateBelongToId(id, belongTo, belongToId));
     }
@@ -123,8 +123,21 @@ public class EquipmentBelongToService {
      *
      * @param id ID
      */
-    public static void deleteById(Long id) {
+    public void deleteById(Long id) {
         DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(EquipmentBelongToMapper.class)
                 .deleteById(id));
+    }
+
+
+    private static class Holder {
+        private static final EquipmentBelongToService SERVICE = new EquipmentBelongToService();
+    }
+
+    private EquipmentBelongToService() {
+
+    }
+
+    public static EquipmentBelongToService getInstance() {
+        return EquipmentBelongToService.Holder.SERVICE;
     }
 }

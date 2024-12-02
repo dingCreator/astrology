@@ -14,18 +14,31 @@ import java.util.Objects;
  */
 public class SkillBarItemService {
 
-    public static SkillBarItem getSkillBarItemByBelongToId(String belongTo, Long belongToId) {
+    public SkillBarItem getSkillBarItemByBelongToId(String belongTo, Long belongToId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(SkillBarItemMapper.class).querySkillBarItemByBelongToId(belongTo, belongToId));
     }
 
-    public static void addSkillBarItem(SkillBarItem skillBarItem) {
+    public void addSkillBarItem(SkillBarItem skillBarItem) {
         DatabaseProvider.getInstance().execute(sqlSession ->
                 sqlSession.getMapper(SkillBarItemMapper.class).insertSkillBarItem(skillBarItem));
     }
 
-    public static void deleteSkillBarItem(String belongTo, Long belongToId) {
+    public void deleteSkillBarItem(String belongTo, Long belongToId) {
         DatabaseProvider.getInstance().execute(sqlSession ->
                 sqlSession.getMapper(SkillBarItemMapper.class).deleteSkillBarItem(belongTo, belongToId));
+    }
+
+
+    private static class Holder {
+        private static final SkillBarItemService SERVICE = new SkillBarItemService();
+    }
+
+    private SkillBarItemService() {
+
+    }
+
+    public static SkillBarItemService getInstance() {
+        return SkillBarItemService.Holder.SERVICE;
     }
 }

@@ -38,6 +38,10 @@ import java.util.function.Supplier;
  */
 public class PlayerBehavior {
 
+    private final SkillBarItemService skillBarItemService = SkillBarItemService.getInstance();
+
+    private final SkillBelongToService skillBelongToService = SkillBelongToService.getInstance();
+
     /**
      * 状态读写锁
      */
@@ -93,14 +97,14 @@ public class PlayerBehavior {
         PlayerCache.createPlayer(player);
 
         // 赠送默认技能
-        SkillBelongToService.createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), id,
+        skillBelongToService.createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), id,
                 SkillEnum.getDefaultSkillByJob(job.getJobCode()).getId());
 
         // 将默认技能装备到技能栏
         List<Long> skillIds = new ArrayList<>();
         skillIds.add(SkillEnum.getDefaultSkillByJob(job.getJobCode()).getId());
         SkillBarItem skillBarItem = SkillUtil.buildSkillBarItemChain(skillIds, BelongToEnum.PLAYER, id);
-        SkillBarItemService.addSkillBarItem(skillBarItem);
+        skillBarItemService.addSkillBarItem(skillBarItem);
     }
 
     /**

@@ -19,7 +19,7 @@ public class SkillBelongToService {
      * @param belongToId 技能归属ID
      * @param skillId    技能ID
      */
-    public static void createSkillBelongTo(String belongTo, Long belongToId, Long skillId) {
+    public void createSkillBelongTo(String belongTo, Long belongToId, Long skillId) {
         SkillBelongTo skillBelongTo = new SkillBelongTo();
         skillBelongTo.setBelongTo(belongTo);
         skillBelongTo.setBelongToId(belongToId);
@@ -35,7 +35,7 @@ public class SkillBelongToService {
      * @param belongToId 归属ID
      * @return 拥有的技能
      */
-    public static List<SkillBelongTo> querySkillBelongToList(String belongTo, Long belongToId) {
+    public List<SkillBelongTo> querySkillBelongToList(String belongTo, Long belongToId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(SkillBelongToMapper.class).querySkillBelongToList(belongTo, belongToId));
     }
@@ -47,8 +47,21 @@ public class SkillBelongToService {
      * @param belongToId 归属ID
      * @return 拥有的技能
      */
-    public static List<SkillBelongTo> querySkillBelongToBySkillId(String belongTo, Long belongToId, List<Long> skillIds) {
+    public List<SkillBelongTo> querySkillBelongToBySkillId(String belongTo, Long belongToId, List<Long> skillIds) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(SkillBelongToMapper.class).querySkillBelongToBySkillId(belongTo, belongToId, skillIds));
+    }
+
+
+    private static class Holder {
+        private static final SkillBelongToService SERVICE = new SkillBelongToService();
+    }
+
+    private SkillBelongToService() {
+
+    }
+
+    public static SkillBelongToService getInstance() {
+        return SkillBelongToService.Holder.SERVICE;
     }
 }

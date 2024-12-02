@@ -23,6 +23,10 @@ import java.util.stream.Collectors;
  */
 public class SkillBehavior {
 
+    private final SkillBarItemService skillBarItemService = SkillBarItemService.getInstance();
+
+    private final SkillBelongToService skillBelongToService = SkillBelongToService.getInstance();
+
     /**
      * 获取技能循环链
      *
@@ -41,7 +45,7 @@ public class SkillBehavior {
      */
     public void createSkillBarItem(Long belongToId, List<Long> skillIds) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(belongToId).getPlayerDTO();
-        List<Long> validSkillIds = SkillBelongToService.querySkillBelongToBySkillId(BelongToEnum.PLAYER.getBelongTo(),
+        List<Long> validSkillIds = skillBelongToService.querySkillBelongToBySkillId(BelongToEnum.PLAYER.getBelongTo(),
                 belongToId, skillIds).stream().map(SkillBelongTo::getSkillId).collect(Collectors.toList());
         if (skillIds.stream().distinct().count() != validSkillIds.size()) {
             throw SkillExceptionEnum.INVALID_SKILL_ID.getException();
@@ -63,8 +67,8 @@ public class SkillBehavior {
         });
 
         SkillCache.deleteSkillBar(belongToId);
-        SkillBarItemService.deleteSkillBarItem(BelongToEnum.PLAYER.getBelongTo(), belongToId);
-        SkillBarItemService.addSkillBarItem(SkillUtil.buildSkillBarItemChain(skillIds, BelongToEnum.PLAYER, belongToId));
+        skillBarItemService.deleteSkillBarItem(BelongToEnum.PLAYER.getBelongTo(), belongToId);
+        skillBarItemService.addSkillBarItem(SkillUtil.buildSkillBarItemChain(skillIds, BelongToEnum.PLAYER, belongToId));
         SkillCache.deleteSkillBar(belongToId);
     }
 
@@ -75,7 +79,7 @@ public class SkillBehavior {
      * @param skillId    技能ID
      */
     public void createSkillBelongTo(Long belongToId, Long skillId) {
-        SkillBelongToService.createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), belongToId, skillId);
+        skillBelongToService.createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), belongToId, skillId);
     }
 
     /**
@@ -85,7 +89,7 @@ public class SkillBehavior {
      * @return 技能列表
      */
     public List<SkillBelongTo> getSkillBelongTo(Long belongToId) {
-        return SkillBelongToService.querySkillBelongToList(BelongToEnum.PLAYER.getBelongTo(), belongToId);
+        return skillBelongToService.querySkillBelongToList(BelongToEnum.PLAYER.getBelongTo(), belongToId);
     }
 
     /**

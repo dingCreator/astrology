@@ -43,10 +43,9 @@ public class Loot {
     @TableField("exp")
     private Long exp;
     /**
-     * 掉落物集合json
+     * 实物奖品列表
      */
-    @TableField("loot_item_list")
-    private String lootItemList;
+    private List<LootItem> itemList;
 
     public static final String BELONG_TO = "belong_to";
 

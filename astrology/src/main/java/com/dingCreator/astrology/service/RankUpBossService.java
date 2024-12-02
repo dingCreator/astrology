@@ -22,7 +22,7 @@ public class RankUpBossService {
      * @param rank 突破前阶级
      * @return 怪物信息
      */
-    public static List<RankUpBoss> getRankUpBoss(String job, int rank) {
+    public List<RankUpBoss> getRankUpBoss(String job, int rank) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession
                 .getMapper(RankUpBossMapper.class).getRankUpBoss(job, rank));
     }
@@ -34,7 +34,7 @@ public class RankUpBossService {
      * @param rank       阶级
      * @param monsterIds 怪物ID
      */
-    public static void insertOrUpdateRankUpBoss(String job, int rank, List<Long> monsterIds) {
+    public void insertOrUpdateRankUpBoss(String job, int rank, List<Long> monsterIds) {
         DatabaseProvider.getInstance().execute(sqlSession -> {
             RankUpBossMapper mapper = sqlSession.getMapper(RankUpBossMapper.class);
             QueryWrapper<RankUpBoss> wrapper = new QueryWrapper<RankUpBoss>()
@@ -46,5 +46,18 @@ public class RankUpBossService {
                     .map(id -> RankUpBoss.builder().job(job).rank(rank).monsterId(id).build())
                     .forEach(mapper::insert);
         });
+    }
+
+
+    private static class Holder {
+        private static final RankUpBossService SERVICE = new RankUpBossService();
+    }
+
+    private RankUpBossService() {
+
+    }
+
+    public static RankUpBossService getInstance() {
+        return RankUpBossService.Holder.SERVICE;
     }
 }

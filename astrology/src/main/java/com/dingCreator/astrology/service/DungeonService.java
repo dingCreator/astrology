@@ -18,7 +18,7 @@ public class DungeonService {
      * @param dungeonId 副本ID
      * @return 副本信息
      */
-    public static Dungeon getById(Long dungeonId) {
+    public Dungeon getById(Long dungeonId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(DungeonMapper.class).getById(dungeonId));
     }
@@ -30,7 +30,7 @@ public class DungeonService {
      * @param dungeonName 副本名称
      * @return 副本信息
      */
-    public static Dungeon getByName(Long mapId, String dungeonName) {
+    public Dungeon getByName(Long mapId, String dungeonName) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(DungeonMapper.class).getByName(mapId, dungeonName));
     }
@@ -41,8 +41,21 @@ public class DungeonService {
      * @param mapId       地图ID
      * @return 副本信息
      */
-    public static List<Dungeon> list(Long mapId) {
+    public List<Dungeon> list(Long mapId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(DungeonMapper.class).list(mapId));
+    }
+
+
+    private static class Holder {
+        private static final DungeonService SERVICE = new DungeonService();
+    }
+
+    private DungeonService() {
+
+    }
+
+    public static DungeonService getInstance() {
+        return DungeonService.Holder.SERVICE;
     }
 }

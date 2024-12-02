@@ -26,7 +26,7 @@ CREATE TABLE astrology_player
     job                       VARCHAR(32)    NOT NULL comment '职业',
     map_id                    INTEGER        NOT NULL comment '所在地图ID',
     status                    VARCHAR(16)    NOT NULL comment '状态',
-    status_start_time         DATE comment '状态开始时间',
+    status_start_time         DATETIME comment '状态开始时间',
     enabled                   BIT            NOT NULL default 1 comment '是否可用',
     PRIMARY KEY (`id`) USING BTREE,
     unique key udx_name (name)
@@ -237,7 +237,8 @@ CREATE TABLE astrology_task_schedule_detail
     target_id               BIGINT COMMENT '任务目标ID',
     target_cnt              INT COMMENT '任务目标数量',
     complete_cnt            INT COMMENT '已完成数量',
-    task_schedule_type      VARCHAR(50) COMMENT '任务进度类型'
+    task_schedule_type      VARCHAR(50) COMMENT '任务进度类型',
+    KEY `idx_player_id` (`player_id`) USING BTREE
 ) ENGINE = InnoDB COMMENT ='任务调度详情表';
 
 CREATE TABLE astrology_peak_task_template

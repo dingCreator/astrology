@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.dingCreator.astrology.behavior.ExpBehavior;
+import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.LootDTO;
 import com.dingCreator.astrology.dto.LootItemDTO;
 import com.dingCreator.astrology.entity.Loot;
@@ -27,6 +28,7 @@ public class LootUtil {
      * @param loot 掉落物
      * @return 掉落物
      */
+    @SuppressWarnings("raw_use")
     public static LootDTO convertLoot(Loot loot) {
         if (Objects.isNull(loot)) {
             return null;
@@ -35,10 +37,12 @@ public class LootUtil {
         lootDTO.setMoney(loot.getMoney());
         lootDTO.setExp(loot.getExp());
         // 转化实物
-        String itemListJson = loot.getLootItemList();
-        if (StringUtils.isNotBlank(itemListJson)) {
-            lootDTO.setItemList(JSONObject.parseArray(loot.getLootItemList(), LootItemDTO.class));
-        }
+        lootDTO.setItemList(loot.getItemList().stream().map(item -> {
+            LootItemDTO dto = new LootItemDTO();
+            dto.setRate(item.getRate());
+            dto.setArticleItem(ArticleUtil.convert(item.getArticleJson()));
+            return dto;
+        }).collect(Collectors.toList()));
         return lootDTO;
     }
 

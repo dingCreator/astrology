@@ -25,11 +25,13 @@ import java.util.stream.Collectors;
  */
 public class EquipmentBehavior {
 
+    private EquipmentBelongToService equipmentBelongToService;
+
     /**
      * 穿装备
      */
     public void equip(long playerId, long id) {
-        EquipmentBelongTo equipmentBelongTo = EquipmentBelongToService.getById(id);
+        EquipmentBelongTo equipmentBelongTo = equipmentBelongToService.getById(id);
         EquipmentUtil.validate(playerId, equipmentBelongTo);
         EquipmentUtil.updateEquipment(playerId, equipmentBelongTo, true);
     }
@@ -40,7 +42,7 @@ public class EquipmentBehavior {
      * @param playerId 玩家ID
      */
     public void remove(long playerId, long id) {
-        EquipmentBelongTo equipmentBelongTo = EquipmentBelongToService.getById(id);
+        EquipmentBelongTo equipmentBelongTo = equipmentBelongToService.getById(id);
         EquipmentUtil.validate(playerId, equipmentBelongTo);
         EquipmentUtil.updateEquipment(playerId, equipmentBelongTo, false);
     }
@@ -55,7 +57,7 @@ public class EquipmentBehavior {
         PageResponse<EquipmentGroupVO> response = new PageResponse<>();
         // 校验一下有没有创建角色
         PlayerCache.getPlayerById(playerId);
-        List<EquipmentGroupVO> list = EquipmentBelongToService.listGroupByBelongToId(BelongToEnum.PLAYER.getBelongTo(), playerId);
+        List<EquipmentGroupVO> list = equipmentBelongToService.listGroupByBelongToId(BelongToEnum.PLAYER.getBelongTo(), playerId);
         return PageUtil.buildPage(list, pageIndex, pageSize);
     }
 
@@ -70,7 +72,7 @@ public class EquipmentBehavior {
         PlayerCache.getPlayerById(playerId);
         EquipmentEnum equipmentEnum = EquipmentEnum.getByName(equipmentName);
 
-        List<EquipmentBelongTo> equipmentBelongToList = EquipmentBelongToService.getByBelongToIdAndEquipmentId(
+        List<EquipmentBelongTo> equipmentBelongToList = equipmentBelongToService.getByBelongToIdAndEquipmentId(
                 BelongToEnum.PLAYER.getBelongTo(), playerId, equipmentEnum.getId());
         if (Objects.isNull(equipmentBelongToList) || equipmentBelongToList.size() == 0) {
             throw EquipmentExceptionEnum.DONT_HAVE_EQUIPMENT.getException();
@@ -147,7 +149,7 @@ public class EquipmentBehavior {
         belongTo.setEquipmentId(equipmentId);
         belongTo.setEquip(false);
         belongTo.setLevel(1);
-        EquipmentBelongToService.addBelongTo(belongTo);
+        equipmentBelongToService.addBelongTo(belongTo);
     }
 
     private static class Holder {

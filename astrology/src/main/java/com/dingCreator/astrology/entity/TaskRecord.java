@@ -9,14 +9,14 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * 每日任务
+ * 任务记录
  *
  * @author ding
  * @date 2024/2/3
  */
 @Data
-@TableName("astrology_daily_task_record")
-public class DailyTaskRecord {
+@TableName("astrology_task_record")
+public class TaskRecord {
     /**
      * ID
      */
@@ -27,16 +27,5 @@ public class DailyTaskRecord {
      */
     @TableField("player_id")
     private Long playerId;
-    /**
-     * 周期月份
-     */
-    @TableField("period_month")
-    private String periodMonth;
-    /**
-     * 完成情况统计
-     * 以,分隔三个数字
-     * 三个数字采用bitmap储存，每个玩家一个月一条数据
-     */
-    @TableField("complete_statics")
-    private String completeStatics;
+
 }

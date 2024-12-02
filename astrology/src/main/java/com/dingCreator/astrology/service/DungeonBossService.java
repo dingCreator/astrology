@@ -19,7 +19,7 @@ public class DungeonBossService {
      * @param id ID
      * @return boss
      */
-    public static DungeonBoss getById(Long id) {
+    public DungeonBoss getById(Long id) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(DungeonBossMapper.class).selectById(id));
     }
@@ -30,11 +30,24 @@ public class DungeonBossService {
      * @param dungeonId 副本ID
      * @return boss
      */
-    public static List<DungeonBoss> getByDungeonId(Long dungeonId) {
+    public List<DungeonBoss> getByDungeonId(Long dungeonId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
             QueryWrapper<DungeonBoss> queryWrapper = new QueryWrapper<DungeonBoss>()
                     .eq(DungeonBoss.DUNGEON_ID, dungeonId);
             return sqlSession.getMapper(DungeonBossMapper.class).selectList(queryWrapper);
         });
+    }
+
+
+    private static class Holder {
+        private static final DungeonBossService SERVICE = new DungeonBossService();
+    }
+
+    private DungeonBossService() {
+
+    }
+
+    public static DungeonBossService getInstance() {
+        return DungeonBossService.Holder.SERVICE;
     }
 }

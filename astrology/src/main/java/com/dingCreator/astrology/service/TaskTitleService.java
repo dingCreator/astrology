@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  */
 public class TaskTitleService {
 
-    public static List<TaskTemplateTitle> listTask() {
+    public List<TaskTemplateTitle> listTask() {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(TaskTemplateTitleMapper.class).listTaskTemplate(new TaskTemplateTitleQryReq()));
     }
@@ -34,7 +34,7 @@ public class TaskTitleService {
      * @param titleId 标题ID
      * @return 任务
      */
-    public static TaskTemplateTitleDTO getTaskTitleDTO(Long titleId) {
+    public TaskTemplateTitleDTO getTaskTitleDTO(Long titleId) {
         TaskTemplateTitle title = getTaskTitle(titleId);
         return constructTaskTitleDTO(title);
     }
@@ -45,7 +45,7 @@ public class TaskTitleService {
      * @param detailIds 详情ID
      * @return 任务列表
      */
-    public static List<TaskTemplateTitleDTO> listTaskTitleDTO(List<Long> detailIds) {
+    public List<TaskTemplateTitleDTO> listTaskTitleDTO(List<Long> detailIds) {
         List<TaskTemplateTitle> titleList = getTaskTitle(detailIds);
         return constructTaskTitleDTOList(titleList);
     }
@@ -56,7 +56,7 @@ public class TaskTitleService {
      * @param title 任务
      * @return 任务
      */
-    public static TaskTemplateTitleDTO constructTaskTitleDTO(TaskTemplateTitle title) {
+    public TaskTemplateTitleDTO constructTaskTitleDTO(TaskTemplateTitle title) {
         List<TaskTemplateTitleDTO> list = constructTaskTitleDTOList(Collections.singletonList(title));
         if (CollectionUtil.isEmpty(list)) {
             return null;
@@ -64,7 +64,7 @@ public class TaskTitleService {
         return list.get(0);
     }
 
-    public static List<TaskTemplateTitleDTO> constructTaskTitleDTOList(List<TaskTemplateTitle> titleList) {
+    public List<TaskTemplateTitleDTO> constructTaskTitleDTOList(List<TaskTemplateTitle> titleList) {
         if (CollectionUtil.isEmpty(titleList)) {
             return new ArrayList<>();
         }
@@ -100,7 +100,7 @@ public class TaskTitleService {
      * @param titleId 任务标题ID
      * @return 任务标题
      */
-    public static TaskTemplateTitle getTaskTitle(Long titleId) {
+    public TaskTemplateTitle getTaskTitle(Long titleId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
             TaskTemplateTitleQryReq req = TaskTemplateTitleQryReq.builder().titleId(titleId).build();
             List<TaskTemplateTitle> list = sqlSession.getMapper(TaskTemplateTitleMapper.class).listTaskTemplate(req);
@@ -114,10 +114,23 @@ public class TaskTitleService {
      * @param detailIds 详情ID
      * @return 任务标题
      */
-    public static List<TaskTemplateTitle> getTaskTitle(List<Long> detailIds) {
+    public List<TaskTemplateTitle> getTaskTitle(List<Long> detailIds) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
             TaskTemplateTitleQryReq req = TaskTemplateTitleQryReq.builder().detailIds(detailIds).build();
             return sqlSession.getMapper(TaskTemplateTitleMapper.class).listTaskTemplate(req);
         });
+    }
+
+
+    private static class Holder {
+        private static final TaskTitleService SERVICE = new TaskTitleService();
+    }
+
+    private TaskTitleService() {
+
+    }
+
+    public static TaskTitleService getInstance() {
+        return TaskTitleService.Holder.SERVICE;
     }
 }

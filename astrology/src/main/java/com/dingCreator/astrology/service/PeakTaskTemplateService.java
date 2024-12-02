@@ -17,7 +17,7 @@ import java.util.Objects;
  */
 public class PeakTaskTemplateService {
 
-    public static PeakTaskDTO getPeakTaskDTO(String job, int rank) {
+    public PeakTaskDTO getPeakTaskDTO(String job, int rank) {
         // 获取巅峰任务配置
         PeakTaskTemplate peakTaskTemplate = getPeakTaskTemplate(job, rank);
         if (Objects.isNull(peakTaskTemplate)) {
@@ -35,7 +35,7 @@ public class PeakTaskTemplateService {
      * @param rank 阶级
      * @return 模板
      */
-    public static PeakTaskTemplate getPeakTaskTemplate(String job, int rank) {
+    public PeakTaskTemplate getPeakTaskTemplate(String job, int rank) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
             QueryWrapper<PeakTaskTemplate> wrapper = new QueryWrapper<>();
             wrapper.eq(PeakTaskTemplate.JOB, job).eq(PeakTaskTemplate.RANK, rank);
@@ -43,8 +43,21 @@ public class PeakTaskTemplateService {
         });
     }
 
-    public static void createPeakTaskTemplate(PeakTaskTemplate peakTaskTemplate) {
+    public void createPeakTaskTemplate(PeakTaskTemplate peakTaskTemplate) {
         DatabaseProvider.getInstance().execute(sqlSession ->
                 sqlSession.getMapper(PeakTaskTemplateMapper.class).insert(peakTaskTemplate));
+    }
+
+
+    private static class Holder {
+        private static final PeakTaskTemplateService SERVICE = new PeakTaskTemplateService();
+    }
+
+    private PeakTaskTemplateService() {
+
+    }
+
+    public static PeakTaskTemplateService getInstance() {
+        return PeakTaskTemplateService.Holder.SERVICE;
     }
 }

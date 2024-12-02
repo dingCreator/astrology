@@ -21,6 +21,10 @@ import java.util.stream.Collectors;
  */
 public class TaskCache {
 
+    private static final TaskTitleService taskTitleService = TaskTitleService.getInstance();
+
+    private static final TaskScheduleDetailService taskScheduleDetailService = TaskScheduleDetailService.getInstance();
+
     /**
      * 任务模板缓存
      */
@@ -36,7 +40,7 @@ public class TaskCache {
     private static synchronized void initTpl() {
         if (!tplInit) {
             tplInit = true;
-            List<TaskTemplateTitleDTO> titleList = TaskTitleService.constructTaskTitleDTOList(TaskTitleService.listTask());
+            List<TaskTemplateTitleDTO> titleList = taskTitleService.constructTaskTitleDTOList(taskTitleService.listTask());
             titleList.forEach(title -> TASK_TEMPLATE_TITLE_MAP.put(title.getId(), title));
         }
     }
@@ -50,12 +54,12 @@ public class TaskCache {
     public static List<TaskScheduleTitleDTO> listTaskScheduleByPlayerId(Long playerId) {
         if (!TASK_SCHEDULE_MAP.containsKey(playerId)) {
             LockUtil.execute(Constants.TASK_SCHEDULE_LOCK_PREFIX + playerId, () -> {
-                List<TaskScheduleDetail> detailList = TaskScheduleDetailService.listTaskScheduleDetail(playerId);
+                List<TaskScheduleDetail> detailList = taskScheduleDetailService.listTaskScheduleDetail(playerId);
                 if (CollectionUtil.isEmpty(detailList)) {
                     TASK_SCHEDULE_MAP.put(playerId, new ArrayList<>());
                 } else {
                     List<Long> detailIds = detailList.stream().map(TaskScheduleDetail::getTaskTemplateDetailId).collect(Collectors.toList());
-                    List<TaskTemplateTitleDTO> titleList = TaskTitleService.listTaskTitleDTO(detailIds);
+                    List<TaskTemplateTitleDTO> titleList = taskTitleService.listTaskTitleDTO(detailIds);
                     List<TaskScheduleTitleDTO> scheduleList = TaskUtil.constructTaskScheduleTitleDTOList(titleList,
                             detailList, playerId);
                     TASK_SCHEDULE_MAP.put(playerId, scheduleList);
@@ -112,7 +116,7 @@ public class TaskCache {
                             .taskScheduleType(TaskScheduleEnum.IN_PROGRESS.getType())
                             .build()
                     ).collect(Collectors.toList());
-            TaskScheduleDetailService.createTaskScheduleDetail(detailList);
+            taskScheduleDetailService.createTaskScheduleDetail(detailList);
 
             List<TaskScheduleTitleDTO> titleList = TASK_SCHEDULE_MAP.getOrDefault(playerId, new ArrayList<>());
             titleList.add(TaskUtil.constructTaskScheduleTitleDTO(title, detailList, playerId));

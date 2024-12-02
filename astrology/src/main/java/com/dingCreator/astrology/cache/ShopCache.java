@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.cache;
 
-import com.dingCreator.astrology.dto.ArticleItemDTO;
+import com.dingCreator.astrology.dto.article.ArticleEquipmentItem;
+import com.dingCreator.astrology.dto.article.ArticleItemDTO;
 import com.dingCreator.astrology.dto.ShopItemDTO;
 import com.dingCreator.astrology.util.RandomUtil;
 
@@ -30,7 +31,8 @@ public class ShopCache {
         if (!initFlag) {
             initFlag = true;
             for (int i = 0; i < 5; i++) {
-                ArticleItemDTO article = new ArticleItemDTO.EquipmentItem((long) RandomUtil.rangeIntRandom(1, 8));
+                ArticleItemDTO article = new ArticleEquipmentItem();
+                ((ArticleEquipmentItem) article).setEquipmentId((long) RandomUtil.rangeIntRandom(1, 8));
                 SHOP_ITEM_LIST.add(ShopItemDTO.builder().article(article).count(1).price(1000L).build());
             }
         }

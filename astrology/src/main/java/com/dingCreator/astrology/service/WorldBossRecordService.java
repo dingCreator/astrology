@@ -15,12 +15,12 @@ import java.util.List;
  */
 public class WorldBossRecordService {
 
-    public static void insert(WorldBossRecord worldBossRecord) {
+    public void insert(WorldBossRecord worldBossRecord) {
         DatabaseProvider.getInstance().execute(sqlSession ->
                 sqlSession.getMapper(WorldBossRecordMapper.class).insert(worldBossRecord));
     }
 
-    public static List<WorldBossRecord> queryTodayWorldBossRecordList() {
+    public List<WorldBossRecord> queryTodayWorldBossRecordList() {
         QueryWrapper<WorldBossRecord> wrapper = new QueryWrapper<WorldBossRecord>()
                 .ge(WorldBossRecord.CREATE_TIME, LocalDate.now().atStartOfDay())
                 .lt(WorldBossRecord.CREATE_TIME, LocalDate.now().plusDays(1).atStartOfDay())
@@ -29,7 +29,7 @@ public class WorldBossRecordService {
                 sqlSession.getMapper(WorldBossRecordMapper.class).selectList(wrapper));
     }
 
-    public static Page<WorldBossRecord> queryTodayWorldBossRecordPage(int pageIndex, int pageSize) {
+    public Page<WorldBossRecord> queryTodayWorldBossRecordPage(int pageIndex, int pageSize) {
         Page<WorldBossRecord> page = new Page<>(pageIndex, pageSize);
         QueryWrapper<WorldBossRecord> wrapper = new QueryWrapper<WorldBossRecord>()
                 .ge(WorldBossRecord.CREATE_TIME, LocalDate.now().atStartOfDay())
@@ -38,5 +38,18 @@ public class WorldBossRecordService {
         DatabaseProvider.getInstance().execute(sqlSession ->
                 sqlSession.getMapper(WorldBossRecordMapper.class).selectPage(page, wrapper));
         return page;
+    }
+
+
+    private static class Holder {
+        private static final WorldBossRecordService SERVICE = new WorldBossRecordService();
+    }
+
+    private WorldBossRecordService() {
+
+    }
+
+    public static WorldBossRecordService getInstance() {
+        return WorldBossRecordService.Holder.SERVICE;
     }
 }

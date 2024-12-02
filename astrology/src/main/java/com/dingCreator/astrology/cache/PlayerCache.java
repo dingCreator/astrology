@@ -68,6 +68,9 @@ public class PlayerCache {
                     if (Objects.isNull(temp)) {
                         throw PlayerExceptionEnum.PLAYER_NOT_FOUND.getException();
                     }
+                    if (!temp.getPlayerDTO().getEnabled()) {
+                        throw PlayerExceptionEnum.PLAYER_DISABLED.getException();
+                    }
                     PLAYER_MAP.put(id, temp);
                 }
                 return temp;

@@ -38,6 +38,12 @@ import java.util.stream.Collectors;
  */
 public class DungeonBehavior {
 
+    private final DungeonService dungeonService = DungeonService.getInstance();
+
+    private final DungeonBossService dungeonBossService = DungeonBossService.getInstance();
+
+    private final DungeonRecordService dungeonRecordService = DungeonRecordService.getInstance();
+
     /**
      * 探索副本
      *
@@ -55,7 +61,7 @@ public class DungeonBehavior {
             throw DungeonExceptionEnum.PLAYER_NOT_FREE.getException();
         }
         // 查询副本信息
-        Dungeon dungeon = DungeonService.getByName(playerDTO.getMapId(), dungeonName);
+        Dungeon dungeon = dungeonService.getByName(playerDTO.getMapId(), dungeonName);
         if (Objects.isNull(dungeon)) {
             throw DungeonExceptionEnum.DUNGEON_NOT_FOUND.getException();
         }
@@ -71,7 +77,7 @@ public class DungeonBehavior {
         } else {
             playerIds = Collections.singletonList(playerId);
         }
-        List<DungeonRecord> dungeonRecordList = DungeonRecordService.queryList(playerIds, dungeon.getId());
+        List<DungeonRecord> dungeonRecordList = dungeonRecordService.queryList(playerIds, dungeon.getId());
         if (Objects.nonNull(dungeonRecordList) && !dungeonRecordList.isEmpty()) {
             dungeonRecordList.forEach(rec -> {
                 long cd = CdUtil.getDuration(rec.getLastExploreTime(), dungeon.getFlushTime());
@@ -81,13 +87,13 @@ public class DungeonBehavior {
             });
         }
         // 新增探索记录
-        DungeonRecordService.insertOrUpdate(playerIds, dungeon.getId(), new Date());
+        dungeonRecordService.insertOrUpdate(playerIds, dungeon.getId(), new Date());
         // 初始化掉落物记录
         Map<LootBelongToEnum, List<Long>> belongToMap = new HashMap<>();
         // 初始化对战结果
         DungeonResultVO dungeonResultVO = new DungeonResultVO();
         // 处理对战
-        List<DungeonBoss> bossList = DungeonBossService.getByDungeonId(dungeon.getId());
+        List<DungeonBoss> bossList = dungeonBossService.getByDungeonId(dungeon.getId());
         boolean lose = false;
         for (DungeonBoss boss : bossList) {
             BattleResultVO resultVO;
@@ -133,7 +139,7 @@ public class DungeonBehavior {
      */
     public List<String> listDungeon(Long playerId) {
         PlayerBehavior.getInstance().flushStatus(PlayerCache.getPlayerById(playerId).getPlayerDTO());
-        List<Dungeon> dungeonList = DungeonService.list(MapUtil.getNowLocation(playerId));
+        List<Dungeon> dungeonList = dungeonService.list(MapUtil.getNowLocation(playerId));
         return dungeonList.stream().map(d -> d.getName() + " 冷却时间：" + d.getFlushTime() + "s")
                 .collect(Collectors.toList());
     }
@@ -148,7 +154,7 @@ public class DungeonBehavior {
     public DungeonVO getDungeonInfoByName(Long playerId, String dungeonName) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId).getPlayerDTO();
         PlayerBehavior.getInstance().flushStatus(playerDTO);
-        Dungeon dungeon = DungeonService.getByName(MapUtil.getNowLocation(playerId), dungeonName);
+        Dungeon dungeon = dungeonService.getByName(MapUtil.getNowLocation(playerId), dungeonName);
         if (Objects.isNull(dungeon)) {
             throw DungeonExceptionEnum.DUNGEON_NOT_FOUND.getException();
         }

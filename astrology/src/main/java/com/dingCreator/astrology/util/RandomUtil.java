@@ -43,6 +43,16 @@ public class RandomUtil {
     /**
      * 生成范围内的随机整形
      *
+     * @param bound 最大值
+     * @return 随机数
+     */
+    public static int rangeIntRandom(int bound) {
+        return RAND.nextInt(bound);
+    }
+
+    /**
+     * 生成范围内的随机整形
+     *
      * @param start 最小值
      * @param end   最大值
      * @return 随机数

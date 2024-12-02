@@ -29,6 +29,10 @@ import java.util.stream.Collectors;
  */
 public class WorldBossCache {
 
+    private static final MonsterService monsterService = MonsterService.getInstance();
+
+    private static final WorldBossService worldBossService = WorldBossService.getInstance();
+
     /**
      * 世界BOSS缓存
      */
@@ -84,7 +88,7 @@ public class WorldBossCache {
      */
     private static synchronized void initBoss() {
         if (!worldBossInitFlag) {
-            WorldBoss todayBoss = WorldBossService.getTodayBoss();
+            WorldBoss todayBoss = worldBossService.getTodayBoss();
             if (Objects.isNull(todayBoss)) {
                 worldBossInitFlag = true;
                 return;
@@ -92,7 +96,7 @@ public class WorldBossCache {
 
             List<Long> bossIds = Arrays.stream(todayBoss.getMonsterId().split(Constants.COMMA)).map(Long::parseLong)
                     .collect(Collectors.toList());
-            List<Monster> monsterList = MonsterService.getMonsterByIds(bossIds, false);
+            List<Monster> monsterList = monsterService.getMonsterByIds(bossIds, false);
             if (CollectionUtil.isEmpty(monsterList)) {
                 return;
             }

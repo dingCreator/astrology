@@ -90,7 +90,7 @@ public class TaskUtilAbility {
      */
     public static PeakTaskDTO initPeakTaskTplDTO(PlayerInfoDTO playerInfo) {
         PlayerDTO playerDTO = playerInfo.getPlayerDTO();
-        PeakTaskDTO task = PeakTaskTemplateService.getPeakTaskDTO(playerDTO.getJob(), playerDTO.getRank());
+        PeakTaskDTO task = PeakTaskTemplateService.getInstance().getPeakTaskDTO(playerDTO.getJob(), playerDTO.getRank());
         if (Objects.isNull(task)) {
             throw TaskExceptionEnum.PEAK_TASK_NOT_EXIST.getException();
         }
@@ -312,7 +312,7 @@ public class TaskUtilAbility {
      * @param scheduleDetail 新的进度详情
      */
     public static void updateTaskSchedule(TaskScheduleDetailDTO scheduleDetail) {
-        TaskScheduleDetailService.updateSchedule(scheduleDetail);
+        TaskScheduleDetailService.getInstance().updateSchedule(scheduleDetail);
     }
 
     /**
