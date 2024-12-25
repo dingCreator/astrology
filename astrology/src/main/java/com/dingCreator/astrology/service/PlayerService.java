@@ -1,15 +1,24 @@
 package com.dingCreator.astrology.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dingCreator.astrology.cache.TeamCache;
+import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.entity.Player;
+import com.dingCreator.astrology.entity.PlayerAsset;
+import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
+import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
+import com.dingCreator.astrology.mapper.PlayerAssetMapper;
 import com.dingCreator.astrology.mapper.PlayerDataMapper;
 import com.dingCreator.astrology.util.EquipmentUtil;
+import com.dingCreator.astrology.util.LockUtil;
+import org.apache.ibatis.session.SqlSession;
 
 import java.util.Objects;
 
@@ -24,7 +33,7 @@ public class PlayerService {
      * @param id 玩家ID
      * @return 玩家基本信息
      */
-    public static Player getPlayerById(Long id) {
+    public Player getPlayerById(Long id) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(PlayerDataMapper.class).getPlayerById(id));
     }
@@ -35,7 +44,7 @@ public class PlayerService {
      * @param name 玩家名称
      * @return 玩家基本信息
      */
-    public static Player getPlayerByName(String name) {
+    public Player getPlayerByName(String name) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(PlayerDataMapper.class).getPlayerByName(name));
     }
@@ -46,7 +55,7 @@ public class PlayerService {
      * @param id 玩家ID
      * @return 玩家信息
      */
-    public static PlayerInfoDTO getPlayerDTOById(Long id) {
+    public PlayerInfoDTO getPlayerDTOById(Long id) {
         Player player = getPlayerById(id);
         if (Objects.isNull(player)) {
             return null;
@@ -63,6 +72,9 @@ public class PlayerService {
         playerInfoDTO.setEquipmentBarDTO(barDTO);
         // 初始化称号
 
+        // 初始化资产
+        PlayerAsset asset = getAssetByPlayerId(id);
+        playerInfoDTO.setPlayerAssetDTO(asset.convert());
 
         PlayerDTO playerDTO = new PlayerDTO();
         playerDTO.copyProperties(player);
@@ -77,9 +89,12 @@ public class PlayerService {
      * @param player 玩家基础信息
      * @return 是否创建成功
      */
-    public static synchronized boolean createPlayer(Player player) {
-        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
-                sqlSession.getMapper(PlayerDataMapper.class).insert(player) > 0);
+    public synchronized boolean createPlayer(Player player, PlayerAsset asset) {
+        return DatabaseProvider.getInstance().batchTransactionExecuteReturn(sqlSession -> {
+            sqlSession.getMapper(PlayerDataMapper.class).insert(player);
+            sqlSession.getMapper(PlayerAssetMapper.class).insert(asset);
+            return true;
+        });
     }
 
     /**
@@ -87,8 +102,61 @@ public class PlayerService {
      *
      * @param player 玩家基本信息
      */
-    public static void updatePlayerById(Player player) {
+    public void updatePlayerById(Player player) {
         DatabaseProvider.getInstance().execute(sqlSession ->
                 sqlSession.getMapper(PlayerDataMapper.class).updateById(player));
+    }
+
+    public PlayerAsset getAssetByPlayerId(Long playerId) {
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession.getMapper(PlayerAssetMapper.class)
+                .selectOne(new QueryWrapper<PlayerAsset>().eq(PlayerAsset.PLAYER_ID, playerId)));
+    }
+
+    public void changeAsset(PlayerInfoDTO infoDTO, PlayerAssetDTO change) {
+        DatabaseProvider.getInstance().execute(sqlSession -> changeAsset(infoDTO, change, sqlSession));
+    }
+
+    public void changeAsset(PlayerInfoDTO infoDTO, PlayerAssetDTO change, SqlSession sqlSession) {
+        LockUtil.execute(Constants.CHANGE_ASSET_LOCK_PREFIX + infoDTO.getPlayerDTO().getId(), () -> {
+            PlayerAssetMapper playerAssetMapper = sqlSession.getMapper(PlayerAssetMapper.class);
+            PlayerAsset asset = playerAssetMapper.selectOne(
+                    new QueryWrapper<PlayerAsset>().eq(PlayerAsset.PLAYER_ID, infoDTO.getPlayerDTO().getId()));
+            // 获取货币
+            long astrologyCoin = asset.getAstrologyCoin();
+            long diamond = asset.getDiamond();
+            // 圣星币
+            if (Objects.nonNull(change.getAstrologyCoin())) {
+                astrologyCoin += change.getAstrologyCoin();
+                if (astrologyCoin < 0) {
+                    throw PlayerExceptionEnum.NOT_ENOUGH_ASTROLOGY_COIN.getException();
+                }
+                asset.setAstrologyCoin(astrologyCoin);
+            }
+            // 缘石
+            if (Objects.nonNull(change.getDiamond())) {
+                diamond += change.getDiamond();
+                if (diamond < 0) {
+                    throw PlayerExceptionEnum.NOT_ENOUGH_DIAMOND.getException();
+                }
+                asset.setDiamond(diamond);
+            }
+            // 持久化
+            playerAssetMapper.updateById(asset);
+            // 更新缓存
+            infoDTO.getPlayerAssetDTO().setAstrologyCoin(astrologyCoin);
+            infoDTO.getPlayerAssetDTO().setDiamond(diamond);
+        });
+    }
+
+    private static class Holder {
+        private static final PlayerService SERVICE = new PlayerService();
+    }
+
+    private PlayerService() {
+
+    }
+
+    public static PlayerService getInstance() {
+        return PlayerService.Holder.SERVICE;
     }
 }

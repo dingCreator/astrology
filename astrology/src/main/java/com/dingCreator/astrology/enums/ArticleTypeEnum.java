@@ -1,10 +1,7 @@
 package com.dingCreator.astrology.enums;
 
 import com.alibaba.fastjson.JSONObject;
-import com.dingCreator.astrology.dto.article.ArticleItemDTO;
-import com.dingCreator.astrology.dto.article.ArticleEquipmentItem;
-import com.dingCreator.astrology.dto.article.ArticleSkillItem;
-import com.dingCreator.astrology.dto.article.ArticleTitleItem;
+import com.dingCreator.astrology.dto.article.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -21,18 +18,24 @@ public enum ArticleTypeEnum {
     /**
      * 装备
      */
-    EQUIPMENT("equipment", str -> JSONObject.parseObject(str, ArticleEquipmentItem.class)),
+    EQUIPMENT("equipment", ArticleEquipmentItem.class, str -> JSONObject.parseObject(str, ArticleEquipmentItem.class)),
     /**
      * 称号
      */
-    TITLE("title", str -> JSONObject.parseObject(str, ArticleTitleItem.class)),
+    TITLE("title", ArticleTitleItem.class, str -> JSONObject.parseObject(str, ArticleTitleItem.class)),
     /**
      * 技能
      */
-    SKILL("skill", str -> JSONObject.parseObject(str, ArticleSkillItem.class)),
+    SKILL("skill", ArticleSkillItem.class, str -> JSONObject.parseObject(str, ArticleSkillItem.class)),
+    /**
+     * 缘石
+     */
+    DIAMOND("diamond", ArticleDiamondItem.class, str -> JSONObject.parseObject(str, ArticleDiamondItem.class)),
     ;
 
     private final String type;
+
+    private final Class<? extends ArticleItemDTO> clazz;
 
     private final Function<String, ? extends ArticleItemDTO> function;
 

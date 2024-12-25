@@ -16,6 +16,11 @@ public abstract class ExtraBattleProcessTemplate {
     private BattleDTO from;
     private List<BattleDTO> our;
     private List<BattleDTO> enemy;
+    private Integer priority;
+
+    public ExtraBattleProcessTemplate() {
+        this.priority = this.initPriority();
+    }
 
     /**
      * 战斗前
@@ -120,5 +125,9 @@ public abstract class ExtraBattleProcessTemplate {
      */
     public void execute() {
 
+    }
+
+    public int initPriority() {
+        return 0;
     }
 }

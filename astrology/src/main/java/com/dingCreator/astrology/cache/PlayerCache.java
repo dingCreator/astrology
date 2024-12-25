@@ -3,9 +3,11 @@ package com.dingCreator.astrology.cache;
 import cn.hutool.core.bean.BeanUtil;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Player;
+import com.dingCreator.astrology.entity.PlayerAsset;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.util.LockUtil;
@@ -31,19 +33,23 @@ public class PlayerCache {
      * @param player 新玩家
      */
     public static void createPlayer(Player player) {
-        if (PLAYER_MAP.containsKey(player.getId()) || Objects.nonNull(PlayerService.getPlayerById(player.getId()))) {
+        if (PLAYER_MAP.containsKey(player.getId())
+                || Objects.nonNull(PlayerService.getInstance().getPlayerById(player.getId()))) {
             throw PlayerExceptionEnum.PLAYER_EXIST.getException();
         }
         LockUtil.execute(Constants.PLAYER_LOCK_PREFIX + player.getId(), () -> {
-            if (PLAYER_MAP.containsKey(player.getId()) || Objects.nonNull(PlayerService.getPlayerById(player.getId()))) {
+            if (PLAYER_MAP.containsKey(player.getId())
+                    || Objects.nonNull(PlayerService.getInstance().getPlayerById(player.getId()))) {
                 throw PlayerExceptionEnum.PLAYER_EXIST.getException();
             }
-            if (!PlayerService.createPlayer(player)) {
+            PlayerAsset asset = PlayerAsset.builder().playerId(player.getId()).astrologyCoin(0L).diamond(0L).build();
+            if (!PlayerService.getInstance().createPlayer(player, asset)) {
                 throw new IllegalStateException("创建角色失败");
             }
             PlayerInfoDTO playerInfoDTO = new PlayerInfoDTO();
             playerInfoDTO.setEquipmentBarDTO(new EquipmentBarDTO());
             playerInfoDTO.setTeam(false);
+            playerInfoDTO.setPlayerAssetDTO(asset.convert());
 
             PlayerDTO playerDTO = new PlayerDTO();
             playerDTO.copyProperties(player);
@@ -64,7 +70,7 @@ public class PlayerCache {
             return LockUtil.execute(Constants.PLAYER_LOCK_PREFIX + id, () -> {
                 PlayerInfoDTO temp = PLAYER_MAP.getOrDefault(id, null);
                 if (Objects.isNull(temp)) {
-                    temp = PlayerService.getPlayerDTOById(id);
+                    temp = PlayerService.getInstance().getPlayerDTOById(id);
                     if (Objects.isNull(temp)) {
                         throw PlayerExceptionEnum.PLAYER_NOT_FOUND.getException();
                     }
@@ -104,7 +110,7 @@ public class PlayerCache {
                     BeanUtil.copyProperties(playerDTO, player, true);
                     return player;
                 }).collect(Collectors.toList());
-        players.forEach(player -> ThreadPoolUtil.executeConsumer(PlayerService::updatePlayerById, player));
+        players.forEach(player -> ThreadPoolUtil.executeConsumer(PlayerService.getInstance()::updatePlayerById, player));
     }
 
     /**

@@ -11,8 +11,11 @@ import java.util.List;
  */
 @Data
 public abstract class BaseActivityAwardRuleDTO {
+
+    public static final String FIELD_ARTICLE_ITEM_LIST = "articleItemList";
+
     /**
      * 物品
      */
-    protected List<ArticleItemDTO> articleItemList;
+    private List<ArticleItemDTO> articleItemList;
 }

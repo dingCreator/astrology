@@ -2,10 +2,12 @@ package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.entity.SkillBarItem;
+import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.RankEnum;
@@ -118,13 +120,16 @@ public class PlayerBehavior {
         if (playerInfoDTO.getPlayerDTO().getName().equals(name)) {
             return;
         }
-        // todo 敏感词校验
-        Player player = PlayerService.getPlayerByName(name);
+        Player player = PlayerService.getInstance().getPlayerByName(name);
         if (Objects.nonNull(player)) {
             throw PlayerExceptionEnum.NAME_EXIST.getException();
         }
         playerInfoDTO.getPlayerDTO().setName(name);
         PlayerCache.flush(Collections.singletonList(playerId));
+    }
+
+    public PlayerInfoDTO getPlayerInfoDTOById(Long id) {
+        return PlayerCache.getPlayerById(id);
     }
 
     /**
@@ -333,6 +338,31 @@ public class PlayerBehavior {
      */
     public List<String> getLastBattleProcess(long playerId) {
         return BattleUtil.getBattleProcess(playerId);
+    }
+
+    /**
+     * 获取玩家资产信息
+     *
+     * @param playerId 玩家ID
+     * @return 玩家资产
+     */
+    public PlayerAssetDTO getPlayerAssetById(long playerId) {
+        return PlayerCache.getPlayerById(playerId).getPlayerAssetDTO();
+    }
+
+    /**
+     * 变更玩家资产
+     *
+     * @param playerId  玩家ID
+     * @param assetType 资产类型
+     * @param val       变更量
+     */
+    public void changePlayerAsset(long playerId, String assetType, long val) {
+        AssetTypeEnum assetTypeEnum = AssetTypeEnum.getByChnName(assetType);
+        if (Objects.isNull(assetTypeEnum)) {
+            throw PlayerExceptionEnum.ASSET_TYPE_ERR.getException();
+        }
+        PlayerService.getInstance().changeAsset(PlayerCache.getPlayerById(playerId), assetTypeEnum.getTransfer2Dto().apply(val));
     }
 
     private static class Holder {

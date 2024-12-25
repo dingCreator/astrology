@@ -4,9 +4,12 @@ import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.cache.ShopCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.ShopItemDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
+import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.enums.exception.ShopExceptionEnum;
 import com.dingCreator.astrology.response.PageResponse;
+import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.util.LockUtil;
 import com.dingCreator.astrology.util.PageUtil;
 
@@ -51,7 +54,18 @@ public class ShopBehavior {
     }
 
     private void buy(PlayerInfoDTO info, ShopItemDTO item) {
-
+        item.getCostMap().forEach(((assetTypeEnum, cost) -> {
+            if (!assetTypeEnum.getValidateCache().apply(info.getPlayerAssetDTO(), cost)) {
+                throw ShopExceptionEnum.NOT_ENOUGH_MONEY.getException();
+            }
+        }));
+        Long playerId = info.getPlayerDTO().getId();
+        PlayerAssetDTO asset = PlayerAssetDTO.builder()
+                .playerId(playerId)
+                .astrologyCoin(item.getCostMap().get(AssetTypeEnum.ASTROLOGY_COIN))
+                .diamond(item.getCostMap().get(AssetTypeEnum.DIAMOND)).build();
+        PlayerService.getInstance().changeAsset(info, asset);
+        item.getArticle().send2Player(playerId);
     }
 
     private static class Holder {

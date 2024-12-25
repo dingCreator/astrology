@@ -7,6 +7,7 @@ import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.*;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
+import com.dingCreator.astrology.dto.equipment.EquipmentDTO;
 import com.dingCreator.astrology.dto.organism.OrganismDTO;
 import com.dingCreator.astrology.dto.organism.OrganismInfoDTO;
 import com.dingCreator.astrology.dto.organism.monster.MonsterDTO;
@@ -570,6 +571,35 @@ public class BattleUtil {
             extraBattleProcessList.add(process);
             skillBarDTO = skillBarDTO.getNext();
         } while (Objects.nonNull(skillBarDTO));
+
+        // 装备技能
+        EquipmentBarDTO bar = from.getOrganismInfoDTO().getEquipmentBarDTO();
+        initEquipmentExtraProcess(from, our, enemy, bar.getArmor(), extraBattleProcessList);
+        initEquipmentExtraProcess(from, our, enemy, bar.getJewelry(), extraBattleProcessList);
+        initEquipmentExtraProcess(from, our, enemy, bar.getWeapon(), extraBattleProcessList);
+    }
+
+    /**
+     * 初始化装备插入结算
+     *
+     * @param from                   来源
+     * @param our                    友方
+     * @param enemy                  敌方
+     * @param equipmentDTO           装备
+     * @param extraBattleProcessList 插入结算列表
+     */
+    private static void initEquipmentExtraProcess(BattleDTO from, List<BattleDTO> our, List<BattleDTO> enemy,
+                                                  EquipmentDTO equipmentDTO,
+                                                  List<ExtraBattleProcessTemplate> extraBattleProcessList) {
+        if (Objects.isNull(equipmentDTO)) {
+            return;
+        }
+        EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentDTO.getEquipmentId());
+        ExtraBattleProcessTemplate process = equipmentEnum.getExtraBattleProcessTemplate();
+        process.setFrom(from);
+        process.setOur(our);
+        process.setEnemy(enemy);
+        extraBattleProcessList.add(process);
     }
 
     /**
@@ -868,8 +898,8 @@ public class BattleUtil {
             return 0;
         }
         // 境界压制
-        realAtk = RankUtil.getRankSupression(fromOrganism.getRank(), highestRank, realAtk);
-        realDef = RankUtil.getRankSupression(tarOrganism.getRank(),
+        realAtk = RankUtil.getRankSuppression(fromOrganism.getRank(), highestRank, realAtk);
+        realDef = RankUtil.getRankSuppression(tarOrganism.getRank(),
                 fromOrganism.getRank(), realDef);
         // 计算公式 damage = realAtk - realDef * (1 - realPenetrate)
         // 技能倍率

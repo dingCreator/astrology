@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.dto.activity;
 
+import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.enums.activity.ActivityLimitTypeEnum;
 import com.dingCreator.astrology.enums.activity.ActivityTypeEnum;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ding
@@ -41,11 +43,6 @@ public class ActivityDTO {
     private ActivityLimitTypeEnum limitTypeEnum;
 
     /**
-     * 限制范围
-     */
-    private Integer limitTypeRange;
-
-    /**
      * 限制次数
      */
     private Integer limitTypeCnt;
@@ -54,6 +51,11 @@ public class ActivityDTO {
      * 是否可用
      */
     private Boolean enabled;
+
+    /**
+     * 是否默认
+     */
+    private Boolean defaultFlag;
 
     /**
      * 活动开始时间
@@ -66,7 +68,12 @@ public class ActivityDTO {
     private LocalDateTime endTime;
 
     /**
-     * 奖品列表
+     * 参与花费
      */
-    private List<BaseActivityAwardRuleDTO> awardList;
+    private Map<AssetTypeEnum, Long> costMap;
+
+    /**
+     * 奖品规则
+     */
+    private List<BaseActivityAwardRuleDTO> awardRuleList;
 }

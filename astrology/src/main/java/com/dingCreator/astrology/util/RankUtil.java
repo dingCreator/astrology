@@ -14,7 +14,7 @@ public class RankUtil {
      * @param val      压制前数值
      * @return 压制后数值
      */
-    public static long getRankSupression(long fromRank, long toRank, long val) {
+    public static long getRankSuppression(long fromRank, long toRank, long val) {
         if (fromRank < toRank) {
             val = Math.round(val * (1 + (fromRank - toRank) * 0.1F));
         }

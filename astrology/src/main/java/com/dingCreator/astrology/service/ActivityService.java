@@ -1,7 +1,8 @@
 package com.dingCreator.astrology.service;
 
-import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.dto.activity.ActivityDTO;
@@ -12,14 +13,20 @@ import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Activity;
 import com.dingCreator.astrology.entity.ActivityRecord;
 import com.dingCreator.astrology.entity.ActivityStatics;
+import com.dingCreator.astrology.enums.activity.ActivityLimitTypeEnum;
+import com.dingCreator.astrology.enums.exception.ActivityExceptionEnum;
 import com.dingCreator.astrology.mapper.ActivityMapper;
 import com.dingCreator.astrology.mapper.ActivityRecordMapper;
 import com.dingCreator.astrology.mapper.ActivityStaticsMapper;
+import com.dingCreator.astrology.request.ActivityPageQryReq;
+import com.dingCreator.astrology.util.ActivityUtil;
 import com.dingCreator.astrology.util.LockUtil;
 import com.dingCreator.astrology.vo.ArticleItemVO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author ding
@@ -33,66 +40,272 @@ public interface ActivityService {
      * @param activityId 活动ID
      * @return 活动信息
      */
-    default ActivityDTO getById(long activityId) {
+    static ActivityDTO getById(long activityId) {
         Activity activity = DatabaseProvider.getInstance().executeReturn(sqlSession ->
-                sqlSession.getMapper(ActivityMapper.class).selectById(activityId)
+                sqlSession.getMapper(ActivityMapper.class).selectById(activityId));
+        if (Objects.isNull(activity)) {
+            throw ActivityExceptionEnum.ACTIVITY_NOT_EXIST.getException();
+        }
+        return activity.convert();
+    }
+
+    /**
+     * 根据活动名称获取活动
+     *
+     * @param activityName 活动名称
+     * @return 活动信息
+     */
+    static ActivityDTO getByName(String activityName) {
+        Activity activity = DatabaseProvider.getInstance().executeReturn(sqlSession ->
+                sqlSession.getMapper(ActivityMapper.class).selectOne(new QueryWrapper<Activity>()
+                        .eq(Activity.ACTIVITY_NAME, activityName)));
+        if (Objects.isNull(activity)) {
+            throw ActivityExceptionEnum.ACTIVITY_NOT_EXIST.getException();
+        }
+        return activity.convert();
+    }
+
+    /**
+     * 活动列表
+     *
+     * @param qryReq 查询条件
+     * @return 活动列表
+     */
+    static List<ActivityDTO> listActivity(ActivityPageQryReq qryReq) {
+        List<Activity> activityList = DatabaseProvider.getInstance().executeReturn(sqlSession -> {
+                    boolean admin = Objects.nonNull(qryReq.getAdmin()) && qryReq.getAdmin();
+                    QueryWrapper<Activity> wrapper = new QueryWrapper<Activity>()
+                            .eq(Objects.nonNull(qryReq.getActivityType()), Activity.ACTIVITY_TYPE, qryReq.getActivityType())
+                            .eq(admin, Activity.ENABLED, true)
+                            .ge(admin, Activity.START_TIME, LocalDateTime.now())
+                            .le(admin, Activity.END_TIME, LocalDateTime.now());
+                    return sqlSession.getMapper(ActivityMapper.class).selectList(wrapper);
+                }
         );
-        ActivityDTO activityDTO = new ActivityDTO();
-        BeanUtil.copyProperties(activity, activityDTO);
-        return activityDTO;
+        return activityList.stream().map(Activity::convert).collect(Collectors.toList());
+    }
+
+    /**
+     * 获取参与统计
+     *
+     * @param activityId    活动ID
+     * @param playerId      玩家ID
+     * @param limitTypeEnum 限制类型
+     * @return 参与统计
+     */
+    default ActivityStaticsDTO getStatics(Long activityId, Long playerId, ActivityLimitTypeEnum limitTypeEnum) {
+        ActivityStatics statics = DatabaseProvider.getInstance().executeReturn(sqlSession -> {
+            String pointInTime = limitTypeEnum.getPointInTime().get();
+            return sqlSession.getMapper(ActivityStaticsMapper.class)
+                    .selectOne(new QueryWrapper<ActivityStatics>()
+                            .eq(ActivityStatics.ACTIVITY_ID, activityId)
+                            .eq(ActivityStatics.PLAYER_ID, playerId)
+                            .eq(Objects.nonNull(pointInTime), ActivityStatics.DATE_TIME, pointInTime));
+        });
+        if (Objects.nonNull(statics)) {
+            return ActivityStaticsDTO.builder()
+                    .id(statics.getId())
+                    .activityId(statics.getActivityId())
+                    .playerId(statics.getPlayerId())
+                    .dateTime(statics.getDateTime())
+                    .count(statics.getCount()).build();
+        }
+        return null;
     }
 
     /**
      * 参加活动
      *
      * @param activity 活动
-     * @param statics  参与统计
      * @param info     玩家信息
      * @return 参与结果
      */
-    default List<ArticleItemVO> joinActivity(ActivityDTO activity, ActivityStaticsDTO statics, PlayerInfoDTO info) {
+    default List<ArticleItemVO> joinActivity(ActivityDTO activity, PlayerInfoDTO info) {
+        return joinActivity(activity, info, 1);
+    }
+
+    /**
+     * 参加活动
+     *
+     * @param activity 活动
+     * @param info     玩家信息
+     * @param times    连续参与次数
+     * @return 参与结果
+     */
+    default List<ArticleItemVO> joinActivity(ActivityDTO activity, PlayerInfoDTO info, int times) {
         String lockKey = Constants.JOIN_ACTIVITY_LOCK_PREFIX + activity.getId() + Constants.UNDERLINE + info.getPlayerDTO().getId();
         return LockUtil.execute(lockKey, () -> {
+            // 查询参与统计
+            ActivityStaticsDTO statics = getStatics(activity.getId(), info.getPlayerDTO().getId(), activity.getLimitTypeEnum());
             // 公共校验
-            validateCommon(activity, statics, info);
+            validateJoinCommon(activity, statics, info, times);
             // 活动类型个性化校验
-            validate();
+            validateJoin();
             // 参与活动
-            List<ArticleItemDTO> awards = join(activity);
+            List<ArticleItemDTO> awards = join(activity, times);
             // 发放奖品并写入记录
             DatabaseProvider.getInstance().batchTransactionExecute(sqlSession -> {
+                Long playerId = info.getPlayerDTO().getId();
+                // 扣除参与费用
+                activity.getCostMap().forEach((assetTypeEnum, cost) ->
+                        PlayerService.getInstance().changeAsset(info, assetTypeEnum.getTransfer2Dto().apply(cost * times), sqlSession));
+                // 发放奖励
                 awards.forEach(award -> award.send2Player(info.getPlayerDTO().getId()));
+                // 插入记录
                 ActivityRecordMapper activityRecordMapper = sqlSession.getMapper(ActivityRecordMapper.class);
-                activityRecordMapper.insert(new ActivityRecord());
                 ActivityStaticsMapper activityStaticsMapper = sqlSession.getMapper(ActivityStaticsMapper.class);
-                ActivityStatics newStatics = new ActivityStatics();
-                if (Objects.nonNull(statics)) {
 
+                ActivityRecord record = ActivityRecord.builder()
+                        .activityId(activity.getId())
+                        .playerId(info.getPlayerDTO().getId())
+                        .createTime(LocalDateTime.now())
+                        .joinTimes(times)
+                        .build();
+                activityRecordMapper.insert(record);
+
+                ActivityStatics newStatics;
+                if (Objects.nonNull(statics)) {
+                    statics.setCount(statics.getCount() + times);
+                    newStatics = ActivityStatics.builder()
+                            .id(statics.getId())
+                            .activityId(statics.getActivityId())
+                            .playerId(statics.getPlayerId())
+                            .dateTime(statics.getDateTime())
+                            .count(statics.getCount()).build();
+                    activityStaticsMapper.updateById(newStatics);
                 } else {
+                    String pointInTime = activity.getLimitTypeEnum().getPointInTime().get();
+                    newStatics = ActivityStatics.builder()
+                            .activityId(activity.getId())
+                            .count(times)
+                            .dateTime(pointInTime)
+                            .playerId(playerId).build();
                     activityStaticsMapper.insert(newStatics);
                 }
             });
             // 转化奖品信息
-            return null;
+            return awards.stream().map(ArticleItemDTO::view).collect(Collectors.toList());
         });
     }
 
+    /**
+     * 创建活动
+     *
+     * @param activityDTO 活动
+     */
+    default void createActivity(ActivityDTO activityDTO) {
+        validateCreate(activityDTO);
+        DatabaseProvider.getInstance().execute(sqlSession -> {
+            Activity activity = Activity.builder()
+                    .activityName(activityDTO.getActivityName())
+                    .activityType(activityDTO.getActivityType().getCode())
+                    .awardRuleJson(activityDTO.getActivityType().getService().parseAwardRule2Json(activityDTO.getAwardRuleList()))
+                    .limit(ActivityUtil.getLimitBit(activityDTO.getLimitTypeEnum(), activityDTO.getLimitTypeCnt()))
+                    .costJson(ActivityUtil.formatCostMapJson(activityDTO.getCostMap()))
+                    .defaultFlag(activityDTO.getDefaultFlag())
+                    .startTime(activityDTO.getStartTime())
+                    .endTime(activityDTO.getEndTime())
+                    .enabled(true)
+                    .build();
+            sqlSession.getMapper(ActivityMapper.class).insert(activity);
+        });
+    }
 
     /**
-     * 公共校验
+     * 获取默认活动
+     *
+     * @return 活动
+     */
+    ActivityDTO getDefaultActivity();
+
+    /**
+     * 创建活动校验
+     *
+     * @param activityDTO 创建活动参数
+     */
+    void validateCreate(ActivityDTO activityDTO);
+
+    /**
+     * 参与活动公共校验
      *
      * @param activity 活动
      * @param statics  参与统计
      * @param info     玩家信息
+     * @param times    连续参与次数
      */
-    default void validateCommon(ActivityDTO activity, ActivityStaticsDTO statics, PlayerInfoDTO info) {
-
+    default void validateJoinCommon(ActivityDTO activity, ActivityStaticsDTO statics, PlayerInfoDTO info, int times) {
+        validateJoinTimes(activity, statics, times);
+        validateTime(activity);
+        validateEnabled(activity);
+        validateCost(activity, info, times);
     }
 
     /**
-     * 具体活动校验
+     * 参与次数校验
+     *
+     * @param activity 活动
+     * @param statics  参与统计
+     * @param times    连续参与次数
      */
-    void validate();
+    default void validateJoinTimes(ActivityDTO activity, ActivityStaticsDTO statics, int times) {
+        if (ActivityLimitTypeEnum.NONE.equals(activity.getLimitTypeEnum())) {
+            return;
+        }
+        if (Objects.isNull(statics) && activity.getLimitTypeCnt() < times) {
+            throw ActivityExceptionEnum.OVER_JOIN_TIMES_LIMIT.getException();
+        }
+        if (Objects.nonNull(statics) && statics.getCount() + times > activity.getLimitTypeCnt()) {
+            throw ActivityExceptionEnum.OVER_JOIN_TIMES_LIMIT.getException();
+        }
+    }
+
+    /**
+     * 参与时间校验
+     *
+     * @param activity 活动
+     */
+    default void validateTime(ActivityDTO activity) {
+        if (LocalDateTime.now().isBefore(activity.getStartTime())) {
+            throw ActivityExceptionEnum.ACTIVITY_NOT_START.getException();
+        }
+        if (LocalDateTime.now().isAfter(activity.getEndTime())) {
+            throw ActivityExceptionEnum.ACTIVITY_HAS_BEEN_END.getException();
+        }
+    }
+
+    /**
+     * 启用禁用校验
+     *
+     * @param activity 活动
+     */
+    default void validateEnabled(ActivityDTO activity) {
+        if (!activity.getEnabled()) {
+            throw ActivityExceptionEnum.ACTIVITY_NOT_ENABLED.getException();
+        }
+    }
+
+    /**
+     * 参与花费校验
+     *
+     * @param activity 活动
+     * @param info     玩家信息
+     * @param times    连续参与次数
+     */
+    default void validateCost(ActivityDTO activity, PlayerInfoDTO info, int times) {
+        if (CollectionUtils.isNotEmpty(activity.getCostMap())) {
+            activity.getCostMap().forEach((assetTypeEnum, cost) -> {
+                long realCost = cost * times;
+                if (!assetTypeEnum.getValidateCache().apply(info.getPlayerAssetDTO(), realCost)) {
+                    throw ActivityExceptionEnum.NOT_ENOUGH_ASSET.getException();
+                }
+            });
+        }
+    }
+
+    /**
+     * 参与活动校验
+     */
+    void validateJoin();
 
     /**
      * 奖品规则
@@ -107,7 +320,17 @@ public interface ActivityService {
      * 具体的参与逻辑
      *
      * @param activity 活动
+     * @param times    连续参与次数
      * @return 参与结果
      */
-    List<ArticleItemDTO> join(ActivityDTO activity);
+    List<ArticleItemDTO> join(ActivityDTO activity, int times);
+
+    /**
+     * 奖品规则转化为json
+     *
+     * @param tList 奖品规则
+     * @param <T>   规则类型
+     * @return json
+     */
+    <T extends BaseActivityAwardRuleDTO> String parseAwardRule2Json(List<T> tList);
 }

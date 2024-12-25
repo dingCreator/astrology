@@ -24,6 +24,9 @@ public enum PlayerExceptionEnum {
     BATTLE_EXPIRED(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "006", "决斗已过期")),
     RECIPIENT_NOT_FOUND(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "007", "对方未创建角色")),
     PLAYER_DISABLED(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "008", "账号被封禁，若需解禁请联系管理员")),
+    NOT_ENOUGH_ASTROLOGY_COIN(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "009", "圣星币不足")),
+    NOT_ENOUGH_DIAMOND(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "010", "缘石不足")),
+    ASSET_TYPE_ERR(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "011", "资产类型错误")),
     ;
     private final BusinessException exception;
 }

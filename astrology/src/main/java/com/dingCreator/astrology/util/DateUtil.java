@@ -19,12 +19,15 @@ import java.util.function.Supplier;
  */
 public class DateUtil {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DateUtil.class);
     private static final List<DateTimeFormatter> DATE_TIME_FORMATTER = Arrays.asList(
-            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_1 + Constants.BLANK + Constants.TIME_FORMAT),
-            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_2 + Constants.BLANK + Constants.TIME_FORMAT),
-            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_3 + Constants.BLANK + Constants.TIME_FORMAT),
-            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_4 + Constants.BLANK + Constants.TIME_FORMAT)
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_1 + Constants.BLANK + Constants.TIME_FORMAT_1),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_2 + Constants.BLANK + Constants.TIME_FORMAT_1),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_3 + Constants.BLANK + Constants.TIME_FORMAT_1),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_4 + Constants.BLANK + Constants.TIME_FORMAT_1),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_1 + Constants.BLANK + Constants.TIME_FORMAT_2),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_2 + Constants.BLANK + Constants.TIME_FORMAT_2),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_3 + Constants.BLANK + Constants.TIME_FORMAT_2),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_4 + Constants.BLANK + Constants.TIME_FORMAT_2)
     );
 
     public static LocalDate parseDate(String str) {

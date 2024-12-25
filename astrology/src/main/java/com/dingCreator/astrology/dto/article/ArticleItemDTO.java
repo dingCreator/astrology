@@ -2,6 +2,7 @@ package com.dingCreator.astrology.dto.article;
 
 import com.dingCreator.astrology.vo.ArticleItemVO;
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -9,7 +10,7 @@ import java.io.Serializable;
  * @author ding
  * @date 2024/4/10
  */
-@Data
+@Getter
 public abstract class ArticleItemDTO implements Serializable {
 
     /**

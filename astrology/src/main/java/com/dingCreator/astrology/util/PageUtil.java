@@ -32,7 +32,7 @@ public class PageUtil {
 
         PageResponse<T> page = new PageResponse<>();
         page.setPageIndex(pageIndex);
-        page.setData(list.stream().skip((pageIndex - 1) * pageSize).collect(Collectors.toList()));
+        page.setData(list.stream().skip((pageIndex - 1) * pageSize).limit(pageSize).collect(Collectors.toList()));
         page.setPageSize(pageSize);
         page.setTotal(size);
         return page;

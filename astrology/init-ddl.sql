@@ -248,3 +248,44 @@ CREATE TABLE astrology_peak_task_template
     `rank`                 INT COMMENT '阶级',
     task_template_title_id BIGINT COMMENT '任务模板ID'
 ) ENGINE = InnoDB COMMENT ='巅峰任务模板表';
+
+CREATE TABLE astrology_player_asset
+(
+    player_id      BIGINT NOT NULL PRIMARY KEY COMMENT '玩家ID，主键',
+    astrology_coin BIGINT NOT NULL DEFAULT 0 COMMENT '圣星币',
+    diamond        BIGINT NOT NULL DEFAULT 0 COMMENT '缘石'
+) ENGINE = InnoDB COMMENT ='玩家资产表';
+
+CREATE TABLE astrology_activity
+(
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    activity_type   VARCHAR(255) NOT NULL COMMENT '活动类型',
+    activity_name   VARCHAR(255) NOT NULL COMMENT '活动名称',
+    `limit`         INT          NOT NULL COMMENT '限制值',
+    enabled         BIT          NOT NULL DEFAULT 1 COMMENT '是否可用',
+    default_flag    BIT          NOT NULL DEFAULT 0 COMMENT '是否默认',
+    start_time      DATETIME     NOT NULL comment '开始时间',
+    end_time        DATETIME     NOT NULL comment '结束时间',
+    cost_json       TEXT         NOT NULL comment '参与花费',
+    award_rule_json TEXT         NOT NULL comment '奖品规则'
+) ENGINE = InnoDB COMMENT ='活动表';
+
+CREATE TABLE astrology_activity_record
+(
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    activity_id BIGINT   NOT NULL COMMENT '活动ID',
+    player_id   BIGINT   NOT NULL COMMENT '玩家ID',
+    join_times  INT      NOT NULL DEFAULT 1 COMMENT '连续参与次数',
+    create_time DATETIME NOT NULL COMMENT '参与时间',
+    key idx_activity_player_id (activity_id, player_id) using btree
+) COMMENT ='活动参与记录表';
+
+CREATE TABLE astrology_activity_statics
+(
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    activity_id BIGINT NOT NULL COMMENT '活动ID',
+    player_id   BIGINT NOT NULL COMMENT '玩家ID',
+    date_time   VARCHAR(255) COMMENT '统计时间节点',
+    count       INT    NOT NULL COMMENT '次数',
+    key idx_activity_player_id_time (activity_id, player_id, date_time) using btree
+) COMMENT ='活动参与统计表';

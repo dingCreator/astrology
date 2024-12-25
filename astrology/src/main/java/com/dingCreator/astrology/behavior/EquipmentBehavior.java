@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  */
 public class EquipmentBehavior {
 
-    private EquipmentBelongToService equipmentBelongToService;
+    private final EquipmentBelongToService equipmentBelongToService = EquipmentBelongToService.getInstance();
 
     /**
      * 穿装备
@@ -54,7 +54,6 @@ public class EquipmentBehavior {
      * @return 装备概览
      */
     public PageResponse<EquipmentGroupVO> listEquipmentGroup(long playerId, int pageIndex, int pageSize) {
-        PageResponse<EquipmentGroupVO> response = new PageResponse<>();
         // 校验一下有没有创建角色
         PlayerCache.getPlayerById(playerId);
         List<EquipmentGroupVO> list = equipmentBelongToService.listGroupByBelongToId(BelongToEnum.PLAYER.getBelongTo(), playerId);
@@ -68,7 +67,7 @@ public class EquipmentBehavior {
      * @param equipmentName 装备名称
      * @return 装备背包
      */
-    public List<EquipmentVO> listPlayerEquipmentByName(long playerId, String equipmentName) {
+    public PageResponse<EquipmentVO> listPlayerEquipmentByName(long playerId, String equipmentName, int pageIndex, int pageSize) {
         PlayerCache.getPlayerById(playerId);
         EquipmentEnum equipmentEnum = EquipmentEnum.getByName(equipmentName);
 
@@ -78,7 +77,7 @@ public class EquipmentBehavior {
             throw EquipmentExceptionEnum.DONT_HAVE_EQUIPMENT.getException();
         }
 
-        return equipmentBelongToList.stream().map(equipmentBelongTo -> {
+        List<EquipmentVO> equipmentVoList = equipmentBelongToList.stream().map(equipmentBelongTo -> {
             String propStr = equipmentEnum.getProp().stream().map(prop -> {
                 StringBuilder builder = new StringBuilder();
                 if (prop.getProp().getVal() != 0) {
@@ -107,6 +106,7 @@ public class EquipmentBehavior {
             equipmentVO.setEquip(equipmentBelongTo.getEquip() ? "已装备" : "未装备");
             return equipmentVO;
         }).collect(Collectors.toList());
+        return PageUtil.buildPage(equipmentVoList, pageIndex, pageSize);
     }
 
     /**

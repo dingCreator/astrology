@@ -94,3 +94,6 @@ insert into astrology_loot(belong_to,belong_to_id,money,exp) values
 ('DungeonBoss',3,0,500),
 ('Dungeon',1,0,10000),
 ('Dungeon',2,0,5000);
+
+-- 初始化玩家资产
+insert into astrology_player_asset(player_id,astrology_coin,diamond) select id,0,0 from astrology_player;

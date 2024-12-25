@@ -1,10 +1,13 @@
 package com.dingCreator.astrology.dto;
 
 import com.dingCreator.astrology.dto.article.ArticleItemDTO;
+import com.dingCreator.astrology.enums.AssetTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Map;
 
 /**
  * @author ding
@@ -26,9 +29,9 @@ public class ShopItemDTO {
     /**
      * 单价
      */
-    private Long price;
+    private Map<AssetTypeEnum, Long> costMap;
     /**
-     * 数量，小于0表示无限
+     * 库存，小于0表示无限
      */
     private Integer stock;
 }

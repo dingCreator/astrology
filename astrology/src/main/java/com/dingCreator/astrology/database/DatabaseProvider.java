@@ -39,6 +39,38 @@ public class DatabaseProvider {
      * @param function 执行SQL
      * @return 处理结果
      */
+    public <T> T executeReturn(Function<SqlSession, T> function, boolean batch, boolean autoCommit) {
+        validateSqlSessionFactory();
+        SqlSession sqlSession = null;
+        try {
+            if (batch) {
+                sqlSession = DatabaseContext.getSqlSessionFactory().openSession(ExecutorType.BATCH, autoCommit);
+            } else {
+                sqlSession = DatabaseContext.getSqlSessionFactory().openSession(ExecutorType.SIMPLE, autoCommit);
+            }
+            T result = function.apply(sqlSession);
+            if (!autoCommit) {
+                sqlSession.commit();
+            }
+            return result;
+        } catch (Exception e) {
+            if (sqlSession != null && !autoCommit) {
+                sqlSession.rollback();
+            }
+            throw e;
+        } finally {
+            if (sqlSession != null) {
+                sqlSession.close();
+            }
+        }
+    }
+
+    /**
+     * 执行SQL
+     *
+     * @param function 执行SQL
+     * @return 处理结果
+     */
     public <T> T executeReturn(Function<SqlSession, T> function) {
         return executeReturn(function, false, true);
     }
@@ -73,38 +105,6 @@ public class DatabaseProvider {
             consumer.accept(sqlSession);
             return null;
         });
-    }
-
-    /**
-     * 执行SQL
-     *
-     * @param function 执行SQL
-     * @return 处理结果
-     */
-    public <T> T executeReturn(Function<SqlSession, T> function, boolean batch, boolean autoCommit) {
-        validateSqlSessionFactory();
-        SqlSession sqlSession = null;
-        try {
-            if (batch) {
-                sqlSession = DatabaseContext.getSqlSessionFactory().openSession(ExecutorType.BATCH, autoCommit);
-            } else {
-                sqlSession = DatabaseContext.getSqlSessionFactory().openSession(ExecutorType.SIMPLE, autoCommit);
-            }
-            T result = function.apply(sqlSession);
-            if (!autoCommit) {
-                sqlSession.commit();
-            }
-            return result;
-        } catch (Exception e) {
-            if (sqlSession != null && !autoCommit) {
-                sqlSession.rollback();
-            }
-            throw e;
-        } finally {
-            if (sqlSession != null) {
-                sqlSession.close();
-            }
-        }
     }
 
     /**

@@ -1,5 +1,12 @@
 package com.dingCreator.astrology.behavior;
 
+import com.dingCreator.astrology.cache.PlayerCache;
+import com.dingCreator.astrology.dto.activity.ActivityDTO;
+import com.dingCreator.astrology.enums.activity.ActivityTypeEnum;
+import com.dingCreator.astrology.request.ActivityPageQryReq;
+import com.dingCreator.astrology.response.PageResponse;
+import com.dingCreator.astrology.service.ActivityService;
+import com.dingCreator.astrology.util.PageUtil;
 import com.dingCreator.astrology.vo.ArticleItemVO;
 
 import java.util.List;
@@ -10,9 +17,53 @@ import java.util.List;
  */
 public class ActivityBehavior {
 
-    public List<ArticleItemVO> joinActivity(long activityId, long playerId) {
+    /**
+     * 参加活动
+     *
+     * @param activityName 活动名称
+     * @param playerId     玩家ID
+     * @return 参与结果
+     */
+    public List<ArticleItemVO> joinActivity(String activityName, long playerId) {
+        ActivityDTO activityDTO = ActivityService.getByName(activityName);
+        return activityDTO.getActivityType().getService()
+                .joinActivity(activityDTO, PlayerCache.getPlayerById(playerId));
+    }
 
-        return null;
+    /**
+     * 参与指定类型的活动
+     *
+     * @param activityTypeEnum 活动类型
+     * @param playerId         玩家ID
+     * @param times            连续参与次数
+     * @return 参与结果
+     */
+    public List<ArticleItemVO> joinActivity(ActivityTypeEnum activityTypeEnum, long playerId, int times) {
+        ActivityService service = activityTypeEnum.getService();
+        ActivityDTO activity = service.getDefaultActivity();
+        return service.joinActivity(activity, PlayerCache.getPlayerById(playerId), times);
+    }
+
+    /**
+     * 查询活动列表
+     *
+     * @param pageIndex 页码
+     * @param pageSize  页面大小
+     * @param qryReq    查询条件
+     * @return 活动列表
+     */
+    public PageResponse<ActivityDTO> qryActivityPage(int pageIndex, int pageSize, ActivityPageQryReq qryReq) {
+        List<ActivityDTO> activityList = ActivityService.listActivity(qryReq);
+        return PageUtil.buildPage(activityList, pageIndex, pageSize);
+    }
+
+    /**
+     * 创建活动
+     *
+     * @param activityDTO 活动
+     */
+    public void createActivity(ActivityDTO activityDTO) {
+        activityDTO.getActivityType().getService().createActivity(activityDTO);
     }
 
     private static class Holder {
