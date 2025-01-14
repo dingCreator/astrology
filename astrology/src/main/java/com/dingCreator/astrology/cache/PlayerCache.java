@@ -110,7 +110,7 @@ public class PlayerCache {
                     BeanUtil.copyProperties(playerDTO, player, true);
                     return player;
                 }).collect(Collectors.toList());
-        players.forEach(player -> ThreadPoolUtil.executeConsumer(PlayerService.getInstance()::updatePlayerById, player));
+        PlayerService.getInstance().updatePlayerByIds(players);
     }
 
     /**

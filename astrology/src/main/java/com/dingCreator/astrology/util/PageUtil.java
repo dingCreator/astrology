@@ -16,6 +16,15 @@ import java.util.stream.Collectors;
 public class PageUtil {
 
     public static <T> PageResponse<T> buildPage(List<T> list, int pageIndex, int pageSize) {
+        return addPageDesc(list.stream().skip((pageIndex - 1) * pageSize).limit(pageSize).collect(Collectors.toList()),
+                pageIndex, pageIndex, list.size());
+    }
+
+    public static <T> PageResponse<T> buildPage(T[] array, int pageIndex, int pageSize) {
+        return buildPage(Arrays.asList(array), pageIndex, pageSize);
+    }
+
+    public static <T> PageResponse<T> addPageDesc(List<T> list, int pageIndex, int pageSize, int size) {
         if (pageIndex < Constants.MIN_PAGE_INDEX) {
             pageIndex = Constants.MIN_PAGE_INDEX;
         }
@@ -26,19 +35,14 @@ public class PageUtil {
             list = new ArrayList<>();
         }
 
-        int size = list.size();
         int maxPageIndex = (int) Math.ceil((float) size / (float) pageSize);
         pageIndex = Math.min(pageIndex, maxPageIndex);
 
         PageResponse<T> page = new PageResponse<>();
         page.setPageIndex(pageIndex);
-        page.setData(list.stream().skip((pageIndex - 1) * pageSize).limit(pageSize).collect(Collectors.toList()));
+        page.setData(list);
         page.setPageSize(pageSize);
         page.setTotal(size);
         return page;
-    }
-
-    public static <T> PageResponse<T> buildPage(T[] array, int pageIndex, int pageSize) {
-        return buildPage(Arrays.asList(array), pageIndex, pageSize);
     }
 }

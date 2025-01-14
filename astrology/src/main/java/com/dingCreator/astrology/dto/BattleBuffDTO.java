@@ -13,6 +13,10 @@ import java.io.Serializable;
 @Builder
 public class BattleBuffDTO implements Serializable {
     /**
+     * Buff来源
+     */
+    private BattleDTO buffFrom;
+    /**
      * buff内容
      */
     private BuffDTO buffDTO;

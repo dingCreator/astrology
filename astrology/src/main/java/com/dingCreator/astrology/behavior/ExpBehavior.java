@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -63,10 +64,11 @@ public class ExpBehavior {
                 playerDTO.setLevel(playerDTO.getLevel() + 1);
                 // 属性提升
                 JobInitPropertiesEnum base = JobInitPropertiesEnum.getByCode(playerDTO.getJob());
-                playerDTO.setHp(playerDTO.getMaxHp() + getLevelUpIncrease(base.getInitHp(), playerDTO.getLevel()));
+                // 先更新上限，否则当前值加不上去
                 playerDTO.setMaxHp(playerDTO.getMaxHp() + getLevelUpIncrease(base.getInitHp(), playerDTO.getLevel()));
-                playerDTO.setMp(playerDTO.getMaxMp() + getLevelUpIncrease(playerDTO.getMaxMp(), 0.03F));
-                playerDTO.setMaxMp(playerDTO.getMaxMp() + getLevelUpIncrease(playerDTO.getMaxMp(), 0.03F));
+                playerDTO.setMaxMp(playerDTO.getMaxMp() + getLevelUpIncrease(base.getInitMp(), BigDecimal.valueOf(0.03)));
+                playerDTO.setHp(playerDTO.getMaxHp());
+                playerDTO.setMp(playerDTO.getMaxMp());
                 // 四种特殊属性赋空值，下次获取时重新计算
                 playerDTO.clearAdditionVal();
 
@@ -74,7 +76,8 @@ public class ExpBehavior {
                 playerDTO.setMagicAtk(playerDTO.getMagicAtk() + getLevelUpIncrease(base.getInitMagicAtk(), playerDTO.getLevel()));
                 playerDTO.setDef(playerDTO.getDef() + getLevelUpIncrease(base.getInitDef(), playerDTO.getLevel()));
                 playerDTO.setMagicDef(playerDTO.getMagicDef() + getLevelUpIncrease(base.getInitMagicDef(), playerDTO.getLevel()));
-                playerDTO.setBehaviorSpeed(playerDTO.getBehaviorSpeed() + getLevelUpIncrease(playerDTO.getBehaviorSpeed(), 0.02F));
+                playerDTO.setBehaviorSpeed(playerDTO.getBehaviorSpeed()
+                        + getLevelUpIncrease(playerDTO.getBehaviorSpeed(), BigDecimal.valueOf(0.03)));
                 playerDTO.setHit(playerDTO.getHit() + getLevelUpIncrease(base.getInitHit(), playerDTO.getLevel()));
                 playerDTO.setDodge(playerDTO.getDodge() + getLevelUpIncrease(base.getInitDodge(), playerDTO.getLevel()));
             }
@@ -126,8 +129,8 @@ public class ExpBehavior {
      * @param rate 比例
      * @return 提升数值
      */
-    private long getLevelUpIncrease(long base, float rate) {
-        return Math.round(base * rate);
+    private long getLevelUpIncrease(long base, BigDecimal rate) {
+        return BigDecimal.valueOf(base).multiply(rate).longValue();
     }
 
     /**

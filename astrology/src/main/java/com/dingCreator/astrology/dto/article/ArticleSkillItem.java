@@ -26,6 +26,11 @@ public class ArticleSkillItem extends ArticleItemDTO {
         super(ArticleTypeEnum.SKILL.getType());
     }
 
+    public ArticleSkillItem(Long skillId) {
+        super(ArticleTypeEnum.SKILL.getType());
+        this.skillId = skillId;
+    }
+
     @Override
     public void send2Player(Long playerId) {
         SkillEnum.getById(skillId);
@@ -35,6 +40,6 @@ public class ArticleSkillItem extends ArticleItemDTO {
     @Override
     public ArticleItemVO view() {
         SkillEnum skillEnum = SkillEnum.getById(skillId);
-        return ArticleItemVO.builder().name(skillEnum.getName()).description(skillEnum.getDesc()).build();
+        return ArticleItemVO.builder().name(skillEnum.getName()).rare(100).description(skillEnum.getDesc()).build();
     }
 }

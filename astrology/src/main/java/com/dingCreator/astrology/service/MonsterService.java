@@ -50,7 +50,7 @@ public class MonsterService {
      */
     public List<Monster> listMonster(int index, int size) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession.getMapper(MonsterMapper.class)
-                .listMonster(index - 1, size));
+                .listMonster((index - 1) * size, size));
     }
 
     /**

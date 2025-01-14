@@ -2,7 +2,6 @@ package com.dingCreator.astrology.dto.skill;
 
 import com.dingCreator.astrology.dto.GiveBuffDTO;
 import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
-import com.dingCreator.astrology.enums.skill.SkillConditionEnum;
 import com.dingCreator.astrology.enums.skill.SkillTargetEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -6,30 +6,24 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 显示物品
- *
  * @author ding
- * @date 2024/8/27
+ * @date 2024/12/28
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ArticleItemVO {
+public class ActivityAwardVO {
     /**
-     * 名称
+     * 物品
      */
-    private String name;
-    /**
-     * 描述
-     */
-    private String description;
+    private ArticleItemVO articleItemVO;
     /**
      * 数量
      */
-    private Long count;
+    private Integer count;
     /**
-     * 稀有度
+     * 是否稀有
      */
-    private Integer rare;
+    private Boolean rare;
 }

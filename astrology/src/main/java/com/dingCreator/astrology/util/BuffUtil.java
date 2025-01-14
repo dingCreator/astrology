@@ -5,8 +5,12 @@ import com.dingCreator.astrology.dto.BattleDTO;
 import com.dingCreator.astrology.dto.BattleBuffDTO;
 import com.dingCreator.astrology.dto.BuffDTO;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
+import lombok.val;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -33,13 +37,17 @@ public class BuffUtil {
             buffList.add(now);
         }
 
-        builder.append("，").append(target.getOrganismInfoDTO().getOrganismDTO().getName())
-                .append(buffDTO.getBuffType().getChnDesc());
-        if (buffDTO.getValue() != 0) {
-            builder.append(buffDTO.getValue() > 0 ? "增加了" : "减少了").append(buffDTO.getValue());
+        builder.append("，").append(target.getOrganismInfoDTO().getOrganismDTO().getName());
+        if (buffDTO.getBuffName().length() > 0) {
+            builder.append("附加状态<").append(buffDTO.getBuffName()).append(">，");
         }
-        if (buffDTO.getRate() != 0) {
-            builder.append(buffDTO.getRate() > 0 ? "增加了" : "减少了").append(Math.abs(buffDTO.getRate()) * 100).append("%");
+        builder.append(buffDTO.getBuffType().getChnDesc());
+        if (buffDTO.getValue() != 0) {
+            builder.append(buffDTO.getValue() > 0 ? "+" + buffDTO.getValue() : buffDTO.getValue());
+        }
+        if (buffDTO.getRate().floatValue() != 0) {
+            float absVal = buffDTO.getRate().multiply(BigDecimal.valueOf(100)).floatValue();
+            builder.append(buffDTO.getRate().floatValue() > 0 ? "+" + absVal : absVal).append("%");
         }
         target.getBuffMap().put(buffDTO.getBuffType(), buffList);
     }
@@ -70,9 +78,25 @@ public class BuffUtil {
         if (CollectionUtil.isEmpty(buffList)) {
             return val;
         }
-        long buffVal = Math.round(val * (1 + buffList.stream().mapToDouble(buff -> buff.getBuffDTO().getRate())
-                .reduce(1, Double::sum)));
+        long buffVal = BigDecimal.valueOf(val)
+                .multiply(buffList.stream().map(buff -> buff.getBuffDTO().getRate()).reduce(BigDecimal.ONE, BigDecimal::add))
+                .setScale(0, RoundingMode.HALF_UP).longValue();
         return buffVal < 0 ? 0 : buffVal;
+    }
+
+    /**
+     * 比例类buff
+     *
+     * @param buffList buff列表
+     * @param rate     初始值
+     * @return 比例类buff后的值
+     */
+    private static Float buffRate(List<BattleBuffDTO> buffList, Float rate) {
+        if (CollectionUtil.isEmpty(buffList)) {
+            return rate;
+        }
+        return buffList.stream().map(buff -> buff.getBuffDTO().getRate())
+                .reduce(new BigDecimal(String.valueOf(rate)), BigDecimal::add).floatValue();
     }
 
     /**
@@ -100,11 +124,11 @@ public class BuffUtil {
     }
 
     /**
-     * 获取魔攻
+     * 获取法强
      *
      * @param val     原数值
      * @param buffMap buff列表
-     * @return 魔攻
+     * @return 法强
      */
     public static Long getMagicAtk(long val, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
         List<BattleBuffDTO> magicAtkBuffList = buffMap.get(BuffTypeEnum.MAGIC_ATK);
@@ -112,11 +136,11 @@ public class BuffUtil {
     }
 
     /**
-     * 获取魔防
+     * 获取法抗
      *
      * @param val     原数值
      * @param buffMap buff列表
-     * @return 魔防
+     * @return 法抗
      */
     public static Long getMagicDef(long val, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
         List<BattleBuffDTO> magicDefBuffList = buffMap.get(BuffTypeEnum.MAGIC_DEF);
@@ -179,8 +203,28 @@ public class BuffUtil {
         List<BattleBuffDTO> list = buffMap.getOrDefault(buffTypeEnum, new ArrayList<>());
         return list.stream().map(BattleBuffDTO::getBuffDTO).reduce((buff1, buff2) -> {
             buff2.setValue(buff1.getValue() + buff2.getValue());
-            buff2.setRate(buff1.getRate() + buff2.getRate());
+            buff2.setRate(buff1.getRate().add(buff2.getRate()));
             return buff2;
         }).orElse(new BuffDTO(buffTypeEnum, "tmp", 0L, 0F));
+    }
+
+    public static Long getVal(long val, BuffTypeEnum buffTypeEnum, BattleDTO battleDTO) {
+        List<BattleBuffDTO> buffList = battleDTO.getBuffMap().get(buffTypeEnum);
+        return buffRate(buffList, buffVal(buffList, val));
+    }
+
+    public static Float getRate(Float rate, BuffTypeEnum buffTypeEnum, BattleDTO battleDTO) {
+        List<BattleBuffDTO> buffList = battleDTO.getBuffMap().get(buffTypeEnum);
+        return buffRate(buffList, rate);
+    }
+
+    /**
+     * 清除异常Buff
+     *
+     * @param battleDTO 战斗信息包装
+     */
+    public static void clearAbnormalBuff(BattleDTO battleDTO, StringBuilder builder) {
+        battleDTO.getBuffMap().forEach((buffTypeEnum, buffList) -> buffList.removeIf(buff -> buff.getBuffDTO().getAbnormal()));
+        builder.append("，").append(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName()).append("所有负面状态被清除");
     }
 }

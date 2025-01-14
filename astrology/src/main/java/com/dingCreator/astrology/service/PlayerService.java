@@ -20,6 +20,7 @@ import com.dingCreator.astrology.util.EquipmentUtil;
 import com.dingCreator.astrology.util.LockUtil;
 import org.apache.ibatis.session.SqlSession;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -90,7 +91,7 @@ public class PlayerService {
      * @return 是否创建成功
      */
     public synchronized boolean createPlayer(Player player, PlayerAsset asset) {
-        return DatabaseProvider.getInstance().batchTransactionExecuteReturn(sqlSession -> {
+        return DatabaseProvider.getInstance().transactionExecuteReturn(sqlSession -> {
             sqlSession.getMapper(PlayerDataMapper.class).insert(player);
             sqlSession.getMapper(PlayerAssetMapper.class).insert(asset);
             return true;
@@ -107,45 +108,56 @@ public class PlayerService {
                 sqlSession.getMapper(PlayerDataMapper.class).updateById(player));
     }
 
+    /**
+     * 根据ID更新玩家信息
+     * @param playerList 玩家列表
+     */
+    public void updatePlayerByIds(List<Player> playerList) {
+        DatabaseProvider.getInstance().batchTransactionExecute(sqlSession -> {
+            PlayerDataMapper mapper = sqlSession.getMapper(PlayerDataMapper.class);
+            for (Player player : playerList) {
+                mapper.updateById(player);
+            }
+        });
+    }
+
     public PlayerAsset getAssetByPlayerId(Long playerId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession.getMapper(PlayerAssetMapper.class)
                 .selectOne(new QueryWrapper<PlayerAsset>().eq(PlayerAsset.PLAYER_ID, playerId)));
     }
 
     public void changeAsset(PlayerInfoDTO infoDTO, PlayerAssetDTO change) {
-        DatabaseProvider.getInstance().execute(sqlSession -> changeAsset(infoDTO, change, sqlSession));
-    }
-
-    public void changeAsset(PlayerInfoDTO infoDTO, PlayerAssetDTO change, SqlSession sqlSession) {
-        LockUtil.execute(Constants.CHANGE_ASSET_LOCK_PREFIX + infoDTO.getPlayerDTO().getId(), () -> {
-            PlayerAssetMapper playerAssetMapper = sqlSession.getMapper(PlayerAssetMapper.class);
-            PlayerAsset asset = playerAssetMapper.selectOne(
-                    new QueryWrapper<PlayerAsset>().eq(PlayerAsset.PLAYER_ID, infoDTO.getPlayerDTO().getId()));
-            // 获取货币
-            long astrologyCoin = asset.getAstrologyCoin();
-            long diamond = asset.getDiamond();
-            // 圣星币
-            if (Objects.nonNull(change.getAstrologyCoin())) {
-                astrologyCoin += change.getAstrologyCoin();
-                if (astrologyCoin < 0) {
-                    throw PlayerExceptionEnum.NOT_ENOUGH_ASTROLOGY_COIN.getException();
-                }
-                asset.setAstrologyCoin(astrologyCoin);
-            }
-            // 缘石
-            if (Objects.nonNull(change.getDiamond())) {
-                diamond += change.getDiamond();
-                if (diamond < 0) {
-                    throw PlayerExceptionEnum.NOT_ENOUGH_DIAMOND.getException();
-                }
-                asset.setDiamond(diamond);
-            }
-            // 持久化
-            playerAssetMapper.updateById(asset);
-            // 更新缓存
-            infoDTO.getPlayerAssetDTO().setAstrologyCoin(astrologyCoin);
-            infoDTO.getPlayerAssetDTO().setDiamond(diamond);
-        });
+        LockUtil.execute(Constants.CHANGE_ASSET_LOCK_PREFIX + infoDTO.getPlayerDTO().getId(), () ->
+                DatabaseProvider.getInstance().batchTransactionExecute(sqlSession -> {
+                    PlayerAssetMapper playerAssetMapper = sqlSession.getMapper(PlayerAssetMapper.class);
+                    PlayerAsset asset = playerAssetMapper.selectOne(
+                            new QueryWrapper<PlayerAsset>().eq(PlayerAsset.PLAYER_ID, infoDTO.getPlayerDTO().getId()));
+                    // 获取货币
+                    long astrologyCoin = asset.getAstrologyCoin();
+                    long diamond = asset.getDiamond();
+                    // 圣星币
+                    if (Objects.nonNull(change.getAstrologyCoin())) {
+                        astrologyCoin += change.getAstrologyCoin();
+                        if (astrologyCoin < 0) {
+                            throw PlayerExceptionEnum.NOT_ENOUGH_ASTROLOGY_COIN.getException();
+                        }
+                        asset.setAstrologyCoin(astrologyCoin);
+                    }
+                    // 缘石
+                    if (Objects.nonNull(change.getDiamond())) {
+                        diamond += change.getDiamond();
+                        if (diamond < 0) {
+                            throw PlayerExceptionEnum.NOT_ENOUGH_DIAMOND.getException();
+                        }
+                        asset.setDiamond(diamond);
+                    }
+                    // 持久化
+                    playerAssetMapper.updateById(asset);
+                    // 更新缓存
+                    infoDTO.getPlayerAssetDTO().setAstrologyCoin(astrologyCoin);
+                    infoDTO.getPlayerAssetDTO().setDiamond(diamond);
+                })
+        );
     }
 
     private static class Holder {

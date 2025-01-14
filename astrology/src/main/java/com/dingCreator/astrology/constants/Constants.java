@@ -157,13 +157,17 @@ public final class Constants {
      */
     public static final float MAX_RATE = 1F;
     /**
+     * 抽奖概率之和（%）
+     */
+    public static final int LUCKY_RATE_PERCENT = 100;
+    /**
      * 抽奖倍率
      */
     public static final int LUCKY_MAGNIFICATION = 100_000;
     /**
      * 抽奖范围
      */
-    public static final int LUCKY_RANGE = 100 * LUCKY_MAGNIFICATION;
+    public static final int LUCKY_RANGE = LUCKY_RATE_PERCENT * LUCKY_MAGNIFICATION;
     /**
      * 均不可
      */

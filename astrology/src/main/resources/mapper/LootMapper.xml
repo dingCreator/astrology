@@ -34,7 +34,7 @@
         where
             belong_to=#{belongTo} and
             belong_to_id IN
-            <foreach collection='belongToIdList' item='belongToId' index='belongToId' separator=',' open="(" close=")">,
+            <foreach collection='belongToIdList' item='belongToId' index='belongToId' open="(" separator=',' close=")">
                 #{belongToId}
             </foreach>
     </select>

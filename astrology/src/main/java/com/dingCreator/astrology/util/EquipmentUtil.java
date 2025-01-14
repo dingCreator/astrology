@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.util;
 
 import com.dingCreator.astrology.cache.PlayerCache;
+import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.equipment.EquipmentDTO;
@@ -43,24 +44,13 @@ public class EquipmentUtil {
         }
 
         PlayerInfoDTO infoDTO = PlayerCache.getPlayerById(playerId);
-        if (!equipmentEnum.getLimitJob().contains(infoDTO.getPlayerDTO().getJob())) {
+        if (!equipmentEnum.getLimitJob().contains(Constants.ALL)
+                && !equipmentEnum.getLimitJob().contains(infoDTO.getPlayerDTO().getJob())) {
             throw EquipmentExceptionEnum.INVALID_JOB.getException();
         }
         if (equipmentEnum.getLimitLevel() > infoDTO.getPlayerDTO().getLevel()) {
             throw EquipmentExceptionEnum.LEVEL_TOO_LOW.getException();
         }
-    }
-
-    /**
-     * 获取值
-     *
-     * @param src  初始值
-     * @param val  提升值
-     * @param rate 提升比例
-     * @return 结果值
-     */
-    public static long getVal(long src, long val, float rate) {
-        return src + val + Math.round((src + val) * rate);
     }
 
     /**
@@ -110,7 +100,7 @@ public class EquipmentUtil {
      * @return 计算装备后的属性
      */
     public static Float getFloatVal(Float val, EquipmentPropertiesTypeEnum equipmentPropertiesTypeEnum,
-                                  EquipmentBarDTO equipmentBarDTO) {
+                                    EquipmentBarDTO equipmentBarDTO) {
         if (Objects.isNull(equipmentBarDTO)) {
             return val;
         }
@@ -124,7 +114,7 @@ public class EquipmentUtil {
     }
 
     public static Float getFloatVal(final Float src, EquipmentPropertiesTypeEnum equipmentPropertiesTypeEnum,
-                                  EquipmentDTO equipmentDTO) {
+                                    EquipmentDTO equipmentDTO) {
         if (Objects.isNull(equipmentDTO)) {
             return src;
         }
@@ -157,6 +147,13 @@ public class EquipmentUtil {
         }
     }
 
+    public static void updateWeapon(Long playerId, EquipmentBelongTo equipmentBelongTo) {
+        PlayerInfoDTO info = PlayerCache.getPlayerById(playerId);
+
+    }
+
+
+
     public static void updateEquipment(Long playerId, EquipmentBelongTo equipmentBelongTo, boolean equip) {
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
         EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentBelongTo.getEquipmentId());
@@ -181,6 +178,7 @@ public class EquipmentUtil {
             equipmentBarDTO.setJewelry(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
                     equipmentBelongTo.getLevel()));
         }
+        playerInfoDTO.getPlayerDTO().clearAdditionVal();
         equipmentBelongToService.updateEquipment(equipmentBelongTo.getId(), equip);
     }
 }

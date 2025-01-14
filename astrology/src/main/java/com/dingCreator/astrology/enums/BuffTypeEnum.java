@@ -3,6 +3,8 @@ package com.dingCreator.astrology.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+
 /**
  * @author ding
  * @date 2024/2/2
@@ -13,23 +15,23 @@ public enum BuffTypeEnum {
     /**
      * 物攻
      */
-    ATK("atk", "攻击"),
+    ATK(OrganismPropertiesEnum.ATK.getFieldName(), OrganismPropertiesEnum.ATK.getChnDesc()),
     /**
      * 物防
      */
-    DEF("def", "防御"),
+    DEF(OrganismPropertiesEnum.DEF.getFieldName(), OrganismPropertiesEnum.DEF.getChnDesc()),
     /**
      * 法强
      */
-    MAGIC_ATK("magicAtk", "法强"),
+    MAGIC_ATK(OrganismPropertiesEnum.MAGIC_ATK.getFieldName(), OrganismPropertiesEnum.MAGIC_ATK.getChnDesc()),
     /**
      * 法抗
      */
-    MAGIC_DEF("magicDef", "法抗"),
+    MAGIC_DEF(OrganismPropertiesEnum.MAGIC_DEF.getFieldName(), OrganismPropertiesEnum.MAGIC_DEF.getChnDesc()),
     /**
      * 速度
      */
-    SPEED("speed", "速度"),
+    SPEED(OrganismPropertiesEnum.BEHAVIOR_SPEED.getFieldName(), OrganismPropertiesEnum.BEHAVIOR_SPEED.getChnDesc()),
     /**
      * 暂停
      */
@@ -45,7 +47,7 @@ public enum BuffTypeEnum {
     /**
      * 生命值偷取（吸血）
      */
-    LIFE_STEAL("lifeSteal", "吸血"),
+    LIFE_STEAL(OrganismPropertiesEnum.LIFE_STEALING.getFieldName(), OrganismPropertiesEnum.LIFE_STEALING.getChnDesc()),
     /**
      * 流血
      */
@@ -53,42 +55,55 @@ public enum BuffTypeEnum {
     /**
      * 命中
      */
-    HIT("hit", "命中"),
+    HIT(OrganismPropertiesEnum.HIT.getFieldName(), OrganismPropertiesEnum.HIT.getChnDesc()),
     /**
      * 闪避
      */
-    DODGE("dodge", "闪避"),
+    DODGE(OrganismPropertiesEnum.DODGE.getFieldName(), OrganismPropertiesEnum.DODGE.getChnDesc()),
     /**
      * 暴击率
      */
-    CRITICAL("critical", "暴击"),
+    CRITICAL(OrganismPropertiesEnum.CRITICAL_RATE.getFieldName(), OrganismPropertiesEnum.CRITICAL_DAMAGE.getChnDesc()),
     /**
      * 暴击率减免
      */
-    CRITICAL_REDUCTION("critical_reduction", "抗暴"),
+    CRITICAL_REDUCTION(OrganismPropertiesEnum.CRITICAL_REDUCTION_RATE.getFieldName(),
+            OrganismPropertiesEnum.CRITICAL_REDUCTION_RATE.getChnDesc()),
     /**
      * 爆伤
      */
-    CRITICAL_DAMAGE("critical_damage", "爆伤"),
+    CRITICAL_DAMAGE(OrganismPropertiesEnum.CRITICAL_DAMAGE.getFieldName(),
+            OrganismPropertiesEnum.CRITICAL_DAMAGE.getChnDesc()),
     /**
      * 爆伤减免
      */
-    CRITICAL_DAMAGE_REDUCTION("critical_damage_reduction", "爆免"),
+    CRITICAL_DAMAGE_REDUCTION(OrganismPropertiesEnum.CRITICAL_DAMAGE_REDUCTION.getFieldName(),
+            OrganismPropertiesEnum.CRITICAL_DAMAGE_REDUCTION.getChnDesc()),
     /**
      * 伤害
      */
-    DAMAGE("damage", "伤害"),
+    DAMAGE("damage", "受到的伤害"),
     /**
      * 法伤
      */
-    MAGIC_DAMAGE("magic_damage", "法伤"),
+    MAGIC_DAMAGE("magicDamage", "受到的法伤"),
     /**
      * 反伤
      */
-    REFLECT_DAMAGE("reflect_damage", "反伤"),
-
-    PENETRATE("penetrate", "穿甲"),
-    MAGIC_PENETRATE("magic_penetrate", "法穿"),
+    REFLECT_DAMAGE("reflectDamage", "反伤"),
+    /**
+     * 穿甲
+     */
+    PENETRATE(OrganismPropertiesEnum.PENETRATE.getFieldName(), OrganismPropertiesEnum.PENETRATE.getChnDesc()),
+    /**
+     * 法穿
+     */
+    MAGIC_PENETRATE(OrganismPropertiesEnum.MAGIC_PENETRATE.getFieldName(),
+            OrganismPropertiesEnum.MAGIC_PENETRATE.getChnDesc()),
+    /**
+     * 免疫
+     */
+    IMMUNITY("immunity", "免疫"),
     ;
 
     /**
@@ -99,4 +114,8 @@ public enum BuffTypeEnum {
      * 中文描述
      */
     private final String chnDesc;
+
+    public static BuffTypeEnum getByName(String name) {
+        return Arrays.stream(values()).filter(e -> e.getName().equals(name)).findFirst().orElse(null);
+    }
 }

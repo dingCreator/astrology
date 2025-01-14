@@ -11,6 +11,7 @@ import com.dingCreator.astrology.service.RankUpBossService;
 import com.dingCreator.astrology.util.BattleUtil;
 import com.dingCreator.astrology.vo.BattleResultVO;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,26 +45,34 @@ public class RankBehavior {
         BattleResultVO response = BattleUtil.battlePVE(id, rankUpBossList.stream().map(RankUpBoss::getMonsterId)
                 .collect(Collectors.toList()), false);
         if (BattleResultVO.BattleResult.WIN.equals(response.getBattleResult())
-                || BattleResultVO.BattleResult.DRAW.equals(response.getBattleResult())) {
-            playerDTO.setRank(playerDTO.getRank() + 1);
+//                || BattleResultVO.BattleResult.DRAW.equals(response.getBattleResult())
+        ) {
+            // 获取突破前阶级，触发突破成功奖励
+            int oldRank = playerDTO.getRank();
+            RankEnum oldRankEnum = RankEnum.getEnum(playerDTO.getJob(), oldRank);
+            oldRankEnum.getRankUpAward().accept(id);
+            // 阶级+1
+            playerDTO.setRank(oldRank + 1);
             // 突破成功赠送1经验触发升级
             ExpBehavior.getInstance().getExp(playerDTO.getId(), 1L);
             // 属性提升
-            playerDTO.setHp((long) Math.round(playerDTO.getMaxHp() * 1.5F));
-            playerDTO.setMaxHp((long) Math.round(playerDTO.getMaxHp() * 1.5F));
-            // 蓝不受突破影响
-            playerDTO.setAtk((long) Math.round(playerDTO.getAtk() * 1.5F));
-            playerDTO.setMagicAtk((long) Math.round(playerDTO.getMagicAtk() * 1.5F));
-            playerDTO.setDef((long) Math.round(playerDTO.getDef() * 1.5F));
-            playerDTO.setMagicDef((long) Math.round(playerDTO.getMagicDef() * 1.5F));
-            playerDTO.setBehaviorSpeed((long) Math.round(playerDTO.getBehaviorSpeed() * 1.5F));
-            playerDTO.setHit((long) Math.round(playerDTO.getHit() * 1.5F));
-            playerDTO.setDodge((long) Math.round(playerDTO.getDodge() * 1.5F));
+            playerDTO.setMaxHp(BigDecimal.valueOf(playerDTO.getMaxHp()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setMaxMp(playerDTO.getMaxMp() + 50 * oldRank);
+            playerDTO.setHp(playerDTO.getMaxHp());
+            playerDTO.setMp(playerDTO.getMaxMp());
+            playerDTO.setAtk(BigDecimal.valueOf(playerDTO.getAtk()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setMagicAtk(BigDecimal.valueOf(playerDTO.getMagicAtk()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setDef(BigDecimal.valueOf(playerDTO.getDef()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setMagicDef(BigDecimal.valueOf(playerDTO.getMagicDef()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setBehaviorSpeed(BigDecimal.valueOf(playerDTO.getBehaviorSpeed()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setHit(BigDecimal.valueOf(playerDTO.getHit()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setDodge(BigDecimal.valueOf(playerDTO.getDodge()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.clearAdditionVal();
         } else {
             // 突破失败扣除一半经验
             playerDTO.setExp((long) Math.round(playerDTO.getExp() / 2F));
         }
-        PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
+        PlayerCache.flush(playerDTO.getId());
         return response;
     }
 

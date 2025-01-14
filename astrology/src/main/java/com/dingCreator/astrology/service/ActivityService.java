@@ -2,6 +2,7 @@ package com.dingCreator.astrology.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.database.DatabaseProvider;
@@ -18,6 +19,7 @@ import com.dingCreator.astrology.enums.exception.ActivityExceptionEnum;
 import com.dingCreator.astrology.mapper.ActivityMapper;
 import com.dingCreator.astrology.mapper.ActivityRecordMapper;
 import com.dingCreator.astrology.mapper.ActivityStaticsMapper;
+import com.dingCreator.astrology.request.ActivityAwardSettingReq;
 import com.dingCreator.astrology.request.ActivityPageQryReq;
 import com.dingCreator.astrology.util.ActivityUtil;
 import com.dingCreator.astrology.util.LockUtil;
@@ -148,7 +150,7 @@ public interface ActivityService {
                 Long playerId = info.getPlayerDTO().getId();
                 // 扣除参与费用
                 activity.getCostMap().forEach((assetTypeEnum, cost) ->
-                        PlayerService.getInstance().changeAsset(info, assetTypeEnum.getTransfer2Dto().apply(cost * times), sqlSession));
+                        PlayerService.getInstance().changeAsset(info, assetTypeEnum.getTransfer2Dto().apply(cost * times)));
                 // 发放奖励
                 awards.forEach(award -> award.send2Player(info.getPlayerDTO().getId()));
                 // 插入记录
@@ -199,7 +201,7 @@ public interface ActivityService {
             Activity activity = Activity.builder()
                     .activityName(activityDTO.getActivityName())
                     .activityType(activityDTO.getActivityType().getCode())
-                    .awardRuleJson(activityDTO.getActivityType().getService().parseAwardRule2Json(activityDTO.getAwardRuleList()))
+                    .awardRuleJson(parseAwardRule2Json(activityDTO.getAwardRuleList()))
                     .limit(ActivityUtil.getLimitBit(activityDTO.getLimitTypeEnum(), activityDTO.getLimitTypeCnt()))
                     .costJson(ActivityUtil.formatCostMapJson(activityDTO.getCostMap()))
                     .defaultFlag(activityDTO.getDefaultFlag())
@@ -333,4 +335,49 @@ public interface ActivityService {
      * @return json
      */
     <T extends BaseActivityAwardRuleDTO> String parseAwardRule2Json(List<T> tList);
+
+    /**
+     * 编辑活动
+     *
+     * @param activity 活动
+     */
+    default void updateActivity(ActivityDTO activity) {
+        Assert.notNull(activity.getId(), "活动ID不能为空");
+        Activity.ActivityBuilder builder = Activity.builder().id(activity.getId());
+        // 只允许更新以下字段
+        if (Objects.nonNull(activity.getActivityName())) {
+            builder.activityName(activity.getActivityName());
+        }
+        if (Objects.nonNull(activity.getStartTime())) {
+            builder.startTime(activity.getStartTime());
+        }
+        if (Objects.nonNull(activity.getEndTime())) {
+            builder.endTime(activity.getEndTime());
+        }
+        if (Objects.nonNull(activity.getLimitTypeEnum()) && Objects.nonNull(activity.getLimitTypeCnt())) {
+            builder.limit(ActivityUtil.getLimitBit(activity.getLimitTypeEnum(), activity.getLimitTypeCnt()));
+        }
+        if (CollectionUtils.isNotEmpty(activity.getCostMap())) {
+            builder.costJson(ActivityUtil.formatCostMapJson(activity.getCostMap()));
+        }
+        if (Objects.nonNull(activity.getDefaultFlag())) {
+            builder.defaultFlag(activity.getDefaultFlag());
+        }
+        if (CollectionUtils.isNotEmpty(activity.getAwardRuleList())) {
+            builder.awardRuleJson(parseAwardRule2Json(activity.getAwardRuleList()));
+        }
+        if (Objects.nonNull(activity.getEnabled())) {
+            builder.enabled(activity.getEnabled());
+        }
+        Activity newActivity = builder.build();
+        DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(ActivityMapper.class).updateById(newActivity));
+    }
+
+    /**
+     * 快捷生成奖品规则
+     *
+     * @param activityDTO             活动
+     * @param activityAwardSettingReq 快捷设置奖品配置
+     */
+    void easySettingAward(ActivityDTO activityDTO, ActivityAwardSettingReq activityAwardSettingReq);
 }

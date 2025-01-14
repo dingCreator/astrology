@@ -2,12 +2,12 @@ package com.dingCreator.astrology.dto;
 
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class GiveBuffDTO implements Serializable {
     /**
      * 比例变化
      */
-    private Float rate;
+    private BigDecimal rate;
     /**
      * 持续回合数
      */
@@ -50,7 +50,7 @@ public class GiveBuffDTO implements Serializable {
     /**
      * 生效概率
      */
-    private Float effectedRate;
+    private BigDecimal effectedRate;
     /**
      * buff上限
      */
@@ -61,7 +61,7 @@ public class GiveBuffDTO implements Serializable {
     }
 
     public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Integer round, Float effectedRate) {
-        this(buffTypeEnum, buffName, 0L, 0F, round, effectedRate, new ArrayList<>());
+        this(buffTypeEnum, buffName, 0L, 0F, round, 1F, new ArrayList<>());
     }
 
     public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Long value, Integer round) {
@@ -86,12 +86,14 @@ public class GiveBuffDTO implements Serializable {
 
     public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Long value, Float rate,
                        Integer round, Float effectedRate, List<BuffLimit> buffLimitList) {
-        this(buffTypeEnum, buffTypeEnum, buffName, value, rate, round, effectedRate, buffLimitList);
+        this(buffTypeEnum, buffTypeEnum, buffName, value, new BigDecimal(String.valueOf(rate)), round,
+                new BigDecimal(String.valueOf(effectedRate)), buffLimitList);
     }
 
     public GiveBuffDTO(BuffTypeEnum buffType, BuffTypeEnum dependsBuffType, String buffName,
-                       Long value, Float rate, Integer round, Float effectedRate, List<BuffLimit> buffLimitList) {
-        if (effectedRate < Constants.MIN_RATE || effectedRate > Constants.MAX_RATE) {
+                       Long value, BigDecimal rate, Integer round, BigDecimal effectedRate, List<BuffLimit> buffLimitList) {
+        if (effectedRate.compareTo(BigDecimal.valueOf(Constants.MIN_RATE)) < 0
+                || effectedRate.compareTo(BigDecimal.valueOf(Constants.MAX_RATE)) > 0) {
             throw new IllegalArgumentException("buff【" + buffName + "】生效概率配置错误");
         }
         this.buffType = buffType;
@@ -117,6 +119,6 @@ public class GiveBuffDTO implements Serializable {
         /**
          * 上限比例
          */
-        private Float limitRate;
+        private BigDecimal limitRate;
     }
 }

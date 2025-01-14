@@ -6,45 +6,39 @@ import com.dingCreator.astrology.enums.ArticleTypeEnum;
 import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.vo.ArticleItemVO;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 /**
  * @author ding
- * @date 2024/12/4
+ * @date 2024/12/30
  */
+@ToString
 @Getter
 @Setter
-@ToString
-public class ArticleDiamondItem extends ArticleItemDTO {
+public class ArticleAstrologyCoinItem extends ArticleItemDTO {
 
-    /**
-     * 数量
-     */
     private Long cnt;
 
-    public ArticleDiamondItem() {
-        super(ArticleTypeEnum.DIAMOND.getType());
-    }
-
-    public ArticleDiamondItem(Long cnt) {
-        super(ArticleTypeEnum.DIAMOND.getType());
-        this.cnt = cnt;
+    public ArticleAstrologyCoinItem() {
+        super(ArticleTypeEnum.ASTROLOGY_COIN.getType());
     }
 
     @Override
     public void send2Player(Long playerId) {
-        PlayerAssetDTO asset = PlayerAssetDTO.builder().playerId(playerId).diamond(this.cnt).build();
+        PlayerAssetDTO asset = PlayerAssetDTO.builder().playerId(playerId).astrologyCoin(this.cnt).build();
         PlayerService.getInstance().changeAsset(PlayerCache.getPlayerById(playerId), asset);
     }
 
     @Override
     public ArticleItemVO view() {
         return ArticleItemVO.builder()
-                .name(AssetTypeEnum.DIAMOND.getChnName())
-                .description(AssetTypeEnum.DIAMOND.getDesc())
+                .name(AssetTypeEnum.ASTROLOGY_COIN.getChnName())
+                .description(AssetTypeEnum.ASTROLOGY_COIN.getDesc())
                 .count(this.cnt)
+                .rare(100)
                 .build();
     }
 }

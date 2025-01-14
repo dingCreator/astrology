@@ -13,6 +13,7 @@ import com.dingCreator.astrology.enums.ArticleTypeEnum;
 import com.dingCreator.astrology.enums.activity.ActivityTypeEnum;
 import com.dingCreator.astrology.enums.exception.ActivityExceptionEnum;
 import com.dingCreator.astrology.mapper.ActivityMapper;
+import com.dingCreator.astrology.request.ActivityAwardSettingReq;
 
 import java.util.List;
 import java.util.Objects;
@@ -81,6 +82,11 @@ public class SignActivityServiceImpl implements ActivityService {
     @Override
     public <T extends BaseActivityAwardRuleDTO> String parseAwardRule2Json(List<T> list) {
         return JSONObject.toJSONString(list);
+    }
+
+    @Override
+    public void easySettingAward(ActivityDTO activityDTO, ActivityAwardSettingReq activityAwardSettingReq) {
+        activityDTO.getActivityType().getService().easySettingAward(activityDTO, activityAwardSettingReq);
     }
 
     private static class Holder {

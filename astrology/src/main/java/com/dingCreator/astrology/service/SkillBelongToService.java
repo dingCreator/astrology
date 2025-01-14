@@ -1,8 +1,10 @@
 package com.dingCreator.astrology.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.entity.SkillBelongTo;
 import com.dingCreator.astrology.mapper.SkillBelongToMapper;
+import org.apache.ibatis.session.SqlSession;
 
 import java.util.List;
 
@@ -24,8 +26,18 @@ public class SkillBelongToService {
         skillBelongTo.setBelongTo(belongTo);
         skillBelongTo.setBelongToId(belongToId);
         skillBelongTo.setSkillId(skillId);
-        DatabaseProvider.getInstance().execute(sqlSession ->
-                sqlSession.getMapper(SkillBelongToMapper.class).createSkillBelongTo(skillBelongTo));
+        DatabaseProvider.getInstance().execute(sqlSession -> {
+            SkillBelongToMapper mapper = sqlSession.getMapper(SkillBelongToMapper.class);
+            // 已有技能不再重复发放
+            int cnt = mapper.selectCount(new QueryWrapper<SkillBelongTo>()
+                    .eq(SkillBelongTo.BELONG_TO, belongTo)
+                    .eq(SkillBelongTo.BELONG_TO_ID, belongToId)
+                    .eq(SkillBelongTo.SKILL_ID, skillId)
+            );
+            if (cnt == 0) {
+                mapper.createSkillBelongTo(skillBelongTo);
+            }
+        });
     }
 
     /**

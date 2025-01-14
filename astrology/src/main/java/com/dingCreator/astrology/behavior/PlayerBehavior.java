@@ -2,6 +2,7 @@ package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
@@ -10,7 +11,6 @@ import com.dingCreator.astrology.entity.SkillBarItem;
 import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
-import com.dingCreator.astrology.enums.RankEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentPropertiesTypeEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
@@ -25,7 +25,9 @@ import com.dingCreator.astrology.util.BattleUtil;
 import com.dingCreator.astrology.util.EquipmentUtil;
 import com.dingCreator.astrology.util.MapUtil;
 import com.dingCreator.astrology.util.SkillUtil;
+import com.dingCreator.astrology.vo.SimplePlayerInfoVO;
 import com.dingCreator.astrology.vo.BattleResultVO;
+import com.dingCreator.astrology.vo.PlayerInfoVO;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -133,55 +135,77 @@ public class PlayerBehavior {
     }
 
     /**
+     * 查询玩家基础信息
+     *
+     * @param id 玩家ID
+     * @return 玩家基础信息
+     */
+    public SimplePlayerInfoVO getSimplePlayerInfoById(Long id) {
+        // 玩家信息
+        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(id);
+        PlayerDTO playerDTO = playerInfoDTO.getPlayerDTO();
+        EquipmentBarDTO bar = playerInfoDTO.getEquipmentBarDTO();
+        return SimplePlayerInfoVO.builder()
+                .id(playerDTO.getId())
+                .name(playerDTO.getName())
+                .job(playerDTO.getJob())
+                .rank(playerDTO.getRank())
+                .level(playerDTO.getLevel())
+                .exp(playerDTO.getExp())
+                .currentLevelMaxExp(ExpBehavior.getInstance().getCurrentLevelMaxExp(playerDTO.getLevel()))
+                .hp(playerDTO.getHpWithAddition())
+                .maxHp(playerDTO.getMaxHpWithAddition())
+                .mp(playerDTO.getMpWithAddition())
+                .maxMp(playerDTO.getMaxMpWithAddition())
+                .atk(EquipmentUtil.getLongVal(playerDTO.getAtk(), EquipmentPropertiesTypeEnum.ATK, bar))
+                .magicAtk(EquipmentUtil.getLongVal(playerDTO.getMagicAtk(), EquipmentPropertiesTypeEnum.MAGIC_ATK, bar))
+                .status(playerDTO.getStatus())
+                .mapId(playerDTO.getMapId()).build();
+    }
+
+    /**
      * 根据玩家ID获取玩家信息
      *
      * @param id 玩家ID
      * @return 玩家信息
      */
-    public BaseResponse<List<String>> getPlayerInfoById(Long id) {
+    public PlayerInfoVO getPlayerInfoById(Long id) {
         // 玩家信息
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(id);
-        PlayerDTO PlayerDTO = playerInfoDTO.getPlayerDTO();
-
-        List<String> list = new ArrayList<>(16);
-        list.add("昵称：" + PlayerDTO.getName() + " 职业：" + JobEnum.getByCode(PlayerDTO.getJob()).getJobName());
-        list.add("阶级：" + RankEnum.getEnum(PlayerDTO.getJob(), PlayerDTO.getRank()).getRankName());
-        list.add("等级：" + PlayerDTO.getLevel() + " 经验：" + PlayerDTO.getExp()
-                + "/" + ExpBehavior.getInstance().getCurrentLevelMaxExp(PlayerDTO.getLevel()));
-        list.add("血量：" + PlayerDTO.getHpWithAddition() + "/" + PlayerDTO.getMaxHpWithAddition());
-        list.add("蓝量：" + PlayerDTO.getMpWithAddition() + "/" + PlayerDTO.getMaxMpWithAddition());
-        list.add("攻击：" + EquipmentUtil.getLongVal(PlayerDTO.getAtk(), EquipmentPropertiesTypeEnum.ATK,
-                playerInfoDTO.getEquipmentBarDTO()));
-        list.add("防御：" + EquipmentUtil.getLongVal(PlayerDTO.getDef(), EquipmentPropertiesTypeEnum.DEF,
-                playerInfoDTO.getEquipmentBarDTO()));
-        list.add("法强：" + EquipmentUtil.getLongVal(PlayerDTO.getMagicAtk(), EquipmentPropertiesTypeEnum.DEF,
-                playerInfoDTO.getEquipmentBarDTO()));
-        list.add("法抗：" + EquipmentUtil.getLongVal(PlayerDTO.getMagicDef(), EquipmentPropertiesTypeEnum.DEF,
-                playerInfoDTO.getEquipmentBarDTO()));
-        list.add("穿甲：" + EquipmentUtil.getFloatVal(PlayerDTO.getPenetrate(), EquipmentPropertiesTypeEnum.PENETRATE,
-                playerInfoDTO.getEquipmentBarDTO()) * 100 + "%");
-        list.add("法穿：" + EquipmentUtil.getFloatVal(PlayerDTO.getMagicPenetrate(), EquipmentPropertiesTypeEnum.DEF,
-                playerInfoDTO.getEquipmentBarDTO()) * 100 + "%");
-        list.add("命中：" + EquipmentUtil.getLongVal(PlayerDTO.getHit(), EquipmentPropertiesTypeEnum.DEF,
-                playerInfoDTO.getEquipmentBarDTO()));
-        list.add("闪避：" + EquipmentUtil.getLongVal(PlayerDTO.getDodge(), EquipmentPropertiesTypeEnum.DEF,
-                playerInfoDTO.getEquipmentBarDTO()));
-        list.add("速度：" + EquipmentUtil.getLongVal(PlayerDTO.getBehaviorSpeed(), EquipmentPropertiesTypeEnum.DEF,
-                playerInfoDTO.getEquipmentBarDTO()));
-        list.add("暴击：" + EquipmentUtil.getFloatVal(PlayerDTO.getCriticalRate(), EquipmentPropertiesTypeEnum.DEF,
-                playerInfoDTO.getEquipmentBarDTO()) * 100 + "%");
-        list.add("抗暴：" + EquipmentUtil.getFloatVal(PlayerDTO.getCriticalReductionRate(), EquipmentPropertiesTypeEnum.DEF,
-                playerInfoDTO.getEquipmentBarDTO()) * 100 + "%");
-        list.add("暴伤：" + EquipmentUtil.getFloatVal(PlayerDTO.getCriticalDamage(), EquipmentPropertiesTypeEnum.DEF,
-                playerInfoDTO.getEquipmentBarDTO()) * 100 + "%");
-        list.add("暴免：" + EquipmentUtil.getFloatVal(PlayerDTO.getCriticalDamageReduction(), EquipmentPropertiesTypeEnum.DEF,
-                playerInfoDTO.getEquipmentBarDTO()) * 100 + "%");
-        list.add("状态：" + PlayerStatusEnum.getByCode(getStatus(PlayerDTO)).getName());
-        list.add("所在地图：" + MapUtil.getMapById(MapUtil.getNowLocation(PlayerDTO.getId())).getName());
-
-        BaseResponse<List<String>> baseResponse = new BaseResponse<>();
-        baseResponse.setContent(list);
-        return baseResponse;
+        PlayerDTO playerDTO = playerInfoDTO.getPlayerDTO();
+        EquipmentBarDTO bar = playerInfoDTO.getEquipmentBarDTO();
+        return PlayerInfoVO.builder().id(playerDTO.getId())
+                .name(playerDTO.getName())
+                .job(playerDTO.getJob())
+                .rank(playerDTO.getRank())
+                .level(playerDTO.getLevel())
+                .exp(playerDTO.getExp())
+                .currentLevelMaxExp(ExpBehavior.getInstance().getCurrentLevelMaxExp(playerDTO.getLevel()))
+                .hp(playerDTO.getHpWithAddition())
+                .maxHp(playerDTO.getMaxHpWithAddition())
+                .mp(playerDTO.getMpWithAddition())
+                .maxMp(playerDTO.getMaxMpWithAddition())
+                .atk(EquipmentUtil.getLongVal(playerDTO.getAtk(), EquipmentPropertiesTypeEnum.ATK, bar))
+                .magicAtk(EquipmentUtil.getLongVal(playerDTO.getMagicAtk(), EquipmentPropertiesTypeEnum.MAGIC_ATK, bar))
+                .def(EquipmentUtil.getLongVal(playerDTO.getDef(), EquipmentPropertiesTypeEnum.DEF, bar))
+                .magicDef(EquipmentUtil.getLongVal(playerDTO.getMagicDef(), EquipmentPropertiesTypeEnum.MAGIC_DEF,bar))
+                .penetrate(EquipmentUtil.getFloatVal(playerDTO.getPenetrate(), EquipmentPropertiesTypeEnum.PENETRATE, bar))
+                .magicPenetrate(EquipmentUtil.getFloatVal(playerDTO.getMagicPenetrate(),
+                        EquipmentPropertiesTypeEnum.MAGIC_PENETRATE, bar))
+                .hit(EquipmentUtil.getLongVal(playerDTO.getHit(), EquipmentPropertiesTypeEnum.HIT, bar))
+                .dodge(EquipmentUtil.getLongVal(playerDTO.getDodge(), EquipmentPropertiesTypeEnum.DODGE, bar))
+                .behaviorSpeed(EquipmentUtil.getLongVal(playerDTO.getBehaviorSpeed(),
+                        EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, bar))
+                .criticalRate(EquipmentUtil.getFloatVal(playerDTO.getCriticalRate(),
+                        EquipmentPropertiesTypeEnum.CRITICAL_RATE, bar))
+                .criticalReductionRate(EquipmentUtil.getFloatVal(playerDTO.getCriticalReductionRate(),
+                        EquipmentPropertiesTypeEnum.CRITICAL_REDUCTION_RATE, bar))
+                .criticalDamage(EquipmentUtil.getFloatVal(playerDTO.getCriticalDamage(),
+                        EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, bar))
+                .criticalDamageReduction(EquipmentUtil.getFloatVal(playerDTO.getCriticalDamageReduction(),
+                        EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE_REDUCTION, bar))
+                .status(playerDTO.getStatus())
+                .mapId(playerDTO.getMapId()).build();
     }
 
     /**
@@ -363,6 +387,10 @@ public class PlayerBehavior {
             throw PlayerExceptionEnum.ASSET_TYPE_ERR.getException();
         }
         PlayerService.getInstance().changeAsset(PlayerCache.getPlayerById(playerId), assetTypeEnum.getTransfer2Dto().apply(val));
+    }
+
+    public void sendAsset2AllPlayer(String assetType, long val) {
+
     }
 
     private static class Holder {

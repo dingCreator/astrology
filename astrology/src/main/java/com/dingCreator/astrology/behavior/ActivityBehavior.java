@@ -3,6 +3,8 @@ package com.dingCreator.astrology.behavior;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.dto.activity.ActivityDTO;
 import com.dingCreator.astrology.enums.activity.ActivityTypeEnum;
+import com.dingCreator.astrology.request.ActivityAwardSettingReq;
+import com.dingCreator.astrology.request.LuckyActivityAwardSettingReq;
 import com.dingCreator.astrology.request.ActivityPageQryReq;
 import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.service.ActivityService;
@@ -58,12 +60,25 @@ public class ActivityBehavior {
     }
 
     /**
+     * 编辑活动
+     *
+     * @param activity 活动
+     */
+    public void updateActivity(ActivityDTO activity) {
+        activity.getActivityType().getService().updateActivity(activity);
+    }
+
+    /**
      * 创建活动
      *
      * @param activityDTO 活动
      */
     public void createActivity(ActivityDTO activityDTO) {
         activityDTO.getActivityType().getService().createActivity(activityDTO);
+    }
+
+    public void easySettingAward(ActivityDTO activityDTO, ActivityAwardSettingReq activityAwardSettingReq) {
+        activityDTO.getActivityType().getService().easySettingAward(activityDTO, activityAwardSettingReq);
     }
 
     private static class Holder {

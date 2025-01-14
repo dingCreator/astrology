@@ -114,6 +114,10 @@ public enum OrganismPropertiesEnum {
     }
 
     public static OrganismPropertiesEnum getByChnDesc(String chnDesc) {
-        return PROP_MAP.getOrDefault(chnDesc, Collections.singletonList(null)).get(0);
+        return Arrays.stream(values()).filter(e -> e.getChnDesc().equals(chnDesc)).findFirst().orElse(null);
+    }
+
+    public static OrganismPropertiesEnum getByFieldName(String fieldName) {
+        return Arrays.stream(values()).filter(e -> e.getFieldName().equals(fieldName)).findFirst().orElse(null);
     }
 }

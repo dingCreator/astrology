@@ -25,6 +25,10 @@ public class ArticleTitleItem extends ArticleItemDTO {
     public ArticleTitleItem() {
         super(ArticleTypeEnum.TITLE.getType());
     }
+    public ArticleTitleItem(Long titleId) {
+        super(ArticleTypeEnum.TITLE.getType());
+        this.titleId = titleId;
+    }
 
     @Override
     public void send2Player(Long playerId) {

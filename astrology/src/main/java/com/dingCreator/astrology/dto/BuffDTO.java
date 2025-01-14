@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * @author ding
@@ -37,33 +38,67 @@ public class BuffDTO implements Serializable {
     /**
      * 比例变化
      */
-    private Float rate;
+    private BigDecimal rate;
     /**
      * buff覆盖规则
      */
     private BuffOverrideStrategyEnum buffOverrideStrategyEnum;
+    /**
+     * 是否属于异常
+     */
+    private Boolean abnormal;
 
     public BuffDTO(BuffTypeEnum buffType, String buffName, Long value) {
         this.buffType = buffType;
         this.buffName = buffName;
         this.value = value;
-        this.rate = 0F;
+        this.rate = BigDecimal.ZERO;
         this.buffOverrideStrategyEnum = BuffOverrideStrategyEnum.MAX_ROUND;
+        this.abnormal = false;
     }
 
     public BuffDTO(BuffTypeEnum buffType, String buffName, Float rate) {
         this.buffType = buffType;
         this.buffName = buffName;
         this.value = 0L;
-        this.rate = rate;
+        this.rate = new BigDecimal(String.valueOf(rate));
         this.buffOverrideStrategyEnum = BuffOverrideStrategyEnum.MAX_ROUND;
+        this.abnormal = false;
     }
 
     public BuffDTO(BuffTypeEnum buffType, String buffName, Long value, Float rate) {
         this.buffType = buffType;
         this.buffName = buffName;
         this.value = value;
-        this.rate = rate;
+        this.rate = new BigDecimal(String.valueOf(rate));
         this.buffOverrideStrategyEnum = BuffOverrideStrategyEnum.MAX_ROUND;
+        this.abnormal = false;
+    }
+
+    public BuffDTO(BuffTypeEnum buffType, String buffName, Long value, Boolean abnormal) {
+        this.buffType = buffType;
+        this.buffName = buffName;
+        this.value = value;
+        this.rate = BigDecimal.ZERO;
+        this.buffOverrideStrategyEnum = BuffOverrideStrategyEnum.MAX_ROUND;
+        this.abnormal = abnormal;
+    }
+
+    public BuffDTO(BuffTypeEnum buffType, String buffName, Float rate, Boolean abnormal) {
+        this.buffType = buffType;
+        this.buffName = buffName;
+        this.value = 0L;
+        this.rate = new BigDecimal(String.valueOf(rate));
+        this.buffOverrideStrategyEnum = BuffOverrideStrategyEnum.MAX_ROUND;
+        this.abnormal = abnormal;
+    }
+
+    public BuffDTO(BuffTypeEnum buffType, String buffName, Long value, Float rate, Boolean abnormal) {
+        this.buffType = buffType;
+        this.buffName = buffName;
+        this.value = value;
+        this.rate = new BigDecimal(String.valueOf(rate));
+        this.buffOverrideStrategyEnum = BuffOverrideStrategyEnum.MAX_ROUND;
+        this.abnormal = abnormal;
     }
 }

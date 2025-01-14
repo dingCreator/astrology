@@ -2,6 +2,7 @@ package com.dingCreator.astrology.dto;
 
 import com.dingCreator.astrology.dto.organism.OrganismInfoDTO;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
+import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -29,6 +30,14 @@ public class BattleDTO implements Serializable {
      * 获得的buff
      */
     private Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap;
+    /**
+     * 标记
+     */
+    private Map<String, Integer> markMap;
+    /**
+     * 附加法则
+     */
+    private List<RuleDTO> ruleList;
     /**
      * 轮次
      */

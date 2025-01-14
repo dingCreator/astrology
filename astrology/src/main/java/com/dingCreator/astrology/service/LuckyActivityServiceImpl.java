@@ -7,15 +7,19 @@ import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.dto.activity.ActivityDTO;
 import com.dingCreator.astrology.dto.activity.BaseActivityAwardRuleDTO;
 import com.dingCreator.astrology.dto.activity.LuckyActivityAwardRuleDTO;
-import com.dingCreator.astrology.dto.article.ArticleEquipmentItem;
 import com.dingCreator.astrology.dto.article.ArticleItemDTO;
 import com.dingCreator.astrology.entity.Activity;
 import com.dingCreator.astrology.enums.ArticleTypeEnum;
 import com.dingCreator.astrology.enums.activity.ActivityTypeEnum;
 import com.dingCreator.astrology.enums.exception.ActivityExceptionEnum;
 import com.dingCreator.astrology.mapper.ActivityMapper;
+import com.dingCreator.astrology.request.ActivityAwardSettingReq;
+import com.dingCreator.astrology.request.LuckyActivityAwardSettingReq;
 import com.dingCreator.astrology.util.RandomUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,6 +31,8 @@ import java.util.stream.Collectors;
  * @date 2024/11/28
  */
 public class LuckyActivityServiceImpl implements ActivityService {
+
+    private final Logger logger = LoggerFactory.getLogger(LuckyActivityServiceImpl.class);
 
     @Override
     public ActivityDTO getDefaultActivity() {
@@ -103,6 +109,50 @@ public class LuckyActivityServiceImpl implements ActivityService {
     @Override
     public <T extends BaseActivityAwardRuleDTO> String parseAwardRule2Json(List<T> list) {
         return JSONObject.toJSONString(list);
+    }
+
+    @Override
+    public void easySettingAward(ActivityDTO activityDTO, ActivityAwardSettingReq activityAwardSettingReq) {
+        LuckyActivityAwardSettingReq settings = (LuckyActivityAwardSettingReq) activityAwardSettingReq;
+        BigDecimal decimal = settings.getItemList().stream().map(LuckyActivityAwardSettingReq.AwardSettingItem::getRate)
+                .reduce(BigDecimal::add).orElseThrow(() -> new IllegalArgumentException("概率参数配置有误"));
+        if (decimal.floatValue() != Constants.LUCKY_RATE_PERCENT) {
+            throw new IllegalArgumentException("概率之和不为1");
+        }
+        List<LuckyActivityAwardRuleDTO> awardRuleList = settings.getItemList().stream().map(item -> {
+            int size = item.getParams().size();
+            BigDecimal range = item.getRate().multiply(BigDecimal.valueOf(Constants.LUCKY_MAGNIFICATION));
+
+            int remaining = range.intValue() % size;
+            int rate = range.intValue() / size;
+
+            List<LuckyActivityAwardRuleDTO> ruleList = item.getParams().stream().map(param -> {
+                LuckyActivityAwardRuleDTO rule = new LuckyActivityAwardRuleDTO();
+                rule.setRate(rate);
+                List<ArticleItemDTO> articleItemList = param.stream()
+                        .map(p -> {
+                            try {
+                                ArticleItemDTO articleItemDTO = item.getArticleTypeEnum().getClazz().newInstance();
+                                return item.getArticleTypeEnum().getGetParam().apply(p, articleItemDTO);
+                            } catch (Throwable t) {
+                                logger.error("抽奖配置出错", t);
+                                throw new IllegalArgumentException("抽奖配置有误");
+                            }
+                        })
+                        .collect(Collectors.toList());
+                rule.setArticleItemList(articleItemList);
+                return rule;
+            }).collect(Collectors.toList());
+            // 有余数的加到最后一件奖品
+            LuckyActivityAwardRuleDTO lastRule = ruleList.get(size - 1);
+            lastRule.setRate(lastRule.getRate() + remaining);
+            return ruleList;
+        }).reduce((list1, list2) -> {
+            list2.addAll(list1);
+            return list2;
+        }).orElseThrow(() -> new IllegalArgumentException("抽奖奖品配置有误"));
+        activityDTO.setAwardRuleList(awardRuleList.stream()
+                .map(award -> (BaseActivityAwardRuleDTO) award).collect(Collectors.toList()));
     }
 
     private static class Holder {

@@ -6,6 +6,7 @@ import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
+import com.dingCreator.astrology.enums.equipment.EquipmentTypeEnum;
 import com.dingCreator.astrology.enums.exception.EquipmentExceptionEnum;
 import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.service.EquipmentBelongToService;
@@ -41,10 +42,8 @@ public class EquipmentBehavior {
      *
      * @param playerId 玩家ID
      */
-    public void remove(long playerId, long id) {
-        EquipmentBelongTo equipmentBelongTo = equipmentBelongToService.getById(id);
-        EquipmentUtil.validate(playerId, equipmentBelongTo);
-        EquipmentUtil.updateEquipment(playerId, equipmentBelongTo, false);
+    public void remove(long playerId, EquipmentTypeEnum equipmentTypeEnum) {
+        equipmentTypeEnum.getRemove().accept(playerId);
     }
 
     /**
@@ -89,21 +88,25 @@ public class EquipmentBehavior {
                 }
                 if (prop.getProp().getRate() != 0) {
                     builder.append(prop.getEquipmentPropertiesTypeEnum().getNameCh());
-                    if (prop.getProp().getVal() > 0) {
+                    if (prop.getProp().getRate() > 0) {
                         builder.append("+");
                     }
                     builder.append(prop.getProp().getRate() * 100);
                     builder.append("%").append(Constants.BLANK);
                 }
                 return builder;
-            }).reduce(StringBuilder::append).orElse(new StringBuilder()).toString();
+            }).reduce((builder1, builder2) -> builder1.append("\n").append(builder2))
+                    .orElse(new StringBuilder()).toString();
 
             EquipmentVO equipmentVO = new EquipmentVO();
+            equipmentVO.setRank(equipmentEnum.getEquipmentRankEnum());
             equipmentVO.setId(equipmentBelongTo.getId());
             equipmentVO.setEquipmentName(equipmentEnum.getName());
+            equipmentVO.setLimitJob(equipmentEnum.getLimitJob());
+            equipmentVO.setLimitLevel(equipmentEnum.getLimitLevel());
             equipmentVO.setEquipmentProperty(propStr);
             equipmentVO.setLevel(equipmentBelongTo.getLevel());
-            equipmentVO.setEquip(equipmentBelongTo.getEquip() ? "已装备" : "未装备");
+            equipmentVO.setEquip(equipmentBelongTo.getEquip());
             return equipmentVO;
         }).collect(Collectors.toList());
         return PageUtil.buildPage(equipmentVoList, pageIndex, pageSize);

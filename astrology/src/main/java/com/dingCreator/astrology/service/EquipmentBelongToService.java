@@ -65,10 +65,18 @@ public class EquipmentBelongToService {
         return queryDTOList.stream().map(query -> {
             EquipmentEnum equipmentEnum = EquipmentEnum.getById(query.getEquipmentId());
             EquipmentGroupVO vo = new EquipmentGroupVO();
+            vo.setEquipmentRank(equipmentEnum.getEquipmentRankEnum());
             vo.setEquipmentName(equipmentEnum.getName());
+            vo.setLimitJob(equipmentEnum.getLimitJob());
+            vo.setLimitLevel(equipmentEnum.getLimitLevel());
             vo.setCount(query.getEquipmentCount());
             vo.setDesc(equipmentEnum.getDesc());
             return vo;
+        }).sorted((e1, e2) -> {
+            if (e2.getEquipmentRank().getRare().equals(e1.getEquipmentRank().getRare())) {
+                return e2.getCount().compareTo(e1.getCount());
+            }
+            return e2.getEquipmentRank().getRare().compareTo(e1.getEquipmentRank().getRare());
         }).collect(Collectors.toList());
     }
 

@@ -13,17 +13,18 @@ import com.dingCreator.astrology.enums.exception.MonsterManageExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.exception.BusinessException;
+import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.service.MonsterService;
 import com.dingCreator.astrology.service.RankUpBossService;
 import com.dingCreator.astrology.service.SkillBarItemService;
 import com.dingCreator.astrology.service.WorldBossService;
+import com.dingCreator.astrology.util.BattleUtil;
 import com.dingCreator.astrology.util.DateUtil;
+import com.dingCreator.astrology.util.PageUtil;
+import com.dingCreator.astrology.vo.BattleResultVO;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -46,11 +47,11 @@ public class MonsterManageBehavior {
      * @param pageIndex 页码
      * @return 怪物列表
      */
-    public List<Monster> listMonster(int pageIndex) {
+    public PageResponse<Monster> pageMonster(int pageIndex, int pageSize) {
         if (pageIndex <= 0) {
             throw MonsterManageExceptionEnum.LIST_MONSTER_PAGE_ERR.getException();
         }
-        return monsterService.listMonster(pageIndex, Constants.DEFAULT_PAGE_SIZE);
+        return PageUtil.addPageDesc(monsterService.listMonster(pageIndex, pageSize), pageIndex, pageSize, countAllBoss());
     }
 
     /**
@@ -276,6 +277,10 @@ public class MonsterManageBehavior {
             throw MonsterManageExceptionEnum.WORLD_BOSS_ID_INVALID.getException();
         }
         rankUpBossService.insertOrUpdateRankUpBoss(jobEnum.getJobCode(), rank, validMonsterIds);
+    }
+
+    public BattleResultVO EVE(Long playerId, Long monsterId1, Long monsterId2) {
+        return BattleUtil.battleEVE(playerId, Collections.singletonList(monsterId1), Collections.singletonList(monsterId2));
     }
 
     private static class Holder {
