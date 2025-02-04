@@ -1,6 +1,5 @@
 package com.dingCreator.astrology.entity.base;
 
-import com.dingCreator.astrology.template.ExtraBattleProcessTemplate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

@@ -52,46 +52,59 @@ public class GiveBuffDTO implements Serializable {
      */
     private BigDecimal effectedRate;
     /**
-     * buff上限
+     * 是否为异常
      */
-    private List<BuffLimit> buffLimit;
+    private Boolean abnormal;
 
     public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Integer round) {
-        this(buffTypeEnum, buffName, 0L, 0F, round, 1F, new ArrayList<>());
+        this(buffTypeEnum, buffName, 0L, 0F, round, 1F, false);
+    }
+
+    public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Integer round, Boolean abnormal) {
+        this(buffTypeEnum, buffName, 0L, 0F, round, 1F, abnormal);
     }
 
     public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Integer round, Float effectedRate) {
-        this(buffTypeEnum, buffName, 0L, 0F, round, 1F, new ArrayList<>());
+        this(buffTypeEnum, buffName, 0L, 0F, round, effectedRate, false);
     }
 
     public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Long value, Integer round) {
-        this(buffTypeEnum, buffName, value, 0F, round, 1F, new ArrayList<>());
+        this(buffTypeEnum, buffName, value, 0F, round, 1F, false);
     }
 
     public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Float rate, Integer round) {
-        this(buffTypeEnum, buffName, 0L, rate, round, 1F, new ArrayList<>());
+        this(buffTypeEnum, buffName, 0L, rate, round, 1F, false);
     }
 
     public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Long value, Float rate, Integer round) {
-        this(buffTypeEnum, buffName, value, rate, round, 1F, new ArrayList<>());
+        this(buffTypeEnum, buffName, value, rate, round, 1F, false);
     }
 
     public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Long value, Integer round, Float effectedRate) {
-        this(buffTypeEnum, buffName, value, 0F, round, effectedRate, new ArrayList<>());
+        this(buffTypeEnum, buffName, value, 0F, round, effectedRate, false);
     }
 
     public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Float rate, Integer round, Float effectedRate) {
-        this(buffTypeEnum, buffName, 0L, rate, round, effectedRate, new ArrayList<>());
+        this(buffTypeEnum, buffName, 0L, rate, round, effectedRate, false);
+    }
+
+    public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Float rate, Integer round, Boolean abnormal) {
+        this(buffTypeEnum, buffName, 0L, rate, round, 1F, abnormal);
+    }
+
+    public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Float rate, Integer round, Float effectedRate,
+                       Boolean abnormal) {
+        this(buffTypeEnum, buffName, 0L, rate, round, effectedRate, abnormal);
     }
 
     public GiveBuffDTO(BuffTypeEnum buffTypeEnum, String buffName, Long value, Float rate,
-                       Integer round, Float effectedRate, List<BuffLimit> buffLimitList) {
+                       Integer round, Float effectedRate, Boolean abnormal) {
         this(buffTypeEnum, buffTypeEnum, buffName, value, new BigDecimal(String.valueOf(rate)), round,
-                new BigDecimal(String.valueOf(effectedRate)), buffLimitList);
+                new BigDecimal(String.valueOf(effectedRate)), abnormal);
     }
 
     public GiveBuffDTO(BuffTypeEnum buffType, BuffTypeEnum dependsBuffType, String buffName,
-                       Long value, BigDecimal rate, Integer round, BigDecimal effectedRate, List<BuffLimit> buffLimitList) {
+                       Long value, BigDecimal rate, Integer round, BigDecimal effectedRate, Boolean abnormal) {
         if (effectedRate.compareTo(BigDecimal.valueOf(Constants.MIN_RATE)) < 0
                 || effectedRate.compareTo(BigDecimal.valueOf(Constants.MAX_RATE)) > 0) {
             throw new IllegalArgumentException("buff【" + buffName + "】生效概率配置错误");
@@ -103,22 +116,6 @@ public class GiveBuffDTO implements Serializable {
         this.rate = rate;
         this.round = round;
         this.effectedRate = effectedRate;
-        this.buffLimit = buffLimitList;
-    }
-
-    @Data
-    public static class BuffLimit {
-        /**
-         * 上限类型
-         */
-        private BuffTypeEnum buffTypeEnum;
-        /**
-         * 上限值
-         */
-        private Long limitValue;
-        /**
-         * 上限比例
-         */
-        private BigDecimal limitRate;
+        this.abnormal = abnormal;
     }
 }

@@ -8,6 +8,7 @@ import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.LootDTO;
 import com.dingCreator.astrology.dto.LootItemDTO;
 import com.dingCreator.astrology.entity.Loot;
+import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.vo.LootVO;
 
 import java.util.List;
@@ -34,7 +35,10 @@ public class LootUtil {
             return null;
         }
         LootDTO lootDTO = new LootDTO();
-        lootDTO.setMoney(loot.getMoney());
+        String assetJson = loot.getAsset();
+        JSONObject assetJsonObj = JSONObject.parseObject(assetJson);
+        lootDTO.setAstrologyCoin(assetJsonObj.getLong(AssetTypeEnum.ASTROLOGY_COIN.getCode()));
+        lootDTO.setDiamond(assetJsonObj.getLong(AssetTypeEnum.DIAMOND.getCode()));
         lootDTO.setExp(loot.getExp());
         // 转化实物
         lootDTO.setItemList(loot.getItemList().stream().map(item -> {
@@ -61,18 +65,18 @@ public class LootUtil {
         if (Objects.isNull(lootDTO)) {
             return vo;
         }
-        // todo 钱
-        vo.setMoney(lootDTO.getMoney());
+        vo.setAstrologyCoin(lootDTO.getAstrologyCoin());
+        vo.setDiamond(lootDTO.getDiamond());
         ExpBehavior.getInstance().getExp(playerId, lootDTO.getExp());
         vo.setExp(lootDTO.getExp());
         if (!CollectionUtil.isEmpty(lootDTO.getItemList())) {
-            vo.setLootItemNameList(lootDTO.getItemList().stream()
+            vo.setItemVOList(lootDTO.getItemList().stream()
                     .filter(loot -> RandomUtil.isHit(loot.getRate()))
                     .map(loot -> {
                         // 发送
                         loot.getArticleItem().send2Player(playerId);
                         // 获取名字
-                        return loot.getArticleItem().view().getName();
+                        return loot.getArticleItem().view();
                     }).collect(Collectors.toList()));
         }
         return vo;

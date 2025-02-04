@@ -24,7 +24,7 @@ CREATE TABLE astrology_player
     `level`                   INTEGER        NOT NULL comment '等级',
     `exp`                     INTEGER        NOT NULL comment '经验',
     job                       VARCHAR(32)    NOT NULL comment '职业',
-    map_id                    INTEGER        NOT NULL comment '所在地图ID',
+    map_id                    BIGINT         NOT NULL comment '所在地图ID',
     status                    VARCHAR(16)    NOT NULL comment '状态',
     status_start_time         DATETIME comment '状态开始时间',
     enabled                   BIT            NOT NULL default 1 comment '是否可用',
@@ -36,8 +36,8 @@ CREATE TABLE astrology_monster
 (
     id                        BIGINT AUTO_INCREMENT NOT NULL comment '主键',
     name                      VARCHAR(32)           NOT NULL comment '名称',
-    hp                        INTEGER               NOT NULL comment '血量',
-    max_hp                    INTEGER               NOT NULL comment '最大血量',
+    hp                        BIGINT                NOT NULL comment '血量',
+    max_hp                    BIGINT                NOT NULL comment '最大血量',
     mp                        INTEGER               NOT NULL comment '蓝量',
     max_mp                    INTEGER               NOT NULL comment '最大蓝量',
     atk                       INTEGER               NOT NULL comment '攻击',
@@ -160,17 +160,25 @@ CREATE TABLE astrology_equipment_belong_to
     key idx_blt_blt_id (belong_to, belong_to_id)
 ) engine = innodb comment = '装备表';
 
-CREATE TABLE astrology_loot
+CREATE TABLE `astrology_loot` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `belong_to` varchar(32) NOT NULL COMMENT '所属类型',
+  `belong_to_id` int NOT NULL COMMENT '所属ID',
+  `asset` varchar(512) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '{}' COMMENT '钱',
+  `exp` int NOT NULL DEFAULT '0' COMMENT '经验',
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_blt_blt_id` (`belong_to`,`belong_to_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='掉落物表'
+
+CREATE TABLE astrology_loot_item
 (
-    id             BIGINT auto_increment not null comment '主键',
-    belong_to      VARCHAR(32)           NOT NULL comment '所属类型',
-    belong_to_id   INTEGER               NOT NULL comment '所属ID',
-    money          INTEGER               NOT NULL DEFAULT 0 comment '钱',
-    exp            INTEGER               NOT NULL DEFAULT 0 comment '经验',
-    loot_item_list VARCHAR(2048) comment '掉落物json',
-    PRIMARY KEY (`id`) using btree,
-    key idx_blt_blt_id (belong_to, belong_to_id)
-) engine = innodb comment = '掉落物表';
+    id BIGINT auto_increment not null comment '主键',
+    loot_id BIGINT not null comment '所属掉落物id',
+    rate DECIMAL(10,4) not null default 1 comment '掉落概率',
+    article_json varchar(256) comment '具体掉落物json',
+    primary key (id) using btree,
+    key idx_loot_id (loot_id)
+) engine = innodb comment = '掉落物详情表';
 
 CREATE TABLE astrology_world_boss
 (

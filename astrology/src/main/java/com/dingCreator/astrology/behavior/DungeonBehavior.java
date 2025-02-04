@@ -57,7 +57,7 @@ public class DungeonBehavior {
 
         PlayerBehavior.getInstance().flushStatus(playerDTO);
         // 判断玩家状态
-        if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(playerDTO))) {
+        if (!PlayerStatusEnum.FREE.getCode().equals(playerDTO.getStatus())) {
             throw DungeonExceptionEnum.PLAYER_NOT_FREE.getException();
         }
         // 查询副本信息

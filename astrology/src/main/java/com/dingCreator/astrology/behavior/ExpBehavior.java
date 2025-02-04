@@ -1,8 +1,6 @@
 package com.dingCreator.astrology.behavior;
 
 
-import cn.hutool.core.date.DateUnit;
-import cn.hutool.core.date.DateUtil;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
@@ -21,7 +19,6 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
 
 /**
  * @author ding
@@ -83,7 +80,7 @@ public class ExpBehavior {
             }
         }
         playerDTO.setExp(currentExp);
-        PlayerCache.flush(id);
+        PlayerCache.save(id);
         return new LevelChange(oldLevel, playerDTO.getLevel(), realExp);
     }
 
@@ -141,13 +138,14 @@ public class ExpBehavior {
     public void hangUp(Long id) {
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(id);
         PlayerDTO playerDTO = playerInfoDTO.getPlayerDTO();
-        if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(playerDTO))) {
-            throw ExpExceptionEnum.CANT_HANG_UP.getException();
+        if (PlayerStatusEnum.HANG_UP.getCode().equals(playerDTO.getStatus())) {
+            throw ExpExceptionEnum.ALREADY_HANG_UP.getException();
         }
-        PlayerBehavior.getInstance().updatePlayerStatus(playerDTO, PlayerStatusEnum.HANG_UP,
-                () -> PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(playerDTO)),
-                ExpExceptionEnum.CANT_HANG_UP.getException());
-        PlayerCache.flush(Collections.singletonList(id));
+        if (PlayerStatusEnum.MOVING.getCode().equals(playerDTO.getStatus())) {
+            throw ExpExceptionEnum.MOVING.getException();
+        }
+        playerDTO.setStatus(PlayerStatusEnum.HANG_UP.getCode());
+        PlayerCache.save(Collections.singletonList(id));
     }
 
     /**
@@ -159,17 +157,12 @@ public class ExpBehavior {
     public BaseResponse<HangUpVO> stopHangUp(Long id) {
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(id);
         PlayerDTO playerDTO = playerInfoDTO.getPlayerDTO();
-        if (!PlayerStatusEnum.HANG_UP.getCode().equals(PlayerBehavior.getInstance().getStatus(playerDTO))) {
+        if (!PlayerStatusEnum.HANG_UP.getCode().equals(playerDTO.getStatus())) {
             throw ExpExceptionEnum.NOT_HANG_UP.getException();
         }
-
         HangUpVO hangUpVO = new HangUpVO();
         long between = Duration.between(playerDTO.getStatusStartTime(), LocalDateTime.now()).toMinutes();
-        PlayerBehavior.getInstance().updatePlayerStatus(playerDTO, PlayerStatusEnum.FREE,
-                () -> PlayerStatusEnum.HANG_UP.getCode().equals(PlayerBehavior.getInstance().getStatus(playerDTO)),
-                ExpExceptionEnum.NOT_HANG_UP.getException());
-        PlayerCache.flush(Collections.singletonList(id));
-
+        playerDTO.setStatus(PlayerStatusEnum.FREE.getCode());
         // 回显真正的挂机时间
         hangUpVO.setHangUpTime(between);
         // 最长有收益挂机时间24h

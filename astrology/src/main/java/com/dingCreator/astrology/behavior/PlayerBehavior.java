@@ -7,34 +7,25 @@ import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Player;
-import com.dingCreator.astrology.entity.SkillBarItem;
 import com.dingCreator.astrology.enums.AssetTypeEnum;
-import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentPropertiesTypeEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.job.JobInitPropertiesEnum;
-import com.dingCreator.astrology.enums.skill.SkillEnum;
-import com.dingCreator.astrology.exception.BusinessException;
 import com.dingCreator.astrology.response.BaseResponse;
 import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.service.SkillBarItemService;
 import com.dingCreator.astrology.service.SkillBelongToService;
 import com.dingCreator.astrology.util.BattleUtil;
 import com.dingCreator.astrology.util.EquipmentUtil;
-import com.dingCreator.astrology.util.MapUtil;
-import com.dingCreator.astrology.util.SkillUtil;
 import com.dingCreator.astrology.vo.SimplePlayerInfoVO;
 import com.dingCreator.astrology.vo.BattleResultVO;
 import com.dingCreator.astrology.vo.PlayerInfoVO;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 /**
  * @author ding
@@ -99,16 +90,6 @@ public class PlayerBehavior {
         player.setDodge(prop.getInitDodge());
         player.setLifeStealing(prop.getInitLifeStealing());
         PlayerCache.createPlayer(player);
-
-        // 赠送默认技能
-        skillBelongToService.createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), id,
-                SkillEnum.getDefaultSkillByJob(job.getJobCode()).getId());
-
-        // 将默认技能装备到技能栏
-        List<Long> skillIds = new ArrayList<>();
-        skillIds.add(SkillEnum.getDefaultSkillByJob(job.getJobCode()).getId());
-        SkillBarItem skillBarItem = SkillUtil.buildSkillBarItemChain(skillIds, BelongToEnum.PLAYER, id);
-        skillBarItemService.addSkillBarItem(skillBarItem);
     }
 
     /**
@@ -127,7 +108,7 @@ public class PlayerBehavior {
             throw PlayerExceptionEnum.NAME_EXIST.getException();
         }
         playerInfoDTO.getPlayerDTO().setName(name);
-        PlayerCache.flush(Collections.singletonList(playerId));
+        PlayerCache.save(Collections.singletonList(playerId));
     }
 
     public PlayerInfoDTO getPlayerInfoDTOById(Long id) {
@@ -209,71 +190,6 @@ public class PlayerBehavior {
     }
 
     /**
-     * 无需校验前置状态带锁更新玩家状态
-     *
-     * @param playerDTO 玩家
-     * @param newStatus 新状态
-     */
-    public void updatePlayerStatus(PlayerDTO playerDTO, PlayerStatusEnum newStatus) {
-        updatePlayerStatus(playerDTO, newStatus, () -> true, null);
-    }
-
-    /**
-     * 自旋
-     *
-     * @param playerDTO 玩家
-     * @param newStatus 新状态
-     */
-    public void casPlayerStatus(PlayerDTO playerDTO, PlayerStatusEnum oldStatus, PlayerStatusEnum newStatus,
-                                BusinessException exception) {
-        synchronized (LOCK) {
-            flushStatus(playerDTO);
-            if (!playerDTO.getStatus().equals(oldStatus.getCode())) {
-                throw exception;
-            }
-            playerDTO.setStatus(newStatus.getCode());
-            playerDTO.setStatusStartTime(LocalDateTime.now());
-            PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
-        }
-    }
-
-    /**
-     * 带锁更新玩家状态
-     * 所有更新玩家状态的操作都建议使用此方法
-     *
-     * @param playerDTO 玩家
-     * @param newStatus 新状态
-     * @param supplier  更新前校验
-     * @param exception 更新前校验出错时的报错
-     */
-    public void updatePlayerStatus(PlayerDTO playerDTO, PlayerStatusEnum newStatus,
-                                   Supplier<Boolean> supplier, BusinessException exception) {
-        synchronized (LOCK) {
-            flushStatus(playerDTO);
-            if (!supplier.get()) {
-                throw exception;
-            }
-            playerDTO.setStatus(newStatus.getCode());
-            playerDTO.setStatusStartTime(LocalDateTime.now());
-            PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
-        }
-    }
-
-    /**
-     * 获取当前状态
-     *
-     * @return 当前状态
-     */
-    public String getStatus(PlayerDTO playerDTO) {
-        if (PlayerStatusEnum.MOVING.getCode().equals(playerDTO.getStatus())) {
-            synchronized (LOCK) {
-                flushStatus(playerDTO);
-            }
-        }
-        return playerDTO.getStatus();
-    }
-
-    /**
      * 发起决斗
      *
      * @param initiatorId 发起者ID
@@ -320,24 +236,7 @@ public class PlayerBehavior {
      * 刷新状态
      */
     public synchronized void flushStatus(PlayerDTO playerDTO) {
-        if (PlayerStatusEnum.MOVING.getCode().equals(playerDTO.getStatus())) {
-            long targetMapId = MapUtil.getTargetLocation(playerDTO.getId());
-            if (targetMapId == 0L) {
-                playerDTO.setStatus(PlayerStatusEnum.FREE.getCode());
-                PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
-            } else {
-                long seconds = MapUtil.moveTime(playerDTO.getId(), MapUtil.getNowLocation(playerDTO.getId()), targetMapId);
-                LocalDateTime statusEndTime = Objects.isNull(playerDTO.getStatusStartTime()) ?
-                        LocalDateTime.MIN : playerDTO.getStatusStartTime().plusSeconds(seconds);
-                if (LocalDateTime.now().isAfter(statusEndTime)) {
-                    // 已经到了
-                    playerDTO.setStatus(PlayerStatusEnum.FREE.getCode());
-                    playerDTO.setStatusStartTime(LocalDateTime.now());
-                    playerDTO.setMapId(MapUtil.getTargetLocation(playerDTO.getId()));
-                    PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
-                }
-            }
-        }
+
     }
 
     /**

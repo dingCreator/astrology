@@ -2,6 +2,7 @@ package com.dingCreator.astrology.dto.organism;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Objects;
  * @date 2024/8/17
  */
 @Data
-public class OrganismDTO {
+public class OrganismDTO implements Serializable {
     /**
      * 名称
      */

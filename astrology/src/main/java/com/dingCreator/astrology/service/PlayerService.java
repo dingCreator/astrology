@@ -10,16 +10,21 @@ import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.entity.PlayerAsset;
+import com.dingCreator.astrology.entity.SkillBarItem;
 import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
+import com.dingCreator.astrology.enums.job.JobEnum;
+import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.mapper.PlayerAssetMapper;
 import com.dingCreator.astrology.mapper.PlayerDataMapper;
 import com.dingCreator.astrology.util.EquipmentUtil;
 import com.dingCreator.astrology.util.LockUtil;
+import com.dingCreator.astrology.util.SkillUtil;
 import org.apache.ibatis.session.SqlSession;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -94,6 +99,17 @@ public class PlayerService {
         return DatabaseProvider.getInstance().transactionExecuteReturn(sqlSession -> {
             sqlSession.getMapper(PlayerDataMapper.class).insert(player);
             sqlSession.getMapper(PlayerAssetMapper.class).insert(asset);
+            // 赠送默认技能
+            Long defaultSkillId = SkillEnum.getDefaultSkillByJob(player.getJob()).getId();
+            SkillBelongToService.getInstance().createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), player.getId(), defaultSkillId);
+            // 赠送被动技能
+            SkillBelongToService.getInstance().createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), player.getId(),
+                    JobEnum.getByCode(player.getJob()).getDefaultInactiveSkillId());
+            // 将默认技能装备到技能栏
+            List<Long> skillIds = new ArrayList<>();
+            skillIds.add(SkillEnum.getDefaultSkillByJob(player.getJob()).getId());
+            SkillBarItem skillBarItem = SkillUtil.buildSkillBarItemChain(skillIds, BelongToEnum.PLAYER, player.getId());
+            SkillBarItemService.getInstance().addSkillBarItem(skillBarItem);
             return true;
         });
     }

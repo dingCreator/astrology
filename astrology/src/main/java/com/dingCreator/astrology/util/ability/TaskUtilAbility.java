@@ -58,7 +58,7 @@ public class TaskUtilAbility {
      */
     public static void validatePlayer(PlayerInfoDTO playerInfo, List<PlayerInfoDTO> teamPlayers) {
         teamPlayers.stream().map(PlayerInfoDTO::getPlayerDTO).forEach(teamPlayer -> {
-            if (PlayerBehavior.getInstance().getStatus(teamPlayer).equals(PlayerStatusEnum.MOVING.getCode())) {
+            if (playerInfo.getPlayerDTO().getStatus().equals(PlayerStatusEnum.MOVING.getCode())) {
                 throw TaskExceptionEnum.PLAYER_IS_MOVING.getException();
             }
         });

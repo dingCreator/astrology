@@ -35,8 +35,8 @@ public class Loot {
     /**
      * 货币
      */
-    @TableField("money")
-    private Long money;
+    @TableField("asset")
+    private String asset;
     /**
      * 经验值
      */

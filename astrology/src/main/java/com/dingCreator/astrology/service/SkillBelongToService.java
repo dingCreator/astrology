@@ -3,10 +3,13 @@ package com.dingCreator.astrology.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.entity.SkillBelongTo;
+import com.dingCreator.astrology.enums.BelongToEnum;
+import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.mapper.SkillBelongToMapper;
 import org.apache.ibatis.session.SqlSession;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author ding
@@ -26,7 +29,7 @@ public class SkillBelongToService {
         skillBelongTo.setBelongTo(belongTo);
         skillBelongTo.setBelongToId(belongToId);
         skillBelongTo.setSkillId(skillId);
-        DatabaseProvider.getInstance().execute(sqlSession -> {
+        DatabaseProvider.getInstance().batchTransactionExecute(sqlSession -> {
             SkillBelongToMapper mapper = sqlSession.getMapper(SkillBelongToMapper.class);
             // 已有技能不再重复发放
             int cnt = mapper.selectCount(new QueryWrapper<SkillBelongTo>()
@@ -62,6 +65,27 @@ public class SkillBelongToService {
     public List<SkillBelongTo> querySkillBelongToBySkillId(String belongTo, Long belongToId, List<Long> skillIds) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(SkillBelongToMapper.class).querySkillBelongToBySkillId(belongTo, belongToId, skillIds));
+    }
+
+    public void deleteInactiveSkills(BelongToEnum belongToEnum, Long belongToId) {
+        DatabaseProvider.getInstance().execute(sqlSession -> {
+            SkillBelongToMapper mapper = sqlSession.getMapper(SkillBelongToMapper.class);
+            List<SkillBelongTo> skills = mapper.selectList(new QueryWrapper<SkillBelongTo>()
+                    .eq(SkillBelongTo.BELONG_TO, belongToEnum.getBelongTo())
+                    .eq(SkillBelongTo.BELONG_TO_ID, belongToId));
+            List<Long> inactiveSkillIds = skills.stream()
+                    .filter(skill -> !SkillEnum.getById(skill.getId()).getActive())
+                    .map(SkillBelongTo::getSkillId)
+                    .collect(Collectors.toList());
+            if (inactiveSkillIds.isEmpty()) {
+                return;
+            }
+            mapper.delete(new QueryWrapper<SkillBelongTo>()
+                    .in(SkillBelongTo.SKILL_ID, inactiveSkillIds)
+                    .eq(SkillBelongTo.BELONG_TO, belongToEnum.getBelongTo())
+                    .eq(SkillBelongTo.BELONG_TO_ID, belongToId)
+            );
+        });
     }
 
 

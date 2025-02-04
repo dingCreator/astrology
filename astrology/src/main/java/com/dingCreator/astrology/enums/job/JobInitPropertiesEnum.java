@@ -28,9 +28,9 @@ public enum JobInitPropertiesEnum {
      * 死地武士
      */
     SI_DI_WU_SHI("SI_DI_WU_SHI",
-            400L, 150L,
-            15L, 15L,
-            15L, 6L,
+            600L, 150L,
+            25L, 20L,
+            15L, 20L,
             0F, 0F,
             0.01F, 0F,
             1.5F, 0F,

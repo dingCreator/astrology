@@ -52,10 +52,10 @@ public class TeamBehavior {
         PlayerDTO initiator = PlayerCache.getPlayerById(initiatorId).getPlayerDTO();
         PlayerDTO captain = PlayerCache.getPlayerById(teamId).getPlayerDTO();
 
-        if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(initiator))) {
+        if (!PlayerStatusEnum.FREE.getCode().equals(initiator.getStatus())) {
             throw TeamExceptionEnum.PRE_JOIN_NOT_FREE.getException();
         }
-        if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(captain))) {
+        if (!PlayerStatusEnum.FREE.getCode().equals(captain.getStatus())) {
             throw TeamExceptionEnum.TEAM_NOT_FREE.getException();
         }
         if (!MapUtil.getNowLocation(initiator.getMapId()).equals(MapUtil.getNowLocation(captain.getMapId()))) {
@@ -171,7 +171,9 @@ public class TeamBehavior {
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.NOT_CAPTAIN.getException();
         }
-        teamDTO.getMembers().forEach(this::leaveTeam);
+        PlayerCache.getPlayerById(initiatorId).setTeam(false);
+        teamDTO.getMembers().stream().filter(member -> !member.equals(teamDTO.getCaptainId()))
+                .forEach(this::leaveTeam);
         TeamCache.deleteTeam(initiatorId);
     }
 

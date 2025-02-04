@@ -12,7 +12,6 @@ import com.dingCreator.astrology.util.BattleUtil;
 import com.dingCreator.astrology.vo.BattleResultVO;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,7 +71,7 @@ public class RankBehavior {
             // 突破失败扣除一半经验
             playerDTO.setExp((long) Math.round(playerDTO.getExp() / 2F));
         }
-        PlayerCache.flush(playerDTO.getId());
+        PlayerCache.save(playerDTO.getId());
         return response;
     }
 

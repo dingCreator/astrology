@@ -9,8 +9,10 @@ import com.dingCreator.astrology.entity.SkillBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.exception.SkillExceptionEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
+import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.service.SkillBarItemService;
 import com.dingCreator.astrology.service.SkillBelongToService;
+import com.dingCreator.astrology.util.PageUtil;
 import com.dingCreator.astrology.util.SkillUtil;
 
 import java.util.Arrays;
@@ -114,10 +116,12 @@ public class SkillBehavior {
     /**
      * 获取技能列表
      *
+     * @param pageSize 每页条数
      * @return 技能列表
+     * @param pageIndex 页码
      */
-    public List<SkillEnum> listSkillEnum() {
-        return Arrays.asList(SkillEnum.values());
+    public PageResponse<SkillEnum> listSkillEnum(int pageIndex, int pageSize) {
+        return PageUtil.buildPage(SkillEnum.values(), pageIndex, pageSize);
     }
 
     private static class Holder {

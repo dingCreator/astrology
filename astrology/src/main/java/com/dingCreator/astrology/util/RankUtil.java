@@ -1,8 +1,5 @@
 package com.dingCreator.astrology.util;
 
-import com.dingCreator.astrology.dto.BattleDTO;
-import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
-
 /**
  * @author ding
  * @date 2024/3/25

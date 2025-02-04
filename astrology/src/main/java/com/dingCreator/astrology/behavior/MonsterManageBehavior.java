@@ -14,10 +14,7 @@ import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.exception.BusinessException;
 import com.dingCreator.astrology.response.PageResponse;
-import com.dingCreator.astrology.service.MonsterService;
-import com.dingCreator.astrology.service.RankUpBossService;
-import com.dingCreator.astrology.service.SkillBarItemService;
-import com.dingCreator.astrology.service.WorldBossService;
+import com.dingCreator.astrology.service.*;
 import com.dingCreator.astrology.util.BattleUtil;
 import com.dingCreator.astrology.util.DateUtil;
 import com.dingCreator.astrology.util.PageUtil;
@@ -223,7 +220,23 @@ public class MonsterManageBehavior {
     }
 
     public void setMonsterInactiveSkill(Long monsterId, List<Long> skillIds) {
+        if (Objects.isNull(getMonsterById(monsterId))) {
+            throw MonsterManageExceptionEnum.MONSTER_NOT_FOUND.getException();
+        }
+        List<Long> validSkillIds = skillIds.stream()
+                .filter(id -> {
+                    SkillEnum skillEnum = SkillEnum.getById(id);
+                    return Objects.nonNull(skillEnum) && !skillEnum.getActive();
+                })
+                .collect(Collectors.toList());
+        if (CollectionUtil.isEmpty(validSkillIds)) {
+            throw MonsterManageExceptionEnum.MONSTER_SKILL_ID_NOT_FOUND.getException();
+        }
 
+        SkillBelongToService service = SkillBelongToService.getInstance();
+        service.deleteInactiveSkills(BelongToEnum.MONSTER, monsterId);
+        validSkillIds.forEach(id -> service.createSkillBelongTo(BelongToEnum.MONSTER.getBelongTo(), monsterId, id));
+        SkillCache.deleteInactiveSkillCache(BelongToEnum.MONSTER.getBelongTo(), monsterId);
     }
 
 

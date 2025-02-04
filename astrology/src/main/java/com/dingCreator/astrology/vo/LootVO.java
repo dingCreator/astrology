@@ -15,7 +15,8 @@ public class LootVO implements Serializable {
     /**
      * 货币
      */
-    private Long money;
+    private Long astrologyCoin;
+    private Long diamond;
     /**
      * 经验值
      */
@@ -23,11 +24,5 @@ public class LootVO implements Serializable {
     /**
      * 掉落物名称集合
      */
-    private List<String> lootItemNameList;
-
-    public LootVO() {
-        this.money = 0L;
-        this.exp = 0L;
-        this.lootItemNameList = new ArrayList<>();
-    }
+    private List<ArticleItemVO> itemVOList;
 }

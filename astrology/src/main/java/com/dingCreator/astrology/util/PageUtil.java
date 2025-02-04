@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 public class PageUtil {
 
     public static <T> PageResponse<T> buildPage(List<T> list, int pageIndex, int pageSize) {
-        return addPageDesc(list.stream().skip((pageIndex - 1) * pageSize).limit(pageSize).collect(Collectors.toList()),
-                pageIndex, pageIndex, list.size());
+        return addPageDesc(list.stream().skip((long) (pageIndex - 1) * pageSize).limit(pageSize).collect(Collectors.toList()),
+                pageIndex, pageSize, list.size());
     }
 
     public static <T> PageResponse<T> buildPage(T[] array, int pageIndex, int pageSize) {

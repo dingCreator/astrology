@@ -6,15 +6,16 @@ import com.dingCreator.astrology.dto.BattleBuffDTO;
 import com.dingCreator.astrology.dto.BattleDTO;
 import com.dingCreator.astrology.dto.BuffDTO;
 import com.dingCreator.astrology.dto.equipment.EquipmentPropertiesDTO;
+import com.dingCreator.astrology.dto.organism.OrganismDTO;
+import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 import com.dingCreator.astrology.enums.exception.EquipmentExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
+import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
-import com.dingCreator.astrology.template.ExtraBattleProcessTemplate;
-import com.dingCreator.astrology.util.BuffUtil;
-import com.dingCreator.astrology.util.RankUtil;
-import com.dingCreator.astrology.util.RuleUtil;
+import com.dingCreator.astrology.util.template.ExtraBattleProcessTemplate;
+import com.dingCreator.astrology.util.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -482,14 +483,14 @@ public enum EquipmentEnum {
                 public void beforeBattle(List<String> battleMsg) {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
-                            .append("的武器【对玄双子】被触发");
+                            .append("的武器技能【阴阳轮转】被触发");
                     BuffUtil.addBuff(this.getFrom(),
-                            new BuffDTO(BuffTypeEnum.SPEED, "", 0.1F, false), 3, builder);
+                            new BuffDTO(BuffTypeEnum.SPEED, "", 0.1F), 3, builder);
                     battleMsg.add(builder.toString());
                 }
             }
     ),
-    EQUIPMENT_41(41L, "魔蛇之首 ：攻击力+1800 吸血+10% 暴击率+25%\n",
+    EQUIPMENT_401(401L, "魔蛇之首",
             "用天级魔物灾厄魔蛇被讨伐后遗留的头颅制作的魔剑，散发着不详和灾厄的气息。据传，这把剑在制作时因魔蛇的神识无法完全剔除，而使其从一把灵剑堕为魔剑。" +
                     "但同样因为如此，这把剑一直有着可以催动魔蛇力量的传闻，但因其历代使用者均因不明原因惨死，此传闻一直也没有得到证实" +
                     "\n隐藏技能\n毒牙：攻击有5%概率造成中毒效果持续两回合，使敌方降低10%攻击同时每回合流失生命上限5%的生命值",
@@ -500,52 +501,206 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void processIfHit(BattleDTO tar, SkillEnum skillEnum, AtomicLong damage, StringBuilder builder) {
-
+                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                    if (RandomUtil.isHit(0.05F)) {
+                        builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                                .append("的武器技能【毒牙】被触发");
+                        BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.ATK, "中毒", -0.1F, true), 2, builder);
+                        BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.BLEEDING, "中毒", -0.05F, true), 2, builder);
+                    }
                 }
             }
     ),
-    //    EQUIPMENT_42(42L, "",
+    EQUIPMENT_402(402L, "五色斑霞",
+            "修仙王朝明霞道人的佩剑，因其战斗中能散发五色神光蔽人耳目扰人心神而得名。相传，还是一介散修明霞道人在返虚期偶遇一太古秘境并夺此至宝，" +
+                    "从此修为突飞猛进，后为修仙王朝发掘，成为修仙王朝的顶尖战力之一" +
+                    "\n隐藏技能\n眩灵光子：战斗开始时提高自身10%闪避，持续三回合",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 1500L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DODGE, 400L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 100L)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode(),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeBattle(List<String> battleMsg) {
+                    StringBuilder builder = new StringBuilder("※")
+                            .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的武器【五色斑霞】被触发");
+                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.DODGE, "", 0.1F), 3, builder);
+                    battleMsg.add(builder.toString());
+                }
+            }
+    ),
+    EQUIPMENT_403(403L, "太衍镇山石",
+            "本不该出现于太衍圣山灵阵上的一块极为突兀的石碑，极具镇压之力。其上镌刻着一段文字“莫道灵山圣人迹，却话宝幼鬼山逢。”" +
+                    "修真者将其从灵阵上拔出后镇压之力逐渐收敛，化作石剑相。彼时，太衍圣山也逐渐现出了它本来的面貌" +
+                    "\n隐藏技能\n镇山之力：战斗开始时，对方全体速度-800，持续三回合",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 1500L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DODGE, -300L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, -300L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, -500L)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode(),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeBattle(List<String> battleMsg) {
+                    StringBuilder builder = new StringBuilder("※")
+                            .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的武器技能【镇山之力】被触发");
+                    this.getEnemy().forEach(enemy ->
+                            BuffUtil.addBuff(enemy, new BuffDTO(BuffTypeEnum.SPEED, "", -800L), 3, builder));
+                    battleMsg.add(builder.toString());
+                }
+            }
+    ),
+    EQUIPMENT_404(404L, "紫云天",
+            "修仙王朝下属天奔雷教至宝，天奔雷法与紫云金母石的绝妙结合，紫玉金母石可以转化普通灵气为封存的天奔雷法充能，" +
+                    "而以天奔雷法催生的紫云也将蕴含雷法威能，使紫云在战斗中出其不意地对敌方造成伤害" +
+                    "\n隐藏技能\n蔽天云紫：攻击造成暴击伤害时对敌方全体造成120%物理伤害（不可暴击），若该伤害命中，则额外降低命中单体10%命中，持续一回合",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 1600L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.35F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 0.5F)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode(),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                    if (critical) {
+                        boolean isHit = BattleUtil.isHit(this.getFrom(), tar, this.getOur(), this.getEnemy(),
+                                new ArrayList<>(), null, builder);
+                        if (isHit) {
+                            builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                                    .append("的武器技能【蔽天云紫】被触发");
+                            long extraDamage = BattleUtil.getDamage(this.getFrom(), tar, this.getOur(), this.getEnemy(),
+                                    DamageTypeEnum.ATK, 0.8F, null, new ArrayList<>(), builder);
+                            builder.append("，追加造成").append(extraDamage).append("点伤害");
+                            BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.HIT, "", -0.1F), 1, builder);
+                        }
+                    }
+                }
+            }
+    ),
+    EQUIPMENT_405(405L, "狼牙",
+            "沃尔夫雇佣兵团长德隆的佩刀，由噬魂狼王的牙打造而成，极为厚重和锋利。据本人所言，狼牙为其祖辈代代相传之宝，" +
+                    "是其祖先沃尔夫族长抵御兽潮获得的战利品，是荣耀的象征。但其祖先后来不顾族人劝阻追随“灭世的十六人”，在“灭世的十六人”遭遇围剿后，" +
+                    "其祖先亦被行刑，从此沃尔夫家族一落千丈" +
+                    "\n隐藏技能\n牙狼噬：自身攻击命中敌方时对敌方造成10%防御降低效果，持续两回合",
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 2200L)),
+            EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.SI_DI_WU_SHI.getJobCode(),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                    builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的武器技能【牙狼噬】被触发");
+                    BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.DEF, "", -0.1F), 2, builder);
+                }
+            }
+    ),
+    EQUIPMENT_406(406L, "凌锋·细雪",
+            "在死烬之渊.终焉战场上屹立不倒的两把名刀，曾经冠绝一个世代，蔽日岛大将垚千寂的佩刀。据传，垚千寂也曾追随“灭世的十六人”，" +
+                    "并按照他们的指示前往死烬之渊，并最终导致了蔽日岛的覆灭。还有种说法称，垚千寂意图颠覆“灭世的十六人”所统领的组织，" +
+                    "因而前往死烬之渊欲寻找神器“冰海沉星”，但其错估了死烬之渊的危险性，导致蔽日岛核心力量尽数殒命，最终导致了蔽日岛的覆灭" +
+                    "\n隐藏技能\n凌锋：对敌方造成伤害时提高自身攻击力10%，持续2回合\n细雪：闪避敌方攻击后回复自身体力5%",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 1200L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 350L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DODGE, 350L)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.SI_DI_WU_SHI.getJobCode(),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void ifNotHit(BattleDTO from, BattleDTO tar, SkillEnum skillEnum, StringBuilder builder) {
+                    super.ifNotHit(from, tar, skillEnum, builder);
+                    if (this.getFrom().equals(tar)) {
+                        OrganismDTO fromOrganism = from.getOrganismInfoDTO().getOrganismDTO();
+                        BattleUtil.doHealing(from, Math.round(fromOrganism.getHpWithAddition() * 0.05), builder);
+                    }
+                }
+
+                @Override
+                public void processIfHit(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                    if (damage.get() > 0) {
+                        builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                                .append("的武器技能【凌锋】被触发");
+                        BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.ATK, "", 0.1F), 2, builder);
+                    }
+                }
+            }
+    ),
+    EQUIPMENT_407(407L, "真武之极",
+            "传奇匠人千秋和的成名作之一，最初命名其为“极”意味着这把刀是千秋和所作刀具之极，但尽管如此，千秋和对其仍不满意，" +
+                    "他认为这把刀具过于轻浮而缺乏凌厉，因此他找到修仙王朝希望借助其至宝真武之石的淬炼，将其真正打造成万古无一的刀具之“极”。" +
+                    "经历过真武之石淬炼的“极”脱胎换骨，更加轻盈但锋华不减，更重要的是，它散发出了一丝法则的波纹，能够造成无视甲胄直击实体的伤害。" +
+                    "为感谢修仙王朝的倾囊相助，千秋和也是将这把名刀更名为“真武之极”" +
+                    "\n隐藏技能\n极道：攻击命中时额外附加敌方当前最大生命值3%的真实伤害",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 1600L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 250L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 200L)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.SI_DI_WU_SHI.getJobCode(),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                    long extraDamage = Math.round(tar.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition() * 0.03);
+                    damage.addAndGet(extraDamage);
+                    builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的武器技能【极道】被触发，额外造成").append(extraDamage).append("点伤害");
+                }
+            }
+    ),
+    EQUIPMENT_408(408L, "星辉礼赞",
+            "圣城一级星祭的标配典籍，虽是量产化典籍，但其制作成本极其高昂，且均经过圣座缘星圣主的亲自赋能，使其直接一跃成为通玄级法器。" +
+                    "再者，星辉礼赞的强大之处在于其群体作战的强大实力，通过法器之间的互相加持，能使使用者群体获得无与伦比的强大攻击力，" +
+                    "即使在越阶挑战的情况下，敌方也很难在星辉礼赞群的攻击下全身而退" +
+                    "\n隐藏技能\n星庭献礼：对敌方造成伤害时提升己方全体成员10%法伤和10%攻击持续一回合",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 2000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 300L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_PENETRATE, 0.1F)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.MAGICIAN.getJobCode(),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                    if (damage.get() > 0) {
+                        builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                                .append("的武器技能【星庭献礼】被触发");
+                        this.getOur().forEach(o -> {
+                            BuffUtil.addBuff(o, new BuffDTO(BuffTypeEnum.ATK, "", 0.1F), 1, builder);
+                            BuffUtil.addBuff(o, new BuffDTO(BuffTypeEnum.MAGIC_ATK, "", 0.1F), 1, builder);
+                        });
+                    }
+                }
+            }
+    ),
+    EQUIPMENT_409(409L, "净天无涯",
+            "陪伴邪修长大的魔剑——天无涯，吸收了四大魔器之一的摩诃无量的残片之后，突破枷锁成长为通玄级。不仅解放了自身本源古老魔器的部分力量，" +
+                    "而且继承了摩诃无量的部分法相之力，其恐怖程度可见一斑" +
+                    "\n隐藏技能\n摩诃无量：战斗开始时，攻击力提升80% ，穿甲提升50%持续六回合",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 2200L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 240L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.LIFE_STEALING, 0.2F)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.EVIL.getJobCode(),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeBattle(List<String> battleMsg) {
+                    StringBuilder builder = new StringBuilder("※")
+                            .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的武器技能【摩诃无量】被触发");
+                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.ATK, "", 0.8F), 6, builder);
+                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.PENETRATE, "", 0.5F), 6, builder);
+                    battleMsg.add(builder.toString());
+                }
+            }
+    ),
+//    EQUIPMENT_500(500L, "彼岸·净天无涯",
 //            "",
 //            EquipmentTypeEnum.WEAPON
 //    ),
-//    EQUIPMENT_43(43L, "",
+//    EQUIPMENT_501(501L, "星神.沧白之祈",
 //            "",
 //            EquipmentTypeEnum.WEAPON
 //    ),
-//    EQUIPMENT_44(44L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_45(45L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_46(46L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_47(47L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_48(48L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_49(49L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_50(50L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_51(51L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_52(52L, "",
+    //    EQUIPMENT_52(52L, "",
 //            "",
 //            EquipmentTypeEnum.WEAPON
 //    ),
@@ -558,10 +713,8 @@ public enum EquipmentEnum {
 //            EquipmentTypeEnum.WEAPON
 //    ),
     EQUIPMENT_600(600L, "冰海沉星",
-            "隐藏技能\n" +
-                    "永冻世界：攻击命中时提升自身30%法伤持续一回合，若该次攻击未命中，则提升自身30%命中（持续一回合）后对敌方全体造成冻结持续一回合\n" +
-                    "法则之力\n" +
-                    "零度法则：进入战斗后我方全体成员提升20%速度，敌方全体成员降低20%速度，且我方成员对冻结状态敌人造成的伤害额外提升50%",
+            "隐藏技能\n永冻世界：攻击命中时提升自身30%法伤持续一回合，若该次攻击未命中，则提升自身30%命中（持续一回合）后对敌方全体造成冻结持续一回合" +
+                    "\n法则之力\n零度法则：进入战斗后我方全体成员提升20%速度，敌方全体成员降低20%速度，且我方成员对冻结状态敌人造成的伤害额外提升50%",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 15000L, 0.3F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 1.0F),
@@ -569,37 +722,41 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_PENETRATE, 0.3F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 2100L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DODGE, 0.3F)
-            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.JEWELRY, JobEnum.MAGICIAN.getJobCode(),
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.JEWELRY,
             new ExtraBattleProcessTemplate() {
                 @Override
                 public void beforeBattle(List<String> battleMsg) {
                     String name = this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName();
-                    StringBuilder builder = new StringBuilder("※" + name + "的饰品【冰海沉星】效果触发");
+                    StringBuilder builder = new StringBuilder("※" + name + "的饰品法则【零度法则】被触发");
                     this.getOur().forEach(o -> RuleUtil.addRule(o, OrganismPropertiesEnum.BEHAVIOR_SPEED, "零度法则", 0.2F, builder));
                     this.getEnemy().forEach(o -> RuleUtil.addRule(o, OrganismPropertiesEnum.BEHAVIOR_SPEED, "零度法则", -0.2F, builder));
                     battleMsg.add(builder.toString());
                 }
 
                 @Override
-                public void processIfHit(BattleDTO tar, SkillEnum skillEnum, AtomicLong damage, StringBuilder builder) {
+                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                    builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的饰品技能【永冻世界】被触发");
                     BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.MAGIC_ATK, "", 0.3F), 1, builder);
                 }
 
                 @Override
-                public void processIfOurHit(BattleDTO tar, SkillEnum skillEnum, AtomicLong damage, StringBuilder builder) {
+                public void processIfOurHit(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect,
+                                            AtomicLong damage, boolean critical, StringBuilder builder) {
                     List<BattleBuffDTO> buffList = tar.getBuffMap().get(BuffTypeEnum.PAUSE);
                     if (CollectionUtils.isNotEmpty(buffList) &&
                             buffList.stream().anyMatch(buff -> "冻结".equals(buff.getBuffDTO().getBuffName()))) {
+                        builder.append("，饰品法则【零度法则】被触发，伤害提升至1.5倍");
                         damage.set(Math.round(damage.get() * 1.5));
                     }
                 }
 
                 @Override
                 public void processIfNotHit(BattleDTO tar, SkillEnum skillEnum, StringBuilder builder) {
-                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.HIT, "冰海沉星", 0.3F), 1, builder);
+                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.HIT, "永冻世界", 0.3F), 1, builder);
                     this.getEnemy().forEach(enemy -> {
                         BuffUtil.addBuff(enemy, new BuffDTO(BuffTypeEnum.PAUSE, "冻结", 0.3F, true), 1, builder);
-                        BuffUtil.addBuff(enemy, new BuffDTO(BuffTypeEnum.SPEED, "冰海沉星", -0.1F), 2, builder);
+                        BuffUtil.addBuff(enemy, new BuffDTO(BuffTypeEnum.SPEED, "永冻世界", -0.1F), 2, builder);
                     });
                 }
             }

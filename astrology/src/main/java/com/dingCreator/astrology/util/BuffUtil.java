@@ -9,10 +9,7 @@ import lombok.val;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 战斗数值计算
@@ -29,25 +26,37 @@ public class BuffUtil {
      */
     public static void addBuff(BattleDTO target, BuffDTO buffDTO, Integer round, StringBuilder builder) {
         List<BattleBuffDTO> buffList = target.getBuffMap().getOrDefault(buffDTO.getBuffType(), new ArrayList<>());
+        if (target.getBuffMap().containsKey(BuffTypeEnum.IMMUNITY) && buffDTO.getAbnormal()) {
+            builder.append("免疫此异常");
+            return;
+        }
         BattleBuffDTO now = BattleBuffDTO.builder().buffDTO(buffDTO).round(round).build();
-        if (buffDTO.getBuffName().length() > 0) {
+        if (!buffDTO.getBuffName().isEmpty()) {
             // 有特殊名称的buff，会有覆盖策略
             buffDTO.getBuffOverrideStrategyEnum().getDoOverride().accept(now, buffList);
         } else {
             buffList.add(now);
         }
-
         builder.append("，").append(target.getOrganismInfoDTO().getOrganismDTO().getName());
-        if (buffDTO.getBuffName().length() > 0) {
+        // 当buff有名称且之前的文描没有包含此段描述
+        if (!buffDTO.getBuffName().isEmpty() && !builder.toString().contains(buffDTO.getBuffName())) {
             builder.append("附加状态<").append(buffDTO.getBuffName()).append(">，");
         }
-        builder.append(buffDTO.getBuffType().getChnDesc());
-        if (buffDTO.getValue() != 0) {
-            builder.append(buffDTO.getValue() > 0 ? "+" + buffDTO.getValue() : buffDTO.getValue());
+        if (BuffTypeEnum.BuffEffectTypeEnum.PROPERTY.equals(buffDTO.getBuffType().getBuffEffectTypeEnum())) {
+            builder.append(buffDTO.getBuffType().getChnDesc());
+            if (buffDTO.getValue() != 0) {
+                builder.append(buffDTO.getValue() > 0 ? "+" + buffDTO.getValue() : buffDTO.getValue());
+            }
+            if (buffDTO.getRate().floatValue() != 0) {
+                float absVal = buffDTO.getRate().multiply(BigDecimal.valueOf(100)).floatValue();
+                builder.append(buffDTO.getRate().floatValue() > 0 ? "+" + absVal : absVal).append("%");
+            }
+        } else if (BuffTypeEnum.BuffEffectTypeEnum.MARK.equals(buffDTO.getBuffType().getBuffEffectTypeEnum())) {
+            builder.append(buffDTO.getBuffName());
         }
-        if (buffDTO.getRate().floatValue() != 0) {
-            float absVal = buffDTO.getRate().multiply(BigDecimal.valueOf(100)).floatValue();
-            builder.append(buffDTO.getRate().floatValue() > 0 ? "+" + absVal : absVal).append("%");
+        // 最多300回合，比这个多的可以认为是持续整场的buff，无需显示持续多少回合
+        if (round <= 300) {
+            builder.append("，持续").append(round).append("回合");
         }
         target.getBuffMap().put(buffDTO.getBuffType(), buffList);
     }
@@ -226,5 +235,28 @@ public class BuffUtil {
     public static void clearAbnormalBuff(BattleDTO battleDTO, StringBuilder builder) {
         battleDTO.getBuffMap().forEach((buffTypeEnum, buffList) -> buffList.removeIf(buff -> buff.getBuffDTO().getAbnormal()));
         builder.append("，").append(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName()).append("所有负面状态被清除");
+    }
+
+    public static void clearActiveBuff(BattleDTO battleDTO, StringBuilder builder) {
+        battleDTO.getBuffMap().forEach((buffTypeEnum, buffList) -> {
+            if (buffTypeEnum.getBuffEffectTypeEnum().equals(BuffTypeEnum.BuffEffectTypeEnum.PROPERTY)) {
+                buffList.removeIf(buff -> buff.getBuffDTO().getRate().floatValue() > 0 || buff.getBuffDTO().getValue() > 0);
+            }
+        });
+        builder.append("，").append(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName()).append("所有增益被清除");
+    }
+
+    public static void clearInactiveBuff(BattleDTO battleDTO, StringBuilder builder) {
+        battleDTO.getBuffMap().forEach((buffTypeEnum, buffList) -> {
+            if (buffTypeEnum.getBuffEffectTypeEnum().equals(BuffTypeEnum.BuffEffectTypeEnum.PROPERTY)) {
+                buffList.removeIf(buff -> buff.getBuffDTO().getRate().floatValue() < 0 || buff.getBuffDTO().getValue() < 0);
+            }
+        });
+        builder.append("，").append(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName()).append("所有增益被清除");
+    }
+
+    public static void clearAllBuff(BattleDTO battleDTO, StringBuilder builder) {
+        battleDTO.setBuffMap(new HashMap<>());
+        builder.append("，").append(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName()).append("所有buff被清除");
     }
 }

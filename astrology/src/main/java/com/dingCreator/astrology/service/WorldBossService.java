@@ -26,7 +26,9 @@ public class WorldBossService {
     public WorldBoss getTodayBoss() {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(WorldBossMapper.class).selectOne(
-                        new QueryWrapper<WorldBoss>().ge(WorldBoss.APPEAR_DATE, LocalDate.now())));
+                        new QueryWrapper<WorldBoss>().eq(WorldBoss.APPEAR_DATE, LocalDate.now())
+                )
+        );
     }
 
     /**

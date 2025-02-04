@@ -7,7 +7,7 @@
         <result column="belong_to" property="belongTo" />
         <result column="belong_to_id" property="belongToId" />
         <result column="exp" property="exp" />
-        <result column="money" property="money" />
+        <result column="asset" property="asset" />
         <collection property="itemList" ofType="com.dingCreator.astrology.entity.LootItem">
             <id column="item_id" property="id" />
             <result column="item_loot_id" property="lootId" />

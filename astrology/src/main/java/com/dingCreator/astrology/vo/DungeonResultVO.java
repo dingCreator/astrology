@@ -34,8 +34,9 @@ public class DungeonResultVO implements Serializable {
 
     public void addLoot(Long id, LootVO vo) {
         LootVO exist = playerLootMap.getOrDefault(id, new LootVO());
-        exist.setMoney(exist.getMoney() + vo.getMoney());
+        exist.setAstrologyCoin(exist.getAstrologyCoin() + vo.getAstrologyCoin());
+        exist.setDiamond(exist.getDiamond() + vo.getDiamond());
         exist.setExp(exist.getExp() + vo.getExp());
-        exist.getLootItemNameList().addAll(vo.getLootItemNameList());
+        exist.getItemVOList().addAll(vo.getItemVOList());
     }
 }

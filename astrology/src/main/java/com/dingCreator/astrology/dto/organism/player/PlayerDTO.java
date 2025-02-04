@@ -4,13 +4,17 @@ import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.dto.organism.OrganismDTO;
 import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.entity.base.Organism;
+import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentPropertiesTypeEnum;
 import com.dingCreator.astrology.util.EquipmentUtil;
+import com.dingCreator.astrology.util.MapUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author ding
@@ -87,5 +91,31 @@ public class PlayerDTO extends OrganismDTO {
         this.status = player.getStatus();
         this.statusStartTime = player.getStatusStartTime();
         this.enabled = player.getEnabled();
+    }
+
+    public synchronized void setStatus(String status) {
+        getStatus();
+        this.status = status;
+        this.statusStartTime = LocalDateTime.now();
+    }
+
+    public synchronized String getStatus() {
+        if (PlayerStatusEnum.MOVING.getCode().equals(status)) {
+            long targetMapId = MapUtil.getTargetLocation(id);
+            if (targetMapId == 0L) {
+                status = PlayerStatusEnum.FREE.getCode();
+            } else {
+                long seconds = MapUtil.moveTime(id, MapUtil.getNowLocation(id), targetMapId);
+                LocalDateTime statusEndTime = Objects.isNull(statusStartTime) ?
+                        LocalDateTime.MIN : statusStartTime.plusSeconds(seconds);
+                if (LocalDateTime.now().isAfter(statusEndTime)) {
+                    // 已经到了
+                    status = PlayerStatusEnum.FREE.getCode();
+                    statusStartTime = LocalDateTime.now();
+                    mapId = MapUtil.getTargetLocation(id);
+                }
+            }
+        }
+        return status;
     }
 }

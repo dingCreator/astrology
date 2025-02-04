@@ -3,7 +3,6 @@ package com.dingCreator.astrology.cache;
 import cn.hutool.core.bean.BeanUtil;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
-import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Player;
@@ -11,7 +10,6 @@ import com.dingCreator.astrology.entity.PlayerAsset;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.util.LockUtil;
-import com.dingCreator.astrology.util.ThreadPoolUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -87,21 +85,19 @@ public class PlayerCache {
 
     /**
      * 更新玩家数据
-     * 允许一段时间内缓存与数据库不一致的情况，保证最终一致性即可
      *
      * @param id 玩家ID
      */
-    public static void flush(Long id) {
-        flush(Collections.singletonList(id));
+    public static void save(Long id) {
+        save(Collections.singletonList(id));
     }
 
     /**
      * 更新玩家数据
-     * 允许一段时间内缓存与数据库不一致的情况，保证最终一致性即可
      *
      * @param ids 玩家ID
      */
-    public static void flush(List<Long> ids) {
+    public static void save(List<Long> ids) {
         List<Player> players = ids.stream()
                 .map(PLAYER_MAP::get)
                 .map(PlayerInfoDTO::getPlayerDTO)

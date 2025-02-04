@@ -1,9 +1,9 @@
-package com.dingCreator.astrology.template;
+package com.dingCreator.astrology.util.template;
 
 import com.dingCreator.astrology.dto.BattleDTO;
-import com.dingCreator.astrology.enums.skill.SkillEnum;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,7 +13,14 @@ import java.util.concurrent.atomic.AtomicLong;
  * @date 2024/4/3
  */
 @Data
-public abstract class ThisBehaviorExtraBattleProcessTemplate {
+public abstract class ThisBehaviorExtraBattleProcessTemplate implements Serializable {
+
+    /**
+     * 本轮开始前
+     */
+    public void beforeThisRound(BattleDTO from, List<BattleDTO> our, List<BattleDTO> enemy, StringBuilder builder) {
+
+    }
 
     /**
      * 本轮结束后
@@ -45,7 +52,7 @@ public abstract class ThisBehaviorExtraBattleProcessTemplate {
      */
     public void ifHit(BattleDTO from, BattleDTO tar,
                             List<BattleDTO> our, List<BattleDTO> enemy,
-                            AtomicLong damage, StringBuilder builder) {
+                            AtomicLong damage, boolean critical, StringBuilder builder) {
 
     }
 

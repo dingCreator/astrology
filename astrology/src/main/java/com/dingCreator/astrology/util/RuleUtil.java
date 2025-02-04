@@ -32,11 +32,14 @@ public class RuleUtil {
                 .rate(new BigDecimal(rate)).build();
         battleDTO.getRuleList().add(ruleDTO);
 
-        if (builder.length() > 0) {
-            builder.append("，");
+        if (!builder.toString().contains(ruleName)
+                || !builder.toString().contains(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName())) {
+            if (builder.length() > 0) {
+                builder.append("，");
+            }
+            builder.append(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName())
+                    .append("附加法则<").append(ruleName).append(">");
         }
-        builder.append(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName())
-                .append("附加法则<").append(ruleName).append(">");
         if (val != 0) {
             builder.append("，").append(organismPropertiesEnum.getChnDesc()).append(val > 0 ? "+" + val : val);
         }
@@ -50,11 +53,13 @@ public class RuleUtil {
     public static long getVal(BattleDTO battleDTO, OrganismPropertiesEnum organismPropertiesEnum, long src) {
         long val = battleDTO.getRuleList().stream()
                 .filter(rule -> organismPropertiesEnum.equals(rule.getOrganismPropertiesEnum()))
-                .filter(rule -> rule.getVal() != 0)
                 .map(RuleDTO::getVal)
+                .filter(ruleVal -> ruleVal != 0)
                 .reduce(src, Long::sum);
-        BigDecimal rate = battleDTO.getRuleList().stream().filter(rule -> rule.getRate().compareTo(BigDecimal.ZERO) != 0)
+        BigDecimal rate = battleDTO.getRuleList().stream()
+                .filter(rule -> organismPropertiesEnum.equals(rule.getOrganismPropertiesEnum()))
                 .map(RuleDTO::getRate)
+                .filter(ruleRate -> ruleRate.compareTo(BigDecimal.ZERO) != 0)
                 .reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
         return BigDecimalUtil.multiply(val, rate.add(BigDecimal.ONE));
     }

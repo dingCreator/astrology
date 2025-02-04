@@ -11,9 +11,13 @@ import java.util.List;
 @Data
 public class LootDTO {
     /**
-     * 钱
+     * 圣星币
      */
-    private Long money;
+    private Long astrologyCoin;
+    /**
+     * 缘石
+     */
+    private Long diamond;
     /**
      * 经验
      */

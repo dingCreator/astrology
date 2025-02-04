@@ -2,6 +2,7 @@ package com.dingCreator.astrology.util;
 
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.dto.equipment.EquipmentPropertiesDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.equipment.EquipmentDTO;
@@ -82,12 +83,17 @@ public class EquipmentUtil {
         }
         EquipmentEnum equipEnum = EquipmentEnum.getById(equipmentDTO.getEquipmentId());
         AtomicLong atomicLong = new AtomicLong(src);
-        equipEnum.getProp().stream()
+        float sumRate = equipEnum.getProp().stream()
                 .filter(equip -> equipmentPropertiesTypeEnum.equals(equip.getEquipmentPropertiesTypeEnum()))
-                .forEach(prop -> {
-                    atomicLong.addAndGet(prop.getProp().getVal());
-                    atomicLong.updateAndGet(prev -> Math.round(prev * (1 + prop.getProp().getRate())));
-                });
+                .peek(prop -> atomicLong.addAndGet(prop.getProp().getVal()))
+                .filter(prop -> prop.getProp().getRate() != 0)
+                .map(EquipmentPropertiesDTO::getProp)
+                .map(EquipmentPropertiesDTO.Prop::getRate)
+                .reduce(Float::sum).orElse(0F);
+        if (atomicLong.get() < 0) {
+            atomicLong.set(0);
+        }
+        atomicLong.set(Math.round(atomicLong.get() * (1 + sumRate)));
         return atomicLong.get();
     }
 
