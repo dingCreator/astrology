@@ -1,7 +1,9 @@
 package com.dingCreator.astrology.vo;
 
 import com.dingCreator.astrology.entity.Loot;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -17,7 +19,7 @@ public class DungeonResultVO implements Serializable {
     /**
      * 探索结果
      */
-    private BattleResultVO.BattleResult exploreResult;
+    private ExploreResult exploreResult;
     /**
      * 获得的掉落物汇总
      * playerId : LootVO
@@ -38,5 +40,29 @@ public class DungeonResultVO implements Serializable {
         exist.setDiamond(exist.getDiamond() + vo.getDiamond());
         exist.setExp(exist.getExp() + vo.getExp());
         exist.getItemVOList().addAll(vo.getItemVOList());
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public enum ExploreResult {
+        /**
+         * 直接通过
+         */
+        PASS("探索时发现了一处密道，直接通关"),
+        /**
+         * 通过该层
+         */
+        COMPLETE("探索成功，并发现了继续前进的道路"),
+        /**
+         * 通关
+         */
+        SUCCESS("探索圆满结束"),
+        /**
+         * 失败
+         */
+        FAIL("探索失败，尝试增强实力后再来探索吧"),
+        ;
+
+        private final String msg;
     }
 }

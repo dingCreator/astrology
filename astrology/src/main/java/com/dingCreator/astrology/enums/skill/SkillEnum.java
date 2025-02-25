@@ -134,13 +134,12 @@ public enum SkillEnum {
 
     SKILL_12(12L, "地裂斩",
             "造成350%物理伤害",
-            "All", 0L,
-            new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 3.5F)
+            "All", 30L, new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 3.5F)
     ),
 
     SKILL_13(13L, "鬼王游行",
             "化身鬼魅遨游战场，提高自身30%速度持续2回合，对敌方造成1000%物理伤害",
-            "All", 0L,
+            "All", 60L,
             Arrays.asList(
                     new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 10F),
                     new SkillEffectDTO(SkillTargetEnum.ME, DamageTypeEnum.ATK, 0F, Collections.singletonList(
@@ -162,13 +161,12 @@ public enum SkillEnum {
 
     SKILL_15(15L, "音敕",
             "造成110%法术伤害",
-            "All", 0L,
-            new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 1.1F)
+            "All", new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 1.1F)
     ),
 
     SKILL_16(16L, "诡惑迷音",
             "造成400%法术伤害并使敌方眩晕持续1回合",
-            "All", 0L,
+            "All", 30L,
             new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 4F, Collections.singletonList(
                     new GiveBuffDTO(BuffTypeEnum.PAUSE, "眩晕", 1, true)
             ))
@@ -176,7 +174,7 @@ public enum SkillEnum {
 
     SKILL_17(17L, "回音圣域",
             "对敌方全体造成600%法术伤害，并使敌方全体进入回音状态持续3回合。回音：造成伤害时受到造成伤害量15%的真实伤害（反伤）",
-            "All", 0L,
+            "All", 60L,
             new SkillEffectDTO(SkillTargetEnum.ALL_ENEMY, DamageTypeEnum.MAGIC, 6F, Collections.singletonList(
                     new GiveBuffDTO(BuffTypeEnum.REFLECT_DAMAGE, "回音", 3)
             ))
@@ -184,8 +182,7 @@ public enum SkillEnum {
 
     SKILL_18(18L, "普通攻击（法）",
             "造成100%法术伤害",
-            "All", 0L,
-            new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 1F)
+            "All", new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 1F)
     ),
 
     SKILL_19(19L, "汲咀之源",
@@ -677,8 +674,10 @@ public enum SkillEnum {
             JobEnum.EVIL.getJobCode(), 70L, new SkillEffectDTO(SkillTargetEnum.ME, DamageTypeEnum.ATK, 0F),
             new ThisBehaviorExtraBattleProcessTemplate() {
                 @Override
-                public void ifHit(BattleDTO from, BattleDTO tar, List<BattleDTO> our, List<BattleDTO> enemy, AtomicLong damage, boolean critical, StringBuilder builder) {
-                    BuffUtil.clearInactiveBuff(from, builder);
+                public void ifHit(BattleDTO from, BattleDTO tar,
+                                  List<BattleDTO> our, List<BattleDTO> enemy,
+                                  AtomicLong damage, boolean critical, StringBuilder builder) {
+                    BuffUtil.clearAbnormalBuff(from, builder);
                     BuffUtil.clearInactiveBuff(from, builder);
                 }
             },
@@ -1337,6 +1336,71 @@ public enum SkillEnum {
             battleMsg.add(builder.toString());
         }
     }),
+
+    SKILL_1039(1039L, "审判（惩）", "提高自身50%攻击，50%法强",
+            "None", false, new ExtraBattleProcessTemplate() {
+        @Override
+        public void beforeBattle(List<String> battleMsg) {
+            StringBuilder builder = new StringBuilder("※")
+                    .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                    .append("的被动技能【审判（惩）】被触发");
+            RuleUtil.addRule(this.getFrom(), OrganismPropertiesEnum.ATK, "审判（惩）", 0.5F, builder);
+            RuleUtil.addRule(this.getFrom(), OrganismPropertiesEnum.MAGIC_ATK, "审判（惩）", 0.5F, builder);
+            battleMsg.add(builder.toString());
+        }
+    }),
+
+    SKILL_1040(1040L, "绝对公正", "自身回合开始时，清除敌我双方所有的增益和弱化类buff效果",
+            "None", false, new ExtraBattleProcessTemplate() {
+        @Override
+        public void beforeMyRound(List<String> battleMsg) {
+            StringBuilder builder = new StringBuilder("※")
+                    .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                    .append("的被动技能【绝对公正】被触发");
+            this.getOur().forEach(o -> {
+                BuffUtil.clearActiveBuff(o, builder);
+                BuffUtil.clearInactiveBuff(o, builder);
+            });
+            this.getEnemy().forEach(o -> {
+                BuffUtil.clearActiveBuff(o, builder);
+                BuffUtil.clearInactiveBuff(o, builder);
+            });
+            battleMsg.add(builder.toString());
+        }
+    }),
+
+    SKILL_1041(1041L, "镰斩", "造成150%物理伤害，命中后降低自身10%防御与法抗持续两回合",
+            "None", new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 1.5F),
+            new ThisBehaviorExtraBattleProcessTemplate() {
+                @Override
+                public void ifHit(BattleDTO from, BattleDTO tar,
+                                  List<BattleDTO> our, List<BattleDTO> enemy,
+                                  AtomicLong damage, boolean critical, StringBuilder builder) {
+                    BuffUtil.addBuff(from, new BuffDTO(BuffTypeEnum.DEF, "", -0.1F), 2, builder);
+                    BuffUtil.addBuff(from, new BuffDTO(BuffTypeEnum.MAGIC_DEF, "", -0.1F), 2, builder);
+                }
+            }
+    ),
+
+//    SKILL_1042(1042L, "明神", "回合开始时解除自身所处的异常状态与弱化类buff效果，并提升自身40%闪避持续2回合",
+//            "None", 40L,
+//
+//    ),
+//
+//    SKILL_1043(1043L, "离烟", "造成550%法术伤害，命中后扣除敌方10%蓝量",
+//            "None", 60L,
+//
+//    ),
+//
+//    SKILL_1044(1044L, "浮岸", "提升自身15%命中持续2回合，连续进行十次攻击每次攻击造成75%物理伤害",
+//            "None", 80L,
+//    ),
+//
+//    SKILL_1045(1045L, "祈愿", "敌我双方回复10%蓝量10%血量"),
+//
+//    SKILL_1046(1046L, "圣裁", "对敌方造成1200%法术伤害，命中后使敌方陷入焚毁异常持续两回合",
+//            "None", 130L,
+//    ),
 
     SKILL_10000(10000L, "作弊",
             "开发者的作弊技能，造成10000%的物理伤害，并提升1000000攻击10回合",

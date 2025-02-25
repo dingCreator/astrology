@@ -1,10 +1,12 @@
 package com.dingCreator.astrology.cache;
 
 import com.dingCreator.astrology.dto.TeamDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -34,7 +36,11 @@ public class TeamCache {
      * @return 小队
      */
     public static TeamDTO getTeamByPlayerId(Long playerId) {
-        return TEAM.values().stream().filter(t -> t.getMembers().contains(playerId)).findFirst().orElse(null);
+        PlayerInfoDTO info = PlayerCache.getPlayerById(playerId);
+        if (!info.getTeam()) {
+            return null;
+        }
+        return TEAM.get(info.getTeamId());
     }
 
     /**
@@ -64,5 +70,13 @@ public class TeamCache {
      */
     public static void deleteTeam(Long teamId) {
         TEAM.remove(teamId);
+    }
+
+    public static Long getCaptainId(Long playerId) {
+        TeamDTO teamDTO = getTeamByPlayerId(playerId);
+        if (Objects.nonNull(teamDTO)) {
+            return teamDTO.getCaptainId();
+        }
+        return null;
     }
 }

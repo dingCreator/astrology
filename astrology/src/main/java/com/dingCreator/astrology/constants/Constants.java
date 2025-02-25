@@ -238,6 +238,10 @@ public final class Constants {
      * 锁前缀-资产变更
      */
     public static final String CHANGE_ASSET_LOCK_PREFIX = "LOCK_CHANGE_ASSET_";
+    /**
+     * 锁前缀-探索副本
+     */
+    public static final String EXPLORE_DUNGEON_LOCK_PREFIX = "LOCK_EXPLORE_DUNGEON_";
 
     /**
      * 每日最多攻击世界boss次数

@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * 刷怪副本
  *
@@ -41,8 +43,8 @@ public class Dungeon {
     @TableField("flush_time")
     private Long flushTime;
     /**
-     * 掉落物
+     * 直接通过概率
      */
-    @TableField("loot")
-    private String loot;
+    @TableField("pass_rate")
+    private BigDecimal passRate;
 }

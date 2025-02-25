@@ -6,6 +6,7 @@ import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.entity.base.Organism;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentPropertiesTypeEnum;
+import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.util.EquipmentUtil;
 import com.dingCreator.astrology.util.MapUtil;
 import lombok.Data;
@@ -42,7 +43,7 @@ public class PlayerDTO extends OrganismDTO {
     /**
      * 状态
      */
-    private String status;
+    private volatile String status;
     /**
      * 进入此状态时间
      */
@@ -93,10 +94,53 @@ public class PlayerDTO extends OrganismDTO {
         this.enabled = player.getEnabled();
     }
 
+    public void copyProperties2Player(Player player) {
+        player.setId(this.id);
+        player.setName(this.name);
+        player.setHp(this.hp);
+        player.setMaxHp(this.maxHp);
+        player.setMp(this.mp);
+        player.setMaxMp(this.maxMp);
+        player.setAtk(this.atk);
+        player.setMagicAtk(this.magicAtk);
+        player.setDef(this.def);
+        player.setMagicDef(this.magicDef);
+        player.setPenetrate(this.penetrate);
+        player.setMagicPenetrate(this.magicPenetrate);
+        player.setCriticalRate(this.criticalRate);
+        player.setCriticalReductionRate(this.criticalReductionRate);
+        player.setCriticalDamage(this.criticalDamage);
+        player.setCriticalDamageReduction(this.criticalDamageReduction);
+        player.setBehaviorSpeed(this.behaviorSpeed);
+        player.setHit(this.hit);
+        player.setDodge(this.dodge);
+        player.setLifeStealing(this.lifeStealing);
+        player.setRank(this.rank);
+        player.setLevel(this.level);
+        player.setExp(this.exp);
+        player.setJob(this.job);
+        player.setMapId(this.mapId);
+        player.setStatus(this.status);
+        player.setStatusStartTime(this.statusStartTime);
+        player.setEnabled(this.enabled);
+    }
+
     public synchronized void setStatus(String status) {
-        getStatus();
-        this.status = status;
+        for (int i = 0; i < 10; i++) {
+            if (casStatus(getStatus(), status)) {
+                return;
+            }
+        }
+        throw PlayerExceptionEnum.STATUS_ERR.getException();
+    }
+
+    public synchronized boolean casStatus(String oldStatus, String newStatus) {
+        if (!Objects.equals(oldStatus, getStatus())) {
+            return false;
+        }
+        this.status = newStatus;
         this.statusStartTime = LocalDateTime.now();
+        return true;
     }
 
     public synchronized String getStatus() {
@@ -113,6 +157,7 @@ public class PlayerDTO extends OrganismDTO {
                     status = PlayerStatusEnum.FREE.getCode();
                     statusStartTime = LocalDateTime.now();
                     mapId = MapUtil.getTargetLocation(id);
+                    PlayerCache.save(id);
                 }
             }
         }

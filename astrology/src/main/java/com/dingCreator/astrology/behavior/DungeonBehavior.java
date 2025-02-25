@@ -1,35 +1,23 @@
 package com.dingCreator.astrology.behavior;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.dingCreator.astrology.cache.PlayerCache;
-import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.dto.LootDTO;
+import com.dingCreator.astrology.dto.DungeonConfigSettingsDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
-import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
-import com.dingCreator.astrology.dto.TeamDTO;
-import com.dingCreator.astrology.entity.*;
-import com.dingCreator.astrology.enums.LootBelongToEnum;
-import com.dingCreator.astrology.enums.PlayerStatusEnum;
+import com.dingCreator.astrology.entity.Dungeon;
 import com.dingCreator.astrology.enums.RankEnum;
-import com.dingCreator.astrology.enums.exception.BattleExceptionEnum;
 import com.dingCreator.astrology.enums.exception.DungeonExceptionEnum;
-import com.dingCreator.astrology.exception.BusinessException;
-import com.dingCreator.astrology.service.DungeonBossService;
-import com.dingCreator.astrology.service.DungeonRecordService;
+import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.service.DungeonService;
-import com.dingCreator.astrology.service.LootService;
-import com.dingCreator.astrology.util.BattleUtil;
-import com.dingCreator.astrology.util.CdUtil;
-import com.dingCreator.astrology.util.LootUtil;
+import com.dingCreator.astrology.util.LockUtil;
 import com.dingCreator.astrology.util.MapUtil;
-import com.dingCreator.astrology.vo.BattleResultVO;
+import com.dingCreator.astrology.util.PageUtil;
 import com.dingCreator.astrology.vo.DungeonResultVO;
 import com.dingCreator.astrology.vo.DungeonVO;
-import com.dingCreator.astrology.vo.LootVO;
 
-import java.util.*;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -40,121 +28,80 @@ public class DungeonBehavior {
 
     private final DungeonService dungeonService = DungeonService.getInstance();
 
-    private final DungeonBossService dungeonBossService = DungeonBossService.getInstance();
-
-    private final DungeonRecordService dungeonRecordService = DungeonRecordService.getInstance();
-
-    /**
-     * 探索副本
-     *
-     * @param playerId    玩家ID
-     * @param dungeonName 副本名称
-     * @return 探索结果
-     */
-    public DungeonResultVO exploreDungeon(Long playerId, String dungeonName) {
-        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
-        PlayerDTO playerDTO = playerInfoDTO.getPlayerDTO();
-
-        PlayerBehavior.getInstance().flushStatus(playerDTO);
-        // 判断玩家状态
-        if (!PlayerStatusEnum.FREE.getCode().equals(playerDTO.getStatus())) {
-            throw DungeonExceptionEnum.PLAYER_NOT_FREE.getException();
-        }
-        // 查询副本信息
-        Dungeon dungeon = dungeonService.getByName(playerDTO.getMapId(), dungeonName);
-        if (Objects.isNull(dungeon)) {
-            throw DungeonExceptionEnum.DUNGEON_NOT_FOUND.getException();
-        }
-        if (playerDTO.getRank() > dungeon.getMaxRank()) {
-            throw DungeonExceptionEnum.RANK_OVER_LIMIT.getException();
-        }
-        List<Long> playerIds;
-        // CD计算
-        if (playerInfoDTO.getTeam()) {
-            TeamBehavior.getInstance().captainOnlyValidate(playerId);
-            TeamDTO teamDTO = TeamCache.getTeamByPlayerId(playerId);
-            playerIds = teamDTO.getMembers();
-        } else {
-            playerIds = Collections.singletonList(playerId);
-        }
-        List<DungeonRecord> dungeonRecordList = dungeonRecordService.queryList(playerIds, dungeon.getId());
-        if (Objects.nonNull(dungeonRecordList) && !dungeonRecordList.isEmpty()) {
-            dungeonRecordList.forEach(rec -> {
-                long cd = CdUtil.getDuration(rec.getLastExploreTime(), dungeon.getFlushTime());
-                if (cd > 0) {
-                    throw new BusinessException(Constants.CD_EXCEPTION_PREFIX + "001", "CD:" + cd + "s");
-                }
-            });
-        }
-        // 新增探索记录
-        dungeonRecordService.insertOrUpdate(playerIds, dungeon.getId(), new Date());
-        // 初始化掉落物记录
-        Map<LootBelongToEnum, List<Long>> belongToMap = new HashMap<>();
-        // 初始化对战结果
-        DungeonResultVO dungeonResultVO = new DungeonResultVO();
-        // 处理对战
-        List<DungeonBoss> bossList = dungeonBossService.getByDungeonId(dungeon.getId());
-        boolean lose = false;
-        for (DungeonBoss boss : bossList) {
-            BattleResultVO resultVO;
-            try {
-                resultVO = BattleUtil.battlePVE(playerId, Collections.singletonList(boss.getMonsterId()), true);
-            } catch (BusinessException e) {
-                // 后续还有boss的情况下，已经重伤了，直接判负
-                if (e.equals(BattleExceptionEnum.INITIATOR_LOW_HP.getException())) {
-                    lose = true;
-                    break;
-                }
-                throw e;
-            }
-
-            if (BattleResultVO.BattleResult.WIN.equals(resultVO.getBattleResult())) {
-                List<Long> bossIds = belongToMap.getOrDefault(LootBelongToEnum.DUNGEON_BOSS, new ArrayList<>());
-                bossIds.add(boss.getId());
-                belongToMap.put(LootBelongToEnum.DUNGEON_BOSS, bossIds);
-            } else {
-                dungeonResultVO.setExploreResult(BattleResultVO.BattleResult.LOSE);
-                lose = true;
-                break;
-            }
-        }
-        dungeonResultVO.setExploreResult(lose ? BattleResultVO.BattleResult.LOSE : BattleResultVO.BattleResult.WIN);
-        if (!lose) {
-            belongToMap.put(LootBelongToEnum.DUNGEON, Collections.singletonList(dungeon.getId()));
-        }
-        belongToMap.forEach(((lootBelongToEnum, belongToIds) -> {
-            List<Loot> lootList = LootService.getByBelongToId(lootBelongToEnum.getBelongTo(), belongToIds);
-            if (CollectionUtil.isNotEmpty(lootList)) {
-                lootList.forEach(loot -> dungeonResultVO.addLoot(LootUtil.sendLoot(loot, playerIds)));
-            }
-        }));
-        return dungeonResultVO;
-    }
-
     /**
      * 获取副本列表
      *
      * @param playerId 玩家ID
      * @return 副本信息
      */
-    public List<String> listDungeon(Long playerId) {
-        PlayerBehavior.getInstance().flushStatus(PlayerCache.getPlayerById(playerId).getPlayerDTO());
+    public PageResponse<String> dungeonPage(Long playerId, int pageIndex, int pageSize) {
         List<Dungeon> dungeonList = dungeonService.list(MapUtil.getNowLocation(playerId));
-        return dungeonList.stream().map(d -> d.getName() + " 冷却时间：" + d.getFlushTime() + "s")
-                .collect(Collectors.toList());
+        return PageUtil.buildPage(dungeonList.stream()
+                .map(d -> "副本名称：" + d.getName() + " 冷却时间：" + d.getFlushTime() + "s")
+                .collect(Collectors.toList()), pageIndex, pageSize);
+    }
+
+    /**
+     * 开始探索副本
+     *
+     * @param playerId 玩家ID
+     * @return 探索结果
+     */
+    public DungeonResultVO startExploreDungeon(Long playerId) {
+        return startExploreDungeon(playerId, 0);
+    }
+
+    /**
+     * 开始探索副本
+     *
+     * @param playerId 玩家ID
+     * @param index    副本编号
+     * @return 探索结果
+     */
+    public DungeonResultVO startExploreDungeon(Long playerId, int index) {
+        return LockUtil.execute(Constants.EXPLORE_DUNGEON_LOCK_PREFIX + playerId, () ->
+                DungeonService.getInstance().startExploreDungeon(playerId, index)
+        );
+    }
+
+    /**
+     * 继续探索副本
+     *
+     * @param playerId 玩家ID
+     * @return 探索结果
+     */
+    public DungeonResultVO continueExploreDungeon(Long playerId) {
+        return LockUtil.execute(Constants.EXPLORE_DUNGEON_LOCK_PREFIX + playerId, () ->
+                DungeonService.getInstance().continueExploreDungeon(playerId)
+        );
+    }
+
+    /**
+     * 停止探索副本
+     *
+     * @param playerId 玩家ID
+     * @return 探索结果
+     */
+    public DungeonResultVO stopExploreDungeon(Long playerId) {
+        return LockUtil.execute(Constants.EXPLORE_DUNGEON_LOCK_PREFIX + playerId, () ->
+                DungeonService.getInstance().stopExploreDungeon(playerId)
+        );
     }
 
     /**
      * 获取副本信息
      *
-     * @param playerId    玩家ID
-     * @param dungeonName 副本名称
+     * @param playerId 玩家ID
+     * @param index    副本编号
      * @return 副本信息
      */
-    public DungeonVO getDungeonInfoByName(Long playerId, String dungeonName) {
+    public DungeonVO getDungeonInfoByIndex(Long playerId, int index) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId).getPlayerDTO();
-        PlayerBehavior.getInstance().flushStatus(playerDTO);
-        Dungeon dungeon = dungeonService.getByName(MapUtil.getNowLocation(playerId), dungeonName);
+        List<Dungeon> dungeonList = dungeonService.list(MapUtil.getNowLocation(playerId));
+        if (index < 1 || index > dungeonList.size()) {
+            throw DungeonExceptionEnum.DUNGEON_NOT_FOUND.getException();
+        }
+        Dungeon dungeon = dungeonList.get(index - 1);
         if (Objects.isNull(dungeon)) {
             throw DungeonExceptionEnum.DUNGEON_NOT_FOUND.getException();
         }
@@ -168,13 +115,14 @@ public class DungeonBehavior {
     /**
      * 创建副本
      *
-     * @param mapName     地图名称
+     * @param mapId       地图Id
      * @param dungeonName 副本名称
      * @param maxRank     最高阶级
      * @param flushTime   刷新时间
      */
-    public void createDungeon(String mapName, String dungeonName, Integer maxRank, Long flushTime) {
-
+    public void createDungeon(Long mapId, String dungeonName, Integer maxRank, Long flushTime, BigDecimal passRate,
+                              DungeonConfigSettingsDTO settings) {
+        DungeonService.getInstance().createDungeon(mapId, dungeonName, maxRank, flushTime, passRate, settings);
     }
 
     public void addLoot(String mapName, String dungeonName, Integer rate, String lootType) {

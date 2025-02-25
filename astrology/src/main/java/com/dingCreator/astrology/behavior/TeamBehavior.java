@@ -33,7 +33,7 @@ public class TeamBehavior {
     public Long buildTeam(Long initiatorId) {
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(initiatorId);
         playerInfoDTO.setTeam(true);
-
+        playerInfoDTO.setTeamId(initiatorId);
         TeamCache.createTeam(initiatorId);
         return playerInfoDTO.getPlayerDTO().getId();
     }
@@ -58,7 +58,7 @@ public class TeamBehavior {
         if (!PlayerStatusEnum.FREE.getCode().equals(captain.getStatus())) {
             throw TeamExceptionEnum.TEAM_NOT_FREE.getException();
         }
-        if (!MapUtil.getNowLocation(initiator.getMapId()).equals(MapUtil.getNowLocation(captain.getMapId()))) {
+        if (!MapUtil.getNowLocation(initiator.getId()).equals(MapUtil.getNowLocation(captain.getId()))) {
             throw TeamExceptionEnum.NOT_IN_SAME_MAP.getException();
         }
         if (teamDTO.getMembers().size() >= Constants.TEAM_MEMBER_LIMIT) {
@@ -66,7 +66,7 @@ public class TeamBehavior {
         }
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(initiatorId);
         playerInfoDTO.setTeam(true);
-
+        playerInfoDTO.setTeamId(teamId);
         teamDTO.getMembers().add(initiatorId);
     }
 
@@ -74,23 +74,25 @@ public class TeamBehavior {
      * 移出小队（仅限队长）
      *
      * @param initiatorId 发起人ID
-     * @param removedId   被移出人ID
+     * @param index       被移出人序号
      */
-    public void removeMember(Long initiatorId, Long removedId) {
-        if (Objects.equals(initiatorId, removedId)) {
-            throw TeamExceptionEnum.NOT_ALLOW_OWN_2_OWN.getException();
-        }
+    public void removeMember(Long initiatorId, int index) {
         TeamDTO teamDTO = TeamCache.getTeamById(initiatorId);
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.NOT_CAPTAIN.getException();
         }
-
-        if (!teamDTO.getMembers().remove(removedId)) {
+        if (index < 1 || index > teamDTO.getMembers().size()) {
             throw TeamExceptionEnum.NOT_TEAM_MEMBER.getException();
         }
-
+        int listIndex = index - 1;
+        Long removedId = teamDTO.getMembers().get(listIndex);
+        if (Objects.equals(initiatorId, removedId)) {
+            throw TeamExceptionEnum.NOT_ALLOW_OWN_2_OWN.getException();
+        }
+        teamDTO.getMembers().remove(removedId);
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(removedId);
         playerInfoDTO.setTeam(false);
+        playerInfoDTO.setTeamId(null);
     }
 
     /**
@@ -109,6 +111,7 @@ public class TeamBehavior {
 
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(initiatorId);
         playerInfoDTO.setTeam(false);
+        playerInfoDTO.setTeamId(null);
     }
 
     /**
@@ -142,16 +145,20 @@ public class TeamBehavior {
     /**
      * 更换队长
      *
-     * @param from 原队长ID
-     * @param to   新队长ID
+     * @param from  原队长ID
+     * @param index 新队长序号
      */
-    public void changeCaptain(Long from, Long to) {
-        if (Objects.equals(from, to)) {
-            throw TeamExceptionEnum.NOT_ALLOW_OWN_2_OWN.getException();
-        }
+    public void changeCaptain(Long from, Integer index) {
         TeamDTO teamDTO = TeamCache.getTeamById(from);
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.NOT_CAPTAIN.getException();
+        }
+        if (index < 1 || index > teamDTO.getMembers().size()) {
+            throw TeamExceptionEnum.NOT_TEAM_MEMBER.getException();
+        }
+        Long to = teamDTO.getMembers().get(index - 1);
+        if (Objects.equals(from, to)) {
+            throw TeamExceptionEnum.NOT_ALLOW_OWN_2_OWN.getException();
         }
         if (!teamDTO.getMembers().contains(to)) {
             throw TeamExceptionEnum.NOT_TEAM_MEMBER.getException();

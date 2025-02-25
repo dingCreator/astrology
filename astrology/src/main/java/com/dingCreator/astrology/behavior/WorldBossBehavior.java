@@ -76,8 +76,8 @@ public class WorldBossBehavior {
             long hpBeforeBattle = prop.getMonsterMap().values().stream().mapToLong(o -> o.getOrganismDTO()
                     .getHpWithAddition()).sum();
             // 开打
-            BattleUtil.battlePVE(playerId, new ArrayList<>(prop.getMonsterMap().values()), true, () ->
-                    prop.getMonsterMap().forEach((key, value) ->
+            BattleUtil.battlePVE(playerId, new ArrayList<>(prop.getMonsterMap().values()), true, false,
+                    () -> prop.getMonsterMap().forEach((key, value) ->
                             monsterService.updateHpById(key, value.getOrganismDTO().getHp()))
             );
             WorldBossCache.commitAtkTimes();

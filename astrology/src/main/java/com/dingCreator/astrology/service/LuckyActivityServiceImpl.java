@@ -16,6 +16,7 @@ import com.dingCreator.astrology.mapper.ActivityMapper;
 import com.dingCreator.astrology.request.ActivityAwardSettingReq;
 import com.dingCreator.astrology.request.LuckyActivityAwardSettingReq;
 import com.dingCreator.astrology.util.RandomUtil;
+import com.dingCreator.astrology.vo.ActivityAwardVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,6 +154,25 @@ public class LuckyActivityServiceImpl implements ActivityService {
         }).orElseThrow(() -> new IllegalArgumentException("抽奖奖品配置有误"));
         activityDTO.setAwardRuleList(awardRuleList.stream()
                 .map(award -> (BaseActivityAwardRuleDTO) award).collect(Collectors.toList()));
+    }
+
+    @Override
+    public List<String> queryAwardList(ActivityDTO activityDTO) {
+        return activityDTO.getAwardRuleList().stream()
+                .map(award -> {
+                    String awardName = award.getArticleItemList().stream()
+                            .map(item -> {
+                                String name = item.view().getName();
+                                if (Objects.nonNull(item.view().getCount())) {
+                                    name += ("*" + item.view().getCount());
+                                }
+                                return name;
+                            }).reduce((s1, s2) -> s1 + "，" + s2).orElse("");
+                    return "[" + awardName + "] "
+                            + (float) ((LuckyActivityAwardRuleDTO) award).getRate() / (float) Constants.LUCKY_MAGNIFICATION
+                            + "%";
+                })
+                .collect(Collectors.toList());
     }
 
     private static class Holder {

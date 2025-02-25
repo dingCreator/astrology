@@ -28,6 +28,7 @@ public enum TeamExceptionEnum {
     PRE_JOIN_NOT_FREE(new BusinessException(TEAM_EXCEPTION_PREFIX + "009", "仅空闲状态可申请加入小队")),
     TEAM_NOT_FREE(new BusinessException(TEAM_EXCEPTION_PREFIX + "010", "只能加入空闲状态的队伍")),
     NOT_IN_SAME_MAP(new BusinessException(TEAM_EXCEPTION_PREFIX + "011", "只能加入处于同一区域的队伍")),
+    INDEX_OUT_OF_RANGE(new BusinessException(TEAM_EXCEPTION_PREFIX + "012", "输入的序号有误")),
     ;
 
     private final BusinessException exception;

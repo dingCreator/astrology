@@ -2,12 +2,13 @@ package com.dingCreator.astrology.util;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.dingCreator.astrology.behavior.ExpBehavior;
-import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.dto.LootDTO;
-import com.dingCreator.astrology.dto.LootItemDTO;
+import com.dingCreator.astrology.dto.loot.LootDTO;
+import com.dingCreator.astrology.dto.loot.LootItemDTO;
+import com.dingCreator.astrology.dto.loot.LootItemQueryDTO;
+import com.dingCreator.astrology.dto.loot.LootQueryDTO;
 import com.dingCreator.astrology.entity.Loot;
+import com.dingCreator.astrology.entity.LootItem;
 import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.vo.LootVO;
 
@@ -30,7 +31,7 @@ public class LootUtil {
      * @return 掉落物
      */
     @SuppressWarnings("raw_use")
-    public static LootDTO convertLoot(Loot loot) {
+    public static LootDTO convertLoot(LootQueryDTO loot) {
         if (Objects.isNull(loot)) {
             return null;
         }
@@ -40,6 +41,7 @@ public class LootUtil {
         lootDTO.setAstrologyCoin(assetJsonObj.getLong(AssetTypeEnum.ASTROLOGY_COIN.getCode()));
         lootDTO.setDiamond(assetJsonObj.getLong(AssetTypeEnum.DIAMOND.getCode()));
         lootDTO.setExp(loot.getExp());
+        lootDTO.setExtInfo(lootDTO.getExtInfo());
         // 转化实物
         lootDTO.setItemList(loot.getItemList().stream().map(item -> {
             LootItemDTO dto = new LootItemDTO();
@@ -50,12 +52,33 @@ public class LootUtil {
         return lootDTO;
     }
 
-    public static LootVO sendLoot(Loot loot, Long playerId) {
+    public static LootQueryDTO convertLoot(LootDTO lootDTO) {
+        if (Objects.isNull(lootDTO)) {
+            return null;
+        }
+        LootQueryDTO loot = new LootQueryDTO();
+        loot.setExp(lootDTO.getExp());
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(AssetTypeEnum.ASTROLOGY_COIN.getCode(), lootDTO.getAstrologyCoin());
+        jsonObject.put(AssetTypeEnum.DIAMOND.getCode(), lootDTO.getDiamond());
+        loot.setAsset(jsonObject.toJSONString());
+        loot.setExtInfo(lootDTO.getExtInfo());
+        List<LootItemQueryDTO> lootItemList = lootDTO.getItemList().stream().map(dto -> {
+            LootItemQueryDTO item = new LootItemQueryDTO();
+            item.setRate(dto.getRate());
+            item.setArticleJson(JSONObject.toJSONString(dto.getArticleItem()));
+            return item;
+        }).collect(Collectors.toList());
+        loot.setItemList(lootItemList);
+        return loot;
+    }
+
+    public static LootVO sendLoot(LootQueryDTO loot, Long playerId) {
         LootDTO lootDTO = convertLoot(loot);
         return sendLoot(lootDTO, playerId);
     }
 
-    public static Map<Long, LootVO> sendLoot(Loot loot, List<Long> playerIds) {
+    public static Map<Long, LootVO> sendLoot(LootQueryDTO loot, List<Long> playerIds) {
         LootDTO lootDTO = convertLoot(loot);
         return sendLoot(lootDTO, playerIds);
     }

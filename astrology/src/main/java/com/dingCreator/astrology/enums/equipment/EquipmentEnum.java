@@ -146,6 +146,14 @@ public enum EquipmentEnum {
             Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 20L)),
             EquipmentRankEnum.ORDINARY, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode()
     ),
+    EQUIPMENT_110(110L, "屠刀",
+            "屠夫用于宰杀牲畜的刀",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 15L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.PENETRATE, 0.01F)
+            ),
+            EquipmentRankEnum.ORDINARY, EquipmentTypeEnum.WEAPON
+    ),
 
     EQUIPMENT_200(200L, "精致的钢剑",
             "无名的锻造师新出炉的钢剑，但似乎是量产品",
@@ -469,6 +477,54 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.LIFE_STEALING, 0.1F)
             ), EquipmentRankEnum.DYNAMIC, EquipmentTypeEnum.WEAPON, JobEnum.EVIL.getJobCode()
     ),
+    EQUIPMENT_332(332L, "量产型三阶剑符",
+            "因为需要注入灵魂之力，无法工业化生产，一位制符大师一天可以制作5-10张",
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 600L)),
+            EquipmentRankEnum.DYNAMIC, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode()
+    ),
+    EQUIPMENT_333(333L, "岁子银甲",
+            "修真王朝王室邀请传奇匠人千秋和为其军队打造的量产型盔甲，具有一定的防御力，用材比较轻便，使军队不至于过多损失其机动性和灵活性",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 1250L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 850L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE_REDUCTION, 0.3F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 30000L)
+            ), EquipmentRankEnum.DYNAMIC, EquipmentTypeEnum.ARMOR
+    ),
+    EQUIPMENT_334(334L, "皓月甲",
+            "因其胸前的一轮皓月标记而得名，修真王朝重甲兵所装备的盔甲，十分厚重，有很强的防御能力，" +
+                    "缺点是过于沉重，对于士兵的体力有很大的消耗，也会使他们行动有所不便",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 1500L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 1500L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 50000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, -100L)
+            ), EquipmentRankEnum.DYNAMIC, EquipmentTypeEnum.ARMOR
+    ),
+    EQUIPMENT_335(335L, "真武甲",
+            "受到真武之石照临的铠甲，蕴含真武的生机之力，能够显著提升使用者的受治疗效果。",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 850L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 850L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 80000L)
+            ), EquipmentRankEnum.DYNAMIC, EquipmentTypeEnum.ARMOR
+    ),
+    EQUIPMENT_336(336L, "芳隐绫",
+            "由天丛蚕丝纺织成的长绫，能够隐去身形，迷乱敌方的行动，对星术有着一定的抵抗能力，但很容易被刀剑斩碎，十分柔弱，不适合近身作战",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DODGE, 800L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 900L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 30000L)
+            ), EquipmentRankEnum.DYNAMIC, EquipmentTypeEnum.WEAPON
+    ),
+    EQUIPMENT_337(337L, "弥身隍行屐",
+            "首件量产化的飞行鞋子，即使是普通人也能轻易催动，腾云驾雾不再是梦",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 350L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 700L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 700L)
+            ), EquipmentRankEnum.DYNAMIC, EquipmentTypeEnum.WEAPON
+    ),
 
     EQUIPMENT_400(400L, "对玄双子",
             "传奇匠人千秋和制作的一对阴阳双持剑，两柄剑分别以玄阴珠和明阳珠为引，以玄清双生石的子石为身。战斗中相辅相成，甚至能够催动一小部分阴阳法则的力量为己用。是千秋和的成名作之一" +
@@ -686,34 +742,66 @@ public enum EquipmentEnum {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【摩诃无量】被触发");
-                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.ATK, "", 0.8F), 6, builder);
-                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.PENETRATE, "", 0.5F), 6, builder);
+                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.ATK, "摩诃无量", 0.8F), 6, builder);
+                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.PENETRATE, "摩诃无量", 0.5F), 6, builder);
                     battleMsg.add(builder.toString());
                 }
             }
     ),
-//    EQUIPMENT_500(500L, "彼岸·净天无涯",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_501(501L, "星神.沧白之祈",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-    //    EQUIPMENT_52(52L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_53(53L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
-//    EQUIPMENT_54(54L, "",
-//            "",
-//            EquipmentTypeEnum.WEAPON
-//    ),
+
+    EQUIPMENT_500(500L, "彼岸·净天无涯",
+            "陪伴邪修长大的魔剑——天无涯的完全形态，四大魔器之初，零号魔器——天喑无道上掉落的碎屑打造的仿制品，拥有同源于天喑无道的力量，除开本源之外，" +
+                    "其本体由无垠之精——一种域外神铁打造而成\n隐藏技能\n神·摩诃无量：战斗开始时提升自身攻击力150% 防御力20% 穿甲50%持续12回合",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 5500L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 2100L, 0.2F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 2100L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.LIFE_STEALING, 0.3F)
+            ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.WEAPON, JobEnum.EVIL.getJobCode(),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeBattle(List<String> battleMsg) {
+                    StringBuilder builder = new StringBuilder("※")
+                            .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的武器技能【神·摩诃无量】被触发");
+                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.ATK, "摩诃无量", 1.5F), 12, builder);
+                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.DEF, "摩诃无量", 0.2F), 12, builder);
+                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.PENETRATE, "摩诃无量", 0.5F), 12, builder);
+                    battleMsg.add(builder.toString());
+                }
+            }
+    ),
+    EQUIPMENT_501(501L, "星神·沧白之祈",
+            "审判双神之一——星神.沧白之祈的分身， 在获得了其认可之后获得的星神权能\n" +
+                    "隐藏技能\n明神：沧白之祈每三回合降下神谕，我的行动前解除自身所处的异常状态和弱化状态，并提升自身40%闪避持续2回合",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 7000L, 0.5F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 7000L, 0.5F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 1850L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.65F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 1F)
+            ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.WEAPON,
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeMyBehavior(BattleDTO tar, StringBuilder builder) {
+                    Map<String, Integer> markMap = this.getFrom().getMarkMap();
+                    if (!markMap.containsKey("沧白之祈") || markMap.get("沧白之祈") == 0) {
+                        markMap.put("沧白之祈", 3);
+                        BuffUtil.clearAbnormalBuff(this.getFrom(), builder);
+                        BuffUtil.clearInactiveBuff(this.getFrom(), builder);
+                        BuffUtil.addBuff(this.getFrom(),
+                                new BuffDTO(BuffTypeEnum.DODGE, "沧白之祈", 0.4F), 2, builder);
+                    } else {
+                        markMap.put("沧白之祈", markMap.get("沧白之祈") - 1);
+                    }
+                }
+            }
+    ),
+
     EQUIPMENT_600(600L, "冰海沉星",
-            "隐藏技能\n永冻世界：攻击命中时提升自身30%法伤持续一回合，若该次攻击未命中，则提升自身30%命中（持续一回合）后对敌方全体造成冻结持续一回合" +
+            "传闻，死烬之渊的深处是一片蔚蓝的海洋，而在这片海域的中央，沉没着一颗璀璨的明星。" +
+                    "无人知道它真正的样貌为何，因为那些不顾死活而觊觎这颗明珠的人们，已经全部死在了它可怕的凛寒之下" +
+                    "\n隐藏技能\n永冻世界：攻击命中时提升自身30%法伤持续一回合，若该次攻击未命中，则提升自身30%命中（持续一回合）后对敌方全体造成冻结持续一回合" +
                     "\n法则之力\n零度法则：进入战斗后我方全体成员提升20%速度，敌方全体成员降低20%速度，且我方成员对冻结状态敌人造成的伤害额外提升50%",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 15000L, 0.3F),
@@ -758,6 +846,24 @@ public enum EquipmentEnum {
                         BuffUtil.addBuff(enemy, new BuffDTO(BuffTypeEnum.PAUSE, "冻结", 0.3F, true), 1, builder);
                         BuffUtil.addBuff(enemy, new BuffDTO(BuffTypeEnum.SPEED, "永冻世界", -0.1F), 2, builder);
                     });
+                }
+            }
+    ),
+    EQUIPMENT_601(601L, "反物质弹",
+            "法则之力\n湮灭法则：所有目标为敌方，且有伤害倍率的单次攻击，附加200%物攻的真实伤害",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 20000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 1F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 4F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.PENETRATE, 0.7F)
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.WEAPON, JobEnum.GUN.getJobCode(),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect,
+                                              AtomicLong damage, boolean critical, StringBuilder builder) {
+                    OrganismDTO organism = this.getFrom().getOrganismInfoDTO().getOrganismDTO();
+                    builder.append("，").append(organism.getName()).append("的武器法则【湮灭法则】被触发");
+                    BattleUtil.doRealDamage(tar, 2 * organism.getAtk(), builder);
                 }
             }
     ),

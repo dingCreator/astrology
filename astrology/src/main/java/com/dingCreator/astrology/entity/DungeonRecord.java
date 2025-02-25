@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Date;
  * @date 2024/4/7
  */
 @Data
-@TableName("dungeon_record")
+@TableName("astrology_dungeon_record")
 public class DungeonRecord {
     /**
      * ID
@@ -31,8 +32,24 @@ public class DungeonRecord {
     @TableField("player_id")
     private Long playerId;
     /**
+     * 探索状态
+     */
+    @TableField("explore_status")
+    private String exploreStatus;
+    /**
+     * 当前层数
+     */
+    @TableField("floor")
+    private Integer floor;
+    /**
      * 最近一次探索时间
      */
     @TableField("last_explore_time")
-    private Date lastExploreTime;
+    private LocalDateTime lastExploreTime;
+
+    public static final String DUNGEON_ID = "dungeon_id";
+
+    public static final String PLAYER_ID = "player_id";
+
+    public static final String EXPLORE_STATUS = "explore_status";
 }

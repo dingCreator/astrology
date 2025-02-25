@@ -144,6 +144,9 @@ public class ExpBehavior {
         if (PlayerStatusEnum.MOVING.getCode().equals(playerDTO.getStatus())) {
             throw ExpExceptionEnum.MOVING.getException();
         }
+        if (PlayerStatusEnum.EXPLORE.getCode().equals(playerDTO.getStatus())) {
+            throw ExpExceptionEnum.EXPLORING.getException();
+        }
         playerDTO.setStatus(PlayerStatusEnum.HANG_UP.getCode());
         PlayerCache.save(Collections.singletonList(id));
     }

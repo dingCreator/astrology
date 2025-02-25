@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.dingCreator.astrology.entity.DungeonRecord;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -13,7 +14,7 @@ import java.util.List;
  * @date 2024/4/7
  */
 @Mapper
-public interface DungeonRecordMapper {
+public interface DungeonRecordMapper extends BaseMapper<DungeonRecord> {
 
     /**
      * 查询
@@ -57,7 +58,7 @@ public interface DungeonRecordMapper {
      * @param dungeonRecord 探索记录
      * @return rows
      */
-    @Insert("updateHpById astrology_dungeon_record set last_explore_time=#{lastExploreTime} where "
+    @Insert("update astrology_dungeon_record set last_explore_time=#{lastExploreTime} where "
             + "player_id=#{playerId} and dungeon_id=#{dungeonId}")
     Integer updateRecord(DungeonRecord dungeonRecord);
 }

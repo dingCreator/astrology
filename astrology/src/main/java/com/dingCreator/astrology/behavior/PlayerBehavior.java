@@ -14,11 +14,13 @@ import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.job.JobInitPropertiesEnum;
 import com.dingCreator.astrology.response.BaseResponse;
+import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.service.SkillBarItemService;
 import com.dingCreator.astrology.service.SkillBelongToService;
 import com.dingCreator.astrology.util.BattleUtil;
 import com.dingCreator.astrology.util.EquipmentUtil;
+import com.dingCreator.astrology.util.PageUtil;
 import com.dingCreator.astrology.vo.SimplePlayerInfoVO;
 import com.dingCreator.astrology.vo.BattleResultVO;
 import com.dingCreator.astrology.vo.PlayerInfoVO;
@@ -169,7 +171,7 @@ public class PlayerBehavior {
                 .atk(EquipmentUtil.getLongVal(playerDTO.getAtk(), EquipmentPropertiesTypeEnum.ATK, bar))
                 .magicAtk(EquipmentUtil.getLongVal(playerDTO.getMagicAtk(), EquipmentPropertiesTypeEnum.MAGIC_ATK, bar))
                 .def(EquipmentUtil.getLongVal(playerDTO.getDef(), EquipmentPropertiesTypeEnum.DEF, bar))
-                .magicDef(EquipmentUtil.getLongVal(playerDTO.getMagicDef(), EquipmentPropertiesTypeEnum.MAGIC_DEF,bar))
+                .magicDef(EquipmentUtil.getLongVal(playerDTO.getMagicDef(), EquipmentPropertiesTypeEnum.MAGIC_DEF, bar))
                 .penetrate(EquipmentUtil.getFloatVal(playerDTO.getPenetrate(), EquipmentPropertiesTypeEnum.PENETRATE, bar))
                 .magicPenetrate(EquipmentUtil.getFloatVal(playerDTO.getMagicPenetrate(),
                         EquipmentPropertiesTypeEnum.MAGIC_PENETRATE, bar))
@@ -196,6 +198,14 @@ public class PlayerBehavior {
      * @param recipientId 接受者ID
      */
     public long createBattle(Long initiatorId, Long recipientId) {
+        String initiatorStatus = PlayerCache.getPlayerById(initiatorId).getPlayerDTO().getStatus();
+        String recipientStatus = PlayerCache.getPlayerById(recipientId).getPlayerDTO().getStatus();
+        if (PlayerStatusEnum.EXPLORE.getCode().equals(initiatorStatus)) {
+            throw PlayerExceptionEnum.INITIATOR_EXPLORING.getException();
+        }
+        if (PlayerStatusEnum.EXPLORE.getCode().equals(recipientStatus)) {
+            throw PlayerExceptionEnum.RECIPIENT_EXPLORING.getException();
+        }
         return BattleUtil.createBattle(initiatorId, recipientId);
     }
 
@@ -233,13 +243,6 @@ public class PlayerBehavior {
     }
 
     /**
-     * 刷新状态
-     */
-    public synchronized void flushStatus(PlayerDTO playerDTO) {
-
-    }
-
-    /**
      * 清除玩家信息缓存
      */
     public void clearCache() {
@@ -256,11 +259,14 @@ public class PlayerBehavior {
     /**
      * 获取最近一次对战详情
      *
-     * @param playerId 玩家ID
+     * @param playerId  玩家ID
+     * @param pageIndex 页码
+     * @param pageSize  页面大小
      * @return 对战详情
      */
-    public List<String> getLastBattleProcess(long playerId) {
-        return BattleUtil.getBattleProcess(playerId);
+    public PageResponse<String> getLastBattleProcess(long playerId, int pageIndex, int pageSize) {
+        List<String> battleMsg = BattleUtil.getBattleProcess(playerId);
+        return PageUtil.buildPage(battleMsg, pageIndex, pageSize);
     }
 
     /**

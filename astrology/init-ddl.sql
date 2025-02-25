@@ -114,27 +114,30 @@ CREATE TABLE astrology_dungeon
     map_id     INTEGER               not null comment '副本所在地图ID',
     max_rank   INTEGER               not null comment '副本最高可参与阶级',
     flush_time INTEGER               not null comment '探索副本冷却时间（秒）',
-    loot       VARCHAR(512)          not null comment '掉落物',
+    pass_rate  DECIMAL(8,5)          not null comment '直接通过概率',
     PRIMARY KEY (`id`) using btree,
     key idx_map_id (map_id)
 ) engine = innodb comment = '副本表';
 
-CREATE TABLE astrology_dungeon_boss
-(
-    id         BIGINT       NOT NULL comment '主键',
-    dungeon_id INTEGER      NOT NULL comment '副本ID',
-    monster_id INTEGER      NOT NULL comment '怪物ID',
-    loot       VARCHAR(512) NOT NULL comment '掉落物',
-    PRIMARY KEY (`id`) using btree,
-    key idx_dg_id (dungeon_id)
-) engine = innodb comment = '副本boss';
+CREATE TABLE astrology_dungeon_config (
+  id BIGINT auto_increment not null comment '主键',
+  dungeon_id BIGINT NOT NULL comment '副本ID',
+  floor INT NOT NULL comment '层数',
+  wave INT NOT NULL comment '波数',
+  monster_id BIGINT NOT NULL comment 'boss的ID',
+  cnt INT NOT NULL comment '数量',
+  PRIMARY KEY (`id`) using btree,
+  key idx_dungeon_id (dungeon_id)
+) engine = innodb comment = '副本配置表';
 
 CREATE TABLE astrology_dungeon_record
 (
     id              BIGINT auto_increment not null comment '主键',
-    player_id       INTEGER               not null comment '玩家ID',
-    dungeon_id      INTEGER               not null comment '副本ID',
-    lastExploreTime DATE                  not null comment '上次挑战时间',
+    player_id       BIGINT               not null comment '玩家ID',
+    dungeon_id      BIGINT               not null comment '副本ID',
+    explore_status  VARCHAR(16)          not null comment '探索状态',
+    floor           INT                  not null comment '层数',
+    last_explore_time DATETIME           not null comment '上次挑战时间',
     PRIMARY KEY (`id`) using btree,
     key idx_pl_id (`player_id`)
 ) engine = innodb comment = '副本挑战记录';
@@ -164,8 +167,9 @@ CREATE TABLE `astrology_loot` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `belong_to` varchar(32) NOT NULL COMMENT '所属类型',
   `belong_to_id` int NOT NULL COMMENT '所属ID',
-  `asset` varchar(512) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '{}' COMMENT '钱',
+  `asset` varchar(512) NOT NULL DEFAULT '{}' COMMENT '资产',
   `exp` int NOT NULL DEFAULT '0' COMMENT '经验',
+  `ext_info` VARCHAR(1024) COMMENT '扩展信息',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `idx_blt_blt_id` (`belong_to`,`belong_to_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='掉落物表'

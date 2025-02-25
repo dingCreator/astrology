@@ -9,6 +9,7 @@ import com.dingCreator.astrology.request.ActivityPageQryReq;
 import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.service.ActivityService;
 import com.dingCreator.astrology.util.PageUtil;
+import com.dingCreator.astrology.vo.ActivityAwardVO;
 import com.dingCreator.astrology.vo.ArticleItemVO;
 
 import java.util.List;
@@ -75,6 +76,20 @@ public class ActivityBehavior {
      */
     public void createActivity(ActivityDTO activityDTO) {
         activityDTO.getActivityType().getService().createActivity(activityDTO);
+    }
+
+    public PageResponse<String> queryAwardPage(String activityName, int pageIndex, int pageSize) {
+        ActivityDTO activityDTO = ActivityService.getByName(activityName);
+        ActivityService service = activityDTO.getActivityType().getService();
+        List<String> list = service.queryAwardList(activityDTO);
+        return PageUtil.buildPage(list, pageIndex, pageSize);
+    }
+
+    public PageResponse<String> queryAwardPage(ActivityTypeEnum activityTypeEnum, int pageIndex, int pageSize) {
+        ActivityService service = activityTypeEnum.getService();
+        ActivityDTO activityDTO = service.getDefaultActivity();
+        List<String> list = service.queryAwardList(activityDTO);
+        return PageUtil.buildPage(list, pageIndex, pageSize);
     }
 
     public void easySettingAward(ActivityDTO activityDTO, ActivityAwardSettingReq activityAwardSettingReq) {

@@ -3,7 +3,7 @@ package com.dingCreator.astrology.util;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.dto.LootDTO;
+import com.dingCreator.astrology.dto.loot.LootDTO;
 import com.dingCreator.astrology.dto.task.*;
 import com.dingCreator.astrology.entity.*;
 import com.dingCreator.astrology.enums.RankEnum;

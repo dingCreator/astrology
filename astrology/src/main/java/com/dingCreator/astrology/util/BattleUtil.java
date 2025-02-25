@@ -32,8 +32,8 @@ import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.enums.skill.SkillTargetEnum;
 import com.dingCreator.astrology.exception.BusinessException;
 import com.dingCreator.astrology.service.MonsterService;
-import com.dingCreator.astrology.util.template.ExtraBattleProcessTemplate;
 import com.dingCreator.astrology.util.function.FunctionExecutor;
+import com.dingCreator.astrology.util.template.ExtraBattleProcessTemplate;
 import com.dingCreator.astrology.vo.BattleResultVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -355,7 +355,19 @@ public class BattleUtil {
      * @return 战斗结果
      */
     public static BattleResultVO battlePVE(Long playerId, List<Long> monsterIdList, boolean allowTeam) {
-        return battlePVE(playerId, getOrganismByMonsterId(monsterIdList), allowTeam, null);
+        return battlePVE(playerId, getOrganismByMonsterId(monsterIdList), allowTeam, true, null);
+    }
+
+    /**
+     * PVE
+     *
+     * @param playerId      发起人ID
+     * @param monsterIdList 怪物ID列表
+     * @param allowTeam     是否允许组队
+     * @return 战斗结果
+     */
+    public static BattleResultVO battlePVE(Long playerId, List<Long> monsterIdList, boolean allowTeam, boolean checkLowHp) {
+        return battlePVE(playerId, getOrganismByMonsterId(monsterIdList), allowTeam, checkLowHp, null);
     }
 
     /**
@@ -365,7 +377,8 @@ public class BattleUtil {
      * @param monsterList 怪物列表
      * @return 战斗结果
      */
-    public static BattleResultVO battlePVE(Long playerId, List<OrganismInfoDTO> monsterList, boolean allowTeam,
+    public static BattleResultVO battlePVE(Long playerId, List<OrganismInfoDTO> monsterList,
+                                           boolean allowTeam, boolean checkLowHp,
                                            FunctionExecutor functionExecutor) {
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
         List<Long> playerIds;
@@ -377,7 +390,7 @@ public class BattleUtil {
         }
         List<OrganismInfoDTO> playerList = getOrganismByPlayerId(playerIds);
 
-        if (playerList.stream().map(OrganismInfoDTO::getOrganismDTO)
+        if (checkLowHp && playerList.stream().map(OrganismInfoDTO::getOrganismDTO)
                 .anyMatch(o -> (float) o.getHpWithAddition() / (float) o.getMaxHpWithAddition() < 0.1)) {
             throw BattleExceptionEnum.INITIATOR_LOW_HP.getException();
         }
@@ -614,7 +627,7 @@ public class BattleUtil {
                             RankUtil.getRankSuppression(organismDTO.getRank(), highestRank), builder);
                 }).count();
         if (count > 0) {
-            battleMsg.add("※" + builder.toString());
+            battleMsg.add("※" + builder);
         }
     }
 
@@ -890,6 +903,7 @@ public class BattleUtil {
         }
         long damage = getDamage(from, tar, our, enemy, skillEffect.getDamageTypeEnum(),
                 skillEffect.getDamageRate(), nowSkill, extraBattleProcessList, builder);
+        damage = Math.round(damage * RandomUtil.rangeFloatRandom(0.9F, 1.1F));
         AtomicLong atomicDamage = new AtomicLong(damage);
         // 计算暴击
         boolean critical = getCriticalDamage(atomicDamage, from, tar, builder);
@@ -1049,11 +1063,11 @@ public class BattleUtil {
         if (DamageTypeEnum.ATK.equals(damageTypeEnum)) {
             realAtk = getLongProperty(fromOrganism.getAtk(), BuffTypeEnum.ATK.getName(), from);
             realPenetrate = getRateProperty(fromOrganism.getPenetrate(), BuffTypeEnum.PENETRATE.getName(), from);
-            realDef = getLongProperty(tarOrganism.getDef(), BuffTypeEnum.DEF.getName(), from);
+            realDef = getLongProperty(tarOrganism.getDef(), BuffTypeEnum.DEF.getName(), tar);
         } else if (DamageTypeEnum.MAGIC.equals(damageTypeEnum)) {
             realAtk = getLongProperty(fromOrganism.getMagicAtk(), BuffTypeEnum.MAGIC_ATK.getName(), from);
             realPenetrate = getRateProperty(fromOrganism.getMagicPenetrate(), BuffTypeEnum.MAGIC_PENETRATE.getName(), from);
-            realDef = getLongProperty(tarOrganism.getMagicDef(), BuffTypeEnum.MAGIC_DEF.getName(), from);
+            realDef = getLongProperty(tarOrganism.getMagicDef(), BuffTypeEnum.MAGIC_DEF.getName(), tar);
         } else {
             return 0;
         }
@@ -1159,6 +1173,7 @@ public class BattleUtil {
             BigDecimal rate = buffList.stream().map(buff -> buff.getBuffDTO().getRate()).reduce(BigDecimal.ONE, BigDecimal::add);
             healAfterCal = BigDecimal.valueOf(healAfterCal).multiply(rate).longValue();
         }
+
         long newHp = Math.min(organismDTO.getHpWithAddition() + healAfterCal, organismDTO.getMaxHpWithAddition());
         builder.append("，血量回复了").append(newHp - organismDTO.getHpWithAddition()).append("点");
         organismDTO.setHpWithAddition(newHp);

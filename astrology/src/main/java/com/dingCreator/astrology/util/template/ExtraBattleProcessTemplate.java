@@ -255,6 +255,14 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
 
     }
 
+    public void beforeHealing() {
+
+    }
+
+    public void afterHealing(long healVal) {
+
+    }
+
     /**
      * 被其他效果触发
      */

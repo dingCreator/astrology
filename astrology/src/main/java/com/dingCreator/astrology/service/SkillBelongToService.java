@@ -74,8 +74,8 @@ public class SkillBelongToService {
                     .eq(SkillBelongTo.BELONG_TO, belongToEnum.getBelongTo())
                     .eq(SkillBelongTo.BELONG_TO_ID, belongToId));
             List<Long> inactiveSkillIds = skills.stream()
-                    .filter(skill -> !SkillEnum.getById(skill.getId()).getActive())
                     .map(SkillBelongTo::getSkillId)
+                    .filter(skillId -> !SkillEnum.getById(skillId).getActive())
                     .collect(Collectors.toList());
             if (inactiveSkillIds.isEmpty()) {
                 return;

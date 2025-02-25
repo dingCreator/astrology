@@ -43,7 +43,7 @@ public class MapBehavior {
         if (MapUtil.getNowLocation(playerId).equals(target.getId())) {
             throw MapExceptionEnum.SAME_MAP.getException();
         }
-        PlayerBehavior.getInstance().flushStatus(PlayerCache.getPlayerById(playerId).getPlayerDTO());
+        PlayerCache.getPlayerById(playerId).getPlayerDTO().getStatus();
         return MapUtil.moveTime(playerId, target.getId());
     }
 
@@ -58,7 +58,7 @@ public class MapBehavior {
         if (MapUtil.getNowLocation(playerId).equals(target.getId())) {
             throw MapExceptionEnum.SAME_MAP.getException();
         }
-        PlayerBehavior.getInstance().flushStatus(PlayerCache.getPlayerById(playerId).getPlayerDTO());
+        PlayerCache.getPlayerById(playerId).getPlayerDTO().getStatus();
         MapUtil.startMove(playerId, target.getId());
         return MapUtil.moveTime(playerId, target.getId());
     }

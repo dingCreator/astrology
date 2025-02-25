@@ -21,8 +21,10 @@ import com.dingCreator.astrology.mapper.ActivityRecordMapper;
 import com.dingCreator.astrology.mapper.ActivityStaticsMapper;
 import com.dingCreator.astrology.request.ActivityAwardSettingReq;
 import com.dingCreator.astrology.request.ActivityPageQryReq;
+import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.util.ActivityUtil;
 import com.dingCreator.astrology.util.LockUtil;
+import com.dingCreator.astrology.vo.ActivityAwardVO;
 import com.dingCreator.astrology.vo.ArticleItemVO;
 
 import java.time.LocalDateTime;
@@ -146,7 +148,7 @@ public interface ActivityService {
             // 参与活动
             List<ArticleItemDTO> awards = join(activity, times);
             // 发放奖品并写入记录
-            DatabaseProvider.getInstance().batchTransactionExecute(sqlSession -> {
+            DatabaseProvider.getInstance().transactionExecute(sqlSession -> {
                 Long playerId = info.getPlayerDTO().getId();
                 // 扣除参与费用
                 activity.getCostMap().forEach((assetTypeEnum, cost) ->
@@ -380,4 +382,6 @@ public interface ActivityService {
      * @param activityAwardSettingReq 快捷设置奖品配置
      */
     void easySettingAward(ActivityDTO activityDTO, ActivityAwardSettingReq activityAwardSettingReq);
+
+    List<String> queryAwardList(ActivityDTO activityDTO);
 }

@@ -103,7 +103,7 @@ public class PlayerCache {
                 .map(PlayerInfoDTO::getPlayerDTO)
                 .map(playerDTO -> {
                     Player player = new Player();
-                    BeanUtil.copyProperties(playerDTO, player, true);
+                    playerDTO.copyProperties2Player(player);
                     return player;
                 }).collect(Collectors.toList());
         PlayerService.getInstance().updatePlayerByIds(players);

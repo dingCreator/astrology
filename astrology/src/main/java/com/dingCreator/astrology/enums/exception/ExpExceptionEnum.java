@@ -18,6 +18,7 @@ public enum ExpExceptionEnum {
     ALREADY_HANG_UP(new BusinessException(Constants.EXP_EXCEPTION_PREFIX + "000", "您已经处于挂机状态中了哦~")),
     MOVING(new BusinessException(Constants.EXP_EXCEPTION_PREFIX + "001", "您已经处于移动中，无法挂机")),
     NOT_HANG_UP(new BusinessException(Constants.EXP_EXCEPTION_PREFIX + "002", "您没有处于挂机中")),
+    EXPLORING(new BusinessException(Constants.EXP_EXCEPTION_PREFIX + "003", "您正在探索副本，无法挂机")),
     ;
 
     private final BusinessException exception;

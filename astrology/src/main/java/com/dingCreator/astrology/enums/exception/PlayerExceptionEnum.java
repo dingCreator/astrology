@@ -27,6 +27,9 @@ public enum PlayerExceptionEnum {
     NOT_ENOUGH_ASTROLOGY_COIN(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "009", "圣星币不足")),
     NOT_ENOUGH_DIAMOND(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "010", "缘石不足")),
     ASSET_TYPE_ERR(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "011", "资产类型错误")),
+    STATUS_ERR(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "012", "玩家状态异常")),
+    INITIATOR_EXPLORING(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "013", "您正在探索中，不能发起对决")),
+    RECIPIENT_EXPLORING(new BusinessException(Constants.PLAYER_EXCEPTION_PREFIX + "014", "对方正在探索中，不能发起对决")),
     ;
     private final BusinessException exception;
 }

@@ -53,6 +53,17 @@ public class CdUtil {
      */
     public static long getDuration(Date lastTime, long seconds) {
         LocalDateTime lastExploreTime = lastTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        return getDuration(lastExploreTime, seconds);
+    }
+
+    /**
+     * 获取CD剩余时间
+     *
+     * @param lastExploreTime 上次参与时间
+     * @param seconds  秒
+     * @return 剩余时间
+     */
+    public static long getDuration(LocalDateTime lastExploreTime, long seconds) {
         Duration duration = Duration.between(lastExploreTime, LocalDateTime.now());
         if (duration.getSeconds() < seconds) {
             return seconds - duration.getSeconds();
