@@ -251,7 +251,7 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
     /**
      * 受到伤害后
      */
-    public void afterDamage(StringBuilder builder) {
+    public void afterDamage(BattleDTO tar, AtomicLong atoDamage, StringBuilder builder) {
 
     }
 

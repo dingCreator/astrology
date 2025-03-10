@@ -80,6 +80,47 @@ public enum EquipmentEnum {
             ),
             EquipmentRankEnum.SP, EquipmentTypeEnum.WEAPON
     ),
+    // EQUIPMENT_9,开启某秘境的钥匙
+    EQUIPMENT_9(9L, "纸糊的衣服",
+            "纸糊成的衣服，上面画着一些修真界无法解析的鬼画符",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 1L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 2L)
+            ),
+            EquipmentRankEnum.SP, EquipmentTypeEnum.ARMOR
+    ),
+    EQUIPMENT_10(10L, "漏风的棉袄",
+            "心里哇凉哇凉的",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 2L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 2L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, -2L)
+            ),
+            EquipmentRankEnum.SP, EquipmentTypeEnum.ARMOR
+    ),
+    EQUIPMENT_11(11L, "铁桶",
+            "游戏《法器大战邪修》爆火后，一些人参照游戏中某位邪修的造型，将铁桶戴在头上，意外发现防御效果不错",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 3L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 3L)
+            ),
+            EquipmentRankEnum.SP, EquipmentTypeEnum.ARMOR
+    ),
+    EQUIPMENT_12(12L, "硬纸板",
+            "趁废品店老板不注意顺走的硬纸板，上面有修真者随意画上的加固符文，使得此硬纸板的硬度堪比石头",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 3L)
+            ),
+            EquipmentRankEnum.SP, EquipmentTypeEnum.ARMOR
+    ),
+    EQUIPMENT_13(13L, "门板",
+            "邪修洗劫完某家后，顺手拆下的门，可以当做盾牌使用",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 2L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 1L)
+            ),
+            EquipmentRankEnum.SP, EquipmentTypeEnum.ARMOR
+    ),
 
     EQUIPMENT_100(100L, "生锈的铁剑",
             "已经生锈的铁剑，似乎还能用？",
@@ -154,6 +195,29 @@ public enum EquipmentEnum {
             ),
             EquipmentRankEnum.ORDINARY, EquipmentTypeEnum.WEAPON
     ),
+    EQUIPMENT_111(111L, "量产型一阶甲符",
+            "现今的修真界学习工业化技术的产物，一条流水线一分钟就能产出200张。",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 15L)
+            ),
+            EquipmentRankEnum.ORDINARY, EquipmentTypeEnum.ARMOR, JobEnum.XIU_ZHEN.getJobCode()
+    ),
+    EQUIPMENT_112(112L, "粗布衣",
+            "非常粗厚的布衣，能起到一定的防护作用，平民过冬的选择之一",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 10L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 10L)
+            ),
+            EquipmentRankEnum.ORDINARY, EquipmentTypeEnum.ARMOR
+    ),
+    EQUIPMENT_113(113L, "橄榄球头盔",
+            "游戏《法器大战邪修》爆火后，一些人参照游戏中某位邪修的造型，将橄榄球头盔戴在头上，意外发现防御效果不错",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 20L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 20L)
+            ),
+            EquipmentRankEnum.ORDINARY, EquipmentTypeEnum.ARMOR
+    ),
 
     EQUIPMENT_200(200L, "精致的钢剑",
             "无名的锻造师新出炉的钢剑，但似乎是量产品",
@@ -219,7 +283,7 @@ public enum EquipmentEnum {
             Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 100L)),
             EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON, JobEnum.GUN.getJobCode()
     ),
-    EQUIPMENT_209(209L, "量产型阿卡",
+    EQUIPMENT_209(209L, "量产型AK",
             "上古年代的产物，居然还能使用，其中藏着一张纸，上面写着“（此处请根据故事背景，插入一些信息）”，字迹越到后面越无法辨认，" +
                     "像是上一任主人临终前写下的",
             Arrays.asList(
@@ -240,6 +304,20 @@ public enum EquipmentEnum {
             Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 200L)),
             EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode()
     ),
+    EQUIPMENT_212(212L, "量产型二阶甲符",
+            "现今的修真界学习工业化技术的产物，一条流水线一分钟能产出20张",
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 150L)),
+            EquipmentRankEnum.NORMAL, EquipmentTypeEnum.ARMOR, JobEnum.XIU_ZHEN.getJobCode()
+    ),
+    EQUIPMENT_213(213L, "岩制铠甲",
+            "岩石经修真者法术处理后制成的铠甲，防御力惊人，但是非常沉重",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 300L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 100L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, -100L)
+            ), EquipmentRankEnum.NORMAL, EquipmentTypeEnum.ARMOR
+    ),
+
 
     EQUIPMENT_300(300L, "青苍剑",
             "修仙王朝初级灵剑中的一种，由寒铁精所铸十分轻便，能有效提升使用者的灵活性，多用作飞剑使用",
@@ -515,7 +593,7 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DODGE, 800L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 900L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 30000L)
-            ), EquipmentRankEnum.DYNAMIC, EquipmentTypeEnum.WEAPON
+            ), EquipmentRankEnum.DYNAMIC, EquipmentTypeEnum.ARMOR
     ),
     EQUIPMENT_337(337L, "弥身隍行屐",
             "首件量产化的飞行鞋子，即使是普通人也能轻易催动，腾云驾雾不再是梦",
@@ -523,7 +601,7 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 350L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 700L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 700L)
-            ), EquipmentRankEnum.DYNAMIC, EquipmentTypeEnum.WEAPON
+            ), EquipmentRankEnum.DYNAMIC, EquipmentTypeEnum.ARMOR
     ),
 
     EQUIPMENT_400(400L, "对玄双子",
@@ -748,6 +826,72 @@ public enum EquipmentEnum {
                 }
             }
     ),
+    EQUIPMENT_410(410L, "开山刀-真",
+            "真正的开山刀，著名刀侠“白龙刀客”的武器。" +
+                    "白龙刀客曾持此刀于死烬之渊西侧的天火山脉与道枯真人的一战，白龙刀客用此刀劈开了一座山，引发天火降世，道枯真人重伤逃跑，白龙刀客就此下落不明。" +
+                    "后来，此刀出现在了死烬之渊东侧的火树林中，由此可见，白龙刀客凶多吉少" +
+                    "\n隐藏技能：每次攻击，都有5%概率附加一次10%物攻的真实伤害",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 2200L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 0.4F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.1F)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.SI_DI_WU_SHI.getJobCode(),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                    long extraDamage = Math.round(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getAtk() * 0.1);
+                    if ((new Random().nextInt(100) < 5)) {
+                        damage.addAndGet(extraDamage);
+                    }
+                    builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的武器技能被触发，额外造成").append(extraDamage).append("点伤害");
+                }
+            }
+    ),
+    EQUIPMENT_411(411L, "白龙刀",
+            "真正的开山刀，著名刀侠“白龙刀客”的武器。" +
+                    "白龙刀客成名之战中使用的武器" +
+                    "白龙刀客是双持刀客，通常左手使用此刀，右手使用开山刀" +
+                    "白龙刀客最终一战后，此刀下落不明" +
+                    "\n隐藏技能：每次攻击，都有20%的概率附加一次20%法攻的普通伤害",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 3000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 0.1F)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.SI_DI_WU_SHI.getJobCode(),
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                    long extraDamage = Math.round(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getMagicAtk() * 0.2);
+                    if ((new Random().nextInt(100) < 20)) {
+                        damage.addAndGet(extraDamage);
+                    }
+                    builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的武器技能被触发，额外造成").append(extraDamage).append("点伤害");
+                }
+            }
+    ),
+    EQUIPMENT_412(412L, "浣溪沙",
+                    "修仙王朝眉山仙子的轻纱，在仙子常年保养与锤炼下已近神迹，" +
+                    "生有灵智，可自动护主。材质坚韧，" +
+                    "由千年晶水蓝矿打磨成的丝织而成，是兼顾颜值与实力的强力防具" +
+                    "\n隐藏技能\n兰芽短浸：受到伤害后，闪避提升35%持续两回合",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 5200L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 2300L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 200000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 500L)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.ARMOR,
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void afterDamage(BattleDTO tar, AtomicLong atoDamage, StringBuilder builder) {
+                    if (atoDamage.get() > 0) {
+                        builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                                .append("的武器技能【兰芽短浸】被触发");
+                        BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.DODGE, "", 0.35F), 2, builder);
+                    }
+                }
+            }
+    ),
 
     EQUIPMENT_500(500L, "彼岸·净天无涯",
             "陪伴邪修长大的魔剑——天无涯的完全形态，四大魔器之初，零号魔器——天喑无道上掉落的碎屑打造的仿制品，拥有同源于天喑无道的力量，除开本源之外，" +
@@ -795,6 +939,22 @@ public enum EquipmentEnum {
                         markMap.put("沧白之祈", markMap.get("沧白之祈") - 1);
                     }
                 }
+            }
+    ),
+    EQUIPMENT_502(502L, "寒星.圣者之冠",
+            "以冰海沉星为原型，并针对其特性打造出来的神煅之器，为古圣城圣者权位与力量的标志。\n" +
+            "传闻圣者之冠具有锁定冰海沉星所在位置的能力，古圣城历代圣者都有着寻找冰海沉星的记录，但他们最终都无功而返或身死道消。\n" +
+                    "隐藏技能\n圣者尊崇.零度法则:装备者受到的伤害减少20%，攻击命中后使敌方速度降低15%持续一回合。",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 10000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 0.2F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 15000L, 0.15F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_REDUCTION_RATE, 0.35F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE_REDUCTION, 0.80F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 400000F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MP, 250F)
+            ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.ARMOR,
+            new ExtraBattleProcessTemplate() {
             }
     ),
 
@@ -850,7 +1010,10 @@ public enum EquipmentEnum {
             }
     ),
     EQUIPMENT_601(601L, "反物质弹",
-            "法则之力\n湮灭法则：所有目标为敌方，且有伤害倍率的单次攻击，附加200%物攻的真实伤害",
+            "未元之都利用湮灭法则开发出的产物。"+
+            "作为世间最具毁灭力量的法则集合体，又融合了反物质的科技手段，反物质弹尚处于雏形之时就已经达到了惊人的法则级，其毁灭之能可以无视一切防御直达命脉。"+
+            "标志着普通人类的脚步已经踏足了世界的根基。"+
+            "\n法则之力\n湮灭法则：所有目标为敌方，且有伤害倍率的单次攻击，附加200%物攻的真实伤害",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 20000L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 1F),
@@ -867,7 +1030,48 @@ public enum EquipmentEnum {
                 }
             }
     ),
+    EQUIPMENT_602(602L, "不灭金身",
+            "法则之力\n不灭法则：每次战斗限一次，受到致命伤害后，免疫此次伤害",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 800000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 32000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 32000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_REDUCTION_RATE, 0.5F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE_REDUCTION, 1.5F)
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.ARMOR,
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeMeDeath(BattleDTO from, BattleDTO tar,
+                                          AtomicLong atoDamage, StringBuilder builder) {
 
+                    OrganismDTO organism = tar.getOrganismInfoDTO().getOrganismDTO();
+                    builder.append("，").append(organism.getName()).append("的武器法则【不灭法则】被触发");
+                }
+            }
+    ),
+    EQUIPMENT_603(603L, "天喑无道",
+            "原始魔器，四大魔器的母本，此世全部负面力量的集合体."+
+            "其历史无从考证，只知其十分古老，"+
+            "最早记录于星历前355年，圣星府灭门案现场被人目击，由一名十岁左右的孩童携带逃离，随后不知踪迹。"+
+            "随后几十年间，广有天喑无道之名的传闻，且传闻所在之处同时有数起凶案发生。"+
+            "第一次被证实存在于星历前263年，一名神秘人士将其置于圣城拍卖会拍卖，后被圣城高层拍下。星历前3年，天喑无道失窃，随后不知所踪。"+
+            "法则之力\n泯灭法则：敌方全体血量回复效果降低90%持续整场战斗无法消除",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 200000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 12000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.LIFE_STEALING, 0.8F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.8F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 1.5F)
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.JEWELRY,
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect,
+                                              AtomicLong damage, boolean critical, StringBuilder builder) {
+                    OrganismDTO organism = this.getFrom().getOrganismInfoDTO().getOrganismDTO();
+                    builder.append("，").append(organism.getName()).append("的武器法则【泯灭法则】被触发");
+                }
+            }
+    ),
     ;
     /**
      * ID

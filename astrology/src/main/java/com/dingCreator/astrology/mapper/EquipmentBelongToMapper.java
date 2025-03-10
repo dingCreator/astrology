@@ -59,7 +59,7 @@ public interface EquipmentBelongToMapper {
                                                        @Param("belongToId") Long belongToId);
 
     /**
-     * 根据归属ID查询是否已穿的装备
+     * 根据归属ID查询是否为已穿的装备
      *
      * @param belongTo   归属
      * @param belongToId 归属ID

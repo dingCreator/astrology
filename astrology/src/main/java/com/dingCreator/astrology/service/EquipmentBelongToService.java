@@ -101,6 +101,8 @@ public class EquipmentBelongToService {
      */
     public void addBelongTo(EquipmentBelongTo equipmentBelongTo) {
         DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(EquipmentBelongToMapper.class)
+                .getBelongToIdEquip());
+        DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(EquipmentBelongToMapper.class)
                 .addBelongTo(equipmentBelongTo));
     }
 
