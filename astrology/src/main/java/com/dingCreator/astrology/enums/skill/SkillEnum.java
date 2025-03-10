@@ -1,7 +1,10 @@
 package com.dingCreator.astrology.enums.skill;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.dingCreator.astrology.dto.*;
+import com.dingCreator.astrology.dto.BattleBuffDTO;
+import com.dingCreator.astrology.dto.BattleDTO;
+import com.dingCreator.astrology.dto.BuffDTO;
+import com.dingCreator.astrology.dto.GiveBuffDTO;
 import com.dingCreator.astrology.dto.organism.OrganismDTO;
 import com.dingCreator.astrology.dto.organism.OrganismInfoDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
@@ -10,9 +13,9 @@ import com.dingCreator.astrology.enums.BuffTypeEnum;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
+import com.dingCreator.astrology.util.*;
 import com.dingCreator.astrology.util.template.ExtraBattleProcessTemplate;
 import com.dingCreator.astrology.util.template.ThisBehaviorExtraBattleProcessTemplate;
-import com.dingCreator.astrology.util.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -1382,25 +1385,77 @@ public enum SkillEnum {
             }
     ),
 
-//    SKILL_1042(1042L, "明神", "回合开始时解除自身所处的异常状态与弱化类buff效果，并提升自身40%闪避持续2回合",
-//            "None", 40L,
+    SKILL_1042(1042L, "真·勇者", "星神认可，为世界带来希望之“勇者”，战斗开始时，双攻，双防，闪避，命中，速度全部提升20%持续十回合。" +
+            "对敌方1号位敌人造成10%法抗10%物抗下降的法则效果",
+            "None", false, new ExtraBattleProcessTemplate() {
+        @Override
+        public void beforeBattle(List<String> battleMsg) {
+            StringBuilder builder = new StringBuilder("※");
+            builder.append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName()).append("的被动技能【真·勇者】被触发");
+            BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.ATK, "真·勇者", 0.2F), 10, builder);
+            BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.MAGIC_ATK, "真·勇者", 0.2F), 10, builder);
+            BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.DEF, "真·勇者", 0.2F), 10, builder);
+            BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.MAGIC_DEF, "真·勇者", 0.2F), 10, builder);
+            BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.HIT, "真·勇者", 0.2F), 10, builder);
+            BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.DODGE, "真·勇者", 0.2F), 10, builder);
+            BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.SPEED, "真·勇者", 0.2F), 10, builder);
+            RuleUtil.addRule(this.getEnemy().get(0), OrganismPropertiesEnum.DEF, "真·勇者", -0.1F, builder);
+            RuleUtil.addRule(this.getEnemy().get(0), OrganismPropertiesEnum.MAGIC_DEF, "真·勇者", -0.1F, builder);
+            battleMsg.add(builder.toString());
+        }
+    }),
+
+//    SKILL_1043(1043L, "明神", "解除自身所处的异常状态与弱化类buff效果，并提升自身40%闪避持续2回合",
+//            "None", 40L
 //
 //    ),
+
+    SKILL_1044(1044L, "离烟", "造成550%法术伤害，命中后扣除敌方10%蓝量",
+            "None", 60L, new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 5.5F),
+            new ThisBehaviorExtraBattleProcessTemplate() {
+                @Override
+                public void ifHit(BattleDTO from, BattleDTO tar,
+                                  List<BattleDTO> our, List<BattleDTO> enemy,
+                                  AtomicLong damage, boolean critical, StringBuilder builder) {
+                    BattleUtil.doMpRecover(tar, Math.round(-0.1F * tar.getOrganismInfoDTO().getOrganismDTO().getMaxMpWithAddition()), builder);
+                }
+            }
+    ),
+
+    SKILL_1045(1045L, "浮岸", "提升自身15%命中持续2回合，连续进行十次攻击每次攻击造成75%物理伤害",
+            "None", 80L,
+            Collections.nCopies(10, new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 0.75F)),
+            new ThisBehaviorExtraBattleProcessTemplate() {
+                @Override
+                public void beforeThisRound(BattleDTO from, List<BattleDTO> our, List<BattleDTO> enemy, StringBuilder builder) {
+                    BuffUtil.addBuff(from, new BuffDTO(BuffTypeEnum.HIT, "", 0.15F), 2, builder);
+                }
+            }
+    ),
+
+    SKILL_1046(1046L, "祈愿", "敌我双方回复10%蓝量10%血量",
+            "None", new SkillEffectDTO(SkillTargetEnum.ME, DamageTypeEnum.ATK, 0F),
+            new ThisBehaviorExtraBattleProcessTemplate() {
+                @Override
+                public void ifHit(BattleDTO from, BattleDTO tar,
+                                  List<BattleDTO> our, List<BattleDTO> enemy,
+                                  AtomicLong damage, boolean critical, StringBuilder builder) {
+                    our.forEach(o -> BattleUtil.doHealing(o,
+                            Math.round(0.1F * o.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition()), builder));
+                    our.forEach(o -> BattleUtil.doMpRecover(o,
+                            Math.round(0.1F * o.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition()), builder));
+                    enemy.forEach(e -> BattleUtil.doHealing(e,
+                            Math.round(0.1F * e.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition()), builder));
+                    enemy.forEach(e -> BattleUtil.doMpRecover(e,
+                            Math.round(0.1F * e.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition()), builder));
+                }
+            }
+    ),
+
+//    SKILL_1047(1047L, "圣裁", "对敌方造成1200%法术伤害，命中后使敌方陷入焚毁异常持续两回合",
+//            "None", 130L, new SkillEffectDTO(SkillTargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 12F),
 //
-//    SKILL_1043(1043L, "离烟", "造成550%法术伤害，命中后扣除敌方10%蓝量",
-//            "None", 60L,
-//
-//    ),
-//
-//    SKILL_1044(1044L, "浮岸", "提升自身15%命中持续2回合，连续进行十次攻击每次攻击造成75%物理伤害",
-//            "None", 80L,
-//    ),
-//
-//    SKILL_1045(1045L, "祈愿", "敌我双方回复10%蓝量10%血量"),
-//
-//    SKILL_1046(1046L, "圣裁", "对敌方造成1200%法术伤害，命中后使敌方陷入焚毁异常持续两回合",
-//            "None", 130L,
-//    ),
+//            ),
 
     SKILL_10000(10000L, "作弊",
             "开发者的作弊技能，造成10000%的物理伤害，并提升1000000攻击10回合",

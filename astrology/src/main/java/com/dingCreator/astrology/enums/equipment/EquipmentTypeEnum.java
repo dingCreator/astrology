@@ -34,7 +34,8 @@ public enum EquipmentTypeEnum {
                     EquipmentBelongToService.getInstance().updateEquipment(bar.getWeapon().getId(), false);
                 }
                 EquipmentBelongToService.getInstance().updateEquipment(equipmentBelongTo.getId(), true);
-                bar.setWeapon(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getBelongToId(), equipmentBelongTo.getLevel()));
+                bar.setWeapon(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getBelongToId(),
+                        equipmentBelongTo.getEquipmentLevel()));
             },
             playerId -> {
                 PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
@@ -56,7 +57,8 @@ public enum EquipmentTypeEnum {
                 if (Objects.nonNull(bar.getArmor())) {
                     EquipmentBelongToService.getInstance().updateEquipment(bar.getArmor().getId(), false);
                 }
-                bar.setArmor(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getBelongToId(), equipmentBelongTo.getLevel()));
+                bar.setArmor(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getBelongToId(),
+                        equipmentBelongTo.getEquipmentLevel()));
                 EquipmentBelongToService.getInstance().updateEquipment(equipmentBelongTo.getId(), true);
             },
             playerId -> {
@@ -79,7 +81,8 @@ public enum EquipmentTypeEnum {
                 if (Objects.nonNull(bar.getJewelry())) {
                     EquipmentBelongToService.getInstance().updateEquipment(bar.getJewelry().getId(), false);
                 }
-                bar.setJewelry(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getBelongToId(), equipmentBelongTo.getLevel()));
+                bar.setJewelry(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getBelongToId(),
+                        equipmentBelongTo.getEquipmentLevel()));
                 EquipmentBelongToService.getInstance().updateEquipment(equipmentBelongTo.getId(), true);
             },
             playerId -> {

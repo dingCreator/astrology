@@ -35,10 +35,6 @@ public class EquipmentUtil {
         if (Objects.isNull(equipmentBelongTo)) {
             throw EquipmentExceptionEnum.EQUIPMENT_NOT_EXIST.getException();
         }
-        if (!BelongToEnum.PLAYER.getBelongTo().equals(equipmentBelongTo.getBelongTo())
-                || !equipmentBelongTo.getBelongToId().equals(playerId)) {
-            throw EquipmentExceptionEnum.NOT_YOUR_EQUIPMENT.getException();
-        }
         EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentBelongTo.getEquipmentId());
         if (Objects.isNull(equipmentEnum)) {
             throw EquipmentExceptionEnum.DATA_ERROR.getException();
@@ -86,9 +82,9 @@ public class EquipmentUtil {
         float sumRate = equipEnum.getProp().stream()
                 .filter(equip -> equipmentPropertiesTypeEnum.equals(equip.getEquipmentPropertiesTypeEnum()))
                 .peek(prop -> atomicLong.addAndGet(prop.getProp().getVal()))
-                .filter(prop -> prop.getProp().getRate() != 0)
                 .map(EquipmentPropertiesDTO::getProp)
                 .map(EquipmentPropertiesDTO.Prop::getRate)
+                .filter(rate -> rate != 0)
                 .reduce(Float::sum).orElse(0F);
         if (atomicLong.get() < 0) {
             atomicLong.set(0);
@@ -143,22 +139,15 @@ public class EquipmentUtil {
                                           EquipmentBelongTo equipmentBelongTo) {
         if (EquipmentTypeEnum.ARMOR.equals(equipmentEnum.getEquipmentTypeEnum())) {
             equipmentBarDTO.setArmor(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
-                    equipmentBelongTo.getLevel()));
+                    equipmentBelongTo.getEquipmentLevel()));
         } else if (EquipmentTypeEnum.WEAPON.equals(equipmentEnum.getEquipmentTypeEnum())) {
             equipmentBarDTO.setWeapon(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
-                    equipmentBelongTo.getLevel()));
+                    equipmentBelongTo.getEquipmentLevel()));
         } else if (EquipmentTypeEnum.JEWELRY.equals(equipmentEnum.getEquipmentTypeEnum())) {
             equipmentBarDTO.setJewelry(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
-                    equipmentBelongTo.getLevel()));
+                    equipmentBelongTo.getEquipmentLevel()));
         }
     }
-
-    public static void updateWeapon(Long playerId, EquipmentBelongTo equipmentBelongTo) {
-        PlayerInfoDTO info = PlayerCache.getPlayerById(playerId);
-
-    }
-
-
 
     public static void updateEquipment(Long playerId, EquipmentBelongTo equipmentBelongTo, boolean equip) {
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
@@ -170,19 +159,19 @@ public class EquipmentUtil {
                 equipmentBelongToService.updateEquipment(equipmentBarDTO.getWeapon().getId(), false);
             }
             equipmentBarDTO.setWeapon(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
-                    equipmentBelongTo.getLevel()));
+                    equipmentBelongTo.getEquipmentLevel()));
         } else if (EquipmentTypeEnum.ARMOR.equals(equipmentEnum.getEquipmentTypeEnum())) {
             if (Objects.nonNull(equipmentBarDTO.getArmor())) {
                 equipmentBelongToService.updateEquipment(equipmentBarDTO.getArmor().getId(), false);
             }
             equipmentBarDTO.setArmor(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
-                    equipmentBelongTo.getLevel()));
+                    equipmentBelongTo.getEquipmentLevel()));
         } else if (EquipmentTypeEnum.JEWELRY.equals(equipmentEnum.getEquipmentTypeEnum())) {
             if (Objects.nonNull(equipmentBarDTO.getJewelry())) {
                 equipmentBelongToService.updateEquipment(equipmentBarDTO.getJewelry().getId(), false);
             }
             equipmentBarDTO.setJewelry(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
-                    equipmentBelongTo.getLevel()));
+                    equipmentBelongTo.getEquipmentLevel()));
         }
         playerInfoDTO.getPlayerDTO().clearAdditionVal();
         equipmentBelongToService.updateEquipment(equipmentBelongTo.getId(), equip);

@@ -17,7 +17,9 @@ import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.util.template.ExtraBattleProcessTemplate;
 import com.dingCreator.astrology.util.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -283,7 +285,7 @@ public enum EquipmentEnum {
             Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 100L)),
             EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON, JobEnum.GUN.getJobCode()
     ),
-    EQUIPMENT_209(209L, "量产型AK",
+    EQUIPMENT_209(209L, "量产型阿卡",
             "上古年代的产物，居然还能使用，其中藏着一张纸，上面写着“（此处请根据故事背景，插入一些信息）”，字迹越到后面越无法辨认，" +
                     "像是上一任主人临终前写下的",
             Arrays.asList(
@@ -1247,6 +1249,7 @@ public enum EquipmentEnum {
 
     private static final Map<Long, EquipmentEnum> EQUIPMENT_ENUM_MAP;
     private static final Map<String, EquipmentEnum> EQUIPMENT_ENUM_NAME_MAP;
+    private static final Map<Long, EquipmentSuit> EQUIPMENT_ENUM_SUIT_MAP = new HashMap<>();
 
     public static EquipmentEnum getById(Long id) {
         EquipmentEnum equipmentEnum = EQUIPMENT_ENUM_MAP.get(id);
@@ -1269,5 +1272,24 @@ public enum EquipmentEnum {
                 EquipmentEnum::getId, Function.identity()));
         EQUIPMENT_ENUM_NAME_MAP = Arrays.stream(EquipmentEnum.values()).collect(Collectors.toMap(
                 EquipmentEnum::getName, Function.identity()));
+    }
+
+    @Data
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class EquipmentSuit {
+        /**
+         * 武器ID
+         */
+        private Long weaponId;
+        /**
+         * 防具ID
+         */
+        private Long armorId;
+        /**
+         * 饰品ID
+         */
+        private Long jewelryId;
     }
 }

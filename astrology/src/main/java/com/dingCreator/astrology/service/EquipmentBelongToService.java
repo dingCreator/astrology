@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.dto.equipment.EquipmentGroupQueryDTO;
 import com.dingCreator.astrology.entity.EquipmentBelongTo;
@@ -8,6 +9,7 @@ import com.dingCreator.astrology.mapper.EquipmentBelongToMapper;
 import com.dingCreator.astrology.vo.EquipmentGroupVO;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +27,18 @@ public class EquipmentBelongToService {
     public EquipmentBelongTo getById(Long id) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(EquipmentBelongToMapper.class).getById(id));
+    }
+
+    public EquipmentBelongTo getByNameAndLevel(String belongTo, Long belongToId, String equipmentName, int level) {
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
+                sqlSession.getMapper(EquipmentBelongToMapper.class).selectOne(
+                        new QueryWrapper<EquipmentBelongTo>()
+                                .eq(EquipmentBelongTo.BELONG_TO, belongTo)
+                                .eq(EquipmentBelongTo.BELONG_TO_ID, belongToId)
+                                .eq(EquipmentBelongTo.EQUIPMENT_ID, EquipmentEnum.getByName(equipmentName).getId())
+                                .eq(EquipmentBelongTo.EQUIPMENT_LEVEL, level)
+                )
+        );
     }
 
     /**
@@ -46,10 +60,15 @@ public class EquipmentBelongToService {
      * @param belongToId 归属ID
      * @return 装备列表
      */
-    public List<EquipmentBelongTo> getByBelongToIdAndEquipmentId(String belongTo, Long belongToId, Long equipmentId) {
+    public EquipmentBelongTo getByBelongToIdAndEquipmentId(String belongTo, Long belongToId, Long equipmentId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(EquipmentBelongToMapper.class)
-                        .getByBelongToIdAndEquipmentId(belongTo, belongToId, equipmentId));
+                        .selectOne(new QueryWrapper<EquipmentBelongTo>()
+                                .eq(EquipmentBelongTo.BELONG_TO, belongTo)
+                                .eq(EquipmentBelongTo.BELONG_TO_ID, belongToId)
+                                .eq(EquipmentBelongTo.EQUIPMENT_ID, equipmentId)
+                        )
+        );
     }
 
     /**
@@ -66,6 +85,7 @@ public class EquipmentBelongToService {
             EquipmentEnum equipmentEnum = EquipmentEnum.getById(query.getEquipmentId());
             EquipmentGroupVO vo = new EquipmentGroupVO();
             vo.setEquipmentRank(equipmentEnum.getEquipmentRankEnum());
+            vo.setEquipmentTypeEnum(equipmentEnum.getEquipmentTypeEnum());
             vo.setEquipmentName(equipmentEnum.getName());
             vo.setLimitJob(equipmentEnum.getLimitJob());
             vo.setLimitLevel(equipmentEnum.getLimitLevel());
@@ -102,8 +122,21 @@ public class EquipmentBelongToService {
     public void addBelongTo(EquipmentBelongTo equipmentBelongTo) {
         DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(EquipmentBelongToMapper.class)
                 .getBelongToIdEquip());
-        DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(EquipmentBelongToMapper.class)
-                .addBelongTo(equipmentBelongTo));
+        DatabaseProvider.getInstance().transactionExecute(sqlSession -> {
+            EquipmentBelongToMapper mapper = sqlSession.getMapper(EquipmentBelongToMapper.class);
+            EquipmentBelongTo oldEquipment = mapper.selectOne(new QueryWrapper<EquipmentBelongTo>()
+                    .eq(EquipmentBelongTo.BELONG_TO, equipmentBelongTo.getBelongTo())
+                    .eq(EquipmentBelongTo.BELONG_TO_ID, equipmentBelongTo.getBelongToId())
+                    .eq(EquipmentBelongTo.EQUIPMENT_ID, equipmentBelongTo.getEquipmentId())
+                    .eq(EquipmentBelongTo.EQUIPMENT_LEVEL, equipmentBelongTo.getEquipmentLevel())
+            );
+            if (Objects.nonNull(oldEquipment)) {
+                oldEquipment.setTotalCnt(oldEquipment.getTotalCnt() + equipmentBelongTo.getTotalCnt());
+                mapper.updateById(oldEquipment);
+            } else {
+                mapper.insert(equipmentBelongTo);
+            }
+        });
     }
 
     /**

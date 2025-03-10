@@ -41,6 +41,7 @@ public class DatabaseProvider {
         // 若无事务，创建一个事务
         if (Objects.isNull(sqlSession = sqlSessionThreadLocal.get())) {
             sqlSession = DatabaseContext.getSqlSessionFactory().openSession(executorType, false);
+            sqlSessionThreadLocal.set(sqlSession);
             try {
                 T result = function.apply(sqlSession);
                 sqlSession.commit();

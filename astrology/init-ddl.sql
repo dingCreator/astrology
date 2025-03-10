@@ -155,12 +155,13 @@ CREATE TABLE astrology_equipment_belong_to
 (
     id           BIGINT auto_increment not null comment '主键',
     belong_to    VARCHAR(32)           NOT NULL comment '所属类型',
-    belong_to_id INTEGER               NOT NULL comment '所属ID',
-    equipment_id INTEGER               NOT NULL comment '装备ID',
-    level        INTEGER               NOT NULL DEFAULT 0 comment '装备等级',
+    belong_to_id BIGINT                NOT NULL comment '所属ID',
+    equipment_id BIGINT                NOT NULL comment '装备ID',
+    equipment_level        INT         NOT NULL DEFAULT 1 comment '装备等级',
+    cnt          INT                   NOT NULL DEFAULT 1 comment '装备数量',
     equip        BIT                   not null default 0 comment '是否已装备',
     PRIMARY KEY (`id`) using btree,
-    key idx_blt_blt_id (belong_to, belong_to_id)
+    unique key uk_blt_blt_id_eq_id_lv (belong_to, belong_to_id, equipment_id, level)
 ) engine = innodb comment = '装备表';
 
 CREATE TABLE `astrology_loot` (
@@ -301,3 +302,19 @@ CREATE TABLE astrology_activity_statics
     count       INT    NOT NULL COMMENT '次数',
     key idx_activity_player_id_time (activity_id, player_id, date_time) using btree
 ) COMMENT ='活动参与统计表';
+
+CREATE TABLE `pill` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `pill_name` VARCHAR(255) NOT NULL COMMENT '丹药名称',
+    `level` INT COMMENT '丹药等级',
+    `vigor` INT COMMENT '生机',
+    `warn` INT COMMENT '温热',
+    `cold` INT COMMENT '寒韵',
+    `toxicity` INT COMMENT '毒性',
+    `quality` INT COMMENT '品质',
+    `star` INT COMMENT '星辰之力',
+    `effect_json` TEXT COMMENT '效果',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY uk_pill_name (`pill_name`),
+    KEY idx_prop(vigor,warn,cold,toxicity,quality,star)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='丹药表';

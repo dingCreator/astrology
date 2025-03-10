@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.dingCreator.astrology.dto.equipment.EquipmentGroupQueryDTO;
 import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import org.apache.ibatis.annotations.*;
@@ -11,7 +12,7 @@ import java.util.List;
  * @date 2024/4/10
  */
 @Mapper
-public interface EquipmentBelongToMapper {
+public interface EquipmentBelongToMapper extends BaseMapper<EquipmentBelongTo> {
 
     /**
      * 根据ID查询信息
@@ -42,9 +43,9 @@ public interface EquipmentBelongToMapper {
      */
     @Select("select * from astrology_equipment_belong_to where belong_to=#{belongTo} and belong_to_id=#{belongToId} " +
             "and equipment_id=#{equipmentId}")
-    List<EquipmentBelongTo> getByBelongToIdAndEquipmentId(@Param("belongTo") String belongTo,
-                                                          @Param("belongToId") Long belongToId,
-                                                          @Param("equipmentId") Long equipmentId);
+    EquipmentBelongTo getByBelongToIdAndEquipmentId(@Param("belongTo") String belongTo,
+                                                    @Param("belongToId") Long belongToId,
+                                                    @Param("equipmentId") Long equipmentId);
 
     /**
      * 根据归属ID查询组
@@ -53,8 +54,8 @@ public interface EquipmentBelongToMapper {
      * @param belongToId 归属ID
      * @return 装备列表
      */
-    @Select("select equipment_id,count(1) equipmentCount from astrology_equipment_belong_to where belong_to=#{belongTo} " +
-            "and belong_to_id=#{belongToId} group by equipment_id")
+    @Select("select equipment_id,total_cnt as equipmentCount from astrology_equipment_belong_to where belong_to=#{belongTo} " +
+            "and belong_to_id=#{belongToId}")
     List<EquipmentGroupQueryDTO> listGroupByBelongToId(@Param("belongTo") String belongTo,
                                                        @Param("belongToId") Long belongToId);
 
@@ -76,8 +77,8 @@ public interface EquipmentBelongToMapper {
      *
      * @param equipmentBelongTo 装备归属
      */
-    @Insert("INSERT INTO astrology_equipment_belong_to(belong_to, belong_to_id, equipment_id, `level`, equip)" +
-            "VALUES (#{belongTo}, #{belongToId}, #{equipmentId}, #{level}, #{equip})")
+    @Insert("INSERT INTO astrology_equipment_belong_to(belong_to, belong_to_id, equipment_id, equipment_level, equip)" +
+            "VALUES (#{belongTo}, #{belongToId}, #{equipmentId}, #{equipmentLevel}, #{equip})")
     void addBelongTo(EquipmentBelongTo equipmentBelongTo);
 
     /**

@@ -38,8 +38,9 @@ public class ArticleEquipmentItem extends ArticleItemDTO {
         equipmentBelongTo.setBelongTo(BelongToEnum.PLAYER.getBelongTo());
         equipmentBelongTo.setBelongToId(playerId);
         equipmentBelongTo.setEquipmentId(equipmentId);
-        equipmentBelongTo.setLevel(1);
+        equipmentBelongTo.setEquipmentLevel(1);
         equipmentBelongTo.setEquip(false);
+        equipmentBelongTo.setTotalCnt(1);
         EquipmentBelongToService.getInstance().addBelongTo(equipmentBelongTo);
     }
 

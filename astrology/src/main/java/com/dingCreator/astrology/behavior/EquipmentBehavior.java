@@ -15,10 +15,8 @@ import com.dingCreator.astrology.util.PageUtil;
 import com.dingCreator.astrology.vo.EquipmentGroupVO;
 import com.dingCreator.astrology.vo.EquipmentVO;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author ding
@@ -31,8 +29,9 @@ public class EquipmentBehavior {
     /**
      * 穿装备
      */
-    public void equip(long playerId, long id) {
-        EquipmentBelongTo equipmentBelongTo = equipmentBelongToService.getById(id);
+    public void equip(long playerId, String equipmentName, int level) {
+        EquipmentBelongTo equipmentBelongTo = equipmentBelongToService
+                .getByNameAndLevel(BelongToEnum.PLAYER.getBelongTo(), playerId, equipmentName, level);
         EquipmentUtil.validate(playerId, equipmentBelongTo);
         EquipmentUtil.updateEquipment(playerId, equipmentBelongTo, true);
     }
@@ -66,50 +65,51 @@ public class EquipmentBehavior {
      * @param equipmentName 装备名称
      * @return 装备背包
      */
-    public PageResponse<EquipmentVO> listPlayerEquipmentByName(long playerId, String equipmentName, int pageIndex, int pageSize) {
+    public EquipmentVO getPlayerEquipmentByName(long playerId, String equipmentName) {
         PlayerCache.getPlayerById(playerId);
         EquipmentEnum equipmentEnum = EquipmentEnum.getByName(equipmentName);
 
-        List<EquipmentBelongTo> equipmentBelongToList = equipmentBelongToService.getByBelongToIdAndEquipmentId(
+        EquipmentBelongTo equipmentBelongTo = equipmentBelongToService.getByBelongToIdAndEquipmentId(
                 BelongToEnum.PLAYER.getBelongTo(), playerId, equipmentEnum.getId());
-        if (Objects.isNull(equipmentBelongToList) || equipmentBelongToList.size() == 0) {
+        if (Objects.isNull(equipmentBelongTo)) {
             throw EquipmentExceptionEnum.DONT_HAVE_EQUIPMENT.getException();
         }
 
-        List<EquipmentVO> equipmentVoList = equipmentBelongToList.stream().map(equipmentBelongTo -> {
-            String propStr = equipmentEnum.getProp().stream().map(prop -> {
-                StringBuilder builder = new StringBuilder();
-                if (prop.getProp().getVal() != 0) {
-                    builder.append(prop.getEquipmentPropertiesTypeEnum().getNameCh());
-                    if (prop.getProp().getVal() > 0) {
-                        builder.append("+");
+        String propStr = equipmentEnum.getProp().stream()
+                .map(prop -> {
+                    StringBuilder builder = new StringBuilder();
+                    if (prop.getProp().getVal() != 0) {
+                        builder.append(prop.getEquipmentPropertiesTypeEnum().getNameCh());
+                        if (prop.getProp().getVal() > 0) {
+                            builder.append("+");
+                        }
+                        builder.append(prop.getProp().getVal()).append(Constants.BLANK);
                     }
-                    builder.append(prop.getProp().getVal()).append(Constants.BLANK);
-                }
-                if (prop.getProp().getRate() != 0) {
-                    builder.append(prop.getEquipmentPropertiesTypeEnum().getNameCh());
-                    if (prop.getProp().getRate() > 0) {
-                        builder.append("+");
+                    if (prop.getProp().getRate() != 0) {
+                        builder.append(prop.getEquipmentPropertiesTypeEnum().getNameCh());
+                        if (prop.getProp().getRate() > 0) {
+                            builder.append("+");
+                        }
+                        builder.append(prop.getProp().getRate() * 100);
+                        builder.append("%").append(Constants.BLANK);
                     }
-                    builder.append(prop.getProp().getRate() * 100);
-                    builder.append("%").append(Constants.BLANK);
-                }
-                return builder;
-            }).reduce((builder1, builder2) -> builder1.append("\n").append(builder2))
-                    .orElse(new StringBuilder()).toString();
+                    return builder;
+                })
+                .reduce((builder1, builder2) -> builder1.append("\n").append(builder2))
+                .orElse(new StringBuilder()).toString();
 
-            EquipmentVO equipmentVO = new EquipmentVO();
-            equipmentVO.setRank(equipmentEnum.getEquipmentRankEnum());
-            equipmentVO.setId(equipmentBelongTo.getId());
-            equipmentVO.setEquipmentName(equipmentEnum.getName());
-            equipmentVO.setLimitJob(equipmentEnum.getLimitJob());
-            equipmentVO.setLimitLevel(equipmentEnum.getLimitLevel());
-            equipmentVO.setEquipmentProperty(propStr);
-            equipmentVO.setLevel(equipmentBelongTo.getLevel());
-            equipmentVO.setEquip(equipmentBelongTo.getEquip());
-            return equipmentVO;
-        }).collect(Collectors.toList());
-        return PageUtil.buildPage(equipmentVoList, pageIndex, pageSize);
+        EquipmentVO equipmentVO = new EquipmentVO();
+        equipmentVO.setRank(equipmentEnum.getEquipmentRankEnum());
+        equipmentVO.setId(equipmentBelongTo.getId());
+        equipmentVO.setEquipmentName(equipmentEnum.getName());
+        equipmentVO.setLimitJob(equipmentEnum.getLimitJob());
+        equipmentVO.setLimitLevel(equipmentEnum.getLimitLevel());
+        equipmentVO.setEquipmentProperty(propStr);
+        equipmentVO.setLevel(equipmentBelongTo.getEquipmentLevel());
+        equipmentVO.setEquip(equipmentBelongTo.getEquip());
+        equipmentVO.setCnt(equipmentBelongTo.getTotalCnt());
+        equipmentVO.setDescription(equipmentEnum.getDesc());
+        return equipmentVO;
     }
 
     /**
@@ -151,7 +151,7 @@ public class EquipmentBehavior {
         belongTo.setBelongToId(playerId);
         belongTo.setEquipmentId(equipmentId);
         belongTo.setEquip(false);
-        belongTo.setLevel(1);
+        belongTo.setEquipmentLevel(1);
         equipmentBelongToService.addBelongTo(belongTo);
     }
 

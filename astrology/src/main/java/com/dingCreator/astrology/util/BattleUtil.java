@@ -1074,7 +1074,9 @@ public class BattleUtil {
         // 技能倍率
         BigDecimal damageRateDecimal = getDamageRate(from, tar, our, enemy, damageRate, nowSkill, templateList, builder);
         // 计算公式 damage = realAtk - realDef * (1 - realPenetrate)
-        long damage = Math.round((realAtk - realDef * (1 - realPenetrate)) * damageRateDecimal.floatValue());
+//        long damage = Math.round((realAtk - realDef * (1 - realPenetrate)) * damageRateDecimal.floatValue());
+        // 测试公式 攻击*系数/（防御+系数）
+        long damage = Math.round(realAtk * 1000 / (realDef * (1 - realPenetrate) + 1000) * damageRateDecimal.floatValue());
         if (DamageTypeEnum.ATK.equals(damageTypeEnum)) {
             BuffUtil.getVal(damage, BuffTypeEnum.DAMAGE, from);
         } else {
@@ -1182,7 +1184,11 @@ public class BattleUtil {
     public static void doMpRecover(BattleDTO battleDTO, long mp, StringBuilder builder) {
         OrganismDTO organismDTO = battleDTO.getOrganismInfoDTO().getOrganismDTO();
         long newMp = Math.min(organismDTO.getMpWithAddition() + mp, organismDTO.getMaxMpWithAddition());
-        builder.append("，蓝量回复了").append(newMp - organismDTO.getMpWithAddition()).append("点");
+        if (mp >= 0) {
+            builder.append("，蓝量回复了").append(newMp - organismDTO.getMpWithAddition()).append("点");
+        } else {
+            builder.append("，蓝量减少了").append(organismDTO.getMpWithAddition() - newMp).append("点");
+        }
         organismDTO.setMpWithAddition(newMp);
     }
 

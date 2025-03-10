@@ -38,11 +38,29 @@ public class EquipmentBelongTo {
     /**
      * 强化等级
      */
-    @TableField("level")
-    private Integer level;
+    @TableField("equipment_level")
+    private Integer equipmentLevel;
+    /**
+     * 数量
+     */
+    @TableField("total_cnt")
+    private Integer totalCnt;
     /**
      * 是否装备中
      */
     @TableField("equip")
     private Boolean equip;
+
+
+    public static String BELONG_TO = "belong_to";
+
+    public static String BELONG_TO_ID = "belong_to_id";
+
+    public static String EQUIPMENT_ID = "equipment_id";
+
+    public static String EQUIPMENT_LEVEL = "equipment_level";
+
+    public static String TOTAL_CNT = "total_cnt";
+
+    public static String EQUIP = "equip";
 }

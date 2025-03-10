@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.vo;
 
 import com.dingCreator.astrology.enums.equipment.EquipmentRankEnum;
+import com.dingCreator.astrology.enums.equipment.EquipmentTypeEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
 import lombok.Data;
 
@@ -17,6 +18,10 @@ public class EquipmentGroupVO implements Serializable {
      * 装备名称
      */
     private String equipmentName;
+    /**
+     * 装备种类
+     */
+    private EquipmentTypeEnum equipmentTypeEnum;
     /**
      * 装备品级
      */

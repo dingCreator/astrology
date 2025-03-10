@@ -166,6 +166,7 @@ public class TeamBehavior {
         teamDTO.setCaptainId(to);
         TeamCache.deleteTeam(from);
         TeamCache.createTeam(to, teamDTO);
+        teamDTO.getMembers().forEach(playerId -> PlayerCache.getPlayerById(playerId).setTeamId(to));
     }
 
     /**
