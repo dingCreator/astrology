@@ -892,6 +892,48 @@ public enum EquipmentEnum {
                 }
             }
     ),
+    EQUIPMENT_413(413L, "雨倾纸伞",
+            "江上流传着一则伞和剑的传说，两位素未谋面的痴人，于九日凌空之日，共赴黄泉。" +
+                    "伞啊，你在吗，你看这九日凌空的异象，是我为你庆生的贺礼。\n" +
+                    "剑啊，我在，唯此一生，我愿为你，与世界为敌。\n" +
+                    "有道是：天临渊火，流影灭之焚形；\n" +
+                    "        伞倾亲意，霜雪骇人离醉。\n" +
+                    "        盈雷齐鼓，剑彻独锋。\n" +
+                    "        霜侵血路，寒林遍地。\n" +
+                    "        所亲之所扰，所妄之所达。\n" +
+                    "        所倾之所绕，所败之所消。\n" +
+                    "        冥河故里饮归处，饶是陌路，对影成三人。" +
+                    "\n套装效果 九临清河晏：\n" +
+                    "与旭日神剑同时装备时，二者提供属性翻倍，旭日神剑技能效果持续整场战斗。",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 2200L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 500L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 0.8F)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.JEWELRY,
+            new ExtraBattleProcessTemplate() {
+            }
+    ),
+    EQUIPMENT_414(414L, "旭日神剑",
+            "江上流传着一则伞和剑的传说，两位素未谋面的痴人，于九日凌空之日，共赴黄泉。" +
+                    "伞啊，你在吗，你看这九日凌空的异象，是我为你庆生的贺礼。\n" +
+                    "剑啊，我在，唯此一生，我愿为你，与世界为敌。\n" +
+                    "有道是：天临渊火，流影灭之焚形；\n" +
+                    "        伞倾亲意，霜雪骇人离醉。\n" +
+                    "        盈雷齐鼓，剑彻独锋。\n" +
+                    "        霜侵血路，寒林遍地。\n" +
+                    "        所亲之所扰，所妄之所达。\n" +
+                    "        所倾之所绕，所败之所消。\n" +
+                    "        冥河故里饮归处，饶是陌路，对影成三人。" +
+                    "\n隐藏技能 九日临空：\n" +
+                    "战斗开始时，提升自身15%攻击力持续九回合，九回合内，每次攻击命中后有15%概率使敌方陷入焚毁异常持续一回合。",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 2800L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.25F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 250L)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON,
+            new ExtraBattleProcessTemplate() {
+            }
+    ),
 
     EQUIPMENT_500(500L, "彼岸·净天无涯",
             "陪伴邪修长大的魔剑——天无涯的完全形态，四大魔器之初，零号魔器——天喑无道上掉落的碎屑打造的仿制品，拥有同源于天喑无道的力量，除开本源之外，" +
@@ -943,8 +985,9 @@ public enum EquipmentEnum {
     ),
     EQUIPMENT_502(502L, "寒星.圣者之冠",
             "以冰海沉星为原型，并针对其特性打造出来的神煅之器，为古圣城圣者权位与力量的标志。\n" +
-            "传闻圣者之冠具有锁定冰海沉星所在位置的能力，古圣城历代圣者都有着寻找冰海沉星的记录，但他们最终都无功而返或身死道消。\n" +
-                    "隐藏技能\n圣者尊崇.零度法则:装备者受到的伤害减少20%，攻击命中后使敌方速度降低15%持续一回合。",
+                 "传闻圣者之冠具有锁定冰海沉星所在位置的能力，古圣城历代圣者都有着寻找冰海沉星的记录，但他们最终都无功而返或身死道消。\n" +
+                 "隐藏技能\n圣者尊崇.零度法则:装备者受到的伤害减少20%，攻击命中后使敌方速度降低15%持续一回合。"+
+                 "神煅加护\n寒星之赐\n法抗+20%，法强+15%",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 10000L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 0.2F),
@@ -1031,11 +1074,14 @@ public enum EquipmentEnum {
             }
     ),
     EQUIPMENT_602(602L, "不灭金身",
-            "法则之力\n不灭法则：每次战斗限一次，受到致命伤害后，免疫此次伤害",
+            "法则之力\n不灭法则：每次战斗限一次，受到致命伤害后，免疫此次伤害"+
+                    "神煅加护\n固若金汤：物防+15% 法抗+15%"+
+                    "隐藏技能\n" +
+                    "金身虚影：战斗开始时，除真实伤害外的所有伤害，按伤害类型，减少对应自身（防御或法抗）200%的数值，持续8回合。金身法则触发后，重新激活此技能，持续3回合。",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 800000L),
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 32000L),
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 32000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 32000L, 0.15F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 32000L, 0.15F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_REDUCTION_RATE, 0.5F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE_REDUCTION, 1.5F)
             ), EquipmentRankEnum.RULE, EquipmentTypeEnum.ARMOR,
@@ -1055,7 +1101,12 @@ public enum EquipmentEnum {
             "最早记录于星历前355年，圣星府灭门案现场被人目击，由一名十岁左右的孩童携带逃离，随后不知踪迹。"+
             "随后几十年间，广有天喑无道之名的传闻，且传闻所在之处同时有数起凶案发生。"+
             "第一次被证实存在于星历前263年，一名神秘人士将其置于圣城拍卖会拍卖，后被圣城高层拍下。星历前3年，天喑无道失窃，随后不知所踪。"+
-            "法则之力\n泯灭法则：敌方全体血量回复效果降低90%持续整场战斗无法消除",
+            "法则之力\n泯灭法则：敌方全体血量回复效果降低90%持续整场战斗无法消除"+
+            "隐藏技能\n" +
+            "觉.摩诃无量\n" +
+            "战斗开始时提升自身100%攻击力 50%命中 50%穿甲 50%防御 50%法抗 持续整场战斗，若该buff效果被清除，则五回合后重新激活。所有摩诃无量同名效果只触发一条，且（觉>神>普>残）\n" +
+            "魔慑诡计\n" +
+            "谋天化道：装备者攻击命中后使敌方受到的伤害提升15%。",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 200000L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 12000L),
