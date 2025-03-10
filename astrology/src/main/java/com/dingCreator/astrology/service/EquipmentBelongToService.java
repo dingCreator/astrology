@@ -120,8 +120,6 @@ public class EquipmentBelongToService {
      * @param equipmentBelongTo 装备归属
      */
     public void addBelongTo(EquipmentBelongTo equipmentBelongTo) {
-        DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(EquipmentBelongToMapper.class)
-                .getBelongToIdEquip());
         DatabaseProvider.getInstance().transactionExecute(sqlSession -> {
             EquipmentBelongToMapper mapper = sqlSession.getMapper(EquipmentBelongToMapper.class);
             EquipmentBelongTo oldEquipment = mapper.selectOne(new QueryWrapper<EquipmentBelongTo>()
