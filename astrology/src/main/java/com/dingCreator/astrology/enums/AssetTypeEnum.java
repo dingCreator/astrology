@@ -21,11 +21,11 @@ public enum AssetTypeEnum {
     /**
      * 货币类型
      */
-    ASTROLOGY_COIN("astrologyCoin", "圣星币", "圣星王朝发行的货币，大陆的通用货币",
+    ASTROLOGY_COIN("astrologyCoin", "圣星币", "圣星币", "圣星王朝发行的货币，大陆的通用货币",
             (asset, cost) -> asset.getAstrologyCoin() >= cost,
             cost -> PlayerAssetDTO.builder().astrologyCoin(cost).build()),
 
-    DIAMOND("diamond", "缘石", "被缘神力量浸染的石头，或许有特殊的用处",
+    DIAMOND("diamond", "缘石", "缘石", "被缘神力量浸染的石头，或许有特殊的用处",
             (asset, cost) -> asset.getDiamond() >= cost,
             cost -> PlayerAssetDTO.builder().diamond(cost).build()),
     ;
@@ -33,6 +33,8 @@ public enum AssetTypeEnum {
     private final String code;
 
     private final String chnName;
+
+    private final String showName;
 
     private final String desc;
 

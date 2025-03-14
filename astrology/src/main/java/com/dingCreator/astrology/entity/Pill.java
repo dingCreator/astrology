@@ -35,6 +35,11 @@ public class Pill {
     @TableField("level")
     private Integer level;
     /**
+     * 丹药类型
+     */
+    @TableField("pill_type")
+    private String PillType;
+    /**
      * 生机
      */
     @TableField("vigor")
@@ -57,16 +62,50 @@ public class Pill {
     /**
      * 品质
      */
-    @TableField("quality")
-    private Integer quality;
+    @TableField("quality_start")
+    private Integer qualityStart;
+    /**
+     * 品质
+     */
+    @TableField("quality_end")
+    private Integer qualityEnd;
     /**
      * 星辰之力
      */
-    @TableField("star")
-    private Integer star;
+    @TableField("star_start")
+    private Integer starStart;
+    /**
+     * 星辰之力
+     */
+    @TableField("star_end")
+    private Integer starEnd;
     /**
      * 效果
      */
     @TableField("effect_json")
     private String effectJson;
+
+    public static final String ID = "id";
+
+    public static final String PILL_NAME = "pill_name";
+
+    public static final String LEVEL = "level";
+
+    public static final String VIGOR = "vigor";
+
+    public static final String WARN = "warn";
+
+    public static final String COLD = "cold";
+
+    public static final String TOXICITY = "toxicity";
+
+    public static final String QUALITY_START = "quality_start";
+
+    public static final String QUALITY_END = "quality_end";
+
+    public static final String STAR_START = "star_start";
+
+    public static final String STAR_END = "star_end";
+
+    public static final String EFFECT_JSON = "effect_json";
 }

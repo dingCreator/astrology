@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dingCreator.astrology.mapper.PillMapper">
+
+    <select id="getPill" resultType="com.dingCreator.astrology.entity.Pill">
+        select * from astrology_pill
+        where vigor = #{vigor}
+        and warn = #{warn}
+        and cold = #{cold}
+        and toxicity &gt;= #{toxicity}
+        and (
+            (quality_start is null or quality_start &lt;= #{quality}) and
+            (quality_end is null or quality_end &gt;= #{quality})
+        )
+        and (
+            (star_start is null or star_start &lt;= #{star}) and
+            (star_end is null or star_end &gt;= #{star})
+        )
+    </select>
+</mapper>

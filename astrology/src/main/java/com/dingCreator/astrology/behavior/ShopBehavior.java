@@ -65,7 +65,7 @@ public class ShopBehavior {
                 .astrologyCoin(item.getCostMap().get(AssetTypeEnum.ASTROLOGY_COIN))
                 .diamond(item.getCostMap().get(AssetTypeEnum.DIAMOND)).build();
         PlayerService.getInstance().changeAsset(info, asset);
-        item.getArticle().send2Player(playerId);
+        item.getArticle().send2Player(playerId, item.getCount());
     }
 
     private static class Holder {

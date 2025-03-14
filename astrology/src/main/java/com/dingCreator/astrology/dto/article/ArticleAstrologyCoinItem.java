@@ -27,7 +27,7 @@ public class ArticleAstrologyCoinItem extends ArticleItemDTO {
     }
 
     @Override
-    public void send2Player(Long playerId) {
+    public void send2Player(Long playerId, int cnt) {
         PlayerAssetDTO asset = PlayerAssetDTO.builder().playerId(playerId).astrologyCoin(this.cnt).build();
         PlayerService.getInstance().changeAsset(PlayerCache.getPlayerById(playerId), asset);
     }

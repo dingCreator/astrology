@@ -73,6 +73,10 @@ public final class Constants {
      * 活动错误码前缀
      */
     public static final String ACTIVITY_EXCEPTION_PREFIX = "E_ACTIVITY_";
+    /**
+     * 炼丹错误码前缀
+     */
+    public static final String ALCHEMY_EXCEPTION_PREFIX = "E_ALCHEMY_";
 
     // **----** 经验相关配置 **----**
     /**
@@ -242,6 +246,18 @@ public final class Constants {
      * 锁前缀-探索副本
      */
     public static final String EXPLORE_DUNGEON_LOCK_PREFIX = "LOCK_EXPLORE_DUNGEON_";
+    /**
+     * 锁前缀-炼丹
+     */
+    public static final String ALCHEMY_LOCK_PREFIX = "LOCK_ALCHEMY_";
+    /**
+     * 锁前缀-丹药
+     */
+    public static final String PILL_LOCK_PREFIX = "LOCK_PILL_";
+    /**
+     * 锁前缀-药材
+     */
+    public static final String HERB_LOCK_PREFIX = "LOCK_HERB_";
 
     /**
      * 每日最多攻击世界boss次数

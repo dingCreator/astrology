@@ -97,7 +97,7 @@ public class LootUtil {
                     .filter(loot -> RandomUtil.isHit(loot.getRate()))
                     .map(loot -> {
                         // 发送
-                        loot.getArticleItem().send2Player(playerId);
+                        loot.getArticleItem().send2Player(playerId, 1);
                         // 获取名字
                         return loot.getArticleItem().view();
                     }).collect(Collectors.toList()));

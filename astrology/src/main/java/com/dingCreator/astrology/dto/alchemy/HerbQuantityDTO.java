@@ -1,4 +1,4 @@
-package com.dingCreator.astrology.dto;
+package com.dingCreator.astrology.dto.alchemy;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,23 +7,15 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author ding
- * @date 2025/2/27
+ * @date 2025/3/11
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PillDTO {
+public class HerbQuantityDTO {
     /**
-     * 丹药名称
-     */
-    private String pillName;
-    /**
-     * 丹药等级
-     */
-    private Integer level;
-    /**
-     * 生机
+     *
      */
     private Integer vigor;
     /**
@@ -43,22 +35,7 @@ public class PillDTO {
      */
     private Integer quality;
     /**
-     * 星辰之力
+     *
      */
     private Integer star;
-    /**
-     * 效果
-     */
-    private PillEffectDTO pillEffectDTO;
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class PillEffectDTO {
-
-        private Integer atk;
-
-        private Integer def;
-    }
 }

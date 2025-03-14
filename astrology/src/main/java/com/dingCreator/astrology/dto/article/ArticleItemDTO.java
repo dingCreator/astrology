@@ -27,7 +27,7 @@ public abstract class ArticleItemDTO implements Serializable {
      *
      * @param playerId 玩家ID
      */
-    public abstract void send2Player(Long playerId);
+    public abstract void send2Player(Long playerId, int cnt);
 
     /**
      * 反显

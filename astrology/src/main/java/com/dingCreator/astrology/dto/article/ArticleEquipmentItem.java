@@ -33,14 +33,14 @@ public class ArticleEquipmentItem extends ArticleItemDTO {
     }
 
     @Override
-    public void send2Player(Long playerId) {
+    public void send2Player(Long playerId, int cnt) {
         EquipmentBelongTo equipmentBelongTo = new EquipmentBelongTo();
         equipmentBelongTo.setBelongTo(BelongToEnum.PLAYER.getBelongTo());
         equipmentBelongTo.setBelongToId(playerId);
         equipmentBelongTo.setEquipmentId(equipmentId);
         equipmentBelongTo.setEquipmentLevel(1);
         equipmentBelongTo.setEquip(false);
-        equipmentBelongTo.setTotalCnt(1);
+        equipmentBelongTo.setTotalCnt(cnt);
         EquipmentBelongToService.getInstance().addBelongTo(equipmentBelongTo);
     }
 

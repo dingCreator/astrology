@@ -303,7 +303,7 @@ CREATE TABLE astrology_activity_statics
     key idx_activity_player_id_time (activity_id, player_id, date_time) using btree
 ) COMMENT ='活动参与统计表';
 
-CREATE TABLE `pill` (
+CREATE TABLE `astrology_pill` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
     `pill_name` VARCHAR(255) NOT NULL COMMENT '丹药名称',
     `level` INT COMMENT '丹药等级',
@@ -311,10 +311,30 @@ CREATE TABLE `pill` (
     `warn` INT COMMENT '温热',
     `cold` INT COMMENT '寒韵',
     `toxicity` INT COMMENT '毒性',
-    `quality` INT COMMENT '品质',
-    `star` INT COMMENT '星辰之力',
+    `quality_start` INT COMMENT '品质',
+    `quality_end` INT COMMENT '品质',
+    `star_start` INT COMMENT '星辰之力',
+    `star_end` INT COMMENT '星辰之力',
     `effect_json` TEXT COMMENT '效果',
     PRIMARY KEY (`id`),
-    UNIQUE KEY uk_pill_name (`pill_name`),
-    KEY idx_prop(vigor,warn,cold,toxicity,quality,star)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='丹药表';
+    UNIQUE KEY uk_pill_name_lv (`pill_name`,`level`),
+    KEY idx_prop(vigor,warn,cold,toxicity,quality_start,quality_end,star_start,star_end)
+) ENGINE=InnoDB COMMENT='丹药表';
+
+create table astrology_player_herb (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+    player_id BIGINT NOT NULL COMMENT '玩家ID',
+    herb_id BIGINT NOT NULL COMMENT '药材ID',
+    herb_cnt INT NOT NULL DEFAULT 0 COMMENT '药材数量',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_player_id_herb_id (player_id, herb_id)
+) ENGINE=innodb COMMENT='玩家药材表';
+
+create table astrology_player_pill (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+    player_id BIGINT NOT NULL COMMENT '玩家ID',
+    pill_id BIGINT NOT NULL COMMENT '丹药ID',
+    pill_cnt INT NOT NULL COMMENT '丹药数量',
+    PRIMARY KEY(id),
+    UNIQUE KEY uk_player_id_pill_id (player_id, pill_id)
+) ENGINE=innodb COMMENT='玩家丹药表';

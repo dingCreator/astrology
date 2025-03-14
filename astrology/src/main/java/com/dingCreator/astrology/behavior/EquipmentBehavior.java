@@ -102,6 +102,7 @@ public class EquipmentBehavior {
         equipmentVO.setRank(equipmentEnum.getEquipmentRankEnum());
         equipmentVO.setId(equipmentBelongTo.getId());
         equipmentVO.setEquipmentName(equipmentEnum.getName());
+        equipmentVO.setType(equipmentEnum.getEquipmentTypeEnum());
         equipmentVO.setLimitJob(equipmentEnum.getLimitJob());
         equipmentVO.setLimitLevel(equipmentEnum.getLimitLevel());
         equipmentVO.setEquipmentProperty(propStr);

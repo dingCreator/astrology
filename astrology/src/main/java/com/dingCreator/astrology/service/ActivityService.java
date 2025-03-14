@@ -154,7 +154,7 @@ public interface ActivityService {
                 activity.getCostMap().forEach((assetTypeEnum, cost) ->
                         PlayerService.getInstance().changeAsset(info, assetTypeEnum.getTransfer2Dto().apply(cost * times)));
                 // 发放奖励
-                awards.forEach(award -> award.send2Player(info.getPlayerDTO().getId()));
+                awards.forEach(award -> award.send2Player(info.getPlayerDTO().getId(), 1));
                 // 插入记录
                 ActivityRecordMapper activityRecordMapper = sqlSession.getMapper(ActivityRecordMapper.class);
                 ActivityStaticsMapper activityStaticsMapper = sqlSession.getMapper(ActivityStaticsMapper.class);

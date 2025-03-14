@@ -31,7 +31,7 @@ public class ArticleTitleItem extends ArticleItemDTO {
     }
 
     @Override
-    public void send2Player(Long playerId) {
+    public void send2Player(Long playerId, int cnt) {
 
     }
 

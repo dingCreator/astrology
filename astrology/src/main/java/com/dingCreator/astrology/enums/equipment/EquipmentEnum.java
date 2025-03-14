@@ -110,9 +110,7 @@ public enum EquipmentEnum {
     ),
     EQUIPMENT_12(12L, "硬纸板",
             "趁废品店老板不注意顺走的硬纸板，上面有修真者随意画上的加固符文，使得此硬纸板的硬度堪比石头",
-            Arrays.asList(
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 3L)
-            ),
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 3L)),
             EquipmentRankEnum.SP, EquipmentTypeEnum.ARMOR
     ),
     EQUIPMENT_13(13L, "门板",
@@ -199,9 +197,7 @@ public enum EquipmentEnum {
     ),
     EQUIPMENT_111(111L, "量产型一阶甲符",
             "现今的修真界学习工业化技术的产物，一条流水线一分钟就能产出200张。",
-            Arrays.asList(
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 15L)
-            ),
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 15L)),
             EquipmentRankEnum.ORDINARY, EquipmentTypeEnum.ARMOR, JobEnum.XIU_ZHEN.getJobCode()
     ),
     EQUIPMENT_112(112L, "粗布衣",
@@ -895,7 +891,7 @@ public enum EquipmentEnum {
             }
     ),
     EQUIPMENT_413(413L, "雨倾纸伞",
-            "江上流传着一则伞和剑的传说，两位素未谋面的痴人，于九日凌空之日，共赴黄泉。" +
+            "江上流传着一则伞和剑的传说，两位素未谋面的痴人，于九日凌空之日，共赴黄泉。\n" +
                     "伞啊，你在吗，你看这九日凌空的异象，是我为你庆生的贺礼。\n" +
                     "剑啊，我在，唯此一生，我愿为你，与世界为敌。\n" +
                     "有道是：天临渊火，流影灭之焚形；\n" +
@@ -904,8 +900,8 @@ public enum EquipmentEnum {
                     "        霜侵血路，寒林遍地。\n" +
                     "        所亲之所扰，所妄之所达。\n" +
                     "        所倾之所绕，所败之所消。\n" +
-                    "        冥河故里饮归处，饶是陌路，对影成三人。" +
-                    "\n套装效果 九临清河晏：\n" +
+                    "        冥河故里饮归处，饶是陌路，对影成三人。\n" +
+                    "套装效果 九临清河晏：\n" +
                     "与旭日神剑同时装备时，二者提供属性翻倍，旭日神剑技能效果持续整场战斗。",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 2200L),
@@ -989,7 +985,7 @@ public enum EquipmentEnum {
             "以冰海沉星为原型，并针对其特性打造出来的神煅之器，为古圣城圣者权位与力量的标志。\n" +
                  "传闻圣者之冠具有锁定冰海沉星所在位置的能力，古圣城历代圣者都有着寻找冰海沉星的记录，但他们最终都无功而返或身死道消。\n" +
                  "隐藏技能\n圣者尊崇.零度法则:装备者受到的伤害减少20%，攻击命中后使敌方速度降低15%持续一回合。"+
-                 "神煅加护\n寒星之赐\n法抗+20%，法强+15%",
+                 "神煅加护 寒星之赐\n法抗+20%，法强+15%",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 10000L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 0.2F),

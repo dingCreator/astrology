@@ -63,6 +63,14 @@ public enum ArticleTypeEnum {
                 ((ArticleAstrologyCoinItem) item).setCnt(cnt);
                 return articleAstrologyCoinItem;
             }),
+
+    HERB("herb", ArticleHerbItem.class,
+            str -> JSONObject.parseObject(str, ArticleHerbItem.class),
+            (herbId, item) -> {
+                ArticleHerbItem articleHerbItem = (ArticleHerbItem) item;
+                ((ArticleHerbItem) item).setHerbId(herbId);
+                return articleHerbItem;
+            }),
     ;
 
     private final String type;

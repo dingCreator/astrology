@@ -35,10 +35,6 @@ import java.util.Objects;
  */
 public class PlayerBehavior {
 
-    private final SkillBarItemService skillBarItemService = SkillBarItemService.getInstance();
-
-    private final SkillBelongToService skillBelongToService = SkillBelongToService.getInstance();
-
     /**
      * 状态读写锁
      */
