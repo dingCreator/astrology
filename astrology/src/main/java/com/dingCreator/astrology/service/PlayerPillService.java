@@ -51,7 +51,7 @@ public class PlayerPillService {
                             new QueryWrapper<PlayerPill>().eq(PlayerPill.PLAYER_ID, playerId).eq(PlayerPill.PILL_ID, pill.getId())
                     );
                     if (cnt > playerPill.getPillCnt()) {
-                        throw AlchemyExceptionEnum.NOT_ENOUGH_PILL.getException().fillArgs(cnt, playerPill.getPillCnt());
+                        throw AlchemyExceptionEnum.NOT_ENOUGH_PILL.getException(cnt, playerPill.getPillCnt());
                     }
                     playerPill.setPillCnt(playerPill.getPillCnt() - cnt);
                     mapper.updateById(playerPill);
@@ -68,8 +68,8 @@ public class PlayerPillService {
                     new QueryWrapper<PlayerPill>()
                             .eq(PlayerPill.PLAYER_ID, playerId)
                             .gt(PlayerPill.PILL_CNT, 0)
-                            .orderByDesc(PlayerPill.PILL_ID)
-                            .last("limit " + index + "," + index * pageSize)
+                            .orderByDesc(PlayerPill.PILL_CNT)
+                            .last("limit " + index * pageSize + "," + pageSize)
             );
         });
     }

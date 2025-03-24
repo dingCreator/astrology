@@ -18,8 +18,41 @@ public class PlayerAlchemy {
     @TableId(value = "player_id")
     private Long playerId;
 
-    @TableField("")
-    private Integer exp;
+    /**
+     * 属性丹经验值
+     */
+    @TableField("property_exp")
+    private Integer propertyExp;
+
+    /**
+     * 属性丹炼制等级
+     */
+    @TableField("property_rank")
+    private Integer propertyRank;
+
+    /**
+     * buff丹经验值
+     */
+    @TableField("buff_exp")
+    private Integer buffExp;
+
+    /**
+     * buff丹炼制等级
+     */
+    @TableField("buff_rank")
+    private Integer buffRank;
+
+    /**
+     * 状态丹经验值
+     */
+    @TableField("status_exp")
+    private Integer statusExp;
+
+    /**
+     * 状态丹炼制等级
+     */
+    @TableField("status_rank")
+    private Integer statusRank;
 
     /**
      * 炼丹术

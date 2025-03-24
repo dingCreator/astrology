@@ -8,7 +8,7 @@ import com.dingCreator.astrology.dto.alchemy.PlayerHerbListDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.entity.Pill;
 import com.dingCreator.astrology.entity.PlayerHerb;
-import com.dingCreator.astrology.enums.HerbEnum;
+import com.dingCreator.astrology.enums.alchemy.HerbEnum;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 
 import java.util.Arrays;
@@ -68,8 +68,8 @@ public class AlchemyUtil {
      */
     public static PillDTO convertPill(Pill pill) {
         PillDTO pillDTO = PillDTO.builder()
-                .pillName(pill.getPillName()).level(pill.getLevel()).vigor(pill.getVigor())
-                .warn(pill.getWarn()).cold(pill.getCold()).toxicity(pill.getToxicity())
+                .pillName(pill.getPillName()).pillRank(pill.getPillRank()).qualityRank(pill.getQualityRank())
+                .vigor(pill.getVigor()).warn(pill.getWarn()).cold(pill.getCold()).toxicity(pill.getToxicity())
                 .qualityStart(pill.getQualityStart()).qualityEnd(pill.getQualityEnd())
                 .starStart(pill.getStarStart()).starEnd(pill.getStarEnd()).build();
         pillDTO.setPillEffectDTO(JSONObject.parseObject(pill.getEffectJson(), PillDTO.PillEffectDTO.class));
@@ -84,8 +84,8 @@ public class AlchemyUtil {
      */
     public static Pill convertPillDTO(PillDTO pillDTO) {
         Pill pill = Pill.builder()
-                .pillName(pillDTO.getPillName()).level(pillDTO.getLevel()).vigor(pillDTO.getVigor())
-                .warn(pillDTO.getWarn()).cold(pillDTO.getCold()).toxicity(pillDTO.getToxicity())
+                .pillName(pillDTO.getPillName()).pillRank(pillDTO.getPillRank()).qualityRank(pillDTO.getQualityRank())
+                .vigor(pillDTO.getVigor()).warn(pillDTO.getWarn()).cold(pillDTO.getCold()).toxicity(pillDTO.getToxicity())
                 .qualityStart(pillDTO.getQualityStart()).qualityEnd(pillDTO.getQualityEnd())
                 .starStart(pillDTO.getStarStart()).starEnd(pillDTO.getStarEnd()).build();
         pill.setEffectJson(JSONObject.toJSONString(pillDTO.getPillEffectDTO()));

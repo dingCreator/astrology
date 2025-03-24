@@ -3,6 +3,8 @@ package com.dingCreator.astrology.behavior;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
+import com.dingCreator.astrology.dto.equipment.EquipmentDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
@@ -33,7 +35,31 @@ public class EquipmentBehavior {
         EquipmentBelongTo equipmentBelongTo = equipmentBelongToService
                 .getByNameAndLevel(BelongToEnum.PLAYER.getBelongTo(), playerId, equipmentName, level);
         EquipmentUtil.validate(playerId, equipmentBelongTo);
-        EquipmentUtil.updateEquipment(playerId, equipmentBelongTo, true);
+        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
+        EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentBelongTo.getEquipmentId());
+        EquipmentBarDTO equipmentBarDTO = playerInfoDTO.getEquipmentBarDTO();
+
+        if (EquipmentTypeEnum.WEAPON.equals(equipmentEnum.getEquipmentTypeEnum())) {
+            if (Objects.nonNull(equipmentBarDTO.getWeapon())) {
+                equipmentBelongToService.updateEquipment(equipmentBarDTO.getWeapon().getId(), false);
+            }
+            equipmentBarDTO.setWeapon(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
+                    equipmentBelongTo.getEquipmentLevel()));
+        } else if (EquipmentTypeEnum.ARMOR.equals(equipmentEnum.getEquipmentTypeEnum())) {
+            if (Objects.nonNull(equipmentBarDTO.getArmor())) {
+                equipmentBelongToService.updateEquipment(equipmentBarDTO.getArmor().getId(), false);
+            }
+            equipmentBarDTO.setArmor(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
+                    equipmentBelongTo.getEquipmentLevel()));
+        } else if (EquipmentTypeEnum.JEWELRY.equals(equipmentEnum.getEquipmentTypeEnum())) {
+            if (Objects.nonNull(equipmentBarDTO.getJewelry())) {
+                equipmentBelongToService.updateEquipment(equipmentBarDTO.getJewelry().getId(), false);
+            }
+            equipmentBarDTO.setJewelry(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
+                    equipmentBelongTo.getEquipmentLevel()));
+        }
+        playerInfoDTO.getPlayerDTO().clearAdditionVal();
+        equipmentBelongToService.updateEquipment(equipmentBelongTo.getId(), true);
     }
 
     /**

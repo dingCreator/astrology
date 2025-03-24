@@ -921,7 +921,6 @@ public class BattleUtil {
         nowSkill.getThisBehaviorExtraProcess().ifHit(from, tar, our, enemy, atomicDamage, critical, builder);
         // 如果是致命伤害，触发特殊结算
         if (atomicDamage.get() >= tarOrganism.getHpWithAddition()) {
-            //
             extraBattleProcessList.stream()
                     .filter(ext -> from.equals(ext.getFrom()))
                     .forEach(ext -> ext.beforeTargetDeath(from, tar, atomicDamage, builder));
@@ -940,6 +939,7 @@ public class BattleUtil {
                 long heal = Math.round(lifeStealRate * atomicDamage.get());
                 doHealing(from, heal, builder);
             }
+            extraBattleProcessList.forEach(ext -> ext.afterDamage(tar, atomicDamage, builder));
         }
         // 有伤害倍率的技能 插入文描
         if (skillEffect.getDamageRate() > 0) {

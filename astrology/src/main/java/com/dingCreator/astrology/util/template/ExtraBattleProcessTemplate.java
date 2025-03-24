@@ -112,7 +112,7 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
 
     }
 
-    public boolean canEffect(BattleDTO tar, SkillEffectDTO skillEffect, StringBuilder builder){
+    public boolean canEffect(BattleDTO tar, SkillEffectDTO skillEffect, StringBuilder builder) {
         return true;
     }
 
@@ -250,6 +250,8 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
 
     /**
      * 受到伤害后
+     *
+     * @param tar 受到伤害者
      */
     public void afterDamage(BattleDTO tar, AtomicLong atoDamage, StringBuilder builder) {
 

@@ -15,7 +15,13 @@ public enum SysExceptionEnum {
     /**
      * 系统异常
      */
-    SYS_BUSY(new BusinessException(Constants.SYS_EXCEPTION_PREFIX + "001", "系统繁忙，操作失败")),
+    SYS_BUSY(Constants.SYS_EXCEPTION_PREFIX + "001", "系统繁忙，操作失败"),
     ;
-    private final BusinessException exception;
+
+    private final String code;
+    private final String cheDesc;
+
+    public BusinessException getException() {
+        return new BusinessException(this.code, this.cheDesc);
+    }
 }

@@ -128,7 +128,7 @@ public class MonsterManageBehavior {
 
     private List<String> setMonsterProp(List<String> propertyTypeValList, Monster monster) {
         List<BusinessException> exceptionList = propertyTypeValList.stream()
-                .map(propertyTypeVal -> propertyTypeVal = propertyTypeVal.replace("：", Constants.COLON))
+                .map(propertyTypeVal -> propertyTypeVal.replace("：", Constants.COLON))
                 .map(propertyTypeVal -> {
                     if (!propertyTypeVal.contains(Constants.COLON)) {
                         return MonsterManageExceptionEnum.MONSTER_PROP_FORMAT_ERR.getException();

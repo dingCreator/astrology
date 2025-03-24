@@ -6,13 +6,18 @@ import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.dto.alchemy.HerbQuantityDTO;
 import com.dingCreator.astrology.dto.alchemy.PillDTO;
 import com.dingCreator.astrology.entity.Pill;
+import com.dingCreator.astrology.entity.PlayerAlchemy;
 import com.dingCreator.astrology.entity.PlayerHerb;
-import com.dingCreator.astrology.enums.HerbEnum;
+import com.dingCreator.astrology.enums.alchemy.AlchemyRankEnum;
+import com.dingCreator.astrology.enums.alchemy.HerbEnum;
+import com.dingCreator.astrology.enums.alchemy.PillTypeEnum;
 import com.dingCreator.astrology.enums.exception.AlchemyExceptionEnum;
 import com.dingCreator.astrology.mapper.PillMapper;
+import com.dingCreator.astrology.mapper.PlayerAlchemyMapper;
 import com.dingCreator.astrology.mapper.PlayerHerbMapper;
 import com.dingCreator.astrology.util.AlchemyUtil;
 import com.dingCreator.astrology.util.LockUtil;
+import com.dingCreator.astrology.util.RandomUtil;
 import com.dingCreator.astrology.vo.AlchemyResultVO;
 
 import java.util.ArrayList;
@@ -37,15 +42,21 @@ public class PillService {
         return LockUtil.execute(Constants.ALCHEMY_LOCK_PREFIX + playerId,
                 () -> DatabaseProvider.getInstance().reuseTransactionExecuteReturn(sqlSession -> {
                     // 初始化mapper
+                    PlayerAlchemyMapper playerAlchemyMapper = sqlSession.getMapper(PlayerAlchemyMapper.class);
                     PlayerHerbMapper playerHerbMapper = sqlSession.getMapper(PlayerHerbMapper.class);
                     PillMapper pillMapper = sqlSession.getMapper(PillMapper.class);
+                    // 0. 判断是否炼药师
+                    PlayerAlchemy playerAlchemy = playerAlchemyMapper.selectById(playerId);
+                    if (Objects.isNull(playerAlchemy)) {
+                        throw AlchemyExceptionEnum.NOT_ALCHEMY_MASTER.getException();
+                    }
                     // 1. 扣除药材
                     List<Long> herbIds = new ArrayList<>(herbMap.size());
                     QueryWrapper<PlayerHerb> herbWrapper = new QueryWrapper<PlayerHerb>().eq(PlayerHerb.PLAYER_ID, playerId);
                     herbMap.keySet().forEach(herbName -> {
                         HerbEnum herbEnum = HerbEnum.getByName(herbName);
                         if (Objects.isNull(herbEnum)) {
-                            throw AlchemyExceptionEnum.INVALID_HERB_NAME.getException().fillArgs(herbName);
+                            throw AlchemyExceptionEnum.INVALID_HERB_NAME.getException(herbName);
                         }
                         herbIds.add(herbEnum.getId());
                     });
@@ -53,16 +64,16 @@ public class PillService {
                     List<PlayerHerb> playerHerbList = playerHerbMapper.selectList(herbWrapper);
                     // 检查是否有足够的药材
                     if (playerHerbList.size() != herbMap.size()) {
-                        throw AlchemyExceptionEnum.NOT_ENOUGH_HERB.getException();
+                        throw AlchemyExceptionEnum.NOT_ENOUGH_HERB_1.getException();
                     }
                     playerHerbList.forEach(playerHerb -> {
                         String herbName = HerbEnum.getById(playerHerb.getHerbId()).getName();
                         int used = herbMap.get(herbName);
                         if (used <= 0) {
-                           throw AlchemyExceptionEnum.INVALID_HERB_INPUT.getException().fillArgs(used);
+                           throw AlchemyExceptionEnum.INVALID_HERB_INPUT.getException(used);
                         }
                         if (used > playerHerb.getHerbCnt()) {
-                            throw AlchemyExceptionEnum.NOT_ENOUGH_HERB.getException().fillArgs(herbName, used, playerHerb.getHerbCnt());
+                            throw AlchemyExceptionEnum.NOT_ENOUGH_HERB.getException(herbName, used, playerHerb.getHerbCnt());
                         }
                         playerHerb.setHerbCnt(playerHerb.getHerbCnt() - used);
                         playerHerbMapper.updateById(playerHerb);
@@ -92,6 +103,23 @@ public class PillService {
                             quantity.getToxicity(), quantity.getQuality(), quantity.getStar());
                     if (Objects.isNull(pill)) {
                         return AlchemyResultVO.builder().success(false).alchemyMsg("投入的药材配比有误，险些炸炉，得到了一炉灰").build();
+                    }
+                    // 4. 计算概率
+                    boolean success = false;
+                    if (PillTypeEnum.PROPERTY.getEngDesc().equals(pill.getPillType())) {
+                        success = RandomUtil.isHit(AlchemyRankEnum.getByRank(playerAlchemy.getPropertyRank())
+                                .getSuccessRate(pill.getPillRank()));
+                    } else if (PillTypeEnum.STATUS.getEngDesc().equals(pill.getPillType())) {
+                        success = RandomUtil.isHit(AlchemyRankEnum.getByRank(playerAlchemy.getStatusRank())
+                                .getSuccessRate(pill.getPillRank()));
+                    } else if (PillTypeEnum.BUFF.getEngDesc().equals(pill.getPillType())) {
+                        success = RandomUtil.isHit(AlchemyRankEnum.getByRank(playerAlchemy.getBuffRank())
+                                .getSuccessRate(pill.getPillRank()));
+                    }
+                    if (!success) {
+                        return AlchemyResultVO.builder().success(false)
+                                .alchemyMsg("您炼制了" + pill.getPillName() + "，但因技艺不精，炼制失败，得到了一炉灰")
+                                .build();
                     }
                     PlayerPillService.getInstance().addPill(playerId, pill.getId(), 1);
                     return AlchemyResultVO.builder().success(true).alchemyMsg("恭喜炼制出" + pill.getPillName()).build();

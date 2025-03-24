@@ -1,10 +1,9 @@
 package com.dingCreator.astrology.dto.article;
 
 import com.dingCreator.astrology.enums.ArticleTypeEnum;
-import com.dingCreator.astrology.enums.HerbEnum;
+import com.dingCreator.astrology.enums.alchemy.HerbEnum;
 import com.dingCreator.astrology.service.PlayerHerbService;
 import com.dingCreator.astrology.vo.ArticleItemVO;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

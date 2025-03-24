@@ -5,10 +5,13 @@ import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.BattleBuffDTO;
 import com.dingCreator.astrology.dto.BattleDTO;
 import com.dingCreator.astrology.dto.BuffDTO;
+import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.equipment.EquipmentPropertiesDTO;
 import com.dingCreator.astrology.dto.organism.OrganismDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
+import com.dingCreator.astrology.enums.EquipmentSuitEnum;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 import com.dingCreator.astrology.enums.exception.EquipmentExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
@@ -869,7 +872,7 @@ public enum EquipmentEnum {
             }
     ),
     EQUIPMENT_412(412L, "浣溪沙",
-                    "修仙王朝眉山仙子的轻纱，在仙子常年保养与锤炼下已近神迹，" +
+            "修仙王朝眉山仙子的轻纱，在仙子常年保养与锤炼下已近神迹，" +
                     "生有灵智，可自动护主。材质坚韧，" +
                     "由千年晶水蓝矿打磨成的丝织而成，是兼顾颜值与实力的强力防具" +
                     "\n隐藏技能\n兰芽短浸：受到伤害后，闪避提升35%持续两回合",
@@ -882,11 +885,9 @@ public enum EquipmentEnum {
             new ExtraBattleProcessTemplate() {
                 @Override
                 public void afterDamage(BattleDTO tar, AtomicLong atoDamage, StringBuilder builder) {
-                    if (atoDamage.get() > 0) {
-                        builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
-                                .append("的武器技能【兰芽短浸】被触发");
-                        BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.DODGE, "", 0.35F), 2, builder);
-                    }
+                    builder.append("※").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的武器技能【兰芽短浸】被触发");
+                    BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.DODGE, "", 0.35F), 2, builder);
                 }
             }
     ),
@@ -930,6 +931,21 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 250L)
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON,
             new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeBattle(List<String> battleMsg) {
+                    StringBuilder builder = new StringBuilder("※")
+                            .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的武器技能【九日临空】被触发");
+                    EquipmentSuitEnum.EquipmentSuit suit = EquipmentSuitEnum.getByEquipmentId(414L).getEquipmentSuit();
+                    int round;
+                    if (suit.suitNum(this.getFrom().getOrganismInfoDTO().getEquipmentBarDTO()) >= 2) {
+                        round = 1000;
+                    } else {
+                        round = 9;
+                    }
+                    BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.ATK, "九日临空", 0.15F), round, builder);
+                    battleMsg.add(builder.toString());
+                }
             }
     ),
 
@@ -983,9 +999,9 @@ public enum EquipmentEnum {
     ),
     EQUIPMENT_502(502L, "寒星.圣者之冠",
             "以冰海沉星为原型，并针对其特性打造出来的神煅之器，为古圣城圣者权位与力量的标志。\n" +
-                 "传闻圣者之冠具有锁定冰海沉星所在位置的能力，古圣城历代圣者都有着寻找冰海沉星的记录，但他们最终都无功而返或身死道消。\n" +
-                 "隐藏技能\n圣者尊崇.零度法则:装备者受到的伤害减少20%，攻击命中后使敌方速度降低15%持续一回合。"+
-                 "神煅加护 寒星之赐\n法抗+20%，法强+15%",
+                    "传闻圣者之冠具有锁定冰海沉星所在位置的能力，古圣城历代圣者都有着寻找冰海沉星的记录，但他们最终都无功而返或身死道消。\n" +
+                    "隐藏技能\n圣者尊崇.零度法则:装备者受到的伤害减少20%，攻击命中后使敌方速度降低15%持续一回合。" +
+                    "神煅加护 寒星之赐\n法抗+20%，法强+15%",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 10000L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 0.2F),
@@ -1051,10 +1067,10 @@ public enum EquipmentEnum {
             }
     ),
     EQUIPMENT_601(601L, "反物质弹",
-            "未元之都利用湮灭法则开发出的产物。"+
-            "作为世间最具毁灭力量的法则集合体，又融合了反物质的科技手段，反物质弹尚处于雏形之时就已经达到了惊人的法则级，其毁灭之能可以无视一切防御直达命脉。"+
-            "标志着普通人类的脚步已经踏足了世界的根基。"+
-            "\n法则之力\n湮灭法则：所有目标为敌方，且有伤害倍率的单次攻击，附加200%物攻的真实伤害",
+            "未元之都利用湮灭法则开发出的产物。" +
+                    "作为世间最具毁灭力量的法则集合体，又融合了反物质的科技手段，反物质弹尚处于雏形之时就已经达到了惊人的法则级，其毁灭之能可以无视一切防御直达命脉。" +
+                    "标志着普通人类的脚步已经踏足了世界的根基。" +
+                    "\n法则之力\n湮灭法则：所有目标为敌方，且有伤害倍率的单次攻击，附加200%物攻的真实伤害",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 20000L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 1F),
@@ -1066,14 +1082,14 @@ public enum EquipmentEnum {
                 public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect,
                                               AtomicLong damage, boolean critical, StringBuilder builder) {
                     OrganismDTO organism = this.getFrom().getOrganismInfoDTO().getOrganismDTO();
-                    builder.append("，").append(organism.getName()).append("的武器法则【湮灭法则】被触发");
+                    builder.append(organism.getName()).append("的武器法则【湮灭法则】被触发");
                     BattleUtil.doRealDamage(tar, 2 * organism.getAtk(), builder);
                 }
             }
     ),
     EQUIPMENT_602(602L, "不灭金身",
-            "法则之力\n不灭法则：每次战斗限一次，受到致命伤害后，免疫此次伤害"+
-                    "神煅加护\n固若金汤：物防+15% 法抗+15%"+
+            "法则之力\n不灭法则：每次战斗限一次，受到致命伤害后，免疫此次伤害" +
+                    "神煅加护\n固若金汤：物防+15% 法抗+15%" +
                     "隐藏技能\n" +
                     "金身虚影：战斗开始时，除真实伤害外的所有伤害，按伤害类型，减少对应自身（防御或法抗）200%的数值，持续8回合。金身法则触发后，重新激活此技能，持续3回合。",
             Arrays.asList(
@@ -1094,17 +1110,17 @@ public enum EquipmentEnum {
             }
     ),
     EQUIPMENT_603(603L, "天喑无道",
-            "原始魔器，四大魔器的母本，此世全部负面力量的集合体."+
-            "其历史无从考证，只知其十分古老，"+
-            "最早记录于星历前355年，圣星府灭门案现场被人目击，由一名十岁左右的孩童携带逃离，随后不知踪迹。"+
-            "随后几十年间，广有天喑无道之名的传闻，且传闻所在之处同时有数起凶案发生。"+
-            "第一次被证实存在于星历前263年，一名神秘人士将其置于圣城拍卖会拍卖，后被圣城高层拍下。星历前3年，天喑无道失窃，随后不知所踪。"+
-            "法则之力\n泯灭法则：敌方全体血量回复效果降低90%持续整场战斗无法消除"+
-            "隐藏技能\n" +
-            "觉.摩诃无量\n" +
-            "战斗开始时提升自身100%攻击力 50%命中 50%穿甲 50%防御 50%法抗 持续整场战斗，若该buff效果被清除，则五回合后重新激活。所有摩诃无量同名效果只触发一条，且（觉>神>普>残）\n" +
-            "魔慑诡计\n" +
-            "谋天化道：装备者攻击命中后使敌方受到的伤害提升15%。",
+            "原始魔器，四大魔器的母本，此世全部负面力量的集合体." +
+                    "其历史无从考证，只知其十分古老，" +
+                    "最早记录于星历前355年，圣星府灭门案现场被人目击，由一名十岁左右的孩童携带逃离，随后不知踪迹。" +
+                    "随后几十年间，广有天喑无道之名的传闻，且传闻所在之处同时有数起凶案发生。" +
+                    "第一次被证实存在于星历前263年，一名神秘人士将其置于圣城拍卖会拍卖，后被圣城高层拍下。星历前3年，天喑无道失窃，随后不知所踪。" +
+                    "法则之力\n泯灭法则：敌方全体血量回复效果降低90%持续整场战斗无法消除" +
+                    "隐藏技能\n" +
+                    "觉.摩诃无量\n" +
+                    "战斗开始时提升自身100%攻击力 50%命中 50%穿甲 50%防御 50%法抗 持续整场战斗，若该buff效果被清除，则五回合后重新激活。所有摩诃无量同名效果只触发一条，且（觉>神>普>残）\n" +
+                    "魔慑诡计\n" +
+                    "谋天化道：装备者攻击命中后使敌方受到的伤害提升15%。",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 200000L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 12000L),
@@ -1245,7 +1261,6 @@ public enum EquipmentEnum {
 
     private static final Map<Long, EquipmentEnum> EQUIPMENT_ENUM_MAP;
     private static final Map<String, EquipmentEnum> EQUIPMENT_ENUM_NAME_MAP;
-    private static final Map<Long, EquipmentSuit> EQUIPMENT_ENUM_SUIT_MAP = new HashMap<>();
 
     public static EquipmentEnum getById(Long id) {
         EquipmentEnum equipmentEnum = EQUIPMENT_ENUM_MAP.get(id);
@@ -1268,24 +1283,5 @@ public enum EquipmentEnum {
                 EquipmentEnum::getId, Function.identity()));
         EQUIPMENT_ENUM_NAME_MAP = Arrays.stream(EquipmentEnum.values()).collect(Collectors.toMap(
                 EquipmentEnum::getName, Function.identity()));
-    }
-
-    @Data
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class EquipmentSuit {
-        /**
-         * 武器ID
-         */
-        private Long weaponId;
-        /**
-         * 防具ID
-         */
-        private Long armorId;
-        /**
-         * 饰品ID
-         */
-        private Long jewelryId;
     }
 }

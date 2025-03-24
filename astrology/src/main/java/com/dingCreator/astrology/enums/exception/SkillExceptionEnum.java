@@ -16,11 +16,17 @@ public enum SkillExceptionEnum {
     /**
      * 技能异常
      */
-    INVALID_SKILL_ID(new BusinessException(Constants.SKILL_EXCEPTION_PREFIX + "000", "输入的技能ID含未拥有的技能")),
-    INACTIVE_SKILL_NOT_ALLOW(new BusinessException(Constants.SKILL_EXCEPTION_PREFIX + "001", "被动技能不能装备到技能栏")),
-    JOB_SKILL_NOT_ALLOW(new BusinessException(Constants.SKILL_EXCEPTION_PREFIX + "002", "你的职业不允许装备该技能")),
-    SKILL_ID_NOT_EXIST(new BusinessException(Constants.SKILL_EXCEPTION_PREFIX + "003", "技能ID对应的技能不存在")),
-    SKILL_NAME_NOT_EXIST(new BusinessException(Constants.SKILL_EXCEPTION_PREFIX + "004", "技能名称对应的技能不存在")),
+    INVALID_SKILL_ID(Constants.SKILL_EXCEPTION_PREFIX + "000", "输入的技能ID含未拥有的技能"),
+    INACTIVE_SKILL_NOT_ALLOW(Constants.SKILL_EXCEPTION_PREFIX + "001", "被动技能不能装备到技能栏"),
+    JOB_SKILL_NOT_ALLOW(Constants.SKILL_EXCEPTION_PREFIX + "002", "你的职业不允许装备该技能"),
+    SKILL_ID_NOT_EXIST(Constants.SKILL_EXCEPTION_PREFIX + "003", "技能ID对应的技能不存在"),
+    SKILL_NAME_NOT_EXIST(Constants.SKILL_EXCEPTION_PREFIX + "004", "技能名称对应的技能不存在"),
     ;
-    private final BusinessException exception;
+
+    private final String code;
+    private final String cheDesc;
+
+    public BusinessException getException() {
+        return new BusinessException(this.code, this.cheDesc);
+    }
 }

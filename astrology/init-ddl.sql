@@ -306,7 +306,9 @@ CREATE TABLE astrology_activity_statics
 CREATE TABLE `astrology_pill` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
     `pill_name` VARCHAR(255) NOT NULL COMMENT '丹药名称',
-    `level` INT COMMENT '丹药等级',
+    `pill_rank` INT COMMENT '丹药等级',
+    `quality_rank` INT COMMENT '品质等级',
+    `pill_type` VARCHAR(32) COMMENT '丹药类型',
     `vigor` INT COMMENT '生机',
     `warn` INT COMMENT '温热',
     `cold` INT COMMENT '寒韵',
@@ -317,7 +319,7 @@ CREATE TABLE `astrology_pill` (
     `star_end` INT COMMENT '星辰之力',
     `effect_json` TEXT COMMENT '效果',
     PRIMARY KEY (`id`),
-    UNIQUE KEY uk_pill_name_lv (`pill_name`,`level`),
+    UNIQUE KEY uk_pill_name_quality_rank (`pill_name`,`quality_rank`),
     KEY idx_prop(vigor,warn,cold,toxicity,quality_start,quality_end,star_start,star_end)
 ) ENGINE=InnoDB COMMENT='丹药表';
 
@@ -338,3 +340,15 @@ create table astrology_player_pill (
     PRIMARY KEY(id),
     UNIQUE KEY uk_player_id_pill_id (player_id, pill_id)
 ) ENGINE=innodb COMMENT='玩家丹药表';
+
+create table astrology_player_alchemy (
+    player_id BIGINT NOT NULL COMMENT '玩家ID',
+    property_exp INT NOT NULL DEFAULT 0 COMMENT '属性丹经验值',
+    property_rank INT NOT NUll DEFAULT 0 COMMENT '属性丹炼制等级',
+    buff_exp INT NOT NULL DEFAULT 0 COMMENT 'buff丹经验值',
+    buff_rank INT NOT NULL DEFAULT 0 COMMENT 'buff丹炼制等级',
+    status_exp INT NOT NULL DEFAULT 0 COMMENT '状态丹经验值',
+    status_rank INT NOT NULL DEFAULT 0 COMMENT '状态丹炼制等级',
+    alchemy_skill_id BIGINT COMMENT '炼丹术',
+    PRIMARY KEY (player_id)
+) ENGINE=innodb COMMENT='玩家炼丹术表'

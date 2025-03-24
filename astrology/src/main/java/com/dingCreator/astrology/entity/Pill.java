@@ -32,8 +32,13 @@ public class Pill {
     /**
      * 丹药等级
      */
-    @TableField("level")
-    private Integer level;
+    @TableField("pill_rank")
+    private Integer pillRank;
+    /**
+     * 品质等级
+     */
+    @TableField("quality_rank")
+    private Integer qualityRank;
     /**
      * 丹药类型
      */
@@ -89,7 +94,9 @@ public class Pill {
 
     public static final String PILL_NAME = "pill_name";
 
-    public static final String LEVEL = "level";
+    public static final String PILL_RANK = "pill_rank";
+
+    public static final String QUALITY_RANK = "quality_rank";
 
     public static final String VIGOR = "vigor";
 

@@ -16,6 +16,13 @@ import java.util.Objects;
  */
 public class PlayerHerbService {
 
+    /**
+     * 增加药材
+     *
+     * @param playerId 玩家ID
+     * @param herbId   药材ID
+     * @param cnt      数量
+     */
     public void addHerb(long playerId, long herbId, int cnt) {
         LockUtil.execute(Constants.PILL_LOCK_PREFIX + playerId,
                 () -> DatabaseProvider.getInstance().transactionExecute(sqlSession -> {
@@ -34,6 +41,14 @@ public class PlayerHerbService {
         );
     }
 
+    /**
+     * 玩家药材列表
+     *
+     * @param playerId  玩家ID
+     * @param pageIndex 页码
+     * @param pageSize  页面大小
+     * @return 药材列表
+     */
     public List<PlayerHerb> listPlayerHerb(Long playerId, int pageIndex, int pageSize) {
         int index = pageIndex - 1;
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
@@ -41,9 +56,19 @@ public class PlayerHerbService {
             return mapper.selectList(new QueryWrapper<PlayerHerb>()
                     .eq(PlayerHerb.PLAYER_ID, playerId)
                     .gt(PlayerHerb.HERB_CNT, 0)
-                    .orderByDesc(PlayerHerb.HERB_ID)
+                    .orderByDesc(PlayerHerb.HERB_CNT)
                     .last("limit " + index * pageSize + "," + pageSize));
         });
+    }
+
+    public PlayerHerb getHerbById(Long playerId, Long herbId) {
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
+                sqlSession.getMapper(PlayerHerbMapper.class).selectOne(
+                        new QueryWrapper<PlayerHerb>()
+                                .eq(PlayerHerb.PLAYER_ID, playerId)
+                                .eq(PlayerHerb.HERB_ID, herbId)
+                                .gt(PlayerHerb.HERB_CNT, 0)
+                ));
     }
 
     public int countPlayerHerb(Long playerId) {

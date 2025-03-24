@@ -21,7 +21,11 @@ public class PillDTO {
     /**
      * 丹药等级
      */
-    private Integer level;
+    private Integer pillRank;
+    /**
+     * 品质等级
+     */
+    private Integer qualityRank;
     /**
      * 生机
      */

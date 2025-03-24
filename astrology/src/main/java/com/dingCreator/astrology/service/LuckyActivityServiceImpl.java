@@ -118,7 +118,7 @@ public class LuckyActivityServiceImpl implements ActivityService {
         BigDecimal decimal = settings.getItemList().stream().map(LuckyActivityAwardSettingReq.AwardSettingItem::getRate)
                 .reduce(BigDecimal::add).orElseThrow(() -> new IllegalArgumentException("概率参数配置有误"));
         if (decimal.floatValue() != Constants.LUCKY_RATE_PERCENT) {
-            throw new IllegalArgumentException("概率之和不为1");
+            throw new IllegalArgumentException("概率之和不为1，当前概率之和：" + decimal.floatValue());
         }
         List<LuckyActivityAwardRuleDTO> awardRuleList = settings.getItemList().stream().map(item -> {
             int size = item.getParams().size();
