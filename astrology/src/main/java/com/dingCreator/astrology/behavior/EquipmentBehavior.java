@@ -1,5 +1,7 @@
 package com.dingCreator.astrology.behavior;
 
+import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
@@ -17,8 +19,10 @@ import com.dingCreator.astrology.util.PageUtil;
 import com.dingCreator.astrology.vo.EquipmentGroupVO;
 import com.dingCreator.astrology.vo.EquipmentVO;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author ding
@@ -77,11 +81,24 @@ public class EquipmentBehavior {
      * @param playerId 玩家ID
      * @return 装备概览
      */
-    public PageResponse<EquipmentGroupVO> listEquipmentGroup(long playerId, int pageIndex, int pageSize) {
+    public PageResponse<EquipmentGroupVO> listEquipmentGroup(long playerId, int pageIndex, int pageSize, String equipmentName) {
         // 校验一下有没有创建角色
         PlayerCache.getPlayerById(playerId);
-        List<EquipmentGroupVO> list = equipmentBelongToService.listGroupByBelongToId(BelongToEnum.PLAYER.getBelongTo(), playerId);
-        return PageUtil.buildPage(list, pageIndex, pageSize);
+        List<EquipmentGroupVO> list = new ArrayList<>();
+        int total = 0;
+        if (StringUtils.isBlank(equipmentName)) {
+            total = equipmentBelongToService.selectCount(BelongToEnum.PLAYER.getBelongTo(), playerId, null);
+            list = equipmentBelongToService.listGroupByBelongToId(BelongToEnum.PLAYER.getBelongTo(), playerId, null);
+        } else {
+            // 获取含关键字的装备ID
+            List<EquipmentEnum> enumList = EquipmentEnum.fuzzyQryByName(equipmentName);
+            if (CollectionUtil.isNotEmpty(enumList)) {
+                List<Long> equipmentIds = enumList.stream().map(EquipmentEnum::getId).collect(Collectors.toList());
+                total = equipmentBelongToService.selectCount(BelongToEnum.PLAYER.getBelongTo(), playerId, equipmentIds);
+                list = equipmentBelongToService.listGroupByBelongToId(BelongToEnum.PLAYER.getBelongTo(), playerId, equipmentIds);
+            }
+        }
+        return PageUtil.addPageDesc(list, pageIndex, pageSize, total);
     }
 
     /**

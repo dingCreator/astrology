@@ -7,10 +7,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author ding
@@ -20,7 +19,11 @@ import java.util.Map;
 @AllArgsConstructor
 public enum EquipmentSuitEnum {
 
-    SUIT_412_413("九临清河晏", new EquipmentSuit() {
+    SUIT_413_414("九临清河晏", new EquipmentSuit(
+            EquipmentEnum.EQUIPMENT_414.getId(),
+            null,
+            EquipmentEnum.EQUIPMENT_413.getId()) {
+
         @Override
         public Long changeLongProperty(Long src, EquipmentBarDTO bar) {
             if (suitNum(bar) >= 2) {
@@ -44,13 +47,12 @@ public enum EquipmentSuitEnum {
     private static final Map<Long, EquipmentSuitEnum> EQUIPMENT_ENUM_SUIT_MAP = new HashMap<>();
 
     static {
-        EQUIPMENT_ENUM_SUIT_MAP.put(EquipmentEnum.EQUIPMENT_412.getId(), SUIT_412_413);
-        EQUIPMENT_ENUM_SUIT_MAP.put(EquipmentEnum.EQUIPMENT_413.getId(), SUIT_412_413);
+        EQUIPMENT_ENUM_SUIT_MAP.put(EquipmentEnum.EQUIPMENT_413.getId(), SUIT_413_414);
+        EQUIPMENT_ENUM_SUIT_MAP.put(EquipmentEnum.EQUIPMENT_414.getId(), SUIT_413_414);
     }
 
     @Data
     @Getter
-    @NoArgsConstructor
     @AllArgsConstructor
     public static class EquipmentSuit {
         /**
@@ -74,13 +76,13 @@ public enum EquipmentSuitEnum {
          */
         public Integer suitNum(EquipmentBarDTO bar) {
             int num = 0;
-            if (bar.getWeapon().getEquipmentId().equals(weaponId)) {
+            if (Objects.nonNull(bar.getWeapon()) && bar.getWeapon().getEquipmentId().equals(weaponId)) {
                 num++;
             }
-            if (bar.getArmor().getEquipmentId().equals(armorId)) {
+            if (Objects.nonNull(bar.getArmor()) && bar.getArmor().getEquipmentId().equals(armorId)) {
                 num++;
             }
-            if (bar.getJewelry().getEquipmentId().equals(jewelryId)) {
+            if (Objects.nonNull(bar.getJewelry()) && bar.getJewelry().getEquipmentId().equals(jewelryId)) {
                 num++;
             }
             return num;

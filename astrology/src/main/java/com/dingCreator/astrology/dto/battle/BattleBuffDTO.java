@@ -1,4 +1,4 @@
-package com.dingCreator.astrology.dto;
+package com.dingCreator.astrology.dto.battle;
 
 import lombok.Builder;
 import lombok.Data;

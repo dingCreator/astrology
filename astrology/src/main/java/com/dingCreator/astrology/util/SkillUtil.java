@@ -38,4 +38,18 @@ public class SkillUtil {
         skillBarItem.setSkillId(builder.toString());
         return skillBarItem;
     }
+
+    /**
+     * 解析技能
+     *
+     * @return 技能
+     */
+    public static SkillEnum analyseSkill(String idOrName) {
+        SkillEnum skillEnum = SkillEnum.getByName(idOrName);
+        if (Objects.isNull(skillEnum)) {
+            Long id = NumberUtil.str2Long(idOrName);
+            skillEnum = SkillEnum.getById(id);
+        }
+        return skillEnum;
+    }
 }

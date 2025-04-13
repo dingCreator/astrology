@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.entity.SkillBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
+import com.dingCreator.astrology.enums.exception.SkillExceptionEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.mapper.SkillBelongToMapper;
-import org.apache.ibatis.session.SqlSession;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +31,7 @@ public class SkillBelongToService {
         skillBelongTo.setSkillId(skillId);
         DatabaseProvider.getInstance().batchTransactionExecute(sqlSession -> {
             SkillBelongToMapper mapper = sqlSession.getMapper(SkillBelongToMapper.class);
-            // 已有技能不再重复发放
+            // 已有技能不再重复插入
             int cnt = mapper.selectCount(new QueryWrapper<SkillBelongTo>()
                     .eq(SkillBelongTo.BELONG_TO, belongTo)
                     .eq(SkillBelongTo.BELONG_TO_ID, belongToId)
@@ -39,6 +39,8 @@ public class SkillBelongToService {
             );
             if (cnt == 0) {
                 mapper.createSkillBelongTo(skillBelongTo);
+            } else {
+                throw SkillExceptionEnum.SKILL_ALREADY_EXIST.getException();
             }
         });
     }

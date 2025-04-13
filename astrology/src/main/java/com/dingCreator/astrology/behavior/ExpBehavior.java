@@ -1,6 +1,8 @@
 package com.dingCreator.astrology.behavior;
 
 
+import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
@@ -8,7 +10,9 @@ import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.RankEnum;
 import com.dingCreator.astrology.enums.exception.ExpExceptionEnum;
+import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.job.JobInitPropertiesEnum;
+import com.dingCreator.astrology.enums.job.JobLevelAwardEnum;
 import com.dingCreator.astrology.response.BaseResponse;
 import com.dingCreator.astrology.vo.HangUpVO;
 import lombok.AllArgsConstructor;
@@ -18,7 +22,10 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author ding
@@ -38,6 +45,7 @@ public class ExpBehavior {
         int oldLevel = playerDTO.getLevel();
         long realExp = exp;
 
+        List<String> awardDescList = new ArrayList<>();
         while (currentExp >= getCurrentLevelMaxExp(playerDTO.getLevel())) {
             RankEnum rankEnum = RankEnum.getEnum(playerDTO.getJob(), playerDTO.getRank());
             if (playerDTO.getLevel() >= Constants.MAX_LEVEL) {
@@ -58,7 +66,12 @@ public class ExpBehavior {
             } else {
                 long currentLevelMaxExp = getCurrentLevelMaxExp(playerDTO.getLevel());
                 currentExp -= currentLevelMaxExp;
-                playerDTO.setLevel(playerDTO.getLevel() + 1);
+                int newLevel = playerDTO.getLevel() + 1;
+                playerDTO.setLevel(newLevel);
+                JobLevelAwardEnum award = JobLevelAwardEnum.getByJobAndLv(JobEnum.getByCode(playerDTO.getJob()), newLevel);
+                if (Objects.nonNull(award)) {
+                    awardDescList.add(award.getSendAward().apply(id));
+                }
                 // 属性提升
                 JobInitPropertiesEnum base = JobInitPropertiesEnum.getByCode(playerDTO.getJob());
                 // 先更新上限，否则当前值加不上去
@@ -81,7 +94,7 @@ public class ExpBehavior {
         }
         playerDTO.setExp(currentExp);
         PlayerCache.save(id);
-        return new LevelChange(oldLevel, playerDTO.getLevel(), realExp);
+        return new LevelChange(oldLevel, playerDTO.getLevel(), realExp, awardDescList);
     }
 
     /**
@@ -193,6 +206,13 @@ public class ExpBehavior {
         hangUpVO.setNewLevel(levelChange.getNewLevel());
         hangUpVO.setHp(playerDTO.getHpWithAddition() - oldHpWithAddition);
         hangUpVO.setMp(playerDTO.getMpWithAddition() - oldMpWithAddition);
+        if (CollectionUtil.isNotEmpty(levelChange.getAwardDesc())) {
+            String msg = levelChange.getAwardDesc().stream().filter(StringUtils::isNotBlank)
+                    .reduce((s1, s2) -> s1 + "\n" + s2).orElse(null);
+            if (Objects.nonNull(msg)) {
+                hangUpVO.setMessage(msg);
+            }
+        }
         BaseResponse<HangUpVO> response = new BaseResponse<>();
         response.setContent(hangUpVO);
         return response;
@@ -204,7 +224,7 @@ public class ExpBehavior {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    private static class LevelChange {
+    public static class LevelChange {
         /**
          * 旧等级
          */
@@ -217,6 +237,10 @@ public class ExpBehavior {
          * 实际获得的经验
          */
         private Long exp;
+        /**
+         * 奖励说明
+         */
+        private List<String> awardDesc;
     }
 
     private static class Holder {

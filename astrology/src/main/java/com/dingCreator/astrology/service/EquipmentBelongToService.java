@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.service;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.dto.equipment.EquipmentGroupQueryDTO;
@@ -78,10 +79,15 @@ public class EquipmentBelongToService {
      * @param belongToId 归属ID
      * @return 装备列表
      */
-    public List<EquipmentGroupVO> listGroupByBelongToId(String belongTo, Long belongToId) {
-        List<EquipmentGroupQueryDTO> queryDTOList = DatabaseProvider.getInstance().executeReturn(sqlSession ->
-                sqlSession.getMapper(EquipmentBelongToMapper.class).listGroupByBelongToId(belongTo, belongToId));
-        return queryDTOList.stream().map(query -> {
+    public List<EquipmentGroupVO> listGroupByBelongToId(String belongTo, Long belongToId, List<Long> ids) {
+        List<EquipmentBelongTo> belongToList = DatabaseProvider.getInstance().executeReturn(sqlSession ->
+                sqlSession.getMapper(EquipmentBelongToMapper.class).selectList(
+                        new QueryWrapper<EquipmentBelongTo>()
+                                .eq(EquipmentBelongTo.BELONG_TO, belongTo)
+                                .eq(EquipmentBelongTo.BELONG_TO_ID, belongToId)
+                                .in(CollectionUtil.isNotEmpty(ids), EquipmentBelongTo.EQUIPMENT_ID, ids)
+                ));
+        return belongToList.stream().map(query -> {
             EquipmentEnum equipmentEnum = EquipmentEnum.getById(query.getEquipmentId());
             EquipmentGroupVO vo = new EquipmentGroupVO();
             vo.setEquipmentRank(equipmentEnum.getEquipmentRankEnum());
@@ -89,7 +95,7 @@ public class EquipmentBelongToService {
             vo.setEquipmentName(equipmentEnum.getName());
             vo.setLimitJob(equipmentEnum.getLimitJob());
             vo.setLimitLevel(equipmentEnum.getLimitLevel());
-            vo.setCount(query.getEquipmentCount());
+            vo.setCount(query.getTotalCnt());
             vo.setDesc(equipmentEnum.getDesc());
             return vo;
         }).sorted((e1, e2) -> {
@@ -98,6 +104,15 @@ public class EquipmentBelongToService {
             }
             return e2.getEquipmentRank().getRare().compareTo(e1.getEquipmentRank().getRare());
         }).collect(Collectors.toList());
+    }
+
+    public int selectCount(String belongTo, Long belongToId, List<Long> ids) {
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession.getMapper(EquipmentBelongToMapper.class)
+                .selectCount(new QueryWrapper<EquipmentBelongTo>()
+                        .eq(EquipmentBelongTo.BELONG_TO, belongTo)
+                        .eq(EquipmentBelongTo.BELONG_TO_ID, belongToId)
+                        .in(CollectionUtil.isNotEmpty(ids), EquipmentBelongTo.EQUIPMENT_ID, ids)
+                ));
     }
 
     /**

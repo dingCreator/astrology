@@ -34,4 +34,8 @@ public class HangUpVO implements Serializable {
      * 回复的mp
      */
     private Long mp;
+    /**
+     * 信息
+     */
+    private String message;
 }

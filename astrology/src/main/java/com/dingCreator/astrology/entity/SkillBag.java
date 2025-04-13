@@ -37,6 +37,12 @@ public class SkillBag {
     /**
      * 数量
      */
-    @TableField("cnt")
-    private Integer cnt;
+    @TableField("skill_cnt")
+    private Integer skillCnt;
+
+    public static final String PLAYER_ID = "player_id";
+
+    public static final String SKILL_ID = "skill_id";
+
+    public static final String SKILL_CNT = "skill_cnt";
 }

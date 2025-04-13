@@ -1,12 +1,10 @@
 package com.dingCreator.astrology.util.template;
 
-import com.dingCreator.astrology.dto.BattleDTO;
+import com.dingCreator.astrology.dto.battle.BattleEffectDTO;
+import com.dingCreator.astrology.dto.battle.BattleRoundDTO;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author ding
@@ -18,65 +16,49 @@ public abstract class ThisBehaviorExtraBattleProcessTemplate implements Serializ
     /**
      * 本轮开始前
      */
-    public void beforeThisRound(BattleDTO from, List<BattleDTO> our, List<BattleDTO> enemy, StringBuilder builder) {
+    public void beforeThisRound(BattleRoundDTO battleRound) {
 
     }
 
     /**
      * 本轮结束后
      */
-    public void afterThisRound(BattleDTO from, List<BattleDTO> our, List<BattleDTO> enemy, StringBuilder builder) {
+    public void afterThisRound(BattleRoundDTO battleRound) {
 
     }
 
     /**
      * 技能选定目标后生效前
      */
-    public void beforeEffect(BattleDTO from, BattleDTO tar,
-                             List<BattleDTO> our, List<BattleDTO> enemy,
-                             StringBuilder builder) {
+    public void beforeEffect(BattleEffectDTO battleEffect) {
 
     }
 
     /**
      * 技能选定目标后生效后
      */
-    public void afterEffect(BattleDTO from, BattleDTO tar,
-                            List<BattleDTO> our, List<BattleDTO> enemy,
-                            StringBuilder builder) {
+    public void afterEffect(BattleEffectDTO battleEffect) {
 
     }
 
     /**
      * 技能命中时
      */
-    public void ifHit(BattleDTO from, BattleDTO tar,
-                            List<BattleDTO> our, List<BattleDTO> enemy,
-                            AtomicLong damage, boolean critical, StringBuilder builder) {
+    public void ifHit(BattleEffectDTO battleEffect) {
 
     }
 
     /**
      * 技能没有命中时
      */
-    public void ifNotHit(BattleDTO from, BattleDTO tar,
-                               List<BattleDTO> our, List<BattleDTO> enemy,
-                               StringBuilder builder) {
+    public void ifNotHit(BattleEffectDTO battleEffect) {
 
     }
 
     /**
      * 修改技能倍率
-     *
-     * @param from       来源
-     * @param tar        目标
-     * @param damageRate 原倍率
-     * @param builder    文描
-     * @return 修改后的技能倍率
      */
-    public BigDecimal changeDamageRate(BattleDTO from, BattleDTO tar,
-                                       List<BattleDTO> our, List<BattleDTO> enemy,
-                                       BigDecimal damageRate, StringBuilder builder) {
-        return damageRate;
+    public void changeDamageRate(BattleEffectDTO battleEffect) {
+
     }
 }

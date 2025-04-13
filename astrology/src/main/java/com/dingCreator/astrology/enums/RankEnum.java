@@ -42,8 +42,6 @@ public enum RankEnum {
 
     MAGICIAN_RANK_1(JobEnum.MAGICIAN.getJobCode(), 1, "星术学徒", 1, 20, 0.5F,
             (playerId, builder) -> {
-                builder.append("获得技能【").append(SkillEnum.SKILL_7.getName()).append("】\n");
-                SkillBehavior.getInstance().createSkillBelongTo(playerId, SkillEnum.SKILL_7.getId());
             }),
     MAGICIAN_RANK_2(JobEnum.MAGICIAN.getJobCode(), 2, "星术师", 21, 40, 0.4F,
             (playerId, builder) -> {

@@ -1,4 +1,4 @@
-package com.dingCreator.astrology.dto;
+package com.dingCreator.astrology.dto.battle;
 
 import com.dingCreator.astrology.enums.BuffOverrideStrategyEnum;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
@@ -92,6 +92,17 @@ public class BuffDTO implements Serializable {
         this.buffOverrideStrategyEnum = buffOverrideStrategyEnum;
         this.abnormal = false;
         this.level = 1;
+    }
+
+    public BuffDTO(BuffTypeEnum buffType, String buffName, Float rate, BuffOverrideStrategyEnum buffOverrideStrategyEnum,
+                   int level) {
+        this.buffType = buffType;
+        this.buffName = buffName;
+        this.value = 0L;
+        this.rate = new BigDecimal(String.valueOf(rate));
+        this.buffOverrideStrategyEnum = buffOverrideStrategyEnum;
+        this.abnormal = false;
+        this.level = level;
     }
 
     public BuffDTO(BuffTypeEnum buffType, String buffName, Long value, Float rate) {

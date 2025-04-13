@@ -68,6 +68,9 @@ public class EquipmentUtil {
         if (Objects.isNull(equipmentBarDTO)) {
             return val;
         }
+        if (Objects.isNull(equipmentPropertiesTypeEnum)) {
+            return val;
+        }
         // 武器
         val = getLongVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getWeapon(), equipmentBarDTO);
         // 防具
@@ -123,6 +126,9 @@ public class EquipmentUtil {
     public static Float getFloatVal(Float val, EquipmentPropertiesTypeEnum equipmentPropertiesTypeEnum,
                                     EquipmentBarDTO equipmentBarDTO) {
         if (Objects.isNull(equipmentBarDTO)) {
+            return val;
+        }
+        if (Objects.isNull(equipmentPropertiesTypeEnum)) {
             return val;
         }
         // 武器

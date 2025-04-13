@@ -1,6 +1,6 @@
 package com.dingCreator.astrology.util.context;
 
-import com.dingCreator.astrology.dto.BattleDTO;
+import com.dingCreator.astrology.dto.battle.BattleDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

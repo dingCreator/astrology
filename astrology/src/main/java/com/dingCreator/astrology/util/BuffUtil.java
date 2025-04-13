@@ -1,11 +1,10 @@
 package com.dingCreator.astrology.util;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.dingCreator.astrology.dto.BattleDTO;
-import com.dingCreator.astrology.dto.BattleBuffDTO;
-import com.dingCreator.astrology.dto.BuffDTO;
+import com.dingCreator.astrology.dto.battle.BattleDTO;
+import com.dingCreator.astrology.dto.battle.BattleBuffDTO;
+import com.dingCreator.astrology.dto.battle.BuffDTO;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
-import lombok.val;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -25,8 +24,11 @@ public class BuffUtil {
      * @param target 目标
      */
     public static void addBuff(BattleDTO target, BuffDTO buffDTO, Integer round, StringBuilder builder) {
+        if (target.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() <= 0) {
+            return;
+        }
         List<BattleBuffDTO> buffList = target.getBuffMap().getOrDefault(buffDTO.getBuffType(), new ArrayList<>());
-        if (target.getBuffMap().containsKey(BuffTypeEnum.IMMUNITY) && buffDTO.getAbnormal()) {
+        if (buffDTO.getAbnormal() && (target.getBuffMap().containsKey(BuffTypeEnum.IMMUNITY))) {
             builder.append("免疫此异常");
             return;
         }
@@ -252,7 +254,7 @@ public class BuffUtil {
                 buffList.removeIf(buff -> buff.getBuffDTO().getRate().floatValue() < 0 || buff.getBuffDTO().getValue() < 0);
             }
         });
-        builder.append("，").append(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName()).append("所有增益被清除");
+        builder.append("，").append(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName()).append("所有减益被清除");
     }
 
     public static void clearAllBuff(BattleDTO battleDTO, StringBuilder builder) {

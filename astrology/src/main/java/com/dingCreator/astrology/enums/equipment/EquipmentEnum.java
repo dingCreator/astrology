@@ -2,13 +2,9 @@ package com.dingCreator.astrology.enums.equipment;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.dto.BattleBuffDTO;
-import com.dingCreator.astrology.dto.BattleDTO;
-import com.dingCreator.astrology.dto.BuffDTO;
-import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
+import com.dingCreator.astrology.dto.battle.*;
 import com.dingCreator.astrology.dto.equipment.EquipmentPropertiesDTO;
 import com.dingCreator.astrology.dto.organism.OrganismDTO;
-import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
 import com.dingCreator.astrology.enums.EquipmentSuitEnum;
@@ -20,9 +16,7 @@ import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.util.template.ExtraBattleProcessTemplate;
 import com.dingCreator.astrology.util.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -615,13 +609,13 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void beforeBattle(List<String> battleMsg) {
+                public void beforeBattle(BattleFieldDTO battleField) {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【阴阳轮转】被触发");
                     BuffUtil.addBuff(this.getFrom(),
                             new BuffDTO(BuffTypeEnum.SPEED, "", 0.1F), 3, builder);
-                    battleMsg.add(builder.toString());
+                    battleField.getBattleMsg().add(builder.toString());
                 }
             }
     ),
@@ -636,8 +630,10 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                public void processIfHitEnemy(BattleEffectDTO battleEffect) {
                     if (RandomUtil.isHit(0.05F)) {
+                        BattleDTO tar = battleEffect.getTar();
+                        StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                         builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                                 .append("的武器技能【毒牙】被触发");
                         BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.ATK, "中毒", -0.1F, true), 2, builder);
@@ -657,12 +653,12 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void beforeBattle(List<String> battleMsg) {
+                public void beforeBattle(BattleFieldDTO battleField) {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器【五色斑霞】被触发");
                     BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.DODGE, "", 0.1F), 3, builder);
-                    battleMsg.add(builder.toString());
+                    battleField.getBattleMsg().add(builder.toString());
                 }
             }
     ),
@@ -678,13 +674,13 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void beforeBattle(List<String> battleMsg) {
+                public void beforeBattle(BattleFieldDTO battleField) {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【镇山之力】被触发");
                     this.getEnemy().forEach(enemy ->
                             BuffUtil.addBuff(enemy, new BuffDTO(BuffTypeEnum.SPEED, "", -800L), 3, builder));
-                    battleMsg.add(builder.toString());
+                    battleField.getBattleMsg().add(builder.toString());
                 }
             }
     ),
@@ -699,18 +695,13 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
-                    if (critical) {
-                        boolean isHit = BattleUtil.isHit(this.getFrom(), tar, this.getOur(), this.getEnemy(),
-                                new ArrayList<>(), null, builder);
-                        if (isHit) {
-                            builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
-                                    .append("的武器技能【蔽天云紫】被触发");
-                            long extraDamage = BattleUtil.getDamage(this.getFrom(), tar, this.getOur(), this.getEnemy(),
-                                    DamageTypeEnum.ATK, 0.8F, null, new ArrayList<>(), builder);
-                            builder.append("，追加造成").append(extraDamage).append("点伤害");
-                            BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.HIT, "", -0.1F), 1, builder);
-                        }
+                public void processIfHitEnemy(BattleEffectDTO battleEffect) {
+                    if (battleEffect.getCritical()) {
+                        BattleDTO tar = battleEffect.getTar();
+                        StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+                        builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                                .append("的武器技能【蔽天云紫】被触发");
+                        BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.HIT, "", -0.1F), 1, builder);
                     }
                 }
             }
@@ -724,7 +715,9 @@ public enum EquipmentEnum {
             EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.SI_DI_WU_SHI.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                public void processIfHitEnemy(BattleEffectDTO battleEffect) {
+                    BattleDTO tar = battleEffect.getTar();
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【牙狼噬】被触发");
                     BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.DEF, "", -0.1F), 2, builder);
@@ -743,20 +736,25 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.SI_DI_WU_SHI.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void ifNotHit(BattleDTO from, BattleDTO tar, SkillEnum skillEnum, StringBuilder builder) {
-                    super.ifNotHit(from, tar, skillEnum, builder);
+                public void ifNotHit(BattleEffectDTO battleEffect) {
+                    BattleDTO tar = battleEffect.getTar();
+                    BattleDTO from = battleEffect.getFrom();
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     if (this.getFrom().equals(tar)) {
                         OrganismDTO fromOrganism = from.getOrganismInfoDTO().getOrganismDTO();
-                        BattleUtil.doHealing(from, Math.round(fromOrganism.getHpWithAddition() * 0.05), builder);
+                        BattleUtil.doHealing(from, Math.round(fromOrganism.getHpWithAddition() * 0.05), builder,
+                                battleEffect.getBattleRound().getBattleField());
                     }
                 }
 
                 @Override
-                public void processIfHit(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
-                    if (damage.get() > 0) {
+                public void processIfHit(BattleEffectDTO battleEffect) {
+                    if (battleEffect.getDamage().get() > 0) {
+                        StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                         builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                                 .append("的武器技能【凌锋】被触发");
-                        BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.ATK, "", 0.1F), 2, builder);
+                        BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.ATK, "", 0.1F),
+                                2, builder);
                     }
                 }
             }
@@ -774,9 +772,12 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.SI_DI_WU_SHI.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                public void processIfHitEnemy(BattleEffectDTO battleEffect) {
+                    BattleDTO from = battleEffect.getFrom();
+                    BattleDTO tar = battleEffect.getTar();
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     long extraDamage = Math.round(tar.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition() * 0.03);
-                    damage.addAndGet(extraDamage);
+                    battleEffect.getDamage().addAndGet(extraDamage);
                     builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【极道】被触发，额外造成").append(extraDamage).append("点伤害");
                 }
@@ -794,8 +795,9 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.MAGICIAN.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
-                    if (damage.get() > 0) {
+                public void processIfHitEnemy(BattleEffectDTO battleEffect) {
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+                    if (battleEffect.getDamage().get() > 0) {
                         builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                                 .append("的武器技能【星庭献礼】被触发");
                         this.getOur().forEach(o -> {
@@ -817,13 +819,13 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.EVIL.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void beforeBattle(List<String> battleMsg) {
+                public void beforeBattle(BattleFieldDTO battleField) {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【摩诃无量】被触发");
                     BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.ATK, "摩诃无量", 0.8F), 6, builder);
                     BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.PENETRATE, "摩诃无量", 0.5F), 6, builder);
-                    battleMsg.add(builder.toString());
+                    battleField.getBattleMsg().add(builder.toString());
                 }
             }
     ),
@@ -839,12 +841,13 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.SI_DI_WU_SHI.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                public void processIfHitEnemy(BattleEffectDTO battleEffect) {
                     long extraDamage = Math.round(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getAtk() * 0.1);
                     if ((new Random().nextInt(100) < 5)) {
-                        damage.addAndGet(extraDamage);
+                        battleEffect.getDamage().addAndGet(extraDamage);
                     }
-                    builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                    battleEffect.getBattleRound().getBuilder()
+                            .append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能被触发，额外造成").append(extraDamage).append("点伤害");
                 }
             }
@@ -861,17 +864,18 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.SI_DI_WU_SHI.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                public void processIfHitEnemy(BattleEffectDTO battleEffect) {
                     long extraDamage = Math.round(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getMagicAtk() * 0.2);
                     if ((new Random().nextInt(100) < 20)) {
-                        damage.addAndGet(extraDamage);
+                        battleEffect.getDamage().addAndGet(extraDamage);
                     }
-                    builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                    battleEffect.getBattleRound().getBuilder()
+                            .append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能被触发，额外造成").append(extraDamage).append("点伤害");
                 }
             }
     ),
-    EQUIPMENT_412(412L, "浣溪沙",
+    EQUIPMENT_412(412L, "浣溪纱",
             "修仙王朝眉山仙子的轻纱，在仙子常年保养与锤炼下已近神迹，" +
                     "生有灵智，可自动护主。材质坚韧，" +
                     "由千年晶水蓝矿打磨成的丝织而成，是兼顾颜值与实力的强力防具" +
@@ -884,8 +888,10 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.ARMOR,
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void afterDamage(BattleDTO tar, AtomicLong atoDamage, StringBuilder builder) {
-                    builder.append("※").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                public void afterDamage(BattleEffectDTO battleEffect) {
+                    BattleDTO tar = battleEffect.getTar();
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+                    builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【兰芽短浸】被触发");
                     BuffUtil.addBuff(tar, new BuffDTO(BuffTypeEnum.DODGE, "", 0.35F), 2, builder);
                 }
@@ -932,7 +938,7 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON,
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void beforeBattle(List<String> battleMsg) {
+                public void beforeBattle(BattleFieldDTO battleField) {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【九日临空】被触发");
@@ -944,7 +950,7 @@ public enum EquipmentEnum {
                         round = 9;
                     }
                     BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.ATK, "九日临空", 0.15F), round, builder);
-                    battleMsg.add(builder.toString());
+                    battleField.getBattleMsg().add(builder.toString());
                 }
             }
     ),
@@ -960,14 +966,14 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.WEAPON, JobEnum.EVIL.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void beforeBattle(List<String> battleMsg) {
+                public void beforeBattle(BattleFieldDTO battleField) {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【神·摩诃无量】被触发");
                     BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.ATK, "摩诃无量", 1.5F), 12, builder);
                     BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.DEF, "摩诃无量", 0.2F), 12, builder);
                     BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.PENETRATE, "摩诃无量", 0.5F), 12, builder);
-                    battleMsg.add(builder.toString());
+                    battleField.getBattleMsg().add(builder.toString());
                 }
             }
     ),
@@ -983,10 +989,12 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.WEAPON,
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void beforeMyBehavior(BattleDTO tar, StringBuilder builder) {
+                public void beforeMyBehavior(BattleEffectDTO battleEffect) {
                     Map<String, Integer> markMap = this.getFrom().getMarkMap();
                     if (!markMap.containsKey("沧白之祈") || markMap.get("沧白之祈") == 0) {
                         markMap.put("沧白之祈", 3);
+                        BattleDTO from = battleEffect.getFrom();
+                        StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                         BuffUtil.clearAbnormalBuff(this.getFrom(), builder);
                         BuffUtil.clearInactiveBuff(this.getFrom(), builder);
                         BuffUtil.addBuff(this.getFrom(),
@@ -1030,34 +1038,38 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.RULE, EquipmentTypeEnum.JEWELRY,
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void beforeBattle(List<String> battleMsg) {
+                public void beforeBattle(BattleFieldDTO battleField) {
                     String name = this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName();
                     StringBuilder builder = new StringBuilder("※" + name + "的饰品法则【零度法则】被触发");
                     this.getOur().forEach(o -> RuleUtil.addRule(o, OrganismPropertiesEnum.BEHAVIOR_SPEED, "零度法则", 0.2F, builder));
                     this.getEnemy().forEach(o -> RuleUtil.addRule(o, OrganismPropertiesEnum.BEHAVIOR_SPEED, "零度法则", -0.2F, builder));
-                    battleMsg.add(builder.toString());
+                    battleField.getBattleMsg().add(builder.toString());
                 }
 
                 @Override
-                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect, AtomicLong damage, boolean critical, StringBuilder builder) {
+                public void processIfHitEnemy(BattleEffectDTO battleEffect) {
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     builder.append("，").append(this.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的饰品技能【永冻世界】被触发");
                     BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.MAGIC_ATK, "", 0.3F), 1, builder);
                 }
 
                 @Override
-                public void processIfOurHit(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect,
-                                            AtomicLong damage, boolean critical, StringBuilder builder) {
+                public void processIfOurHit(BattleEffectDTO battleEffect) {
+                    BattleDTO tar = battleEffect.getTar();
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     List<BattleBuffDTO> buffList = tar.getBuffMap().get(BuffTypeEnum.PAUSE);
                     if (CollectionUtils.isNotEmpty(buffList) &&
                             buffList.stream().anyMatch(buff -> "冻结".equals(buff.getBuffDTO().getBuffName()))) {
                         builder.append("，饰品法则【零度法则】被触发，伤害提升至1.5倍");
-                        damage.set(Math.round(damage.get() * 1.5));
+                        battleEffect.getDamage().set(Math.round(battleEffect.getDamage().get() * 1.5));
                     }
                 }
 
                 @Override
-                public void processIfNotHit(BattleDTO tar, SkillEnum skillEnum, StringBuilder builder) {
+                public void processIfNotHit(BattleEffectDTO battleEffect) {
+                    BattleDTO from = battleEffect.getFrom();
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     BuffUtil.addBuff(this.getFrom(), new BuffDTO(BuffTypeEnum.HIT, "永冻世界", 0.3F), 1, builder);
                     this.getEnemy().forEach(enemy -> {
                         BuffUtil.addBuff(enemy, new BuffDTO(BuffTypeEnum.PAUSE, "冻结", 0.3F, true), 1, builder);
@@ -1076,11 +1088,12 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 1F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 4F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.PENETRATE, 0.7F)
-            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.WEAPON, JobEnum.GUN.getJobCode(),
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.WEAPON,
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect,
-                                              AtomicLong damage, boolean critical, StringBuilder builder) {
+                public void processIfHitEnemy(BattleEffectDTO battleEffect) {
+                    BattleDTO tar = battleEffect.getTar();
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     OrganismDTO organism = this.getFrom().getOrganismInfoDTO().getOrganismDTO();
                     builder.append(organism.getName()).append("的武器法则【湮灭法则】被触发");
                     BattleUtil.doRealDamage(tar, 2 * organism.getAtk(), builder);
@@ -1101,11 +1114,12 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.RULE, EquipmentTypeEnum.ARMOR,
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void beforeMeDeath(BattleDTO from, BattleDTO tar,
-                                          AtomicLong atoDamage, StringBuilder builder) {
-
+                public void beforeMeDeath(BattleEffectDTO battleEffect) {
+                    BattleDTO tar = battleEffect.getTar();
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     OrganismDTO organism = tar.getOrganismInfoDTO().getOrganismDTO();
-                    builder.append("，").append(organism.getName()).append("的武器法则【不灭法则】被触发");
+                    builder.append("，").append(organism.getName()).append("的武器法则【不灭法则】被触发，免疫此次伤害");
+                    battleEffect.getDamage().set(0L);
                 }
             }
     ),
@@ -1130,10 +1144,10 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.RULE, EquipmentTypeEnum.JEWELRY,
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect,
-                                              AtomicLong damage, boolean critical, StringBuilder builder) {
+                public void processIfHitEnemy(BattleEffectDTO battleEffect) {
                     OrganismDTO organism = this.getFrom().getOrganismInfoDTO().getOrganismDTO();
-                    builder.append("，").append(organism.getName()).append("的武器法则【泯灭法则】被触发");
+                    battleEffect.getBattleRound().getBuilder()
+                            .append("，").append(organism.getName()).append("的武器法则【泯灭法则】被触发");
                 }
             }
     ),
@@ -1276,6 +1290,13 @@ public enum EquipmentEnum {
             throw EquipmentExceptionEnum.EQUIPMENT_NOT_EXIST.getException();
         }
         return equipmentEnum;
+    }
+
+    public static List<EquipmentEnum> fuzzyQryByName(String name) {
+        return EQUIPMENT_ENUM_NAME_MAP.entrySet().stream()
+                .filter(entry -> entry.getKey().contains(name))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
     }
 
     static {

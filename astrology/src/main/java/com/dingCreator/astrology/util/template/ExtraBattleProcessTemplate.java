@@ -1,6 +1,9 @@
 package com.dingCreator.astrology.util.template;
 
-import com.dingCreator.astrology.dto.BattleDTO;
+import com.dingCreator.astrology.dto.battle.BattleDTO;
+import com.dingCreator.astrology.dto.battle.BattleEffectDTO;
+import com.dingCreator.astrology.dto.battle.BattleFieldDTO;
+import com.dingCreator.astrology.dto.battle.BattleRoundDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import lombok.Data;
@@ -11,6 +14,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * 插入结算的模板
+ * 提供大量钩子方法，重写对应的钩子方法即可在战斗中生效
+ *
  * @author ding
  * @date 2024/4/3
  */
@@ -45,102 +51,100 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
     /**
      * 战斗前
      */
-    public void beforeBattle(List<String> battleMsg) {
+    public void beforeBattle(BattleFieldDTO battleField) {
 
     }
 
     /**
      * 战斗后
      */
-    public void afterBattle(List<String> battleMsg) {
+    public void afterBattle(BattleFieldDTO battleField) {
 
     }
 
     /**
      * 每轮前
      */
-    public void beforeEachRound(List<String> battleMsg) {
+    public void beforeEachRound(BattleRoundDTO battleRound) {
 
     }
 
     /**
      * 每轮后
      */
-    public void afterEachRound(List<String> battleMsg) {
+    public void afterEachRound(BattleRoundDTO battleRound) {
 
     }
 
     /**
      * 友方轮次前
      */
-    public void beforeOurRound(List<String> battleMsg) {
+    public void beforeOurRound(BattleRoundDTO battleRound) {
 
     }
 
     /**
      * 友方轮次后
      */
-    public void afterOurRound(List<String> battleMsg) {
+    public void afterOurRound(BattleRoundDTO battleRound) {
 
     }
 
     /**
      * 友方轮次前
      */
-    public void beforeEnemyRound(List<String> battleMsg) {
+    public void beforeEnemyRound(BattleRoundDTO battleRound) {
 
     }
 
     /**
      * 友方轮次后
      */
-    public void afterEnemyRound(List<String> battleMsg) {
+    public void afterEnemyRound(BattleRoundDTO battleRound) {
 
     }
 
     /**
      * 我的轮次前
      */
-    public void beforeMyRound(List<String> battleMsg) {
+    public void beforeMyRound(BattleRoundDTO battleRound) {
 
     }
 
     /**
      * 我的轮次后
      */
-    public void afterMyRound(List<String> battleMsg) {
+    public void afterMyRound(BattleRoundDTO battleRound) {
 
     }
 
-    public boolean canEffect(BattleDTO tar, SkillEffectDTO skillEffect, StringBuilder builder) {
+    public boolean canEffect(BattleEffectDTO battleEffect) {
         return true;
     }
 
     /**
      * 我的行动前
      */
-    public void beforeMyBehavior(BattleDTO tar, StringBuilder builder) {
+    public void beforeMyBehavior(BattleEffectDTO battleEffect) {
 
     }
 
     /**
      * 我的行动后
      */
-    public void afterMyBehavior(BattleDTO tar, StringBuilder builder) {
+    public void afterMyBehavior(BattleEffectDTO battleEffect) {
 
     }
 
     /**
      * 技能命中时
      */
-    public void ifHit(BattleDTO from, BattleDTO tar,
-                      SkillEnum skillEnum, SkillEffectDTO skillEffect,
-                      AtomicLong damage, boolean critical, StringBuilder builder) {
-        if (from.equals(this.from)) {
-            processIfHit(tar, skillEnum, skillEffect, damage, critical, builder);
+    public void ifHit(BattleEffectDTO battleEffect) {
+        if (battleEffect.getFrom().equals(this.from)) {
+            processIfHit(battleEffect);
         }
-        if (this.our.contains(from)) {
-            processIfOurHit(tar, skillEnum, skillEffect, damage, critical, builder);
+        if (this.our.contains(battleEffect.getFrom())) {
+            processIfOurHit(battleEffect);
         }
     }
 
@@ -154,10 +158,9 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
      * @param critical    是否暴击
      * @param builder     文描
      */
-    public void processIfHit(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect,
-                             AtomicLong damage, boolean critical, StringBuilder builder) {
-        if (this.getEnemy().contains(tar)) {
-            processIfHitEnemy(tar, skillEnum, skillEffect, damage, critical, builder);
+    public void processIfHit(BattleEffectDTO battleEffect) {
+        if (this.getEnemy().contains(battleEffect.getTar())) {
+            processIfHitEnemy(battleEffect);
         }
     }
 
@@ -171,80 +174,73 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
      * @param critical    是否暴击
      * @param builder     文描
      */
-    public void processIfHitEnemy(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect,
-                                  AtomicLong damage, boolean critical, StringBuilder builder) {
+    public void processIfHitEnemy(BattleEffectDTO battleEffect) {
 
     }
 
-    public void processIfOurHit(BattleDTO tar, SkillEnum skillEnum, SkillEffectDTO skillEffect,
-                                AtomicLong damage, boolean critical, StringBuilder builder) {
+    public void processIfOurHit(BattleEffectDTO battleEffect) {
 
     }
 
-    public void processIfOurHitEnemy(BattleDTO tar, SkillEnum skillEnum, AtomicLong damage, boolean critical, StringBuilder builder) {
+    public void processIfOurHitEnemy(BattleEffectDTO battleEffect, boolean critical) {
 
     }
 
     /**
      * 技能没有命中时
      */
-    public void ifNotHit(BattleDTO from, BattleDTO tar, SkillEnum skillEnum, StringBuilder builder) {
-        if (from.equals(this.from)) {
-            processIfNotHit(tar, skillEnum, builder);
+    public void ifNotHit(BattleEffectDTO battleEffect) {
+        if (battleEffect.getFrom().equals(this.from)) {
+            processIfNotHit(battleEffect);
         }
     }
 
-    public void processIfNotHit(BattleDTO tar, SkillEnum skillEnum, StringBuilder builder) {
+    public void processIfNotHit(BattleEffectDTO battleEffect) {
 
     }
 
-    public final BigDecimal changeDamageRate(BattleDTO from, BattleDTO tar, BigDecimal damageRate, SkillEnum skillEnum, StringBuilder builder) {
-        if (from.equals(this.getFrom())) {
-            return processChangeMySkillDamageRate(tar, damageRate, skillEnum, builder);
+    public final void changeDamageRate(BattleEffectDTO battleEffect) {
+        if (battleEffect.getFrom().equals(this.getFrom())) {
+            processChangeMySkillDamageRate(battleEffect);
         }
-        return damageRate;
     }
 
-    public BigDecimal processChangeMySkillDamageRate(BattleDTO tar, BigDecimal damageRate, SkillEnum skillEnum, StringBuilder builder) {
-        return damageRate;
+    public void processChangeMySkillDamageRate(BattleEffectDTO battleEffect) {
+
     }
 
     /**
      * 目标阵亡前（即受到致命攻击时）
      */
-    public void beforeTargetDeath(BattleDTO from, BattleDTO tar,
-                                  AtomicLong atoDamage, StringBuilder builder) {
+    public void beforeTargetDeath(BattleEffectDTO battleEffect) {
 
     }
 
     /**
      * 目标阵亡后
      */
-    public void afterTargetDeath(BattleDTO from, BattleDTO tar,
-                                 AtomicLong atoDamage, StringBuilder builder) {
+    public void afterTargetDeath(BattleEffectDTO battleEffect) {
 
     }
 
     /**
      * 自身阵亡前（即受到致命攻击时）
      */
-    public void beforeMeDeath(BattleDTO from, BattleDTO tar,
-                              AtomicLong atoDamage, StringBuilder builder) {
+    public void beforeMeDeath(BattleEffectDTO battleEffect) {
 
     }
 
     /**
      * 自身阵亡后
      */
-    public void afterMeDeath(BattleDTO from, BattleDTO tar,
-                             AtomicLong atoDamage, StringBuilder builder) {
+    public void afterMeDeath(BattleEffectDTO battleEffect) {
 
     }
 
     /**
      * 受到伤害前
      */
-    public void beforeDamage(StringBuilder builder) {
+    public void beforeDamage(BattleEffectDTO battleEffect) {
 
     }
 
@@ -253,7 +249,7 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
      *
      * @param tar 受到伤害者
      */
-    public void afterDamage(BattleDTO tar, AtomicLong atoDamage, StringBuilder builder) {
+    public void afterDamage(BattleEffectDTO battleEffect) {
 
     }
 
@@ -262,13 +258,6 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
     }
 
     public void afterHealing(long healVal) {
-
-    }
-
-    /**
-     * 被其他效果触发
-     */
-    public void execute() {
 
     }
 }

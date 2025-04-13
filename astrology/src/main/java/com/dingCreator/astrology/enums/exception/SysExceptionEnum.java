@@ -16,6 +16,7 @@ public enum SysExceptionEnum {
      * 系统异常
      */
     SYS_BUSY(Constants.SYS_EXCEPTION_PREFIX + "001", "系统繁忙，操作失败"),
+    INPUT_FORMAT_ERROR(Constants.SYS_EXCEPTION_PREFIX + "002", "输入内容有误"),
     ;
 
     private final String code;

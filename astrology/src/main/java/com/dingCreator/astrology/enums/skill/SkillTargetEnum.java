@@ -1,12 +1,17 @@
 package com.dingCreator.astrology.enums.skill;
 
-import com.dingCreator.astrology.dto.BattleDTO;
+import cn.hutool.core.collection.CollectionUtil;
+import com.dingCreator.astrology.dto.battle.BattleBuffDTO;
+import com.dingCreator.astrology.dto.battle.BattleDTO;
+import com.dingCreator.astrology.enums.BuffTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author ding
@@ -18,21 +23,12 @@ public enum SkillTargetEnum {
     /**
      * 技能目标
      */
-    ANY_ENEMY("ANY_ENEMY", "任意敌方，按正常锁定逻辑", true, (from, target) -> {
-        // todo
-        return target;
-    }),
-    FIRST_ENEMY("FIRST_ENEMY", "第一个敌方", true, (from, target) -> {
-        // todo
-        return target;
-    }),
-    ANY_OUR("ANY_OUR", "任意我方，按正常锁定逻辑", false, (from, target) -> target),
-    ALL_ENEMY("ALL_ENEMY", "全体敌方", true, (from, target) -> target),
-    ALL_OUR("ALL_ENEMY", "全体我方", false, (from, target) -> target),
-    ME("ME", "自己", false, (from, target) -> {
-        // todo
-        return target;
-    }),
+    ANY_ENEMY("ANY_ENEMY", "任意敌方，按正常锁定逻辑", true, (from, our, enemy) -> getTaunt(enemy)),
+    FIRST_ENEMY("FIRST_ENEMY", "第一个敌方", true, (from, our, enemy) -> Collections.singletonList(enemy.get(0))),
+    ANY_OUR("ANY_OUR", "任意我方，按正常锁定逻辑", false, (from, our, enemy) -> Collections.singletonList(our.get(0))),
+    ALL_ENEMY("ALL_ENEMY", "全体敌方", true, (from, our, enemy) -> enemy),
+    ALL_OUR("ALL_ENEMY", "全体我方", false, (from, our, enemy) -> our),
+    ME("ME", "自己", false, (from, our, enemy) -> Collections.singletonList(from)),
     ;
     private final String code;
 
@@ -40,5 +36,39 @@ public enum SkillTargetEnum {
 
     private final boolean enemy;
 
-    private final BiFunction<BattleDTO, List<BattleDTO>, List<BattleDTO>> getTarget;
+    private final GetTarget<BattleDTO> getTarget;
+
+    @FunctionalInterface
+    public interface GetTarget<E extends BattleDTO> {
+
+        default List<E> getTarget(E from, List<E> our, List<E> enemy) {
+            List<E> aliveOur = our.stream()
+                    .filter(b -> b.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() > 0)
+                    .collect(Collectors.toList());
+            List<E> aliveEnemy = enemy.stream()
+                    .filter(b -> b.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() > 0)
+                    .collect(Collectors.toList());
+            return getTarget0(from, aliveOur, aliveEnemy);
+        }
+
+        List<E> getTarget0(E from, List<E> our, List<E> enemy);
+    }
+
+    static List<BattleDTO> getTaunt(List<BattleDTO> target) {
+        List<BattleDTO> taunt = target.stream().filter(t -> {
+            List<BattleBuffDTO> buffList = t.getBuffMap().getOrDefault(BuffTypeEnum.TAUNT, null);
+            return CollectionUtil.isNotEmpty(buffList);
+        }).collect(Collectors.toList());
+
+        if (!taunt.isEmpty()) {
+            target = Collections.singletonList(
+                    taunt.stream()
+                            .max(Comparator.comparing(t -> t.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition()))
+                            .get()
+            );
+        } else {
+            target = Collections.singletonList(target.get(0));
+        }
+        return target;
+    }
 }

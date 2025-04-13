@@ -1,6 +1,6 @@
 package com.dingCreator.astrology.dto.skill;
 
-import com.dingCreator.astrology.dto.BuffDTO;
+import com.dingCreator.astrology.dto.battle.BuffDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

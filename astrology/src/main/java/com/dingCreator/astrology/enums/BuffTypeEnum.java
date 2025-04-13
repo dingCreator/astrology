@@ -23,19 +23,23 @@ public enum BuffTypeEnum {
     /**
      * 法强
      */
-    MAGIC_ATK(OrganismPropertiesEnum.MAGIC_ATK.getFieldName(), OrganismPropertiesEnum.MAGIC_ATK.getChnDesc(), BuffEffectTypeEnum.PROPERTY),
+    MAGIC_ATK(OrganismPropertiesEnum.MAGIC_ATK.getFieldName(), OrganismPropertiesEnum.MAGIC_ATK.getChnDesc(),
+            BuffEffectTypeEnum.PROPERTY),
     /**
      * 法抗
      */
-    MAGIC_DEF(OrganismPropertiesEnum.MAGIC_DEF.getFieldName(), OrganismPropertiesEnum.MAGIC_DEF.getChnDesc(), BuffEffectTypeEnum.PROPERTY),
+    MAGIC_DEF(OrganismPropertiesEnum.MAGIC_DEF.getFieldName(), OrganismPropertiesEnum.MAGIC_DEF.getChnDesc(),
+            BuffEffectTypeEnum.PROPERTY),
     /**
      * 速度
      */
-    SPEED(OrganismPropertiesEnum.BEHAVIOR_SPEED.getFieldName(), OrganismPropertiesEnum.BEHAVIOR_SPEED.getChnDesc(), BuffEffectTypeEnum.PROPERTY),
+    SPEED(OrganismPropertiesEnum.BEHAVIOR_SPEED.getFieldName(), OrganismPropertiesEnum.BEHAVIOR_SPEED.getChnDesc(),
+            BuffEffectTypeEnum.PROPERTY),
     /**
      * 生命值偷取（吸血）
      */
-    LIFE_STEAL(OrganismPropertiesEnum.LIFE_STEALING.getFieldName(), OrganismPropertiesEnum.LIFE_STEALING.getChnDesc(), BuffEffectTypeEnum.PROPERTY),
+    LIFE_STEAL(OrganismPropertiesEnum.LIFE_STEALING.getFieldName(), OrganismPropertiesEnum.LIFE_STEALING.getChnDesc(),
+            BuffEffectTypeEnum.PROPERTY),
     /**
      * 命中
      */
@@ -47,7 +51,8 @@ public enum BuffTypeEnum {
     /**
      * 暴击率
      */
-    CRITICAL(OrganismPropertiesEnum.CRITICAL_RATE.getFieldName(), OrganismPropertiesEnum.CRITICAL_DAMAGE.getChnDesc(), BuffEffectTypeEnum.PROPERTY),
+    CRITICAL(OrganismPropertiesEnum.CRITICAL_RATE.getFieldName(), OrganismPropertiesEnum.CRITICAL_DAMAGE.getChnDesc(),
+            BuffEffectTypeEnum.PROPERTY),
     /**
      * 暴击率减免
      */
@@ -66,7 +71,8 @@ public enum BuffTypeEnum {
     /**
      * 穿甲
      */
-    PENETRATE(OrganismPropertiesEnum.PENETRATE.getFieldName(), OrganismPropertiesEnum.PENETRATE.getChnDesc(), BuffEffectTypeEnum.PROPERTY),
+    PENETRATE(OrganismPropertiesEnum.PENETRATE.getFieldName(), OrganismPropertiesEnum.PENETRATE.getChnDesc(),
+            BuffEffectTypeEnum.PROPERTY),
     /**
      * 法穿
      */

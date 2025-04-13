@@ -57,6 +57,10 @@ public class WorldBossCache {
      * 攻击次数缓存是否已初始化
      */
     private static volatile boolean atkTimesInitFlag = false;
+    /**
+     * 初始化boss的时间
+     */
+    private static LocalDate lastInitDate;
 
     /**
      * 获取boss属性
@@ -64,9 +68,7 @@ public class WorldBossCache {
      * @return BOSS属性
      */
     public static BossPropDTO getBossProp() {
-        if (!worldBossInitFlag) {
-            initBoss();
-        }
+        initBoss();
         return WORLD_BOSS_MAP.get(LocalDate.now());
     }
 
@@ -87,10 +89,10 @@ public class WorldBossCache {
      * 初始化世界boss
      */
     private static synchronized void initBoss() {
-        if (!worldBossInitFlag) {
+        // 日期更新后需要重新初始化boss
+        if (!worldBossInitFlag || !LocalDate.now().isEqual(lastInitDate)) {
             WorldBoss todayBoss = worldBossService.getTodayBoss();
             if (Objects.isNull(todayBoss)) {
-                worldBossInitFlag = true;
                 return;
             }
 
@@ -119,6 +121,9 @@ public class WorldBossCache {
                     },
                     (m1, m2) -> m2)));
             WORLD_BOSS_MAP.put(LocalDate.now(), vo);
+            // 更新初始化标记
+            worldBossInitFlag = true;
+            lastInitDate = LocalDate.now();
         }
     }
 
@@ -145,9 +150,7 @@ public class WorldBossCache {
      * @return 攻击次数
      */
     public static int getAtkTimes(Long playerId) {
-        if (!atkTimesInitFlag) {
-            initAtkTimes();
-        }
+        initAtkTimes();
         return ATK_TIMES_MAP.getOrDefault(LocalDate.now(), new HashMap<>()).getOrDefault(playerId, 0);
     }
 
@@ -157,9 +160,7 @@ public class WorldBossCache {
      * @param playerIdList 玩家id
      */
     public static synchronized void increaseAtkTimes(List<Long> playerIdList) {
-        if (!worldBossInitFlag) {
-            initBoss();
-        }
+        initBoss();
         if (Objects.isNull(WORLD_BOSS_MAP.get(LocalDate.now()))) {
             throw WorldBossExceptionEnum.NOT_EXIST.getException();
         }
@@ -229,5 +230,6 @@ public class WorldBossCache {
         preAtkTimesMap.clear();
         worldBossInitFlag = false;
         atkTimesInitFlag = false;
+        lastInitDate = null;
     }
 }

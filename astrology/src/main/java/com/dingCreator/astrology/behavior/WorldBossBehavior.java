@@ -6,7 +6,7 @@ import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.cache.WorldBossCache;
 import com.dingCreator.astrology.constants.Constants;
-import com.dingCreator.astrology.dto.organism.OrganismInfoDTO;
+import com.dingCreator.astrology.entity.WorldBoss;
 import com.dingCreator.astrology.entity.WorldBossRecord;
 import com.dingCreator.astrology.enums.exception.WorldBossExceptionEnum;
 import com.dingCreator.astrology.service.MonsterService;
@@ -146,6 +146,19 @@ public class WorldBossBehavior {
             voList.add(vo);
         }
         return voList;
+    }
+
+    /**
+     * 世界boss详情
+     *
+     * @return 世界boss详情
+     */
+    public WorldBossCache.BossPropDTO getWorldBossDetail() {
+        WorldBossCache.BossPropDTO prop = WorldBossCache.getBossProp();
+        if (Objects.isNull(prop)) {
+            throw WorldBossExceptionEnum.NOT_EXIST.getException();
+        }
+        return prop;
     }
 
     /**

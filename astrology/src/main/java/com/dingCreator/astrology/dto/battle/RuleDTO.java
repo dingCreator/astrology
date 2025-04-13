@@ -1,4 +1,4 @@
-package com.dingCreator.astrology.dto;
+package com.dingCreator.astrology.dto.battle;
 
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 import lombok.AllArgsConstructor;
