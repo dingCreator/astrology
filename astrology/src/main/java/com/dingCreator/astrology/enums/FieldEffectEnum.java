@@ -25,10 +25,10 @@ public enum FieldEffectEnum {
                 @Override
                 public Float getRate(Float rate, BuffTypeEnum buffTypeEnum) {
                     if (BuffTypeEnum.HEAL.equals(buffTypeEnum)) {
-                        return 0.3F * rate;
+                        return rate - 0.7F;
                     }
                     if (BuffTypeEnum.ATK.equals(buffTypeEnum) || BuffTypeEnum.MAGIC_ATK.equals(buffTypeEnum)) {
-                        return 1.5F * rate;
+                        return rate + 0.5F;
                     }
                     return rate;
                 }
@@ -40,7 +40,13 @@ public enum FieldEffectEnum {
             new Effect() {
                 @Override
                 public Float getRate(Float rate, BuffTypeEnum buffTypeEnum) {
-                    return Effect.super.getRate(rate, buffTypeEnum);
+                    if (BuffTypeEnum.HEAL.equals(buffTypeEnum)) {
+                        return rate + 0.3F;
+                    }
+                    if (BuffTypeEnum.MAGIC_PENETRATE.equals(buffTypeEnum) || BuffTypeEnum.MAGIC_ATK.equals(buffTypeEnum)) {
+                        return rate + 0.2F;
+                    }
+                    return rate;
                 }
 
                 @Override
