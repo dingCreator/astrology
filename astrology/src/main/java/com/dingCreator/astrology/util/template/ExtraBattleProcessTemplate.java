@@ -4,14 +4,9 @@ import com.dingCreator.astrology.dto.battle.BattleDTO;
 import com.dingCreator.astrology.dto.battle.BattleEffectDTO;
 import com.dingCreator.astrology.dto.battle.BattleFieldDTO;
 import com.dingCreator.astrology.dto.battle.BattleRoundDTO;
-import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
-import com.dingCreator.astrology.enums.skill.SkillEnum;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 插入结算的模板
@@ -22,22 +17,22 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @Data
 public abstract class ExtraBattleProcessTemplate implements Serializable {
+
     /**
-     * 插入结算的来源
+     * 插入结算的归属者
      */
-    private BattleDTO from;
-    /**
-     * 插入结算的友方
-     */
-    private List<BattleDTO> our;
-    /**
-     * 插入结算的敌方
-     */
-    private List<BattleDTO> enemy;
+    private BattleDTO owner;
+
     /**
      * 优先级
      */
-    private Integer priority;
+    protected Integer priority;
+
+    /**
+     * 此效果拥有者阵亡后是否生效
+     */
+    private Boolean effectIfDeath;
+
     /**
      * 此插入结算的冷却CD
      */
@@ -46,218 +41,358 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
     public ExtraBattleProcessTemplate() {
         this.priority = 0;
         this.cd = 0;
+        this.effectIfDeath = false;
     }
+
+    private boolean effect() {
+        return effectIfDeath || owner.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() > 0;
+    }
+
+    /**
+     * 战斗开始前
+     *
+     * @param battleField 战场
+     */
+    public final void executeBeforeBattle(BattleFieldDTO battleField) {
+        if (effect()) {
+            beforeBattle(battleField);
+        }
+    }
+
+    /**
+     * 战斗结束后
+     *
+     * @param battleField 战场
+     */
+    public final void executeAfterBattle(BattleFieldDTO battleField) {
+        if (effect()) {
+            afterBattle(battleField);
+        }
+    }
+
+    /**
+     * 每回合开始前
+     *
+     * @param battleRound 回合
+     */
+    public final void executeBeforeRound(BattleRoundDTO battleRound) {
+        if (!effect()) {
+            return;
+        }
+        beforeEachRound(battleRound);
+        if (battleRound.getFrom().equals(this.owner)) {
+            beforeMyRound(battleRound);
+        }
+        if (battleRound.getEnemy().contains(this.owner)) {
+            beforeEnemyRound(battleRound);
+        }
+        if (battleRound.getOur().contains(this.owner)) {
+            beforeOurRound(battleRound);
+        }
+    }
+
+    /**
+     * 每回合结束后
+     *
+     * @param battleRound 回合
+     */
+    public final void executeAfterRound(BattleRoundDTO battleRound) {
+        if (!effect()) {
+            return;
+        }
+        if (battleRound.getOur().contains(this.owner)) {
+            afterOurRound(battleRound);
+        }
+        if (battleRound.getEnemy().contains(this.owner)) {
+            afterEnemyRound(battleRound);
+        }
+        if (battleRound.getFrom().equals(this.owner)) {
+            afterMyRound(battleRound);
+        }
+        afterEachRound(battleRound);
+    }
+
+    /**
+     * 技能命中时
+     *
+     * @param battleEffect 单段伤害单个目标效果
+     */
+    public final void executeIfHit(BattleEffectDTO battleEffect) {
+        if (!effect()) {
+            return;
+        }
+        boolean fromMe = battleEffect.getFrom().equals(this.owner);
+        boolean fromOur = battleEffect.getOur().contains(battleEffect.getFrom());
+        boolean fromEnemy = battleEffect.getEnemy().contains(battleEffect.getFrom());
+
+        boolean toMe = battleEffect.getTar().equals(this.owner);
+        boolean toOur = battleEffect.getOur().contains(battleEffect.getTar());
+        boolean toEnemy = battleEffect.getEnemy().contains(battleEffect.getTar());
+
+        if (fromMe) {
+            ifMeHit(battleEffect);
+            if (toMe) {
+                ifMeHitMe(battleEffect);
+            } else if (toOur) {
+                ifMeHitOur(battleEffect);
+            } else if (toEnemy) {
+                ifMeHitEnemy(battleEffect);
+            }
+        } else if (fromOur) {
+            ifOurHit(battleEffect);
+            if (toMe) {
+                ifOurHitMe(battleEffect);
+            } else if (toOur) {
+                ifOurHitOur(battleEffect);
+            } else if (toEnemy) {
+                ifOurHitEnemy(battleEffect);
+            }
+        } else if (fromEnemy) {
+            if (toMe) {
+                ifEnemyHitMe(battleEffect);
+            }
+        }
+    }
+
+    /**
+     * 技能未命中时
+     *
+     * @param battleEffect 单段伤害单个目标效果
+     */
+    public final void executeIfNotHit(BattleEffectDTO battleEffect) {
+        if (!effect()) {
+            return;
+        }
+        boolean fromMe = battleEffect.getFrom().equals(this.owner);
+        boolean fromOur = battleEffect.getOur().contains(battleEffect.getFrom());
+        boolean fromEnemy = battleEffect.getEnemy().contains(battleEffect.getFrom());
+
+        if (fromMe) {
+            ifMeNotHit(battleEffect);
+        } else if (fromOur) {
+            ifOurNotHit(battleEffect);
+        } else if (fromEnemy) {
+            ifEnemyNotHit(battleEffect);
+        }
+    }
+
+    public final void executeChangeDamageRate(BattleEffectDTO battleEffect) {
+        if (!effect()) {
+            return;
+        }
+        changeDamageRate(battleEffect);
+    }
+
+    public final void executeBeforeMyBehavior(BattleEffectDTO battleEffect) {
+        if (!effect()) {
+            return;
+        }
+        if (battleEffect.getFrom().equals(this.owner)) {
+            beforeMyBehavior(battleEffect);
+        }
+    }
+
+    public final void executeAfterMyBehavior(BattleEffectDTO battleEffect) {
+        if (!effect()) {
+            return;
+        }
+        if (battleEffect.getFrom().equals(this.owner)) {
+            afterMyBehavior(battleEffect);
+        }
+    }
+
+    public final void executeBeforeDeath(BattleEffectDTO battleEffect) {
+        if (battleEffect.getTar().equals(this.owner)) {
+            beforeMeDeath(battleEffect);
+        }
+    }
+
+    public final void executeAfterDeath(BattleEffectDTO battleEffect) {
+        if (battleEffect.getTar().equals(this.owner)) {
+            afterMeDeath(battleEffect);
+        }
+    }
+
+    public final void executeBeforeDamage(BattleEffectDTO battleEffect) {
+        if (effect()) {
+            beforeDamage(battleEffect);
+        }
+    }
+
+    public final void executeAfterDamage(BattleEffectDTO battleEffect) {
+        if (effect()) {
+            afterDamage(battleEffect);
+        }
+    }
+
+    // 以下为钩子方法
 
     /**
      * 战斗前
      */
     public void beforeBattle(BattleFieldDTO battleField) {
-
     }
 
     /**
      * 战斗后
      */
     public void afterBattle(BattleFieldDTO battleField) {
-
     }
 
     /**
      * 每轮前
      */
     public void beforeEachRound(BattleRoundDTO battleRound) {
-
     }
 
     /**
      * 每轮后
      */
     public void afterEachRound(BattleRoundDTO battleRound) {
-
     }
 
     /**
      * 友方轮次前
      */
     public void beforeOurRound(BattleRoundDTO battleRound) {
-
     }
 
     /**
      * 友方轮次后
      */
     public void afterOurRound(BattleRoundDTO battleRound) {
-
     }
 
     /**
      * 友方轮次前
      */
     public void beforeEnemyRound(BattleRoundDTO battleRound) {
-
     }
 
     /**
      * 友方轮次后
      */
     public void afterEnemyRound(BattleRoundDTO battleRound) {
-
     }
 
     /**
      * 我的轮次前
      */
     public void beforeMyRound(BattleRoundDTO battleRound) {
-
     }
 
     /**
      * 我的轮次后
      */
     public void afterMyRound(BattleRoundDTO battleRound) {
-
-    }
-
-    public boolean canEffect(BattleEffectDTO battleEffect) {
-        return true;
     }
 
     /**
      * 我的行动前
      */
     public void beforeMyBehavior(BattleEffectDTO battleEffect) {
-
     }
 
     /**
      * 我的行动后
      */
     public void afterMyBehavior(BattleEffectDTO battleEffect) {
-
     }
 
     /**
-     * 技能命中时
+     * 我的技能命中时
      */
-    public void ifHit(BattleEffectDTO battleEffect) {
-        if (battleEffect.getFrom().equals(this.from)) {
-            processIfHit(battleEffect);
-        }
-        if (this.our.contains(battleEffect.getFrom())) {
-            processIfOurHit(battleEffect);
-        }
+    public void ifMeHit(BattleEffectDTO battleEffect) {
+    }
+
+    /**
+     * 我的技能命中我自己时
+     */
+    public void ifMeHitMe(BattleEffectDTO battleEffect) {
+    }
+
+    /**
+     * 我的技能命中我方时
+     */
+    public void ifMeHitOur(BattleEffectDTO battleEffect) {
+    }
+
+    /**
+     * 我的技能命中敌方时
+     */
+    public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
     }
 
     /**
      * 我方技能命中时
-     *
-     * @param tar         目标
-     * @param skillEnum   技能
-     * @param skillEffect 技能效果
-     * @param damage      伤害量
-     * @param critical    是否暴击
-     * @param builder     文描
      */
-    public void processIfHit(BattleEffectDTO battleEffect) {
-        if (this.getEnemy().contains(battleEffect.getTar())) {
-            processIfHitEnemy(battleEffect);
-        }
+    public void ifOurHit(BattleEffectDTO battleEffect) {
+    }
+
+    /**
+     * 我方技能命中我时
+     */
+    public void ifOurHitMe(BattleEffectDTO battleEffect) {
+    }
+
+    /**
+     * 我方技能命中我方时
+     */
+    public void ifOurHitOur(BattleEffectDTO battleEffect) {
     }
 
     /**
      * 我方技能命中敌方时
-     *
-     * @param tar         目标
-     * @param skillEnum   技能
-     * @param skillEffect 技能效果
-     * @param damage      伤害量
-     * @param critical    是否暴击
-     * @param builder     文描
      */
-    public void processIfHitEnemy(BattleEffectDTO battleEffect) {
-
+    public void ifOurHitEnemy(BattleEffectDTO battleEffect) {
     }
 
-    public void processIfOurHit(BattleEffectDTO battleEffect) {
-
-    }
-
-    public void processIfOurHitEnemy(BattleEffectDTO battleEffect, boolean critical) {
-
+    /**
+     * 敌方技能命中我时
+     */
+    public void ifEnemyHitMe(BattleEffectDTO battleEffect) {
     }
 
     /**
      * 技能没有命中时
      */
-    public void ifNotHit(BattleEffectDTO battleEffect) {
-        if (battleEffect.getFrom().equals(this.from)) {
-            processIfNotHit(battleEffect);
-        }
+    public void ifMeNotHit(BattleEffectDTO battleEffect) {
     }
 
-    public void processIfNotHit(BattleEffectDTO battleEffect) {
+    public void ifOurNotHit(BattleEffectDTO battleEffect) {
+    }
 
+    public void ifEnemyNotHit(BattleEffectDTO battleEffect) {
     }
 
     public final void changeDamageRate(BattleEffectDTO battleEffect) {
-        if (battleEffect.getFrom().equals(this.getFrom())) {
-            processChangeMySkillDamageRate(battleEffect);
-        }
-    }
-
-    public void processChangeMySkillDamageRate(BattleEffectDTO battleEffect) {
-
-    }
-
-    /**
-     * 目标阵亡前（即受到致命攻击时）
-     */
-    public void beforeTargetDeath(BattleEffectDTO battleEffect) {
-
-    }
-
-    /**
-     * 目标阵亡后
-     */
-    public void afterTargetDeath(BattleEffectDTO battleEffect) {
-
     }
 
     /**
      * 自身阵亡前（即受到致命攻击时）
      */
     public void beforeMeDeath(BattleEffectDTO battleEffect) {
-
     }
 
     /**
      * 自身阵亡后
      */
     public void afterMeDeath(BattleEffectDTO battleEffect) {
-
-    }
-
-    /**
-     * 受到伤害前
-     */
-    public void beforeDamage(BattleEffectDTO battleEffect) {
-
     }
 
     /**
      * 受到伤害后
      *
-     * @param tar 受到伤害者
+     * @param battleEffect 单个技能单个目标的战斗效果
+     */
+    public void beforeDamage(BattleEffectDTO battleEffect) {
+    }
+
+    /**
+     * 受到伤害后
+     *
+     * @param battleEffect 单个技能单个目标的战斗效果
      */
     public void afterDamage(BattleEffectDTO battleEffect) {
-
-    }
-
-    public void beforeHealing() {
-
-    }
-
-    public void afterHealing(long healVal) {
-
     }
 }

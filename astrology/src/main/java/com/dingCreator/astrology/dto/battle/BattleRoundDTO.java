@@ -1,30 +1,25 @@
 package com.dingCreator.astrology.dto.battle;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.dingCreator.astrology.dto.organism.OrganismDTO;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
 import com.dingCreator.astrology.enums.FieldEffectEnum;
+import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
-import com.dingCreator.astrology.util.BattleUtil;
-import com.dingCreator.astrology.util.BuffUtil;
-import com.dingCreator.astrology.util.NumberUtil;
-import com.dingCreator.astrology.util.RandomUtil;
+import com.dingCreator.astrology.util.*;
 import com.dingCreator.astrology.util.template.ExtraBattleProcessTemplate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 /**
  * @author ding
@@ -34,7 +29,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BattleRoundDTO {
+public class BattleRoundDTO implements Serializable {
 
     /**
      * 本回合行动者
@@ -67,7 +62,7 @@ public class BattleRoundDTO {
     public void executeRound() {
         List<String> battleMsg = this.getBattleField().getBattleMsg();
         // 初始化战斗过程记录
-        builder = new StringBuilder("-->");
+        builder = new StringBuilder("-回合").append(this.getBattleField().getRound()).append("->");
         beforeRound();
         inRound();
         afterRound();
@@ -79,19 +74,14 @@ public class BattleRoundDTO {
      * 回合前
      */
     public void beforeRound() {
+        // buff轮次-1 并清除所有过期buff
+        from.getBuffMap().values().stream()
+                .peek(buffList -> buffList.forEach(buff -> buff.setRound(buff.getRound() - 1)))
+                .forEach(buffList -> buffList.removeIf(buffDTO -> buffDTO.getRound() < 0));
         // 插入结算
         List<ExtraBattleProcessTemplate> extraBattleProcessList = this.getBattleField().getExtraBattleProcessTemplateList();
         // 每回合
-        extraBattleProcessList.forEach(ext -> ext.beforeEachRound(this));
-        // 我方每回合
-        extraBattleProcessList.stream().filter(ext -> ext.getOur().contains(from))
-                .forEach(ext -> ext.beforeOurRound(this));
-        // 敌方每回合
-        extraBattleProcessList.stream().filter(ext -> ext.getEnemy().contains(from))
-                .forEach(ext -> ext.beforeEnemyRound(this));
-        // 我每回合
-        extraBattleProcessList.stream().filter(ext -> from.equals(ext.getFrom()))
-                .forEach(ext -> ext.beforeMyRound(this));
+        extraBattleProcessList.forEach(ext -> ext.executeBeforeRound(this));
     }
 
     /**
@@ -100,19 +90,28 @@ public class BattleRoundDTO {
     public void afterRound() {
         // 插入结算
         List<ExtraBattleProcessTemplate> extraBattleProcessList = this.getBattleField().getExtraBattleProcessTemplateList();
-        // 战斗信息
-        List<String> battleMsg = this.getBattleField().getBattleMsg();
         // 计算流血效果
         if (from.getBuffMap().containsKey(BuffTypeEnum.BLEEDING)) {
             from.getBuffMap().get(BuffTypeEnum.BLEEDING)
                     .forEach(battleBuff -> {
-                        builder.append("状态：").append(battleBuff.getBuffDTO().getBuffName());
+                        builder.append("，状态：").append(battleBuff.getBuffDTO().getBuffName());
                         BigDecimal bleedingRate = battleBuff.getBuffDTO().getRate();
+                        bleedingRate = bleedingRate.compareTo(BigDecimal.ZERO) > 0 ?
+                                bleedingRate : bleedingRate.multiply(BigDecimal.valueOf(-1));
                         long maxHp = from.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition();
                         long damage = bleedingRate.multiply(BigDecimal.valueOf(maxHp)).longValue();
+                        long def = Math.round(0.2 * BattleUtil.getLongProperty(
+                                from.getOrganismInfoDTO().getOrganismDTO().getDef(),
+                                OrganismPropertiesEnum.DEF.getFieldName(),
+                                from, this.battleField
+                        ));
+                        damage -= def;
+                        damage = Math.min(damage, 100000);
                         BattleEffectDTO effectDTO = BattleEffectDTO.builder()
                                 .from(battleBuff.getBuffFrom()).tar(from)
-                                .damage(new AtomicLong(damage)).battleRound(this).build();
+                                .damage(new AtomicLong(damage))
+                                .damageTypeEnum(DamageTypeEnum.SPECIAL)
+                                .battleRound(this).build();
                         BattleUtil.doDamage(effectDTO);
                     });
         }
@@ -120,28 +119,19 @@ public class BattleRoundDTO {
         battleField.setRound(battleField.getRound() + 1);
         // 角色轮次+1
         from.setRound(from.getRound() + 1);
-        // buff轮次-1 并清除所有过期buff
-        from.getBuffMap().values().stream()
-                .peek(buffList -> buffList.forEach(buff -> buff.setRound(buff.getRound() - 1)))
-                .forEach(buffList -> buffList.removeIf(buffDTO -> buffDTO.getRound() < 0));
+        // 计算行动值
         from.setBehavior(from.getBehavior() - battleField.getTotalBehavior());
-        // 我每回合
-        extraBattleProcessList.stream().filter(ext -> from.equals(ext.getFrom()))
-                .forEach(ext -> ext.afterMyRound(this));
-        // 敌方每回合
-        extraBattleProcessList.stream().filter(ext -> ext.getEnemy().contains(from))
-                .forEach(ext -> ext.afterEnemyRound(this));
-        // 我方每回合
-        extraBattleProcessList.stream().filter(ext -> ext.getOur().contains(from))
-                .forEach(ext -> ext.afterOurRound(this));
         // 每回合
-        extraBattleProcessList.forEach(ext -> ext.afterEachRound(this));
+        extraBattleProcessList.forEach(ext -> ext.executeAfterRound(this));
     }
 
     /**
      * 本回合
      */
     public void inRound() {
+        if (from.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() <= 0) {
+            return;
+        }
         builder.append(from.getOrganismInfoDTO().getOrganismDTO().getName());
         // 获取技能栏
         SkillBarDTO bar = from.getOrganismInfoDTO().getSkillBarDTO();
@@ -188,6 +178,20 @@ public class BattleRoundDTO {
                 .append("/").append(e.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition()));
         // 轮次结束后插入结算
         skillEnum.getThisBehaviorExtraProcess().afterThisRound(this);
+        // 记录此回合详细数据
+        BattleRoundRecordDTO record = BattleRoundRecordDTO.builder()
+                .from(CopyUtil.copyNewInstance(this.getFrom()))
+                .our(CopyUtil.copyNewInstance(this.getOur()))
+                .enemy(CopyUtil.copyNewInstance(this.getEnemy()))
+                .battleFieldRecord(
+                        BattleFieldRecordDTO.builder()
+                                .round(battleField.getRound())
+                                .maxRound(battleField.getMaxRound())
+                                .totalBehavior(battleField.getTotalBehavior())
+                                .fieldEffectEnum(CopyUtil.copyNewInstance(battleField.getFieldEffectEnum()))
+                                .build()
+                ).build();
+        this.battleField.getRoundRecordList().add(record);
     }
 
 
@@ -199,7 +203,7 @@ public class BattleRoundDTO {
      */
     public void executeSingleEffectBehavior(SkillEffectDTO skillEffect, SkillEnum nowSkill) {
         // 选择技能目标
-        List<BattleDTO> target = skillEffect.getSkillTargetEnum().getGetTarget().getTarget(this.from, this.our, this.enemy);
+        List<BattleDTO> target = skillEffect.getTargetEnum().getTarget().getTarget(this.from, this.our, this.enemy);
         if (target.isEmpty()) {
             return;
         }
@@ -207,7 +211,7 @@ public class BattleRoundDTO {
             BattleEffectDTO battleEffect = BattleEffectDTO.builder()
                     .from(from).tar(tar).our(our).enemy(enemy)
                     .damageRate(BigDecimal.valueOf(skillEffect.getDamageRate()))
-                    .nowSkill(nowSkill).battleRound(this)
+                    .nowSkill(nowSkill).skillEffect(skillEffect).battleRound(this)
                     .build();
             battleEffect.executeSingleTarBehavior();
         });
@@ -218,7 +222,7 @@ public class BattleRoundDTO {
             builder.append(String.format("，场地效果【%s】失效", this.getBattleField().getFieldEffectEnum().getFieldEffectName()));
             this.getBattleField().getFieldEffectEnum().getEffect().finalizeEffect(this);
         }
-        builder.append(String.format("，场地效果【%s】生效", this.getBattleField().getFieldEffectEnum().getFieldEffectName()));
+        builder.append(String.format("，场地效果【%s】生效", newEffect.getFieldEffectName()));
         newEffect.getEffect().finalizeEffect(this);
         this.getBattleField().setFieldEffectEnum(newEffect);
     }

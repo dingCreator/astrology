@@ -57,10 +57,10 @@ public class PlayerDTO extends OrganismDTO {
     protected synchronized void initPropWithAddition() {
         this.maxHpWithAddition = EquipmentUtil.getLongVal(this.maxHp, EquipmentPropertiesTypeEnum.HP,
                 PlayerCache.getPlayerById(this.id).getEquipmentBarDTO());
-        this.hpWithAddition = this.maxHpWithAddition * Math.round((float) this.hp / (float) this.maxHp);
+        this.hpWithAddition = (long) Math.round((float) this.maxHpWithAddition * (float) this.hp / (float) this.maxHp);
         this.maxMpWithAddition = EquipmentUtil.getLongVal(this.maxMp, EquipmentPropertiesTypeEnum.MP,
                 PlayerCache.getPlayerById(this.id).getEquipmentBarDTO());
-        this.mpWithAddition = this.maxMpWithAddition * Math.round((float) this.mp / (float) this.maxMp);
+        this.mpWithAddition = (long) Math.round((float)this.maxMpWithAddition * (float) this.mp / (float) this.maxMp);
     }
 
     public void copyProperties(Player player) {

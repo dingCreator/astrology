@@ -38,7 +38,7 @@ public enum BuffTypeEnum {
     /**
      * 生命值偷取（吸血）
      */
-    LIFE_STEAL(OrganismPropertiesEnum.LIFE_STEALING.getFieldName(), OrganismPropertiesEnum.LIFE_STEALING.getChnDesc(),
+    LIFE_STEAL(OrganismPropertiesEnum.LIFE_STEAL.getFieldName(), OrganismPropertiesEnum.LIFE_STEAL.getChnDesc(),
             BuffEffectTypeEnum.PROPERTY),
     /**
      * 命中
@@ -93,7 +93,7 @@ public enum BuffTypeEnum {
     /**
      * 治疗量变更
      */
-    HEAL("heal", "治疗", BuffEffectTypeEnum.MARK),
+    HEAL("heal", "治疗量", BuffEffectTypeEnum.PROPERTY),
     /**
      * 流血
      */
@@ -103,13 +103,25 @@ public enum BuffTypeEnum {
      */
     INVINCIBLE("invincible", "无敌", BuffEffectTypeEnum.MARK),
     /**
+     * 护盾
+     */
+    SHIELD("shield", "护盾", BuffEffectTypeEnum.MARK),
+    /**
      * 伤害
      */
-    DAMAGE("damage", "受到的伤害", BuffEffectTypeEnum.PROPERTY),
+    DAMAGE("damage", "受到伤害", BuffEffectTypeEnum.PROPERTY),
+    /**
+     * 伤害
+     */
+    DO_DAMAGE("doDamage", "造成伤害", BuffEffectTypeEnum.PROPERTY),
     /**
      * 法伤
      */
-    MAGIC_DAMAGE("magicDamage", "受到的法伤", BuffEffectTypeEnum.PROPERTY),
+    MAGIC_DAMAGE("magicDamage", "受到法伤", BuffEffectTypeEnum.PROPERTY),
+    /**
+     * 法伤
+     */
+    DO_MAGIC_DAMAGE("doMagicDamage", "造成法伤", BuffEffectTypeEnum.PROPERTY),
     /**
      * 反伤
      */

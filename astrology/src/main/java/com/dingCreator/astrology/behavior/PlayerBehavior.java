@@ -2,6 +2,8 @@ package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.dto.battle.BattleRoundDTO;
+import com.dingCreator.astrology.dto.battle.BattleRoundRecordDTO;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
@@ -292,6 +294,23 @@ public class PlayerBehavior {
 
     public void sendAsset2AllPlayer(String assetType, long val) {
 
+    }
+
+    public BattleResultVO PVP(Long playerId1, Long playerId2) {
+        return BattleUtil.battlePVP(playerId1, playerId2);
+    }
+
+    public BattleRoundRecordDTO getBattleRound(Long playerId, int roundIdx) {
+        return BattleUtil.getByPlayerIdAndRound(playerId, roundIdx);
+    }
+
+    public void recover(Long playerId) {
+        PlayerInfoDTO info = PlayerCache.getPlayerById(playerId);
+        PlayerDTO player = info.getPlayerDTO();
+        player.clearAdditionVal();
+        player.setHp(player.getMaxHp());
+        player.setMp(player.getMaxMp());
+        PlayerCache.save(playerId);
     }
 
     private static class Holder {

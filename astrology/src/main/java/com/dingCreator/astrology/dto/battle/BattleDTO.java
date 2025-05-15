@@ -2,6 +2,7 @@ package com.dingCreator.astrology.dto.battle;
 
 import com.dingCreator.astrology.dto.organism.OrganismInfoDTO;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
+import com.dingCreator.astrology.util.BuffUtil;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -41,4 +42,8 @@ public class BattleDTO implements Serializable {
      * 轮次
      */
     private Long round;
+
+    public void giveBuff(BattleDTO target, List<GiveBuffDTO> giveBuffList, StringBuilder builder)  {
+        BuffUtil.addBuff(this, target, giveBuffList, builder);
+    }
 }

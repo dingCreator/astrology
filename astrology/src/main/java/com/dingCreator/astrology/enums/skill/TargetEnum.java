@@ -10,7 +10,6 @@ import lombok.Getter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
  */
 @Getter
 @AllArgsConstructor
-public enum SkillTargetEnum {
+public enum TargetEnum {
     /**
      * 技能目标
      */
@@ -36,10 +35,10 @@ public enum SkillTargetEnum {
 
     private final boolean enemy;
 
-    private final GetTarget<BattleDTO> getTarget;
+    private final Target<BattleDTO> target;
 
     @FunctionalInterface
-    public interface GetTarget<E extends BattleDTO> {
+    public interface Target<E extends BattleDTO> {
 
         default List<E> getTarget(E from, List<E> our, List<E> enemy) {
             List<E> aliveOur = our.stream()
@@ -55,6 +54,9 @@ public enum SkillTargetEnum {
     }
 
     static List<BattleDTO> getTaunt(List<BattleDTO> target) {
+        if (CollectionUtil.isEmpty(target)) {
+            return Collections.emptyList();
+        }
         List<BattleDTO> taunt = target.stream().filter(t -> {
             List<BattleBuffDTO> buffList = t.getBuffMap().getOrDefault(BuffTypeEnum.TAUNT, null);
             return CollectionUtil.isNotEmpty(buffList);

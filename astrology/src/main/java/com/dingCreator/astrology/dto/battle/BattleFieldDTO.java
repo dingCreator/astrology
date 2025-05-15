@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +22,7 @@ import java.util.Objects;
 @Data
 @Builder
 @AllArgsConstructor
-public class BattleFieldDTO {
+public class BattleFieldDTO implements Serializable {
     /**
      * 战斗发起方
      */
@@ -51,6 +52,10 @@ public class BattleFieldDTO {
      */
     private List<String> battleMsg;
     /**
+     * 战斗回合详情
+     */
+    private List<BattleRoundRecordDTO> roundRecordList;
+    /**
      * 插入结算
      */
     private List<ExtraBattleProcessTemplate> extraBattleProcessTemplateList;
@@ -68,7 +73,7 @@ public class BattleFieldDTO {
         BattleUtil.getRankSuppression(initiatorList, recipientHighestRank, battleMsg);
         BattleUtil.getRankSuppression(recipientList, initiatorHighestRank, battleMsg);
         // 战斗前插入事件结算
-        extraBattleProcessTemplateList.forEach(ext -> ext.beforeBattle(this));
+        extraBattleProcessTemplateList.forEach(ext -> ext.executeBeforeBattle(this));
         // 总行动值
         this.totalBehavior = initiatorList.stream()
                 .mapToLong(o -> BattleUtil.getLongProperty(
@@ -81,16 +86,16 @@ public class BattleFieldDTO {
                                 OrganismPropertiesEnum.BEHAVIOR_SPEED.getFieldName(), o, this
                         )).sum();
         // 初始化轮次
-        round = 0;
+        this.round = 1;
         // 战斗中
         while (initiatorList.stream().mapToLong(o -> o.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition()).sum() > 0
                 && recipientList.stream().mapToLong(o -> o.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition()).sum() > 0
-                && round < maxRound) {
+                && this.round <= this.maxRound) {
             battleProcess(initiatorList, recipientList);
             battleProcess(recipientList, initiatorList);
         }
         // 战斗后
-        extraBattleProcessTemplateList.forEach(ext -> ext.afterBattle(this));
+        extraBattleProcessTemplateList.forEach(ext -> ext.executeAfterBattle(this));
         // 判断胜负
         long initiatorAliveNum = initiatorList.stream()
                 .filter(o -> o.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() > 0).count();
@@ -99,6 +104,7 @@ public class BattleFieldDTO {
         // 构建返回数据
         BattleResultVO response = new BattleResultVO();
         response.setInfo(battleMsg);
+        response.setRoundRecordList(roundRecordList);
         if (initiatorAliveNum > recipientAliveNum) {
             response.setBattleResult(BattleResultVO.BattleResult.WIN);
         } else if (initiatorAliveNum == recipientAliveNum) {
@@ -142,5 +148,25 @@ public class BattleFieldDTO {
         battleMsg.add(String.format("场地效果【%s】生效", newEffect.getFieldEffectName()));
         newEffect.getEffect().finalizeEffect(this);
         this.fieldEffectEnum = newEffect;
+    }
+
+    /**
+     * 获取战场上某人的友方
+     *
+     * @param from 某人
+     * @return 友方
+     */
+    public List<BattleDTO> getOur(BattleDTO from) {
+        return initiatorList.contains(from) ? initiatorList : recipientList;
+    }
+
+    /**
+     * 获取战场上某人的敌方
+     *
+     * @param from 某人
+     * @return 敌方
+     */
+    public List<BattleDTO> getEnemy(BattleDTO from) {
+        return initiatorList.contains(from) ? recipientList : initiatorList;
     }
 }

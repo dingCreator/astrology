@@ -7,15 +7,15 @@ import com.dingCreator.astrology.enums.BuffTypeEnum;
 import com.dingCreator.astrology.enums.FieldEffectEnum;
 import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
-import com.dingCreator.astrology.util.BattleUtil;
-import com.dingCreator.astrology.util.BuffUtil;
-import com.dingCreator.astrology.util.NumberUtil;
-import com.dingCreator.astrology.util.RandomUtil;
+import com.dingCreator.astrology.util.*;
 import com.dingCreator.astrology.util.template.ExtraBattleProcessTemplate;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
@@ -26,6 +26,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BattleEffectDTO {
     /**
      * 来源
@@ -64,18 +66,24 @@ public class BattleEffectDTO {
      */
     private BigDecimal damageRate;
     /**
+     * 伤害类型
+     */
+    private DamageTypeEnum damageTypeEnum;
+    /**
      * 所属的轮次
      */
     private BattleRoundDTO battleRound;
 
     public BattleEffectDTO(BattleDTO from, BattleDTO tar, List<BattleDTO> our, List<BattleDTO> enemy,
-                           SkillEnum nowSkill, SkillEffectDTO skillEffect, BattleRoundDTO battleRound) {
+                           SkillEnum nowSkill, SkillEffectDTO skillEffect, BigDecimal damageRate,
+                           BattleRoundDTO battleRound) {
         this.from = from;
         this.tar = tar;
         this.our = our;
         this.enemy = enemy;
         this.nowSkill = nowSkill;
         this.skillEffect = skillEffect;
+        this.damageRate = damageRate;
         this.battleRound = battleRound;
     }
 
@@ -87,34 +95,33 @@ public class BattleEffectDTO {
         // 插入结算
         List<ExtraBattleProcessTemplate> extraBattleProcessList = battleField.getExtraBattleProcessTemplateList();
         // 插入结算-我的行动前
-        extraBattleProcessList.stream().filter(ext -> ext.getFrom().equals(from))
-                .forEach(ext -> ext.beforeMyBehavior(this));
+        extraBattleProcessList.forEach(ext -> ext.executeBeforeMyBehavior(this));
         nowSkill.getThisBehaviorExtraProcess().beforeEffect(this);
+        skillEffect.getTemplate().beforeEffect(this);
         // 行动过程
         executeBehavior();
         // 插入结算-我的行动后
+        skillEffect.getTemplate().afterEffect(this);
         nowSkill.getThisBehaviorExtraProcess().afterEffect(this);
-        extraBattleProcessList.stream().filter(ext -> ext.getFrom().equals(from))
-                .forEach(ext -> ext.afterMyBehavior(this));
+        extraBattleProcessList.forEach(ext -> ext.executeAfterMyBehavior(this));
     }
 
     public void executeBehavior() {
-        OrganismDTO fromOrganism = from.getOrganismInfoDTO().getOrganismDTO();
         OrganismDTO tarOrganism = tar.getOrganismInfoDTO().getOrganismDTO();
         BattleFieldDTO battleField = battleRound.getBattleField();
         StringBuilder builder = battleRound.getBuilder();
         // 插入结算
         List<ExtraBattleProcessTemplate> extraBattleProcessList = battleField.getExtraBattleProcessTemplateList();
         // 技能目标为敌方，计算是否命中
-        if (skillEffect.getSkillTargetEnum().isEnemy()) {
+        if (skillEffect.getTargetEnum().isEnemy()) {
             if (!BattleUtil.isHit(from, tar, battleField)) {
                 // 未命中插入结算
-                extraBattleProcessList.forEach(ext -> ext.ifNotHit(this));
+                extraBattleProcessList.forEach(ext -> ext.executeIfNotHit(this));
                 if (Objects.nonNull(nowSkill)) {
                     nowSkill.getThisBehaviorExtraProcess().ifNotHit(this);
                 }
                 skillEffect.getTemplate().ifNotHit(this);
-                battleRound.getBuilder().append(",没有命中").append(tarOrganism.getName());
+                battleRound.getBuilder().append("，未命中").append(tarOrganism.getName());
                 return;
             }
         }
@@ -123,29 +130,19 @@ public class BattleEffectDTO {
         this.damage = new AtomicLong(damage);
         // 计算暴击
         this.critical = BattleUtil.getCriticalDamage(this);
-        // 计算减伤
-        if (DamageTypeEnum.ATK.equals(skillEffect.getDamageTypeEnum()) && tar.getBuffMap().containsKey(BuffTypeEnum.DAMAGE)) {
-            float reduction = BuffUtil.getRate(0F, BuffTypeEnum.DAMAGE, from);
-            this.damage.set(Math.round(this.damage.get() * (1 - reduction)));
-        } else if (DamageTypeEnum.MAGIC.equals(skillEffect.getDamageTypeEnum())
-                && tar.getBuffMap().containsKey(BuffTypeEnum.MAGIC_DAMAGE)) {
-            float reduction = BuffUtil.getRate(0F, BuffTypeEnum.MAGIC_DAMAGE, from);
-            this.damage.set(Math.round(this.damage.get() * (1 - reduction)));
-        }
         // 判断此技能是否能生效
-        if (extraBattleProcessList.stream().anyMatch(ext -> !ext.canEffect(this))) {
+        if (BuffUtil.calInvincible(this)) {
+            return;
+        }
+        if (RuleUtil.calInvincible(this)) {
             return;
         }
         // 命中插入结算
-        extraBattleProcessList.forEach(ext -> ext.ifHit(this));
+        extraBattleProcessList.forEach(ext -> ext.executeIfHit(this));
         nowSkill.getThisBehaviorExtraProcess().ifHit(this);
         skillEffect.getTemplate().ifHit(this);
         // 造成伤害
-        BattleUtil.doDamage(this);
-        // 有伤害倍率的技能 插入文描
-        if (skillEffect.getDamageRate() > 0) {
-            builder.append("，对").append(tarOrganism.getName()).append("造成").append(this.damage.get()).append("点伤害");
-        }
+        BattleUtil.doDamage(this, damageRate.floatValue() > 0);
         // 若对方仍有存活，且出手方身上有反伤buff，计算反伤
         List<BattleBuffDTO> reflectDamageBuffList = from.getBuffMap().get(BuffTypeEnum.REFLECT_DAMAGE);
         if (CollectionUtil.isNotEmpty(reflectDamageBuffList)
@@ -158,10 +155,7 @@ public class BattleEffectDTO {
         }
         if (tarOrganism.getHpWithAddition() <= 0) {
             // 触发受到致命伤害后的结算
-            extraBattleProcessList.stream().filter(ext -> tar.equals(ext.getFrom()))
-                    .forEach(ext -> ext.afterMeDeath(this));
-            extraBattleProcessList.stream().filter(ext -> from.equals(ext.getFrom()))
-                    .forEach(ext -> ext.afterTargetDeath(this));
+            extraBattleProcessList.forEach(ext -> ext.executeAfterDeath(this));
         }
     }
 
@@ -173,8 +167,7 @@ public class BattleEffectDTO {
             this.getBattleRound().getBattleField().getFieldEffectEnum().getEffect().finalizeEffect(this);
         }
         this.getBattleRound().getBuilder()
-                .append(String.format("，场地效果【%s】生效",
-                        this.getBattleRound().getBattleField().getFieldEffectEnum().getFieldEffectName()));
+                .append(String.format("，场地效果【%s】生效", newEffect.getFieldEffectName()));
         newEffect.getEffect().finalizeEffect(this);
         this.getBattleRound().getBattleField().setFieldEffectEnum(newEffect);
     }

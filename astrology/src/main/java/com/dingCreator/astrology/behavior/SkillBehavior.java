@@ -99,7 +99,7 @@ public class SkillBehavior {
         List<String> jobCodes = skillEnum.getJobCode();
         if (jobCodes.contains(Constants.NONE)) {
             throw SkillExceptionEnum.JOB_SKILL_NOT_ALLOW_2.getException();
-        } else if (!jobCodes.contains(player.getJob())) {
+        } else if (!jobCodes.contains(player.getJob()) && !jobCodes.contains(Constants.ALL)) {
             throw SkillExceptionEnum.JOB_SKILL_NOT_ALLOW_2.getException();
         }
         SkillBagService.getInstance().learnSkill(playerId, skillEnum.getId());

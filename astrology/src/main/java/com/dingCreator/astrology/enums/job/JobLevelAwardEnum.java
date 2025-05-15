@@ -67,15 +67,15 @@ public enum JobLevelAwardEnum {
         return "习得技能【" + SkillEnum.SKILL_31.getName() + "】";
     }),
     SI_DI_WU_SHI_LV_35(JobEnum.SI_DI_WU_SHI, 35, playerId -> {
-        SkillBehavior.getInstance().createSkillBelongTo(playerId, SkillEnum.SKILL_32.getId());
+        SkillBehavior.getInstance().createSkillBelongTo(playerId, SkillEnum.SKILL_26.getId());
         return "习得技能【" + SkillEnum.SKILL_32.getName() + "】";
     }),
     SI_DI_WU_SHI_LV_50(JobEnum.SI_DI_WU_SHI, 50, playerId -> {
-        SkillBehavior.getInstance().createSkillBelongTo(playerId, SkillEnum.SKILL_33.getId());
+        SkillBehavior.getInstance().createSkillBelongTo(playerId, SkillEnum.SKILL_32.getId());
         return "习得技能【" + SkillEnum.SKILL_33.getName() + "】";
     }),
     SI_DI_WU_SHI_LV_61(JobEnum.SI_DI_WU_SHI, 61, playerId -> {
-        SkillBehavior.getInstance().createSkillBelongTo(playerId, SkillEnum.SKILL_26.getId());
+        SkillBehavior.getInstance().createSkillBelongTo(playerId, SkillEnum.SKILL_33.getId());
         return "习得技能【" + SkillEnum.SKILL_26.getName() + "】";
     }),
 

@@ -354,7 +354,7 @@ create table astrology_player_alchemy (
 ) ENGINE=innodb COMMENT='玩家炼丹术表'
 
 create table astrology_skill_bag (
-    id BIGINT NOT NULL COMMENT '主键',
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
     player_id BIGINT NOT NULL COMMENT '玩家ID',
     skill_id BIGINT NOT NULL COMMENT '技能ID',
     skill_cnt INT NOT NULL DEFAULT 0 COMMENT '技能数量',

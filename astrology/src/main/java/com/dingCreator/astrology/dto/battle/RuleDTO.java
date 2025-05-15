@@ -1,11 +1,13 @@
 package com.dingCreator.astrology.dto.battle;
 
+import com.dingCreator.astrology.enums.BuffTypeEnum;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
@@ -18,7 +20,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RuleDTO {
+public class RuleDTO implements Serializable {
     /**
      * 法则名称
      */
@@ -26,7 +28,7 @@ public class RuleDTO {
     /**
      * 属性
      */
-    private OrganismPropertiesEnum organismPropertiesEnum;
+    private BuffTypeEnum buffTypeEnum;
     /**
      * 值
      */

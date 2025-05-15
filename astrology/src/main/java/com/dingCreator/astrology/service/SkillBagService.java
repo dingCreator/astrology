@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dingCreator.astrology.cache.SkillCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.entity.SkillBag;
@@ -51,6 +52,7 @@ public class SkillBagService {
                     SkillBelongToService.getInstance().createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), playerId, skillId);
                 })
         );
+        SkillCache.deleteInactiveSkillCache(playerId);
     }
 
     public List<SkillBag> pageSkillBag(Long playerId, int pageIndex, int pageSize) {

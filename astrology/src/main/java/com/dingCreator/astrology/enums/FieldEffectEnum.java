@@ -7,6 +7,7 @@ import com.dingCreator.astrology.util.BuffUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
  */
 @Getter
 @AllArgsConstructor
-public enum FieldEffectEnum {
+public enum FieldEffectEnum implements Serializable {
 
     EFFECT_1(1L, "临渊绝响",
             "双方血量回复效果降低70%，攻击与法强提升50%",
@@ -68,7 +69,22 @@ public enum FieldEffectEnum {
                     );
                 }
             }
-    );
+    ),
+
+    EFFECT_3(3L, "虚神界", "双方闪避提高40%",
+            new Effect() {
+                @Override
+                public Float getRate(Float rate, BuffTypeEnum buffTypeEnum) {
+                    if (BuffTypeEnum.DODGE.equals(buffTypeEnum)) {
+                        return rate + 0.4F;
+                    }
+                    return rate;
+                }
+            }
+    ),
+
+
+    ;
 
     private final Long id;
 

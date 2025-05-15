@@ -1,7 +1,7 @@
 package com.dingCreator.astrology.dto.skill;
 
 import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
-import com.dingCreator.astrology.enums.skill.SkillTargetEnum;
+import com.dingCreator.astrology.enums.skill.TargetEnum;
 import com.dingCreator.astrology.util.template.ThisEffectExtraBattleProcessTemplate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,7 +20,7 @@ public class SkillEffectDTO implements Serializable {
     /**
      * 目标
      */
-    private SkillTargetEnum skillTargetEnum;
+    private TargetEnum targetEnum;
     /**
      * 伤害类型
      */
@@ -34,8 +34,16 @@ public class SkillEffectDTO implements Serializable {
      */
     private ThisEffectExtraBattleProcessTemplate template;
 
-    public SkillEffectDTO(SkillTargetEnum skillTargetEnum, DamageTypeEnum damageTypeEnum, Float damageRate) {
-        this(skillTargetEnum, damageTypeEnum, damageRate, new ThisEffectExtraBattleProcessTemplate() {
+    public SkillEffectDTO(TargetEnum targetEnum){
+        this(targetEnum, DamageTypeEnum.ATK, 0F);
+    }
+
+    public SkillEffectDTO(TargetEnum targetEnum, ThisEffectExtraBattleProcessTemplate template){
+        this(targetEnum, DamageTypeEnum.ATK, 0F, template);
+    }
+
+    public SkillEffectDTO(TargetEnum targetEnum, DamageTypeEnum damageTypeEnum, Float damageRate) {
+        this(targetEnum, damageTypeEnum, damageRate, new ThisEffectExtraBattleProcessTemplate() {
 
         });
     }

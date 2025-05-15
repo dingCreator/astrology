@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.util;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.response.PageResponse;
 
@@ -16,6 +17,9 @@ import java.util.stream.Collectors;
 public class PageUtil {
 
     public static <T> PageResponse<T> buildPage(List<T> list, int pageIndex, int pageSize) {
+        if (CollectionUtil.isEmpty(list)) {
+            return addPageDesc(new ArrayList<>(), pageIndex, pageSize, 0);
+        }
         return addPageDesc(list.stream().skip((long) (pageIndex - 1) * pageSize).limit(pageSize).collect(Collectors.toList()),
                 pageIndex, pageSize, list.size());
     }

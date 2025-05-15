@@ -98,7 +98,7 @@ public class EquipmentBehavior {
                 list = equipmentBelongToService.listGroupByBelongToId(BelongToEnum.PLAYER.getBelongTo(), playerId, equipmentIds);
             }
         }
-        return PageUtil.addPageDesc(list, pageIndex, pageSize, total);
+        return PageUtil.buildPage(list, pageIndex, pageSize);
     }
 
     /**
@@ -194,6 +194,7 @@ public class EquipmentBehavior {
         belongTo.setBelongTo(BelongToEnum.PLAYER.getBelongTo());
         belongTo.setBelongToId(playerId);
         belongTo.setEquipmentId(equipmentId);
+        belongTo.setTotalCnt(1);
         belongTo.setEquip(false);
         belongTo.setEquipmentLevel(1);
         equipmentBelongToService.addBelongTo(belongTo);

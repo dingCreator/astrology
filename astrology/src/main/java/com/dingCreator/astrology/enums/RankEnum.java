@@ -72,19 +72,19 @@ public enum RankEnum {
             (playerId, builder) -> {
             }),
 
-    GUN_RANK_1(JobEnum.GUN.getJobCode(), 1, "下士", 1, 20, 0.5F,
+    GUN_RANK_1(JobEnum.GUN.getJobCode(), 1, "上等兵", 1, 20, 0.5F,
             (playerId, builder) -> {
             }),
-    GUN_RANK_2(JobEnum.GUN.getJobCode(), 2, "少尉", 21, 40, 0.4F,
+    GUN_RANK_2(JobEnum.GUN.getJobCode(), 2, "上士", 21, 40, 0.4F,
             (playerId, builder) -> {
             }),
-    GUN_RANK_3(JobEnum.GUN.getJobCode(), 3, "少校", 41, 60, 0.3F,
+    GUN_RANK_3(JobEnum.GUN.getJobCode(), 3, "上尉", 41, 60, 0.3F,
             (playerId, builder) -> {
             }),
-    GUN_RANK_4(JobEnum.GUN.getJobCode(), 4, "少将", 61, 80, 0.2F,
+    GUN_RANK_4(JobEnum.GUN.getJobCode(), 4, "上校", 61, 80, 0.2F,
             (playerId, builder) -> {
             }),
-    GUN_RANK_5(JobEnum.GUN.getJobCode(), 5, "元帅", 81, 100, 0.1F,
+    GUN_RANK_5(JobEnum.GUN.getJobCode(), 5, "上将", 81, 100, 0.1F,
             (playerId, builder) -> {
             }),
 

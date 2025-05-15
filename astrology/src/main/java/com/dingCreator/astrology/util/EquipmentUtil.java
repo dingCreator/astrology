@@ -38,7 +38,7 @@ public class EquipmentUtil {
      */
     public static void validate(long playerId, EquipmentBelongTo equipmentBelongTo) {
         if (Objects.isNull(equipmentBelongTo)) {
-            throw EquipmentExceptionEnum.EQUIPMENT_NOT_EXIST.getException();
+            throw EquipmentExceptionEnum.DONT_HAVE_EQUIPMENT.getException();
         }
         EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentBelongTo.getEquipmentId());
         if (Objects.isNull(equipmentEnum)) {

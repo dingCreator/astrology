@@ -32,14 +32,13 @@ public abstract class ThisEffectExtraBattleProcessTemplate implements Serializab
 
     /**
      * 修改技能倍率
-     *
-     * @param from       来源
-     * @param tar        目标
-     * @param damageRate 原倍率
-     * @param builder    文描
-     * @return 修改后的技能倍率
      */
-    public BigDecimal changeDamageRate(BattleEffectDTO battleEffect) {
-        return battleEffect.getDamageRate();
+    public void changeDamageRate(BattleEffectDTO battleEffect) {
+    }
+
+    public void beforeEffect(BattleEffectDTO battleEffect) {
+    }
+
+    public void afterEffect(BattleEffectDTO battleEffect) {
     }
 }

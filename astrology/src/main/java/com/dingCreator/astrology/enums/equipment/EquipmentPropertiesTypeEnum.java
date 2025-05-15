@@ -1,15 +1,10 @@
 package com.dingCreator.astrology.enums.equipment;
 
-import com.dingCreator.astrology.cache.PlayerCache;
-import com.dingCreator.astrology.dto.equipment.EquipmentPropertiesDTO;
-import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
-import com.dingCreator.astrology.util.EquipmentUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;
-import java.util.function.BiConsumer;
 
 /**
  * @author ding
@@ -84,7 +79,7 @@ public enum EquipmentPropertiesTypeEnum {
     /**
      * 吸血
      */
-    LIFE_STEALING(OrganismPropertiesEnum.LIFE_STEALING.getFieldName(), OrganismPropertiesEnum.LIFE_STEALING.getChnDesc()),
+    LIFE_STEALING(OrganismPropertiesEnum.LIFE_STEAL.getFieldName(), OrganismPropertiesEnum.LIFE_STEAL.getChnDesc()),
     ;
 
     /**

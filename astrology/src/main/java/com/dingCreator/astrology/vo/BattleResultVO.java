@@ -1,5 +1,7 @@
 package com.dingCreator.astrology.vo;
 
+import com.dingCreator.astrology.dto.battle.BattleRoundDTO;
+import com.dingCreator.astrology.dto.battle.BattleRoundRecordDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -25,6 +27,10 @@ public class BattleResultVO implements Serializable {
      * 战况（对于发起方而言）
      */
     private BattleResult battleResult;
+    /**
+     * 战斗回合详情
+     */
+    private List<BattleRoundRecordDTO> roundRecordList;
     /**
      * 发起方ID
      */

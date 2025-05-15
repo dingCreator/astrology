@@ -295,6 +295,9 @@ public class MonsterManageBehavior {
     public BattleResultVO EVE(Long playerId, Long monsterId1, Long monsterId2) {
         return BattleUtil.battleEVE(playerId, Collections.singletonList(monsterId1), Collections.singletonList(monsterId2));
     }
+    public BattleResultVO PVE(Long playerId, Long monsterId) {
+        return BattleUtil.battlePVE(playerId, Collections.singletonList(monsterId));
+    }
 
     private static class Holder {
         private static final MonsterManageBehavior BEHAVIOR = new MonsterManageBehavior();

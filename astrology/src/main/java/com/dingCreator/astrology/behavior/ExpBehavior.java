@@ -183,34 +183,42 @@ public class ExpBehavior {
         hangUpVO.setHangUpTime(between);
         // 最长有收益挂机时间24h
         between = Math.min(between, Constants.MAX_HANG_UP_TIME);
-        // 记录值
-        long oldHpWithAddition = playerDTO.getHpWithAddition();
-        long oldMpWithAddition = playerDTO.getMpWithAddition();
-        // 回复状态
-        long oldHp = playerDTO.getHp();
-        long maxHp = playerDTO.getMaxHp();
-        long oldMp = playerDTO.getMp();
-        long maxMp = playerDTO.getMaxMp();
-        float recharge = RankEnum.getEnum(playerDTO.getJob(), playerDTO.getRank()).getRechargeRatePerMin();
-        long newHp = Math.min(maxHp, oldHp + Math.round(maxHp * recharge * between));
-        long newMp = Math.min(maxMp, oldMp + Math.round(maxMp * recharge * between));
-        playerDTO.setHp(newHp);
-        playerDTO.setMp(newMp);
-        playerDTO.clearAdditionVal();
-        // 计算经验值
-        long exp = (10 + (long) Math.pow(playerDTO.getLevel() - 1, 3) / 30) * between;
-        LevelChange levelChange = getExp(id, exp);
-        // 回显实际获得的经验值以及状态变化
-        hangUpVO.setExp(levelChange.getExp());
-        hangUpVO.setOldLevel(levelChange.getOldLevel());
-        hangUpVO.setNewLevel(levelChange.getNewLevel());
-        hangUpVO.setHp(playerDTO.getHpWithAddition() - oldHpWithAddition);
-        hangUpVO.setMp(playerDTO.getMpWithAddition() - oldMpWithAddition);
-        if (CollectionUtil.isNotEmpty(levelChange.getAwardDesc())) {
-            String msg = levelChange.getAwardDesc().stream().filter(StringUtils::isNotBlank)
-                    .reduce((s1, s2) -> s1 + "\n" + s2).orElse(null);
-            if (Objects.nonNull(msg)) {
-                hangUpVO.setMessage(msg);
+        if (between == 0) {
+            hangUpVO.setExp(0L);
+            hangUpVO.setOldLevel(playerDTO.getLevel());
+            hangUpVO.setNewLevel(playerDTO.getLevel());
+            hangUpVO.setHp(0L);
+            hangUpVO.setMp(0L);
+        } else {
+            // 记录值
+            long oldHpWithAddition = playerDTO.getHpWithAddition();
+            long oldMpWithAddition = playerDTO.getMpWithAddition();
+            // 回复状态
+            long oldHp = playerDTO.getHp();
+            long maxHp = playerDTO.getMaxHp();
+            long oldMp = playerDTO.getMp();
+            long maxMp = playerDTO.getMaxMp();
+            float recharge = RankEnum.getEnum(playerDTO.getJob(), playerDTO.getRank()).getRechargeRatePerMin();
+            long newHp = Math.min(maxHp, oldHp + Math.round(maxHp * recharge * between));
+            long newMp = Math.min(maxMp, oldMp + Math.round(maxMp * recharge * between));
+            playerDTO.setHp(newHp);
+            playerDTO.setMp(newMp);
+            playerDTO.clearAdditionVal();
+            // 计算经验值
+            long exp = (10 + (long) Math.pow(playerDTO.getLevel() - 1, 3) / 30) * between;
+            LevelChange levelChange = getExp(id, exp);
+            // 回显实际获得的经验值以及状态变化
+            hangUpVO.setExp(levelChange.getExp());
+            hangUpVO.setOldLevel(levelChange.getOldLevel());
+            hangUpVO.setNewLevel(levelChange.getNewLevel());
+            hangUpVO.setHp(playerDTO.getHpWithAddition() - oldHpWithAddition);
+            hangUpVO.setMp(playerDTO.getMpWithAddition() - oldMpWithAddition);
+            if (CollectionUtil.isNotEmpty(levelChange.getAwardDesc())) {
+                String msg = levelChange.getAwardDesc().stream().filter(StringUtils::isNotBlank)
+                        .reduce((s1, s2) -> s1 + "\n" + s2).orElse(null);
+                if (Objects.nonNull(msg)) {
+                    hangUpVO.setMessage(msg);
+                }
             }
         }
         BaseResponse<HangUpVO> response = new BaseResponse<>();
