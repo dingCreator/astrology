@@ -2,18 +2,17 @@ package com.dingCreator.astrology.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.dto.activity.ActivityDTO;
 import com.dingCreator.astrology.dto.activity.BaseActivityAwardRuleDTO;
 import com.dingCreator.astrology.dto.activity.SignActivityAwardRuleDTO;
 import com.dingCreator.astrology.dto.article.ArticleItemDTO;
 import com.dingCreator.astrology.entity.Activity;
-import com.dingCreator.astrology.enums.ArticleTypeEnum;
 import com.dingCreator.astrology.enums.activity.ActivityTypeEnum;
 import com.dingCreator.astrology.enums.exception.ActivityExceptionEnum;
 import com.dingCreator.astrology.mapper.ActivityMapper;
 import com.dingCreator.astrology.request.ActivityAwardSettingReq;
+import com.dingCreator.astrology.util.ArticleUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,16 +54,8 @@ public class SignActivityServiceImpl implements ActivityService {
         List<SignActivityAwardRuleDTO> awardRuleList = jsonObjList.stream()
                 .map(jsonObj -> {
                     SignActivityAwardRuleDTO sign = new SignActivityAwardRuleDTO();
-
-                    List<JSONObject> articleObj =
-                            jsonObj.<List<JSONObject>>getObject(BaseActivityAwardRuleDTO.FIELD_ARTICLE_ITEM_LIST, List.class);
-                    List<ArticleItemDTO> articleItemList = articleObj.stream()
-                            .map(artJson -> {
-                                String artType = artJson.getString(Constants.ITEM_TYPE);
-                                Class<? extends ArticleItemDTO> clazz = ArticleTypeEnum.getByType(artType).getClazz();
-                                return artJson.toJavaObject(clazz);
-                            }).collect(Collectors.toList());
-                    sign.setArticleItemList(articleItemList);
+                    String articleJson = jsonObj.getString(BaseActivityAwardRuleDTO.FIELD_ARTICLE_ITEM_SET);
+                    sign.setArticleItemSet(ArticleUtil.convertSet(articleJson));
                     return sign;
                 }).collect(Collectors.toList());
         return (List<T>) awardRuleList;
@@ -76,7 +67,7 @@ public class SignActivityServiceImpl implements ActivityService {
                 .map(award -> (SignActivityAwardRuleDTO) award)
                 .collect(Collectors.toList());
         return awardRuleList.stream()
-                .flatMap(award -> award.getArticleItemList().stream())
+                .flatMap(award -> award.getArticleItemSet().stream())
                 .collect(Collectors.toList());
     }
 

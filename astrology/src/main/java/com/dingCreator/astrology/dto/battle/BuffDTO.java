@@ -94,6 +94,10 @@ public class BuffDTO implements Serializable {
         this(buffType, buffName, value, rate, abnormal, BuffOverrideStrategyEnum.MAX_ROUND);
     }
 
+    public BuffDTO(BuffTypeEnum buffType, String buffName, Long value, BuffOverrideStrategyEnum buffOverrideStrategyEnum) {
+        this(buffType, buffName, value, 0F, false, buffOverrideStrategyEnum);
+    }
+
     public BuffDTO(BuffTypeEnum buffType, String buffName, Float rate, BuffOverrideStrategyEnum buffOverrideStrategyEnum) {
         this.buffType = buffType;
         this.buffName = buffName;

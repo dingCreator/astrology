@@ -1,6 +1,5 @@
 package com.dingCreator.astrology.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -10,6 +9,7 @@ import com.dingCreator.astrology.dto.activity.ActivityDTO;
 import com.dingCreator.astrology.dto.activity.ActivityStaticsDTO;
 import com.dingCreator.astrology.dto.activity.BaseActivityAwardRuleDTO;
 import com.dingCreator.astrology.dto.article.ArticleItemDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Activity;
 import com.dingCreator.astrology.entity.ActivityRecord;
@@ -21,10 +21,8 @@ import com.dingCreator.astrology.mapper.ActivityRecordMapper;
 import com.dingCreator.astrology.mapper.ActivityStaticsMapper;
 import com.dingCreator.astrology.request.ActivityAwardSettingReq;
 import com.dingCreator.astrology.request.ActivityPageQryReq;
-import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.util.ActivityUtil;
 import com.dingCreator.astrology.util.LockUtil;
-import com.dingCreator.astrology.vo.ActivityAwardVO;
 import com.dingCreator.astrology.vo.ArticleItemVO;
 
 import java.time.LocalDateTime;
@@ -151,8 +149,11 @@ public interface ActivityService {
             DatabaseProvider.getInstance().transactionExecute(sqlSession -> {
                 Long playerId = info.getPlayerDTO().getId();
                 // 扣除参与费用
-                activity.getCostMap().forEach((assetTypeEnum, cost) ->
-                        PlayerService.getInstance().changeAsset(info, assetTypeEnum.getTransfer2Dto().apply(cost * times)));
+                List<PlayerAssetDTO> changeList = activity.getCostMap().entrySet().stream()
+                        .map(entry -> PlayerAssetDTO.builder().playerId(playerId)
+                                .assetType(entry.getKey().getCode()).assetCnt(entry.getValue() * times).build())
+                        .collect(Collectors.toList());
+                PlayerService.getInstance().changeAsset(info, changeList);
                 // 发放奖励
                 awards.forEach(award -> award.send2Player(info.getPlayerDTO().getId(), 1));
                 // 插入记录
@@ -299,7 +300,7 @@ public interface ActivityService {
         if (CollectionUtils.isNotEmpty(activity.getCostMap())) {
             activity.getCostMap().forEach((assetTypeEnum, cost) -> {
                 long realCost = cost * times;
-                if (!assetTypeEnum.getValidateCache().apply(info.getPlayerAssetDTO(), realCost)) {
+                if (!assetTypeEnum.getValidateCache().apply(info.getAssetList(), realCost)) {
                     throw ActivityExceptionEnum.NOT_ENOUGH_ASSET.getException();
                 }
             });

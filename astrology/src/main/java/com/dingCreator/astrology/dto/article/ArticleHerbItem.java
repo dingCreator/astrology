@@ -19,22 +19,20 @@ public class ArticleHerbItem extends ArticleItemDTO {
 
     private Long herbId;
 
-    public ArticleHerbItem() {
+    public ArticleHerbItem(Long herbId) {
         super(ArticleTypeEnum.HERB.getType());
+        this.herbId = herbId;
     }
 
     @Override
-    public void send2Player(Long playerId, int cnt)  {
-        PlayerHerbService.getInstance().addHerb(playerId, herbId, cnt);
+    public void send2Player(Long playerId, int cnt) {
+        PlayerHerbService.getInstance().addHerb(playerId, herbId, this.cnt.intValue() * cnt);
     }
 
     @Override
-    public ArticleItemVO view() {
-        return ArticleItemVO.builder()
-                .name(HerbEnum.getById(herbId).getName())
-                .description("缘神没有写药材介绍")
-                .rare(100)
-                .count(1L)
-                .build();
+    public ArticleItemVO fillView(ArticleItemVO vo) {
+        vo.setName(HerbEnum.getById(herbId).getName());
+        vo.setDescription("缘神没有写药材介绍");
+        return vo;
     }
 }

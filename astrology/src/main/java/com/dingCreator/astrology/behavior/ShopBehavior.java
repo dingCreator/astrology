@@ -13,7 +13,9 @@ import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.util.LockUtil;
 import com.dingCreator.astrology.util.PageUtil;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author ding
@@ -21,13 +23,17 @@ import java.util.List;
  */
 public class ShopBehavior {
 
-    public PageResponse<ShopItemDTO> listShopItems(int pageIndex, int pageSize) {
-        return PageUtil.buildPage(ShopCache.listShopItems(), pageIndex, pageSize);
+    public List<String> listShopName() {
+        return ShopCache.listShopName();
     }
 
-    public ShopItemDTO buy(Long playerId, Integer no) {
+    public PageResponse<ShopItemDTO> listShopItems(String shopName, int pageIndex, int pageSize) {
+        return PageUtil.buildPage(ShopCache.listShopItems(shopName), pageIndex, pageSize);
+    }
+
+    public ShopItemDTO buy(Long playerId, String shopName, Integer no) {
         int idx = no - 1;
-        List<ShopItemDTO> itemList = ShopCache.listShopItems();
+        List<ShopItemDTO> itemList = ShopCache.listShopItems(shopName);
         if (idx < 0 || idx >= itemList.size()) {
             throw ShopExceptionEnum.SHOP_ITEM_NO_INVALID.getException();
         }
@@ -55,16 +61,15 @@ public class ShopBehavior {
 
     private void buy(PlayerInfoDTO info, ShopItemDTO item) {
         item.getCostMap().forEach(((assetTypeEnum, cost) -> {
-            if (!assetTypeEnum.getValidateCache().apply(info.getPlayerAssetDTO(), cost)) {
+            if (!assetTypeEnum.getValidateCache().apply(info.getAssetList(), cost)) {
                 throw ShopExceptionEnum.NOT_ENOUGH_MONEY.getException();
             }
         }));
         Long playerId = info.getPlayerDTO().getId();
-        PlayerAssetDTO asset = PlayerAssetDTO.builder()
-                .playerId(playerId)
-                .astrologyCoin(item.getCostMap().get(AssetTypeEnum.ASTROLOGY_COIN))
-                .diamond(item.getCostMap().get(AssetTypeEnum.DIAMOND)).build();
-        PlayerService.getInstance().changeAsset(info, asset);
+        List<PlayerAssetDTO> assetList = item.getCostMap().entrySet().stream().map(entry ->
+            PlayerAssetDTO.builder().playerId(playerId).assetType(entry.getKey().getCode()).assetCnt(-entry.getValue()).build()
+        ).collect(Collectors.toList());
+        PlayerService.getInstance().changeAsset(info, assetList);
         item.getArticle().send2Player(playerId, item.getCount());
     }
 

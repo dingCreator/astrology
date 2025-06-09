@@ -34,7 +34,8 @@ public class BuffUtil {
         if (target.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() <= 0) {
             return;
         }
-        if (buffDTO.getAbnormal() && (target.getBuffMap().containsKey(BuffTypeEnum.IMMUNITY))) {
+        if (buffDTO.getAbnormal() && (target.getBuffMap().containsKey(BuffTypeEnum.IMMUNITY)
+                || target.getRuleList().stream().anyMatch(rule -> BuffTypeEnum.IMMUNITY.equals(rule.getBuffTypeEnum())))) {
             builder.append("，免疫异常【").append(buffDTO.getBuffName()).append("】");
             return;
         }

@@ -23,10 +23,15 @@ public class WorldBossRecord {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
+     * 世界boss配置ID
+     */
+    @TableField("world_boss_id")
+    private Long worldBossId;
+    /**
      * 玩家ID |1|2|3|
      */
-    @TableField("player_id_list")
-    private String playerIdList;
+    @TableField("player_id")
+    private Long playerId;
     /**
      * 伤害量
      */
@@ -38,9 +43,11 @@ public class WorldBossRecord {
     @TableField("create_time")
     private LocalDateTime createTime;
 
+    public static final String WORLD_BOSS_ID = "world_boss_id";
+
     public static final String CREATE_TIME = "create_time";
 
-    public static final String PLAYER_ID_LIST = "player_id_list";
+    public static final String PLAYER_ID = "player_id";
 
     public static final String DAMAGE = "damage";
 }

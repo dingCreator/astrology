@@ -1,10 +1,12 @@
 package com.dingCreator.astrology.request;
 
+import com.dingCreator.astrology.dto.article.ArticleItemDTO;
 import com.dingCreator.astrology.enums.ArticleTypeEnum;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author ding
@@ -13,7 +15,7 @@ import java.util.List;
 @Data
 public class LuckyActivityAwardSettingReq extends ActivityAwardSettingReq {
 
-    private List<AwardSettingItem> itemList;
+    private List<AwardSettingItem> settingItemList;
 
     @Data
     public static class AwardSettingItem {
@@ -22,12 +24,8 @@ public class LuckyActivityAwardSettingReq extends ActivityAwardSettingReq {
          */
         private BigDecimal rate;
         /**
-         * 类型
+         * 物品
          */
-        private ArticleTypeEnum articleTypeEnum;
-        /**
-         * 参数
-         */
-        private List<List<Long>> params;
+        private List<Set<ArticleItemDTO>> articleItemList;
     }
 }

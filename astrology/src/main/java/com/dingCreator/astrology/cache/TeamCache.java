@@ -40,7 +40,7 @@ public class TeamCache {
         if (!info.getTeam()) {
             return null;
         }
-        return TEAM.get(info.getTeamId());
+        return TEAM.getOrDefault(info.getTeamId(), null);
     }
 
     /**

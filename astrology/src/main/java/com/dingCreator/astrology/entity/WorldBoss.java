@@ -33,11 +33,6 @@ public class WorldBoss {
     @TableField("monster_id")
     private String monsterId;
     /**
-     * 出现日期
-     */
-    @TableField("appear_date")
-    private LocalDate appearDate;
-    /**
      * 开始时间
      */
     @TableField("start_time")
@@ -47,10 +42,20 @@ public class WorldBoss {
      */
     @TableField("end_time")
     private LocalDateTime endTime;
-
-    public static final String APPEAR_DATE = "appear_date";
+    /**
+     * 奖励
+     */
+    @TableField("award")
+    private String award;
+    /**
+     * 是否已发放奖励
+     */
+    @TableField("distribute")
+    private Boolean distribute;
 
     public static final String START_TIME = "start_time";
 
     public static final String END_TIME = "end_time";
+
+    public static final String DISTRIBUTE = "distribute";
 }

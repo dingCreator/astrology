@@ -21,27 +21,33 @@ import lombok.NoArgsConstructor;
 @TableName("astrology_player_asset")
 public class PlayerAsset {
     /**
-     * 玩家ID 主键
+     * 主键
      */
-    @TableId("player_id")
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
+    /**
+     * 玩家ID
+     */
+    @TableField("player_id")
     private Long playerId;
     /**
-     * 圣星币
+     * 资产类型
      */
-    @TableField("astrology_coin")
-    private Long astrologyCoin;
+    @TableField("asset_type")
+    private String assetType;
     /**
-     * 缘石
+     * 资产量
      */
-    @TableField("diamond")
-    private Long diamond;
+    @TableField("asset_cnt")
+    private Long assetCnt;
 
     public static final String PLAYER_ID = "player_id";
 
     public PlayerAssetDTO convert() {
         return PlayerAssetDTO.builder()
+                .id(this.id)
                 .playerId(this.playerId)
-                .astrologyCoin(this.astrologyCoin)
-                .diamond(this.diamond).build();
+                .assetType(this.assetType)
+                .assetCnt(this.assetCnt).build();
     }
 }

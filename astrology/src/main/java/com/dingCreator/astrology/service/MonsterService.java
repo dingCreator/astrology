@@ -76,6 +76,18 @@ public class MonsterService {
         DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(MonsterMapper.class).updateById(monster));
     }
 
+    /**
+     * 完全恢复怪物血量
+     *
+     * @param id 怪物id
+     */
+    public void recoverById(long id) {
+        DatabaseProvider.getInstance().execute(sqlSession -> {
+            Monster monster = sqlSession.getMapper(MonsterMapper.class).getMonsterById(id);
+            monster.setHp(monster.getMaxHp());
+            MonsterService.getInstance().updateMonster(monster);
+        });
+    }
 
     /**
      * 编辑怪物信息

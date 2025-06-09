@@ -37,7 +37,7 @@ public class PlayerInfoDTO implements Serializable {
     /**
      * 货币
      */
-    private PlayerAssetDTO playerAssetDTO;
+    private List<PlayerAssetDTO> assetList;
     /**
      * 称号
      */

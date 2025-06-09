@@ -1,13 +1,11 @@
 package com.dingCreator.astrology.dto.article;
 
-import com.dingCreator.astrology.entity.SkillBag;
 import com.dingCreator.astrology.enums.ArticleTypeEnum;
-import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.service.SkillBagService;
-import com.dingCreator.astrology.service.SkillBelongToService;
 import com.dingCreator.astrology.vo.ArticleItemVO;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -24,10 +22,6 @@ public class ArticleSkillItem extends ArticleItemDTO {
      */
     private Long skillId;
 
-    public ArticleSkillItem() {
-        super(ArticleTypeEnum.SKILL.getType());
-    }
-
     public ArticleSkillItem(Long skillId) {
         super(ArticleTypeEnum.SKILL.getType());
         this.skillId = skillId;
@@ -40,8 +34,10 @@ public class ArticleSkillItem extends ArticleItemDTO {
     }
 
     @Override
-    public ArticleItemVO view() {
+    public ArticleItemVO fillView(ArticleItemVO vo) {
         SkillEnum skillEnum = SkillEnum.getById(skillId);
-        return ArticleItemVO.builder().name(skillEnum.getName()).rare(100).description(skillEnum.getDesc()).build();
+        vo.setName(skillEnum.getName());
+        vo.setDescription(skillEnum.getDesc());
+        return vo;
     }
 }

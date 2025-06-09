@@ -23,6 +23,7 @@ import lombok.experimental.Accessors;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -972,8 +973,8 @@ public enum SkillEnum implements Serializable {
     ),
 
     SKILL_48(48L, "机灵自愈/众生虚妙",
-            "每回合回复自身15%血量4%蓝量持续三回合。伪神姿态下每回合回复全体友方20%血量,8%蓝量持续三回合",
-            JobEnum.GUN.getJobCode(), 80L, new SkillEffectDTO(TargetEnum.ME, DamageTypeEnum.ATK, 0F),
+            "每回合回复自身8%血量4%蓝量持续三回合。伪神姿态下每回合回复全体友方12%血量,8%蓝量持续三回合",
+            JobEnum.GUN.getJobCode(), 120L, new SkillEffectDTO(TargetEnum.ME, DamageTypeEnum.ATK, 0F),
             new ThisBehaviorExtraBattleProcessTemplate() {
                 @Override
                 public void ifHit(BattleEffectDTO battleEffect) {
@@ -990,9 +991,12 @@ public enum SkillEnum implements Serializable {
             if (cnt <= 0) {
                 this.getOwner().getMarkMap().remove("机灵自愈/众生虚妙");
             }
-            battleRound.getOur().forEach(b -> {
-                float healRate = this.getOwner().getMarkMap().containsKey("伪神") ? 0.2F : 0.15F;
-                float mpRate = this.getOwner().getMarkMap().containsKey("伪神") ? 0.08F : 0.04F;
+            float healRate = this.getOwner().getMarkMap().containsKey("伪神") ? 0.04F : 0.02F;
+            float mpRate = this.getOwner().getMarkMap().containsKey("伪神") ? 0.08F : 0.04F;
+
+            List<BattleDTO> skillTars = this.getOwner().getMarkMap().containsKey("伪神") ?
+                    Collections.singletonList(battleRound.getFrom()) : battleRound.getOur();
+            skillTars.forEach(b -> {
                 String skillName = this.getOwner().getMarkMap().containsKey("伪神") ? "众生虚妙" : "机灵自愈";
                 long heal = Math.round(healRate * b.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition());
                 long mp = Math.round(mpRate * b.getOrganismInfoDTO().getOrganismDTO().getMaxMpWithAddition());
@@ -1072,22 +1076,27 @@ public enum SkillEnum implements Serializable {
 
     SKILL_51(51L, "秽斩·天锋",
             "对敌方造成2100%物理伤害。对战世界boss“异维生命体·冥水河神·M10”时造成双倍伤害，并破除其“静水流深”状态，同时获得十层“薪火”",
-            Constants.ALL, 350L, new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 21F),
-            new ThisBehaviorExtraBattleProcessTemplate() {
-
-            }
+            Constants.ALL, 350L, new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 21F)
     ),
 
     SKILL_52(52L, "秽斩·星神",
             "对敌方造成2100%法术伤害。对战世界boss“异维生命体·冥水河神·M10”时造成双倍伤害，并破除其“静水流深”状态，同时获得十层“薪火”",
-            Constants.ALL, 350L, new SkillEffectDTO()
-
+            Constants.ALL, 350L, new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 21F)
     ),
 
     SKILL_53(53L, "秽斩·卦术",
             "对敌方造成700%法术伤害。对战世界boss“异维生命体·冥水河神·M10”时造成双倍伤害，并破除其“静水流深”状态。" +
                     "释放后自身速度与法抗降低15%持续三回合。",
-            Constants.ALL, 350L, new SkillEffectDTO()
+            Constants.ALL, 110L, new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 7F),
+            new ThisBehaviorExtraBattleProcessTemplate() {
+                @Override
+                public void afterEffect(BattleEffectDTO battleEffect) {
+                    BattleDTO from = battleEffect.getFrom();
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+                    BuffUtil.addBuff(from, from, new BuffDTO(BuffTypeEnum.SPEED, -0.15F), 3, builder);
+                    BuffUtil.addBuff(from, from, new BuffDTO(BuffTypeEnum.MAGIC_DEF, -0.15F), 3, builder);
+                }
+            }
     ),
 
 
@@ -2078,7 +2087,7 @@ public enum SkillEnum implements Serializable {
                     "其他队员每次在对M10造成伤害后会获得一层“薪火”。每层“薪火”使当前队员对M10造成的伤害提升2%。“薪火”效果持续整场战斗无法消除",
             Constants.NONE, false, new ExtraBattleProcessTemplate() {
         @Override
-        public void beforeDamage(BattleEffectDTO battleEffect) {
+        public void beforeMeDamage(BattleEffectDTO battleEffect) {
             StringBuilder builder = battleEffect.getBattleRound().getBuilder();
             Map<String, Integer> fromMarkMap = battleEffect.getFrom().getMarkMap();
             if (fromMarkMap.containsKey("沼溺")) {
@@ -2093,7 +2102,8 @@ public enum SkillEnum implements Serializable {
         }
 
         @Override
-        public void afterDamage(BattleEffectDTO battleEffect) {
+        public void afterMeDamage(BattleEffectDTO battleEffect) {
+
             Map<String, Integer> fromMarkMap = battleEffect.getFrom().getMarkMap();
             Map<String, Integer> ownerMarkMap = this.getOwner().getMarkMap();
             if (!ownerMarkMap.containsKey("对外附加沼溺")) {
@@ -2149,6 +2159,16 @@ public enum SkillEnum implements Serializable {
                 }
 
                 @Override
+                public void afterMyBehavior(BattleEffectDTO battleEffect) {
+                    if (this.getOwner().getMarkMap().containsKey("静水流深")) {
+                        long shieldVal = Math.round(0.08F * this.getOwner().getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition());
+                        BuffUtil.addBuff(this.getOwner(), this.getOwner(),
+                                new BuffDTO(BuffTypeEnum.SHIELD, "护盾", shieldVal, BuffOverrideStrategyEnum.OVERRIDE),
+                                battleEffect.getBattleRound().getBuilder());
+                    }
+                }
+
+                @Override
                 public void ifEnemyHitMe(BattleEffectDTO battleEffect) {
                     if (SKILL_50.equals(battleEffect.getNowSkill())
                             || SKILL_51.equals(battleEffect.getNowSkill())
@@ -2156,11 +2176,19 @@ public enum SkillEnum implements Serializable {
                             || SKILL_53.equals(battleEffect.getNowSkill())) {
                         this.getOwner().getMarkMap().remove("静水流深");
                         this.getOwner().getMarkMap().put("怒意狂澜", 1);
+                        battleEffect.getBattleRound().getBuilder().append("，")
+                                .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                                .append("进入“怒意狂澜”状态");
+                    }
+
+                    if (SKILL_51.equals(battleEffect.getNowSkill()) || SKILL_52.equals(battleEffect.getNowSkill())) {
+                        Map<String, Integer> fromMarkMap = battleEffect.getFrom().getMarkMap();
+                        fromMarkMap.put("薪火", fromMarkMap.getOrDefault("薪火", 0) + 10);
                     }
                 }
 
                 @Override
-                public void beforeDamage(BattleEffectDTO battleEffect) {
+                public void beforeMeDamage(BattleEffectDTO battleEffect) {
                     if (SKILL_50.equals(battleEffect.getNowSkill())
                             || SKILL_51.equals(battleEffect.getNowSkill())
                             || SKILL_52.equals(battleEffect.getNowSkill())
@@ -2252,7 +2280,7 @@ public enum SkillEnum implements Serializable {
                             if (markMap.containsKey("静水流深")) {
                                 markMap.remove("静水流深");
                                 markMap.put("怒意狂澜", 1);
-                            } else if (markMap.containsKey("怒意狂澜")){
+                            } else if (markMap.containsKey("怒意狂澜")) {
                                 markMap.remove("怒意狂澜");
                                 markMap.put("怒意狂澜", 1);
                             }
@@ -2300,6 +2328,132 @@ public enum SkillEnum implements Serializable {
                     long heal = Math.round(0.03F * battleRound.getFrom().getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition());
                     BattleUtil.doHealing(battleRound.getFrom(), heal, battleRound.getBuilder(), battleRound.getBattleField());
                     battleRound.getBuilder().append("，");
+                }
+            }
+    ),
+
+    SKILL_1067(1067L, "卒莫消长（异维）",
+            "全部回合开始时触发，当前回合为奇数回合时，提升自身30%法强，降低自身30%防御持续一回合。" +
+                    "偶数回合开始时，提升自身30%防御，降低自身30%法强持续一回合", Constants.NONE, false,
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeEachRound(BattleRoundDTO battleRound) {
+                    int round = battleRound.getBattleField().getRound();
+                    battleRound.getBuilder().append("※")
+                            .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的被动【卒莫消长（异维）】被触发");
+                    if (round % 2 == 1) {
+                        BuffUtil.addBuff(this.getOwner(), this.getOwner(),
+                                new BuffDTO(BuffTypeEnum.MAGIC_ATK, 0.3F), 1, battleRound.getBuilder());
+                        BuffUtil.addBuff(this.getOwner(), this.getOwner(),
+                                new BuffDTO(BuffTypeEnum.DEF, -0.3F), 1, battleRound.getBuilder());
+                    } else {
+                        BuffUtil.addBuff(this.getOwner(), this.getOwner(),
+                                new BuffDTO(BuffTypeEnum.DEF, 0.3F), 1, battleRound.getBuilder());
+                        BuffUtil.addBuff(this.getOwner(), this.getOwner(),
+                                new BuffDTO(BuffTypeEnum.MAGIC_ATK, -0.3F), 1, battleRound.getBuilder());
+                    }
+                }
+            }
+    ),
+
+    SKILL_1068(1068L, "奇茸借法", "提升自身10%法强持续一回合，造成130%法术伤害",
+            Constants.NONE, new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 1.3F),
+            new ThisBehaviorExtraBattleProcessTemplate() {
+                @Override
+                public void ifHit(BattleEffectDTO battleEffect) {
+                    BuffUtil.addBuff(battleEffect.getFrom(), battleEffect.getFrom(),
+                            new BuffDTO(BuffTypeEnum.MAGIC_ATK, 0.1F), 1,
+                            battleEffect.getBattleRound().getBuilder());
+                }
+            }
+    ),
+
+    SKILL_1069(1069L, "明芯指引", "清除敌方全体增益buff效果，命中提升99%持续0回合，对敌方全体造成550%法术伤害",
+            Constants.NONE, 80L, new SkillEffectDTO(TargetEnum.ALL_ENEMY, DamageTypeEnum.MAGIC, 5.5F),
+            new ThisBehaviorExtraBattleProcessTemplate() {
+                @Override
+                public void beforeThisRound(BattleRoundDTO battleRound) {
+                    BuffUtil.addBuff(battleRound.getFrom(), battleRound.getFrom(),
+                            new BuffDTO(BuffTypeEnum.HIT, 0.99F), 0, battleRound.getBuilder());
+                }
+            }
+    ),
+
+    SKILL_1070(1070L, "芳灵流碎", "扣除自身20%最大血量，使敌方陷入眩晕异常持续两回合",
+            Constants.NONE, new SkillEffectDTO(TargetEnum.ANY_ENEMY),
+            new ThisBehaviorExtraBattleProcessTemplate() {
+                @Override
+                public void afterEffect(BattleEffectDTO battleEffect) {
+                    BattleDTO from = battleEffect.getFrom();
+                    Long maxHp = BattleUtil.getLongProperty(
+                            from.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition(),
+                            OrganismPropertiesEnum.MAX_HP.getFieldName(), from,
+                            battleEffect.getBattleRound().getBattleField());
+                    BattleEffectDTO effect = BattleEffectDTO.builder()
+                            .damage(new AtomicLong(Math.round(0.2 * maxHp)))
+                            .battleRound(battleEffect.getBattleRound())
+                            .from(from).tar(from).build();
+                    BattleUtil.doDamage(effect);
+                    BuffUtil.addBuff(battleEffect.getFrom(), battleEffect.getTar(),
+                            new BuffDTO(BuffTypeEnum.PAUSE, "眩晕", true), 2,
+                            battleEffect.getBattleRound().getBuilder());
+                }
+            }
+    ),
+
+    SKILL_1071(1071L, "灵莲悄恸·妖神卍解",
+            "整场战斗限用一次，死亡时触发，回复自身全部血量与蓝量。被妖神M3吞噬，最大血量最大蓝量提升至200%，法强防御命中闪避速度提升50%持续整场战斗。" +
+                    "\n妖神绝语∶每回合回复5000点血量",
+            Constants.NONE, false, new ExtraBattleProcessTemplate() {
+
+        @Override
+        public void beforeMyRound(BattleRoundDTO battleRound) {
+            StringBuilder builder = battleRound.getBuilder();
+            builder.append("※").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的被动技能【妖神绝语】被触发");
+            BattleUtil.doHealing(this.getOwner(), 5000, builder, battleRound.getBattleField());
+        }
+
+        @Override
+        public void beforeMeDeath(BattleEffectDTO battleEffect) {
+            // 因为是受到致命伤害，此处的from应为造成伤害者，tar才是受到致命伤害者
+            BattleDTO tar = battleEffect.getTar();
+            if (tar.getMarkMap().containsKey("已触发灵莲悄恸·妖神卍解")) {
+                return;
+            }
+            tar.getMarkMap().put("已触发灵莲悄恸·妖神卍解", 1);
+            StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+            battleEffect.getDamage().set(0L);
+            builder.append("，☠").append(tar.getOrganismInfoDTO().getOrganismDTO().getName()).append("受到致命伤害，被妖神M3吞噬");
+            Long maxHp = BattleUtil.getLongProperty(
+                    tar.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition(),
+                    OrganismPropertiesEnum.MAX_HP.getFieldName(), tar,
+                    battleEffect.getBattleRound().getBattleField());
+            Long maxMp = BattleUtil.getLongProperty(
+                    tar.getOrganismInfoDTO().getOrganismDTO().getMaxMpWithAddition(),
+                    OrganismPropertiesEnum.MAX_MP.getFieldName(), tar,
+                    battleEffect.getBattleRound().getBattleField());
+            tar.getOrganismInfoDTO().getOrganismDTO().setMaxHpWithAddition(2 * maxHp);
+            tar.getOrganismInfoDTO().getOrganismDTO().setMaxMpWithAddition(2 * maxMp);
+            BattleUtil.doHealing(tar, 2 * maxHp, builder, battleEffect.getBattleRound().getBattleField());
+            BattleUtil.doMpChange(tar, 2 * maxMp, builder);
+            BuffUtil.addBuff(tar, tar, new BuffDTO(BuffTypeEnum.MAGIC_ATK, 0.5F), builder);
+            BuffUtil.addBuff(tar, tar, new BuffDTO(BuffTypeEnum.DEF, 0.5F), builder);
+            BuffUtil.addBuff(tar, tar, new BuffDTO(BuffTypeEnum.HIT, 0.5F), builder);
+            BuffUtil.addBuff(tar, tar, new BuffDTO(BuffTypeEnum.DODGE, 0.5F), builder);
+            BuffUtil.addBuff(tar, tar, new BuffDTO(BuffTypeEnum.SPEED, 0.5F), builder);
+        }
+    }),
+
+    SKILL_1072(1072L, "异维入侵", "M3·米莉儿天生免疫全部异常效果", Constants.NONE, false,
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeBattle(BattleFieldDTO battleField) {
+                    StringBuilder builder = new StringBuilder("※")
+                            .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的被动【异维入侵】被触发");
+                    RuleUtil.addRule(this.getOwner(), BuffTypeEnum.IMMUNITY, "异维入侵", 0L, builder);
                 }
             }
     ),

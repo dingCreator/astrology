@@ -1,12 +1,14 @@
 package com.dingCreator.astrology.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.entity.SkillBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.exception.SkillExceptionEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.mapper.SkillBelongToMapper;
+import com.dingCreator.astrology.response.PageResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,9 +54,39 @@ public class SkillBelongToService {
      * @param belongToId 归属ID
      * @return 拥有的技能
      */
+    public PageResponse<SkillBelongTo> querySkillBelongToPage(String belongTo, Long belongToId,
+                                                              int pageIndex, int pageSize) {
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
+                    QueryWrapper<SkillBelongTo> wrapper = new QueryWrapper<SkillBelongTo>()
+                            .eq(SkillBelongTo.BELONG_TO, belongTo)
+                            .eq(SkillBelongTo.BELONG_TO_ID, belongToId);
+                    Page<SkillBelongTo> page = new Page<>(pageIndex, pageSize);
+                    sqlSession.getMapper(SkillBelongToMapper.class).selectPage(page, wrapper);
+                    PageResponse<SkillBelongTo> response = new PageResponse<>();
+                    response.setData(page.getRecords());
+                    response.setPageIndex((int) page.getCurrent());
+                    response.setPageSize((int) page.getSize());
+                    response.setTotal((int) page.getTotal());
+                    return response;
+                }
+        );
+    }
+
+    /**
+     * 获取拥有的技能
+     *
+     * @param belongTo   归属
+     * @param belongToId 归属ID
+     * @return 拥有的技能
+     */
     public List<SkillBelongTo> querySkillBelongToList(String belongTo, Long belongToId) {
-        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
-                sqlSession.getMapper(SkillBelongToMapper.class).querySkillBelongToList(belongTo, belongToId));
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
+                    QueryWrapper<SkillBelongTo> wrapper = new QueryWrapper<SkillBelongTo>()
+                            .eq(SkillBelongTo.BELONG_TO, belongTo)
+                            .eq(SkillBelongTo.BELONG_TO_ID, belongToId);
+                    return sqlSession.getMapper(SkillBelongToMapper.class).selectList(wrapper);
+                }
+        );
     }
 
     /**

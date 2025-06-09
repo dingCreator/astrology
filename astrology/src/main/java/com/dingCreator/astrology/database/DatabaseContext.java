@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.database;
 
+import lombok.Getter;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 /**
@@ -8,11 +9,8 @@ import org.apache.ibatis.session.SqlSessionFactory;
  */
 public class DatabaseContext {
 
+    @Getter
     private static SqlSessionFactory sqlSessionFactory;
-
-    public static SqlSessionFactory getSqlSessionFactory() {
-        return sqlSessionFactory;
-    }
 
     public static void setSqlSession(SqlSessionFactory sqlSessionFactory) {
         DatabaseContext.sqlSessionFactory = sqlSessionFactory;

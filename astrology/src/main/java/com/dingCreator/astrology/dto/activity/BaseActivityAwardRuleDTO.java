@@ -3,7 +3,7 @@ package com.dingCreator.astrology.dto.activity;
 import com.dingCreator.astrology.dto.article.ArticleItemDTO;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * @author ding
@@ -12,10 +12,10 @@ import java.util.List;
 @Data
 public abstract class BaseActivityAwardRuleDTO {
 
-    public static final String FIELD_ARTICLE_ITEM_LIST = "articleItemList";
+    public static final String FIELD_ARTICLE_ITEM_SET = "articleItemSet";
 
     /**
      * 物品
      */
-    private List<ArticleItemDTO> articleItemList;
+    private Set<ArticleItemDTO> articleItemSet;
 }

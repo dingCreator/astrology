@@ -83,7 +83,7 @@ CREATE TABLE astrology_skill_bar_item
     id           BIGINT AUTO_INCREMENT not null comment '主键',
     belong_to    VARCHAR(16)           not null comment '所属类型',
     belong_to_id BIGINT                not null comment '所属ID',
-    skill_id     VARCHAR(128)          not null comment '按顺序排列的技能ID列表',
+    skill_id     VARCHAR(256)          not null comment '按顺序排列的技能ID列表',
     PRIMARY KEY (`id`) using BTREE,
     KEY idx_blt_blt_id (belong_to, belong_to_id)
 ) engine = innodb comment = '技能栏';
@@ -189,21 +189,24 @@ CREATE TABLE astrology_world_boss
 (
     id          bigint auto_increment not null comment '主键',
     monster_id  bigint                not null comment 'boss id',
-    appear_date date                  not null comment '出现日期',
     start_time  datetime              not null comment '开始时间',
     end_time    datetime              not null comment '结束时间',
+    award       varchar(4096)         comment '奖励配置',
+    distribute  bit                   comment '是否已发放奖励',
     PRIMARY KEY (`id`) using btree,
-    key idx_appear_date (`appear_date`)
+    key idx_start_end_time (`start_time`,`end_time`)
 ) engine = innodb comment = '世界boss配置表';
 
 CREATE TABLE astrology_world_boss_record
 (
     id             bigint auto_increment not null comment '主键',
-    player_id_list varchar(64)           not null comment '玩家ID',
+    world_boss_id  bigint                not null comment '世界boss配置ID',
+    player_id      bigint                not null comment '玩家ID',
     damage         bigint                not null comment '伤害量',
     create_time    datetime              not null comment '记录创建时间',
     PRIMARY KEY (`id`) using btree,
-    key idx_player_id_list (`player_id_list`)
+    unique key uk_world_boss_player_id (`world_boss_id`,`player_id`),
+    key idx_damage (`damage`)
 ) engine = innodb comment ='世界boss挑战记录表';
 
 CREATE TABLE astrology_task_template_detail
@@ -264,9 +267,11 @@ CREATE TABLE astrology_peak_task_template
 
 CREATE TABLE astrology_player_asset
 (
-    player_id      BIGINT NOT NULL PRIMARY KEY COMMENT '玩家ID，主键',
-    astrology_coin BIGINT NOT NULL DEFAULT 0 COMMENT '圣星币',
-    diamond        BIGINT NOT NULL DEFAULT 0 COMMENT '缘石'
+    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    player_id      BIGINT NOT NULL COMMENT '玩家ID',
+    asset_type     varchar(64) NOT NULL DEFAULT 0 COMMENT '资产类型',
+    asset_cnt      BIGINT NOT NULL DEFAULT 0 COMMENT '资产数量',
+    unique key uk_player_id_asset_type(player_id, asset_type)
 ) ENGINE = InnoDB COMMENT ='玩家资产表';
 
 CREATE TABLE astrology_activity
@@ -361,3 +366,17 @@ create table astrology_skill_bag (
     PRIMARY KEY (id),
     UNIQUE KEY uk_player_id_skill_id (player_id, skill_id)
 ) ENGINE=innodb COMMENT='玩家技能背包表';
+
+create table astrology_mail_box (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+    player_id BIGINT NOT NULL COMMENT '玩家ID',
+    subject varchar(64) not null comment '主题',
+    item_json varchar(1024) not null comment '物品信息',
+    item_cnt INT not null default 1 comment '数量',
+    create_time datetime not null default current_timestamp comment '发放时间',
+    expire_in datetime not null comment '过期时间',
+    received bit not null default 0 comment '是否已领取',
+    primary key (id),
+    key idx_player_id_expire_in_received(player_id, expire_in, received),
+    key idx_create_time(create_time)
+) engine=innodb comment='玩家邮箱表';

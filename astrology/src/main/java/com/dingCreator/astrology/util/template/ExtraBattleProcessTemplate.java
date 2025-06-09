@@ -7,6 +7,7 @@ import com.dingCreator.astrology.dto.battle.BattleRoundDTO;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 插入结算的模板
@@ -22,6 +23,16 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
      * 插入结算的归属者
      */
     private BattleDTO owner;
+
+    /**
+     * 归属者队友
+     */
+    private List<BattleDTO> ownerOur;
+
+    /**
+     * 归属者敌人
+     */
+    private List<BattleDTO> ownerEnemy;
 
     /**
      * 优先级
@@ -121,13 +132,13 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
         if (!effect()) {
             return;
         }
-        boolean fromMe = battleEffect.getFrom().equals(this.owner);
-        boolean fromOur = battleEffect.getOur().contains(battleEffect.getFrom());
-        boolean fromEnemy = battleEffect.getEnemy().contains(battleEffect.getFrom());
+        boolean fromMe = this.owner.equals(battleEffect.getFrom());
+        boolean fromOur = this.ownerOur.contains(battleEffect.getFrom());
+        boolean fromEnemy = this.ownerEnemy.contains(battleEffect.getFrom());
 
-        boolean toMe = battleEffect.getTar().equals(this.owner);
-        boolean toOur = battleEffect.getOur().contains(battleEffect.getTar());
-        boolean toEnemy = battleEffect.getEnemy().contains(battleEffect.getTar());
+        boolean toMe = this.owner.equals(battleEffect.getTar());
+        boolean toOur = this.ownerOur.contains(battleEffect.getTar());
+        boolean toEnemy = this.ownerEnemy.contains(battleEffect.getTar());
 
         if (fromMe) {
             ifMeHit(battleEffect);
@@ -163,9 +174,9 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
         if (!effect()) {
             return;
         }
-        boolean fromMe = battleEffect.getFrom().equals(this.owner);
-        boolean fromOur = battleEffect.getOur().contains(battleEffect.getFrom());
-        boolean fromEnemy = battleEffect.getEnemy().contains(battleEffect.getFrom());
+        boolean fromMe = this.owner.equals(battleEffect.getFrom());
+        boolean fromOur = this.ownerOur.contains(battleEffect.getFrom());
+        boolean fromEnemy = this.ownerEnemy.contains(battleEffect.getFrom());
 
         if (fromMe) {
             ifMeNotHit(battleEffect);
@@ -215,13 +226,17 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
 
     public final void executeBeforeDamage(BattleEffectDTO battleEffect) {
         if (effect()) {
-            beforeDamage(battleEffect);
+            if (battleEffect.getTar().equals(this.getOwner())) {
+                beforeMeDamage(battleEffect);
+            }
         }
     }
 
     public final void executeAfterDamage(BattleEffectDTO battleEffect) {
         if (effect()) {
-            afterDamage(battleEffect);
+            if (battleEffect.getTar().equals(this.getOwner())) {
+                afterMeDamage(battleEffect);
+            }
         }
     }
 
@@ -385,7 +400,7 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
      *
      * @param battleEffect 单个技能单个目标的战斗效果
      */
-    public void beforeDamage(BattleEffectDTO battleEffect) {
+    public void beforeMeDamage(BattleEffectDTO battleEffect) {
     }
 
     /**
@@ -393,6 +408,6 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
      *
      * @param battleEffect 单个技能单个目标的战斗效果
      */
-    public void afterDamage(BattleEffectDTO battleEffect) {
+    public void afterMeDamage(BattleEffectDTO battleEffect) {
     }
 }

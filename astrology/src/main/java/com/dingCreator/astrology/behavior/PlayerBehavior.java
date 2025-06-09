@@ -273,8 +273,8 @@ public class PlayerBehavior {
      * @param playerId 玩家ID
      * @return 玩家资产
      */
-    public PlayerAssetDTO getPlayerAssetById(long playerId) {
-        return PlayerCache.getPlayerById(playerId).getPlayerAssetDTO();
+    public List<PlayerAssetDTO> getPlayerAssetById(long playerId) {
+        return PlayerCache.getPlayerById(playerId).getAssetList();
     }
 
     /**
@@ -289,11 +289,9 @@ public class PlayerBehavior {
         if (Objects.isNull(assetTypeEnum)) {
             throw PlayerExceptionEnum.ASSET_TYPE_ERR.getException();
         }
-        PlayerService.getInstance().changeAsset(PlayerCache.getPlayerById(playerId), assetTypeEnum.getTransfer2Dto().apply(val));
-    }
-
-    public void sendAsset2AllPlayer(String assetType, long val) {
-
+        PlayerService.getInstance().changeAsset(PlayerCache.getPlayerById(playerId),
+                Collections.singletonList(PlayerAssetDTO.builder().playerId(playerId)
+                        .assetType(assetTypeEnum.getCode()).assetCnt(val).build()));
     }
 
     public BattleResultVO PVP(Long playerId1, Long playerId2) {

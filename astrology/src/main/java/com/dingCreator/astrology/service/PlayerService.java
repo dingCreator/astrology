@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.dingCreator.astrology.cache.TeamCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.database.DatabaseProvider;
@@ -26,7 +27,10 @@ import org.apache.ibatis.session.SqlSession;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author ding
@@ -79,8 +83,8 @@ public class PlayerService {
         // 初始化称号
 
         // 初始化资产
-        PlayerAsset asset = getAssetByPlayerId(id);
-        playerInfoDTO.setPlayerAssetDTO(asset.convert());
+        List<PlayerAsset> assetList = getAssetByPlayerId(id);
+        playerInfoDTO.setAssetList(assetList.stream().map(PlayerAsset::convert).collect(Collectors.toList()));
 
         PlayerDTO playerDTO = new PlayerDTO();
         playerDTO.copyProperties(player);
@@ -95,10 +99,10 @@ public class PlayerService {
      * @param player 玩家基础信息
      * @return 是否创建成功
      */
-    public synchronized boolean createPlayer(Player player, PlayerAsset asset) {
+    public synchronized boolean createPlayer(Player player, List<PlayerAsset> assetList) {
         return DatabaseProvider.getInstance().transactionExecuteReturn(sqlSession -> {
             sqlSession.getMapper(PlayerDataMapper.class).insert(player);
-            sqlSession.getMapper(PlayerAssetMapper.class).insert(asset);
+            assetList.forEach(asset -> sqlSession.getMapper(PlayerAssetMapper.class).insert(asset));
             // 赠送默认技能
             Long defaultSkillId = SkillEnum.getDefaultSkillByJob(player.getJob()).getId();
             SkillBelongToService.getInstance().createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), player.getId(), defaultSkillId);
@@ -126,6 +130,7 @@ public class PlayerService {
 
     /**
      * 根据ID更新玩家信息
+     *
      * @param playerList 玩家列表
      */
     public void updatePlayerByIds(List<Player> playerList) {
@@ -137,41 +142,50 @@ public class PlayerService {
         });
     }
 
-    public PlayerAsset getAssetByPlayerId(Long playerId) {
+    public List<PlayerAsset> getAssetByPlayerId(Long playerId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession.getMapper(PlayerAssetMapper.class)
-                .selectOne(new QueryWrapper<PlayerAsset>().eq(PlayerAsset.PLAYER_ID, playerId)));
+                .selectList(new QueryWrapper<PlayerAsset>().eq(PlayerAsset.PLAYER_ID, playerId)));
     }
 
-    public void changeAsset(PlayerInfoDTO infoDTO, PlayerAssetDTO change) {
+    public void changeAsset(PlayerInfoDTO infoDTO, List<PlayerAssetDTO> changeList) {
         LockUtil.execute(Constants.CHANGE_ASSET_LOCK_PREFIX + infoDTO.getPlayerDTO().getId(), () ->
                 DatabaseProvider.getInstance().batchTransactionExecute(sqlSession -> {
+                    List<PlayerAssetDTO> nonZeroChangeList = changeList.stream()
+                            .filter(change -> change.getAssetCnt() != 0).collect(Collectors.toList());
+                    if (CollectionUtils.isEmpty(nonZeroChangeList)) {
+                        return;
+                    }
+                    // 获取资产
                     PlayerAssetMapper playerAssetMapper = sqlSession.getMapper(PlayerAssetMapper.class);
-                    PlayerAsset asset = playerAssetMapper.selectOne(
+                    List<PlayerAsset> assetList = playerAssetMapper.selectList(
                             new QueryWrapper<PlayerAsset>().eq(PlayerAsset.PLAYER_ID, infoDTO.getPlayerDTO().getId()));
-                    // 获取货币
-                    long astrologyCoin = asset.getAstrologyCoin();
-                    long diamond = asset.getDiamond();
-                    // 圣星币
-                    if (Objects.nonNull(change.getAstrologyCoin())) {
-                        astrologyCoin += change.getAstrologyCoin();
-                        if (astrologyCoin < 0) {
-                            throw PlayerExceptionEnum.NOT_ENOUGH_ASTROLOGY_COIN.getException();
+                    Map<String, PlayerAsset> assetMap = assetList.stream()
+                            .collect(Collectors.toMap(PlayerAsset::getAssetType, Function.identity()));
+                    nonZeroChangeList.forEach(change -> {
+                        PlayerAsset playerAsset = assetMap.get(change.getAssetType());
+                        if (Objects.isNull(playerAsset)) {
+                            playerAsset = PlayerAsset.builder().playerId(infoDTO.getPlayerDTO().getId())
+                                    .assetType(change.getAssetType()).assetCnt(0L).build();
+                            if (change.getAssetCnt() > 0) {
+                                playerAsset.setAssetCnt(change.getAssetCnt());
+                            }
+                            playerAssetMapper.insert(playerAsset);
+                            assetList.add(playerAsset);
+                            if (change.getAssetCnt() < 0) {
+                                throw AssetTypeEnum.getByCode(change.getAssetType()).getNotEnoughException().getException();
+                            }
+                        } else {
+                            long val = playerAsset.getAssetCnt() + change.getAssetCnt();
+                            if (val < 0) {
+                                throw AssetTypeEnum.getByCode(change.getAssetType()).getNotEnoughException().getException();
+                            }
+                            playerAsset.setAssetCnt(val);
+                            // 持久化
+                            playerAssetMapper.updateById(playerAsset);
                         }
-                        asset.setAstrologyCoin(astrologyCoin);
-                    }
-                    // 缘石
-                    if (Objects.nonNull(change.getDiamond())) {
-                        diamond += change.getDiamond();
-                        if (diamond < 0) {
-                            throw PlayerExceptionEnum.NOT_ENOUGH_DIAMOND.getException();
-                        }
-                        asset.setDiamond(diamond);
-                    }
-                    // 持久化
-                    playerAssetMapper.updateById(asset);
+                    });
                     // 更新缓存
-                    infoDTO.getPlayerAssetDTO().setAstrologyCoin(astrologyCoin);
-                    infoDTO.getPlayerAssetDTO().setDiamond(diamond);
+                    infoDTO.setAssetList(assetList.stream().map(PlayerAsset::convert).collect(Collectors.toList()));
                 })
         );
     }

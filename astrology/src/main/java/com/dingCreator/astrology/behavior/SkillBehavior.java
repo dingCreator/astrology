@@ -63,7 +63,7 @@ public class SkillBehavior {
             List<String> jobEnumList = skillEnum.getJobCode();
             if (jobEnumList.contains(Constants.NONE)) {
                 throw SkillExceptionEnum.JOB_SKILL_NOT_ALLOW.getException();
-            } else if (!jobEnumList.contains(playerDTO.getJob())) {
+            } else if (!jobEnumList.contains(playerDTO.getJob()) && !jobEnumList.contains(Constants.ALL)) {
                 throw SkillExceptionEnum.JOB_SKILL_NOT_ALLOW.getException();
             }
         });
@@ -126,8 +126,8 @@ public class SkillBehavior {
      * @param belongToId 归属ID
      * @return 技能列表
      */
-    public List<SkillBelongTo> getSkillBelongTo(Long belongToId) {
-        return skillBelongToService.querySkillBelongToList(BelongToEnum.PLAYER.getBelongTo(), belongToId);
+    public PageResponse<SkillBelongTo> getSkillBelongTo(Long belongToId, int pageIndex, int pageSize) {
+        return skillBelongToService.querySkillBelongToPage(BelongToEnum.PLAYER.getBelongTo(), belongToId, pageIndex, pageSize);
     }
 
     /**

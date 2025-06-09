@@ -9,14 +9,13 @@ import com.dingCreator.astrology.dto.activity.BaseActivityAwardRuleDTO;
 import com.dingCreator.astrology.dto.activity.LuckyActivityAwardRuleDTO;
 import com.dingCreator.astrology.dto.article.ArticleItemDTO;
 import com.dingCreator.astrology.entity.Activity;
-import com.dingCreator.astrology.enums.ArticleTypeEnum;
 import com.dingCreator.astrology.enums.activity.ActivityTypeEnum;
 import com.dingCreator.astrology.enums.exception.ActivityExceptionEnum;
 import com.dingCreator.astrology.mapper.ActivityMapper;
 import com.dingCreator.astrology.request.ActivityAwardSettingReq;
 import com.dingCreator.astrology.request.LuckyActivityAwardSettingReq;
+import com.dingCreator.astrology.util.ArticleUtil;
 import com.dingCreator.astrology.util.RandomUtil;
-import com.dingCreator.astrology.vo.ActivityAwardVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -70,16 +70,9 @@ public class LuckyActivityServiceImpl implements ActivityService {
                 .map(jsonObj -> {
                     LuckyActivityAwardRuleDTO lucky = new LuckyActivityAwardRuleDTO();
                     lucky.setRate(jsonObj.getInteger(LuckyActivityAwardRuleDTO.FIELD_RATE));
-
-                    List<JSONObject> articleObj =
-                            jsonObj.<List<JSONObject>>getObject(BaseActivityAwardRuleDTO.FIELD_ARTICLE_ITEM_LIST, List.class);
-                    List<ArticleItemDTO> articleItemList = articleObj.stream()
-                            .map(artJson -> {
-                                String artType = artJson.getString(Constants.ITEM_TYPE);
-                                Class<? extends ArticleItemDTO> clazz = ArticleTypeEnum.getByType(artType).getClazz();
-                                return artJson.toJavaObject(clazz);
-                            }).collect(Collectors.toList());
-                    lucky.setArticleItemList(articleItemList);
+                    String articleJson = jsonObj.getString(BaseActivityAwardRuleDTO.FIELD_ARTICLE_ITEM_SET);
+                    Set<ArticleItemDTO> articleItemSet = ArticleUtil.convertSet(articleJson);
+                    lucky.setArticleItemSet(articleItemSet);
                     return lucky;
                 }).collect(Collectors.toList());
         return (List<T>) awardRuleList;
@@ -102,7 +95,7 @@ public class LuckyActivityServiceImpl implements ActivityService {
                 index.addAndGet(-rate);
                 return false;
             }).findFirst().orElseThrow(() -> new IllegalArgumentException("抽奖规则配置有误"));
-            joinAwardList.addAll(rule.getArticleItemList());
+            joinAwardList.addAll(rule.getArticleItemSet());
         }
         return joinAwardList;
     }
@@ -114,36 +107,30 @@ public class LuckyActivityServiceImpl implements ActivityService {
 
     @Override
     public void easySettingAward(ActivityDTO activityDTO, ActivityAwardSettingReq activityAwardSettingReq) {
+        // 概率配置校验
         LuckyActivityAwardSettingReq settings = (LuckyActivityAwardSettingReq) activityAwardSettingReq;
-        BigDecimal decimal = settings.getItemList().stream().map(LuckyActivityAwardSettingReq.AwardSettingItem::getRate)
+        BigDecimal decimal = settings.getSettingItemList().stream()
+                .map(LuckyActivityAwardSettingReq.AwardSettingItem::getRate)
                 .reduce(BigDecimal::add).orElseThrow(() -> new IllegalArgumentException("概率参数配置有误"));
         if (decimal.floatValue() != Constants.LUCKY_RATE_PERCENT) {
             throw new IllegalArgumentException("概率之和不为1，当前概率之和：" + decimal.floatValue());
         }
-        List<LuckyActivityAwardRuleDTO> awardRuleList = settings.getItemList().stream().map(item -> {
-            int size = item.getParams().size();
+        // 构建奖品
+        List<LuckyActivityAwardRuleDTO> awardRuleList = settings.getSettingItemList().stream().map(item -> {
+            // 计算每个奖品组的概率
+            int size = item.getArticleItemList().size();
             BigDecimal range = item.getRate().multiply(BigDecimal.valueOf(Constants.LUCKY_MAGNIFICATION));
 
             int remaining = range.intValue() % size;
             int rate = range.intValue() / size;
 
-            List<LuckyActivityAwardRuleDTO> ruleList = item.getParams().stream().map(param -> {
+            List<LuckyActivityAwardRuleDTO> ruleList = item.getArticleItemList().stream().map(articleItemGroup -> {
                 LuckyActivityAwardRuleDTO rule = new LuckyActivityAwardRuleDTO();
                 rule.setRate(rate);
-                List<ArticleItemDTO> articleItemList = param.stream()
-                        .map(p -> {
-                            try {
-                                ArticleItemDTO articleItemDTO = item.getArticleTypeEnum().getClazz().newInstance();
-                                return item.getArticleTypeEnum().getGetParam().apply(p, articleItemDTO);
-                            } catch (Throwable t) {
-                                logger.error("抽奖配置出错", t);
-                                throw new IllegalArgumentException("抽奖配置有误");
-                            }
-                        })
-                        .collect(Collectors.toList());
-                rule.setArticleItemList(articleItemList);
+                rule.setArticleItemSet(articleItemGroup);
                 return rule;
             }).collect(Collectors.toList());
+
             // 有余数的加到最后一件奖品
             LuckyActivityAwardRuleDTO lastRule = ruleList.get(size - 1);
             lastRule.setRate(lastRule.getRate() + remaining);
@@ -160,7 +147,7 @@ public class LuckyActivityServiceImpl implements ActivityService {
     public List<String> queryAwardList(ActivityDTO activityDTO) {
         return activityDTO.getAwardRuleList().stream()
                 .map(award -> {
-                    String awardName = award.getArticleItemList().stream()
+                    String awardName = award.getArticleItemSet().stream()
                             .map(item -> {
                                 String name = item.view().getName();
                                 if (Objects.nonNull(item.view().getCount())) {

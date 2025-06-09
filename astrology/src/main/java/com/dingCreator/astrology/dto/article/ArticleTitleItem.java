@@ -1,9 +1,6 @@
 package com.dingCreator.astrology.dto.article;
 
-import com.dingCreator.astrology.cache.PlayerCache;
-import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.enums.ArticleTypeEnum;
-import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.vo.ArticleItemVO;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,9 +19,6 @@ public class ArticleTitleItem extends ArticleItemDTO {
      */
     private Long titleId;
 
-    public ArticleTitleItem() {
-        super(ArticleTypeEnum.TITLE.getType());
-    }
     public ArticleTitleItem(Long titleId) {
         super(ArticleTypeEnum.TITLE.getType());
         this.titleId = titleId;
@@ -36,7 +30,9 @@ public class ArticleTitleItem extends ArticleItemDTO {
     }
 
     @Override
-    public ArticleItemVO view() {
-        return ArticleItemVO.builder().name("功能开发中").description("功能开发中").build();
+    public ArticleItemVO fillView(ArticleItemVO vo) {
+        vo.setName("功能开发中");
+        vo.setDescription("功能开发中");
+        return vo;
     }
 }

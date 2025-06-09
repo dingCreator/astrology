@@ -15,15 +15,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PlayerAssetDTO {
     /**
+     * 主键
+     */
+    private Long id;
+    /**
      * 玩家ID
      */
     private Long playerId;
     /**
      * 圣星币
      */
-    private Long astrologyCoin;
+    private String assetType;
     /**
      * 缘石
      */
-    private Long diamond;
+    private Long assetCnt;
 }

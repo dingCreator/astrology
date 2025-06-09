@@ -6,14 +6,12 @@ import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Player;
 import com.dingCreator.astrology.entity.PlayerAsset;
+import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.util.LockUtil;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -42,14 +40,16 @@ public class PlayerCache {
                     || Objects.nonNull(PlayerService.getInstance().getPlayerById(player.getId()))) {
                 throw PlayerExceptionEnum.PLAYER_EXIST.getException();
             }
-            PlayerAsset asset = PlayerAsset.builder().playerId(player.getId()).astrologyCoin(0L).diamond(0L).build();
-            if (!PlayerService.getInstance().createPlayer(player, asset)) {
+            List<PlayerAsset> assetList = Arrays.stream(AssetTypeEnum.values())
+                    .map(e -> PlayerAsset.builder().playerId(player.getId()).assetType(e.getCode()).assetCnt(0L).build())
+                    .collect(Collectors.toList());
+            if (!PlayerService.getInstance().createPlayer(player, assetList)) {
                 throw new IllegalStateException("创建角色失败");
             }
             PlayerInfoDTO playerInfoDTO = new PlayerInfoDTO();
             playerInfoDTO.setEquipmentBarDTO(new EquipmentBarDTO());
             playerInfoDTO.setTeam(false);
-            playerInfoDTO.setPlayerAssetDTO(asset.convert());
+            playerInfoDTO.setAssetList(assetList.stream().map(PlayerAsset::convert).collect(Collectors.toList()));
 
             PlayerDTO playerDTO = new PlayerDTO();
             playerDTO.copyProperties(player);

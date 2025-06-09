@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;
-import java.util.function.BiFunction;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -19,67 +19,28 @@ public enum ArticleTypeEnum {
     /**
      * 装备
      */
-    EQUIPMENT("equipment", ArticleEquipmentItem.class, str -> JSONObject.parseObject(str, ArticleEquipmentItem.class),
-            (id, item) -> {
-                ArticleEquipmentItem equipmentItem = (ArticleEquipmentItem) item;
-                ((ArticleEquipmentItem) item).setEquipmentId(id);
-                return equipmentItem;
-            }),
+    EQUIPMENT("equipment", str -> JSONObject.parseObject(str, ArticleEquipmentItem.class)),
     /**
      * 称号
      */
-    TITLE("title", ArticleTitleItem.class, str -> JSONObject.parseObject(str, ArticleTitleItem.class),
-            (id, item) -> {
-                ArticleTitleItem titleItem = (ArticleTitleItem) item;
-                ((ArticleTitleItem) item).setTitleId(id);
-                return titleItem;
-            }
-    ),
+    TITLE("title", str -> JSONObject.parseObject(str, ArticleTitleItem.class)),
     /**
      * 技能
      */
-    SKILL("skill", ArticleSkillItem.class, str -> JSONObject.parseObject(str, ArticleSkillItem.class),
-            (id, item) -> {
-                ArticleSkillItem skillItem = (ArticleSkillItem) item;
-                ((ArticleSkillItem) item).setSkillId(id);
-                return skillItem;
-            }),
+    SKILL("skill", str -> JSONObject.parseObject(str, ArticleSkillItem.class)),
     /**
-     * 缘石
+     * 药材
      */
-    DIAMOND("diamond", ArticleDiamondItem.class, str -> JSONObject.parseObject(str, ArticleDiamondItem.class),
-            (cnt, item) -> {
-                ArticleDiamondItem diamondItem = (ArticleDiamondItem) item;
-                ((ArticleDiamondItem) item).setCnt(cnt);
-                return diamondItem;
-            }),
+    HERB("herb", str -> JSONObject.parseObject(str, ArticleHerbItem.class)),
     /**
-     * 圣星币
+     * 资产
      */
-    ASTROLOGY_COIN("astrologyCoin", ArticleAstrologyCoinItem.class,
-            str -> JSONObject.parseObject(str, ArticleAstrologyCoinItem.class),
-            (cnt, item) -> {
-                ArticleAstrologyCoinItem articleAstrologyCoinItem = (ArticleAstrologyCoinItem) item;
-                ((ArticleAstrologyCoinItem) item).setCnt(cnt);
-                return articleAstrologyCoinItem;
-            }),
-
-    HERB("herb", ArticleHerbItem.class,
-            str -> JSONObject.parseObject(str, ArticleHerbItem.class),
-            (herbId, item) -> {
-                ArticleHerbItem articleHerbItem = (ArticleHerbItem) item;
-                ((ArticleHerbItem) item).setHerbId(herbId);
-                return articleHerbItem;
-            }),
+    ASSET("asset", str -> JSONObject.parseObject(str, ArticleAssetItem.class)),
     ;
 
     private final String type;
 
-    private final Class<? extends ArticleItemDTO> clazz;
-
-    private final Function<String, ? extends ArticleItemDTO> function;
-
-    private final BiFunction<Long, ArticleItemDTO, ? extends ArticleItemDTO> getParam;
+    private final Function<String, ? extends ArticleItemDTO> convertJsonFunc;
 
     public static ArticleTypeEnum getByType(String type) {
         return Arrays.stream(ArticleTypeEnum.values()).filter(e -> e.getType().equals(type)).findFirst().orElse(null);

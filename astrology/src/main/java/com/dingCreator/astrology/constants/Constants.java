@@ -262,6 +262,10 @@ public final class Constants {
      * 锁前缀-技能背包
      */
     public static final String SKILL_BAG_LOCK_PREFIX = "LOCK_SKILL_BAG_";
+    /**
+     * 锁前缀-邮件
+     */
+    public static final String MAIL_LOCK_PREFIX = "LOCK_MAIL_";
 
     /**
      * 每日最多攻击世界boss次数

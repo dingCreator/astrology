@@ -895,7 +895,7 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.ARMOR,
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void afterDamage(BattleEffectDTO battleEffect) {
+                public void afterMeDamage(BattleEffectDTO battleEffect) {
                     BattleDTO tar = battleEffect.getTar();
                     BattleDTO from = battleEffect.getFrom();
                     StringBuilder builder = battleEffect.getBattleRound().getBuilder();
@@ -1038,10 +1038,10 @@ public enum EquipmentEnum {
                 }
             }
     ),
-    EQUIPMENT_502(502L, "寒星.圣者之冠",
+    EQUIPMENT_502(502L, "寒星·圣者之冠",
             "以冰海沉星为原型，并针对其特性打造出来的神煅之器，为古圣城圣者权位与力量的标志。\n" +
                     "传闻圣者之冠具有锁定冰海沉星所在位置的能力，古圣城历代圣者都有着寻找冰海沉星的记录，但他们最终都无功而返或身死道消。\n" +
-                    "隐藏技能\n圣者尊崇.零度法则:装备者受到的伤害减少20%，攻击命中后使敌方速度降低15%持续一回合。" +
+                    "隐藏技能\n圣者尊崇·零度法则:装备者受到的伤害减少20%，攻击命中后使敌方速度降低15%持续一回合。" +
                     "神煅加护 寒星之赐\n法抗+20%，法强+15%",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 10000L),
@@ -1049,11 +1049,27 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 15000L, 0.15F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_REDUCTION_RATE, 0.35F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE_REDUCTION, 0.80F),
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 400000F),
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MP, 250F)
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 400000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MP, 250L)
             ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.ARMOR,
             new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeMeDamage(BattleEffectDTO battleEffect) {
+                    battleEffect.getBattleRound().getBuilder().append("※")
+                            .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的防具技能【圣者尊崇·零度法则】被触发");
+                    battleEffect.getDamage().set(Math.round(battleEffect.getDamage().get() * 0.8F));
+                }
 
+                @Override
+                public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
+                    battleEffect.getBattleRound().getBuilder().append("※")
+                            .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的防具技能【圣者尊崇·零度法则】被触发");
+                    BuffUtil.addBuff(battleEffect.getFrom(), battleEffect.getTar(),
+                            new BuffDTO(BuffTypeEnum.SPEED, -0.15F), 1,
+                            battleEffect.getBattleRound().getBuilder());
+                }
             }
     ),
 
@@ -1127,7 +1143,7 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 1F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 4F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.PENETRATE, 0.4F)
-            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.WEAPON,
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.WEAPON, JobEnum.GUN.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
                 public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
@@ -1155,7 +1171,7 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 32000L, 0.15F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_REDUCTION_RATE, 0.5F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE_REDUCTION, 1.5F)
-            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.ARMOR,
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.ARMOR, JobEnum.SI_DI_WU_SHI.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
                 public void beforeBattle(BattleFieldDTO battleField) {
@@ -1220,13 +1236,14 @@ public enum EquipmentEnum {
                 @Override
                 public void beforeBattle(BattleFieldDTO battleField) {
                     OrganismDTO organism = this.getOwner().getOrganismInfoDTO().getOrganismDTO();
-                    StringBuilder builder = new StringBuilder("※").append(organism.getName()).append("的饰品法则【泯灭法则】被触发");
+                    battleField.getBattleMsg().add("※" + organism.getName() + "的饰品法则【泯灭法则】被触发");
 
                     // 触发技能
                     ExtraBattleProcessTemplate sk1032Tpl = SkillEnum.SKILL_1032.getGlobalExtraProcess();
                     sk1032Tpl.setOwner(this.getOwner());
                     sk1032Tpl.setPriority(this.getPriority());
                     sk1032Tpl.executeBeforeBattle(battleField);
+
                 }
             }
     ),

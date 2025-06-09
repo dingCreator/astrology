@@ -559,8 +559,8 @@ public class BattleUtil {
         List<ExtraBattleProcessTemplate> tmpBattleProcessList = new ArrayList<>();
         List<ExtraBattleProcessTemplate> extraBattleProcessList = new ArrayList<>();
         // 插入被动技能效果结算
-        initiatorBattleTmp.forEach(initiatorObj -> initExtraProcess(initiatorObj, tmpBattleProcessList));
-        recipientBattleTmp.forEach(recipientObj -> initExtraProcess(recipientObj, tmpBattleProcessList));
+        initiatorBattleTmp.forEach(initiatorObj -> initExtraProcess(initiatorObj, initiatorBattleTmp, recipientBattleTmp, tmpBattleProcessList));
+        recipientBattleTmp.forEach(recipientObj -> initExtraProcess(recipientObj, recipientBattleTmp, initiatorBattleTmp, tmpBattleProcessList));
         // 优先级排序
         if (CollectionUtils.isNotEmpty(tmpBattleProcessList)) {
             extraBattleProcessList = tmpBattleProcessList.stream()
@@ -613,11 +613,14 @@ public class BattleUtil {
      *
      * @param from 当前目标
      */
-    private static void initExtraProcess(BattleDTO from, List<ExtraBattleProcessTemplate> extraBattleProcessList) {
+    private static void initExtraProcess(BattleDTO from, List<BattleDTO> our, List<BattleDTO> enemy,
+                                         List<ExtraBattleProcessTemplate> extraBattleProcessList) {
         // 被动技能
         for (SkillEnum skill : from.getOrganismInfoDTO().getInactiveSkills()) {
             ExtraBattleProcessTemplate process = CopyUtil.copyNewInstance(skill.getGlobalExtraProcess());
             process.setOwner(from);
+            process.setOwnerOur(our);
+            process.setOwnerEnemy(enemy);
             extraBattleProcessList.add(process);
         }
 
@@ -632,6 +635,8 @@ public class BattleUtil {
             ExtraBattleProcessTemplate process
                     = CopyUtil.copyNewInstance(SkillEnum.getById(skillBarDTO.getSkillId()).getGlobalExtraProcess());
             process.setOwner(from);
+            process.setOwnerOur(our);
+            process.setOwnerEnemy(enemy);
             extraBattleProcessList.add(process);
             skillBarDTO = skillBarDTO.getNext();
         } while (Objects.nonNull(skillBarDTO));
@@ -639,9 +644,9 @@ public class BattleUtil {
         // 装备技能
         EquipmentBarDTO bar = from.getOrganismInfoDTO().getEquipmentBarDTO();
         if (Objects.nonNull(bar)) {
-            initEquipmentExtraProcess(from, bar.getArmor(), extraBattleProcessList);
-            initEquipmentExtraProcess(from, bar.getJewelry(), extraBattleProcessList);
-            initEquipmentExtraProcess(from, bar.getWeapon(), extraBattleProcessList);
+            initEquipmentExtraProcess(from, our, enemy, bar.getArmor(), extraBattleProcessList);
+            initEquipmentExtraProcess(from, our, enemy, bar.getJewelry(), extraBattleProcessList);
+            initEquipmentExtraProcess(from, our, enemy, bar.getWeapon(), extraBattleProcessList);
         }
     }
 
@@ -652,7 +657,7 @@ public class BattleUtil {
      * @param equipmentDTO           装备
      * @param extraBattleProcessList 插入结算列表
      */
-    private static void initEquipmentExtraProcess(BattleDTO from, EquipmentDTO equipmentDTO,
+    private static void initEquipmentExtraProcess(BattleDTO from, List<BattleDTO> our, List<BattleDTO> enemy, EquipmentDTO equipmentDTO,
                                                   List<ExtraBattleProcessTemplate> extraBattleProcessList) {
         if (Objects.isNull(equipmentDTO)) {
             return;
@@ -660,6 +665,8 @@ public class BattleUtil {
         EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentDTO.getEquipmentId());
         ExtraBattleProcessTemplate process = CopyUtil.copyNewInstance(equipmentEnum.getExtraBattleProcessTemplate());
         process.setOwner(from);
+        process.setOwnerOur(our);
+        process.setOwnerEnemy(enemy);
         extraBattleProcessList.add(process);
     }
 
@@ -853,8 +860,7 @@ public class BattleUtil {
         BattleFieldDTO battleField = battleRound.getBattleField();
         BattleDTO target = battleEffect.getTar();
 
-        long oldHp = target.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition();
-        if (oldHp <= 0) {
+        if (target.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() <= 0) {
             return;
         }
         DamageTypeEnum damageTypeEnum = Objects.nonNull(battleEffect.getDamageTypeEnum()) ?
@@ -875,8 +881,26 @@ public class BattleUtil {
         }
         // 造成伤害前
         battleField.getExtraBattleProcessTemplateList().forEach(ext -> ext.executeBeforeDamage(battleEffect));
+        long damageBf = battleEffect.getDamage().get();
+        // 计算盾
+        List<BattleBuffDTO> battleBuffList = battleEffect.getTar().getBuffMap().get(BuffTypeEnum.SHIELD);
+        if (CollectionUtils.isNotEmpty(battleBuffList)) {
+            battleBuffList.stream().peek(battleBuff -> {
+                long shieldVal = battleBuff.getBuffDTO().getValue();
+                long damage = battleEffect.getDamage().get();
+                if (shieldVal > damage) {
+                    battleEffect.getDamage().set(0L);
+                    battleBuff.getBuffDTO().setValue(shieldVal - damage);
+                } else {
+                    battleEffect.getDamage().set(damage - shieldVal);
+                    battleBuff.getBuffDTO().setValue(0L);
+                }
+            }).filter(battleBuff -> battleBuff.getBuffDTO().getValue() > 0).findFirst();
+            battleBuffList.removeIf(battleBuff -> battleBuff.getBuffDTO().getValue() <= 0);
+            battleRound.getBuilder().append("，被抵消").append(damageBf - battleEffect.getDamage().get()).append("点伤害");
+        }
         // 如果是致命伤害，触发特殊结算
-        if (battleEffect.getDamage().get() >= oldHp) {
+        if (battleEffect.getDamage().get() >= target.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition()) {
             battleField.getExtraBattleProcessTemplateList().forEach(ext -> ext.executeBeforeDeath(battleEffect));
         }
         // 若造成了伤害
@@ -891,12 +915,13 @@ public class BattleUtil {
             }
             battleField.getExtraBattleProcessTemplateList().forEach(ext -> ext.executeAfterDamage(battleEffect));
         }
-        long newHp = Math.max(0, oldHp - battleEffect.getDamage().get());
-        target.getOrganismInfoDTO().getOrganismDTO().setHpWithAddition(newHp);
+        long newHp = Math.max(0, target.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() - battleEffect.getDamage().get());
         if (showDamageText) {
             battleRound.getBuilder().append("，对").append(target.getOrganismInfoDTO().getOrganismDTO().getName())
-                    .append("造成").append(oldHp - newHp).append(damageTypeEnum.getTypeChnDesc()).append("伤害");
+                    .append("造成").append(target.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() - newHp)
+                    .append(damageTypeEnum.getTypeChnDesc()).append("伤害");
         }
+        target.getOrganismInfoDTO().getOrganismDTO().setHpWithAddition(newHp);
     }
 
     /**

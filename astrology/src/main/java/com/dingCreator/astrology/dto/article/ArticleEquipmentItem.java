@@ -23,10 +23,6 @@ public class ArticleEquipmentItem extends ArticleItemDTO {
      */
     private Long equipmentId;
 
-    public ArticleEquipmentItem() {
-        super(ArticleTypeEnum.EQUIPMENT.getType());
-    }
-
     public ArticleEquipmentItem(Long equipmentId) {
         super(ArticleTypeEnum.EQUIPMENT.getType());
         this.equipmentId = equipmentId;
@@ -45,11 +41,11 @@ public class ArticleEquipmentItem extends ArticleItemDTO {
     }
 
     @Override
-    public ArticleItemVO view() {
+    public ArticleItemVO fillView(ArticleItemVO vo) {
         EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentId);
-        return ArticleItemVO.builder()
-                .name("【" + equipmentEnum.getEquipmentRankEnum().getRankChnDesc() + "】" + equipmentEnum.getName())
-                .rare(equipmentEnum.getEquipmentRankEnum().getRare())
-                .description(equipmentEnum.getDesc()).build();
+        vo.setName("【" + equipmentEnum.getEquipmentRankEnum().getRankChnDesc() + "】" + equipmentEnum.getName());
+        vo.setDescription(equipmentEnum.getDesc());
+        vo.setRare(equipmentEnum.getEquipmentRankEnum().getRare());
+        return vo;
     }
 }

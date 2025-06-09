@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.dingCreator.astrology.cache.SkillCache;
 import com.dingCreator.astrology.cache.WorldBossCache;
 import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.dto.WorldBossAwardDTO;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.entity.SkillBarItem;
 import com.dingCreator.astrology.entity.base.Monster;
@@ -20,7 +21,7 @@ import com.dingCreator.astrology.util.DateUtil;
 import com.dingCreator.astrology.util.PageUtil;
 import com.dingCreator.astrology.vo.BattleResultVO;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -195,6 +196,20 @@ public class MonsterManageBehavior {
     }
 
     /**
+     * 获取怪物主动技能
+     *
+     * @param monsterId 怪物ID
+     * @return 怪物主动技能
+     */
+    public List<SkillEnum> getMonsterInActiveSkill(Long monsterId) {
+        if (Objects.isNull(getMonsterById(monsterId))) {
+            throw MonsterManageExceptionEnum.MONSTER_NOT_FOUND.getException();
+        }
+        return SkillCache.getInactiveSkill(BelongToEnum.MONSTER.getBelongTo(), monsterId)
+                .stream().map(SkillEnum::getById).collect(Collectors.toList());
+    }
+
+    /**
      * 设置怪物主动技能
      *
      * @param monsterId 怪物ID
@@ -243,20 +258,19 @@ public class MonsterManageBehavior {
     /**
      * 创建或者更新世界boss
      *
-     * @param appearDateStr 出现日期
-     * @param startHour     开始时间
-     * @param endHour       结束时间
-     * @param monsterIds    怪物ID
+     * @param startTimeStr 开始时间
+     * @param endTimeStr   结束时间
+     * @param monsterIds   怪物ID
      */
-    public void insertOrUpdateWorldBoss(String appearDateStr, int startHour, int endHour, List<Long> monsterIds) {
-        boolean invalidStartHour = startHour < Constants.MIN_HOUR || startHour > Constants.MAX_HOUR + 1;
-        boolean invalidEndHour = endHour < Constants.MIN_HOUR || startHour > Constants.MAX_HOUR + 1;
-        boolean invalidHourRelation = startHour >= endHour;
-        if (invalidStartHour || invalidEndHour || invalidHourRelation) {
+    public void insertOrUpdateWorldBoss(String startTimeStr, String endTimeStr, List<Long> monsterIds,
+                                        List<WorldBossAwardDTO> awardList) {
+        LocalDateTime startTime = DateUtil.parseDateTime(startTimeStr);
+        LocalDateTime endTime = DateUtil.parseDateTime(endTimeStr);
+        if (Objects.isNull(startTime) || Objects.isNull(endTime)) {
             throw MonsterManageExceptionEnum.WORLD_BOSS_TIME_INVALID.getException();
         }
-        LocalDate appearDate = DateUtil.parseDate(appearDateStr);
-        if (Objects.isNull(appearDate)) {
+        boolean invalidHourRelation = startTime.isAfter(endTime);
+        if (invalidHourRelation) {
             throw MonsterManageExceptionEnum.WORLD_BOSS_TIME_INVALID.getException();
         }
         // 过滤非法boss ID
@@ -264,7 +278,7 @@ public class MonsterManageBehavior {
                 .collect(Collectors.toList());
         String monsterId = validMonsterIds.stream().map(Objects::toString).reduce((id1, id2) -> id1 + Constants.COMMA + id2)
                 .orElseThrow(MonsterManageExceptionEnum.WORLD_BOSS_ID_INVALID::getException);
-        worldBossService.insertOrUpdateWorldBoss(appearDate, startHour, endHour, monsterId);
+        worldBossService.insertOrUpdateWorldBoss(startTime, endTime, monsterId, awardList);
         WorldBossCache.clearCache();
     }
 
@@ -295,6 +309,7 @@ public class MonsterManageBehavior {
     public BattleResultVO EVE(Long playerId, Long monsterId1, Long monsterId2) {
         return BattleUtil.battleEVE(playerId, Collections.singletonList(monsterId1), Collections.singletonList(monsterId2));
     }
+
     public BattleResultVO PVE(Long playerId, Long monsterId) {
         return BattleUtil.battlePVE(playerId, Collections.singletonList(monsterId));
     }
