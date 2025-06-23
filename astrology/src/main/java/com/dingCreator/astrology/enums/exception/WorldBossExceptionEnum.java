@@ -24,14 +24,14 @@ public enum WorldBossExceptionEnum {
     ;
 
     private final String code;
-    private final String cheDesc;
+    private final String chnDesc;
 
     public BusinessException getException(Object... args) {
         String cheDesc;
         if (args.length == 0) {
-            cheDesc = this.cheDesc;
+            cheDesc = this.chnDesc;
         } else {
-            cheDesc = String.format(this.cheDesc, args);
+            cheDesc = String.format(this.chnDesc, args);
         }
         return new BusinessException(this.code, cheDesc);
     }

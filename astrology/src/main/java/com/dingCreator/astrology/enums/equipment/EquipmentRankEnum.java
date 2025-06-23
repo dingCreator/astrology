@@ -16,8 +16,8 @@ public enum EquipmentRankEnum {
      */
     SP("SP", "论外级", 0, 0, 0),
     ORDINARY("ORDINARY", "凡级", 0, 0, 100),
-    NORMAL("NORMAL", "普通级", 0, 15, 200),
-    DYNAMIC("DYNAMIC", "灵威级", 0, 30, 300),
+    NORMAL("NORMAL", "普通级", 0, 0, 200),
+    DYNAMIC("DYNAMIC", "灵威级", 0, 20, 300),
     MYSTERY("MYSTERY", "通玄级", 0, 50, 400),
     WONDER("WONDER", "神迹级", 0, 75, 500),
     RULE("RULE", "法则级", 0, 81, 600),

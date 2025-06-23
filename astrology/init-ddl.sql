@@ -380,3 +380,15 @@ create table astrology_mail_box (
     key idx_player_id_expire_in_received(player_id, expire_in, received),
     key idx_create_time(create_time)
 ) engine=innodb comment='玩家邮箱表';
+
+CREATE TABLE `astrology_market_item` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `player_id` bigint NOT NULL COMMENT '玩家ID',
+  `article_name` varchar(255) NOT NULL COMMENT '物品名称',
+  `article_json` text NOT NULL COMMENT '物品json',
+  `item_cnt` int NOT NULL COMMENT '物品数量',
+  `cost_map_json` text NOT NULL COMMENT '价格（单价）',
+  PRIMARY KEY (`id`),
+  key idx_player_id(player_id),
+  key idx_article_name(article_name)
+) ENGINE=InnoDB COMMENT='市场物品表';

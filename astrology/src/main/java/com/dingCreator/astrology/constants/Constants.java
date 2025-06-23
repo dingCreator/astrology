@@ -77,6 +77,18 @@ public final class Constants {
      * 炼丹错误码前缀
      */
     public static final String ALCHEMY_EXCEPTION_PREFIX = "E_ALCHEMY_";
+    /**
+     * 物品错误码前缀
+     */
+    public static final String ARTICLE_EXCEPTION_PREFIX = "E_ARTICLE_";
+    /**
+     * 药材错误码前缀
+     */
+    public static final String HERB_EXCEPTION_PREFIX = "E_HERB_";
+    /**
+     * 市场错误码前缀
+     */
+    public static final String MARKET_EXCEPTION_PREFIX = "E_MARKET_";
 
     // **----** 经验相关配置 **----**
     /**
@@ -233,7 +245,7 @@ public final class Constants {
     /**
      * 锁前缀-商店
      */
-    public static final String SHOP_BUY_LOCK_PREFIX = "LOCK_SHOP_BUY_";
+    public static final String SHOP_LOCK_PREFIX = "LOCK_SHOP_";
     /**
      * 锁前缀-参加活动
      */
@@ -266,6 +278,10 @@ public final class Constants {
      * 锁前缀-邮件
      */
     public static final String MAIL_LOCK_PREFIX = "LOCK_MAIL_";
+    /**
+     * 锁前缀-装备
+     */
+    public static final String EQUIPMENT_LOCK_PREFIX = "LOCK_EQUIPMENT_";
 
     /**
      * 每日最多攻击世界boss次数

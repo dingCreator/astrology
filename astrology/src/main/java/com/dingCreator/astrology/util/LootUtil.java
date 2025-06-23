@@ -3,15 +3,17 @@ package com.dingCreator.astrology.util;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.dingCreator.astrology.behavior.ExpBehavior;
+import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.dto.loot.LootDTO;
 import com.dingCreator.astrology.dto.loot.LootItemDTO;
 import com.dingCreator.astrology.dto.loot.LootItemQueryDTO;
 import com.dingCreator.astrology.dto.loot.LootQueryDTO;
-import com.dingCreator.astrology.entity.Loot;
-import com.dingCreator.astrology.entity.LootItem;
+import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.enums.AssetTypeEnum;
+import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.vo.LootVO;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,8 +40,9 @@ public class LootUtil {
         LootDTO lootDTO = new LootDTO();
         String assetJson = loot.getAsset();
         JSONObject assetJsonObj = JSONObject.parseObject(assetJson);
-        lootDTO.setAstrologyCoin(assetJsonObj.getLong(AssetTypeEnum.ASTROLOGY_COIN.getCode()));
-        lootDTO.setDiamond(assetJsonObj.getLong(AssetTypeEnum.DIAMOND.getCode()));
+        Map<AssetTypeEnum, Long> assetMap = new HashMap<>();
+        assetJsonObj.forEach((assetType, val) -> assetMap.put(AssetTypeEnum.getByCode(assetType), ((Number) val).longValue()));
+        lootDTO.setAssetMap(assetMap);
         lootDTO.setExp(loot.getExp());
         lootDTO.setExtInfo(lootDTO.getExtInfo());
         // 转化实物
@@ -56,12 +59,11 @@ public class LootUtil {
         if (Objects.isNull(lootDTO)) {
             return null;
         }
+        Map<String, Long> assetMap = new HashMap<>();
+        lootDTO.getAssetMap().forEach((key, value) -> assetMap.put(key.getCode(), value));
         LootQueryDTO loot = new LootQueryDTO();
         loot.setExp(lootDTO.getExp());
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(AssetTypeEnum.ASTROLOGY_COIN.getCode(), lootDTO.getAstrologyCoin());
-        jsonObject.put(AssetTypeEnum.DIAMOND.getCode(), lootDTO.getDiamond());
-        loot.setAsset(jsonObject.toJSONString());
+        loot.setAsset(JSONObject.toJSONString(assetMap));
         loot.setExtInfo(lootDTO.getExtInfo());
         List<LootItemQueryDTO> lootItemList = lootDTO.getItemList().stream().map(dto -> {
             LootItemQueryDTO item = new LootItemQueryDTO();
@@ -88,16 +90,23 @@ public class LootUtil {
         if (Objects.isNull(lootDTO)) {
             return vo;
         }
-        vo.setAstrologyCoin(lootDTO.getAstrologyCoin());
-        vo.setDiamond(lootDTO.getDiamond());
+        // 发钱
+        vo.setAssetMap(lootDTO.getAssetMap());
+        List<PlayerAssetDTO> assetList = lootDTO.getAssetMap().entrySet().stream()
+                .map(entry -> PlayerAssetDTO.builder().assetType(entry.getKey().getCode())
+                        .assetCnt(entry.getValue()).playerId(playerId).build())
+                .collect(Collectors.toList());
+        PlayerService.getInstance().changeAsset(PlayerCache.getPlayerById(playerId), assetList);
+        // 发经验
         ExpBehavior.getInstance().getExp(playerId, lootDTO.getExp());
         vo.setExp(lootDTO.getExp());
+        // 发实物
         if (!CollectionUtil.isEmpty(lootDTO.getItemList())) {
             vo.setItemVOList(lootDTO.getItemList().stream()
                     .filter(loot -> RandomUtil.isHit(loot.getRate()))
                     .map(loot -> {
                         // 发送
-                        loot.getArticleItem().send2Player(playerId, 1);
+                        loot.getArticleItem().changeCnt(playerId, 1);
                         // 获取名字
                         return loot.getArticleItem().view();
                     }).collect(Collectors.toList()));

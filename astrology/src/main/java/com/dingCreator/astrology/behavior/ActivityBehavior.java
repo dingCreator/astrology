@@ -11,6 +11,7 @@ import com.dingCreator.astrology.service.ActivityService;
 import com.dingCreator.astrology.util.PageUtil;
 import com.dingCreator.astrology.vo.ActivityAwardVO;
 import com.dingCreator.astrology.vo.ArticleItemVO;
+import com.dingCreator.astrology.vo.JoinActivityResultVO;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class ActivityBehavior {
      * @param playerId     玩家ID
      * @return 参与结果
      */
-    public List<ArticleItemVO> joinActivity(String activityName, long playerId) {
+    public JoinActivityResultVO joinActivity(String activityName, long playerId) {
         ActivityDTO activityDTO = ActivityService.getByName(activityName);
         return activityDTO.getActivityType().getService()
                 .joinActivity(activityDTO, PlayerCache.getPlayerById(playerId));
@@ -41,7 +42,7 @@ public class ActivityBehavior {
      * @param times            连续参与次数
      * @return 参与结果
      */
-    public List<ArticleItemVO> joinActivity(ActivityTypeEnum activityTypeEnum, long playerId, int times) {
+    public JoinActivityResultVO joinActivity(ActivityTypeEnum activityTypeEnum, long playerId, int times) {
         ActivityService service = activityTypeEnum.getService();
         ActivityDTO activity = service.getDefaultActivity();
         return service.joinActivity(activity, PlayerCache.getPlayerById(playerId), times);

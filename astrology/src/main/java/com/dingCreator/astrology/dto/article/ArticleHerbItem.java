@@ -25,8 +25,13 @@ public class ArticleHerbItem extends ArticleItemDTO {
     }
 
     @Override
-    public void send2Player(Long playerId, int cnt) {
+    public void changeCnt(Long playerId, int cnt) {
         PlayerHerbService.getInstance().addHerb(playerId, herbId, this.cnt.intValue() * cnt);
+    }
+
+    @Override
+    public void checkCnt(long playerId, int requireCnt) {
+
     }
 
     @Override

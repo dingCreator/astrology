@@ -2,11 +2,14 @@ package com.dingCreator.astrology.service;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.dto.equipment.EquipmentGroupQueryDTO;
 import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
+import com.dingCreator.astrology.enums.exception.EquipmentExceptionEnum;
 import com.dingCreator.astrology.mapper.EquipmentBelongToMapper;
+import com.dingCreator.astrology.util.LockUtil;
 import com.dingCreator.astrology.vo.EquipmentGroupVO;
 
 import java.util.List;
@@ -38,6 +41,7 @@ public class EquipmentBelongToService {
                                 .eq(EquipmentBelongTo.BELONG_TO_ID, belongToId)
                                 .eq(EquipmentBelongTo.EQUIPMENT_ID, EquipmentEnum.getByName(equipmentName).getId())
                                 .eq(EquipmentBelongTo.EQUIPMENT_LEVEL, level)
+                                .gt(EquipmentBelongTo.TOTAL_CNT, 0)
                 )
         );
     }
@@ -68,6 +72,7 @@ public class EquipmentBelongToService {
                                 .eq(EquipmentBelongTo.BELONG_TO, belongTo)
                                 .eq(EquipmentBelongTo.BELONG_TO_ID, belongToId)
                                 .eq(EquipmentBelongTo.EQUIPMENT_ID, equipmentId)
+                                .gt(EquipmentBelongTo.TOTAL_CNT, 0)
                         )
         );
     }
@@ -111,6 +116,7 @@ public class EquipmentBelongToService {
                 .selectCount(new QueryWrapper<EquipmentBelongTo>()
                         .eq(EquipmentBelongTo.BELONG_TO, belongTo)
                         .eq(EquipmentBelongTo.BELONG_TO_ID, belongToId)
+                        .gt(EquipmentBelongTo.TOTAL_CNT, 0)
                         .in(CollectionUtil.isNotEmpty(ids), EquipmentBelongTo.EQUIPMENT_ID, ids)
                 ));
     }
@@ -135,21 +141,32 @@ public class EquipmentBelongToService {
      * @param equipmentBelongTo 装备归属
      */
     public void addBelongTo(EquipmentBelongTo equipmentBelongTo) {
-        DatabaseProvider.getInstance().transactionExecute(sqlSession -> {
-            EquipmentBelongToMapper mapper = sqlSession.getMapper(EquipmentBelongToMapper.class);
-            EquipmentBelongTo oldEquipment = mapper.selectOne(new QueryWrapper<EquipmentBelongTo>()
-                    .eq(EquipmentBelongTo.BELONG_TO, equipmentBelongTo.getBelongTo())
-                    .eq(EquipmentBelongTo.BELONG_TO_ID, equipmentBelongTo.getBelongToId())
-                    .eq(EquipmentBelongTo.EQUIPMENT_ID, equipmentBelongTo.getEquipmentId())
-                    .eq(EquipmentBelongTo.EQUIPMENT_LEVEL, equipmentBelongTo.getEquipmentLevel())
-            );
-            if (Objects.nonNull(oldEquipment)) {
-                oldEquipment.setTotalCnt(oldEquipment.getTotalCnt() + equipmentBelongTo.getTotalCnt());
-                mapper.updateById(oldEquipment);
-            } else {
-                mapper.insert(equipmentBelongTo);
-            }
-        });
+        DatabaseProvider.getInstance().transactionExecute(sqlSession ->
+                LockUtil.execute(Constants.EQUIPMENT_LOCK_PREFIX + equipmentBelongTo +
+                        Constants.UNDERLINE + equipmentBelongTo.getBelongToId(), () -> {
+                    EquipmentBelongToMapper mapper = sqlSession.getMapper(EquipmentBelongToMapper.class);
+                    EquipmentBelongTo oldEquipment = mapper.selectOne(new QueryWrapper<EquipmentBelongTo>()
+                            .eq(EquipmentBelongTo.BELONG_TO, equipmentBelongTo.getBelongTo())
+                            .eq(EquipmentBelongTo.BELONG_TO_ID, equipmentBelongTo.getBelongToId())
+                            .eq(EquipmentBelongTo.EQUIPMENT_ID, equipmentBelongTo.getEquipmentId())
+                            .eq(EquipmentBelongTo.EQUIPMENT_LEVEL, equipmentBelongTo.getEquipmentLevel())
+                    );
+                    if (Objects.nonNull(oldEquipment)) {
+                        if (oldEquipment.getEquip() && oldEquipment.getTotalCnt() + equipmentBelongTo.getTotalCnt() < 1) {
+                            throw EquipmentExceptionEnum.NOT_ENOUGH_EQUIPMENT.getException();
+                        } else if (!oldEquipment.getEquip() && oldEquipment.getTotalCnt() + equipmentBelongTo.getTotalCnt() < 0) {
+                            throw EquipmentExceptionEnum.NOT_ENOUGH_EQUIPMENT.getException();
+                        }
+                        oldEquipment.setTotalCnt(oldEquipment.getTotalCnt() + equipmentBelongTo.getTotalCnt());
+                        mapper.updateById(oldEquipment);
+                    } else {
+                        if (equipmentBelongTo.getTotalCnt() < 0) {
+                            throw EquipmentExceptionEnum.NOT_ENOUGH_EQUIPMENT.getException();
+                        }
+                        mapper.insert(equipmentBelongTo);
+                    }
+                })
+        );
     }
 
     /**

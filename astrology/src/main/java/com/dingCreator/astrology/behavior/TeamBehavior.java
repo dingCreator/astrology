@@ -109,6 +109,7 @@ public class TeamBehavior {
             throw TeamExceptionEnum.CAPTAIN_NOT_ALLOW.getException();
         }
 
+        teamDTO.getMembers().remove(initiatorId);
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(initiatorId);
         playerInfoDTO.setTeam(false);
         playerInfoDTO.setTeamId(null);
@@ -180,8 +181,11 @@ public class TeamBehavior {
             throw TeamExceptionEnum.NOT_CAPTAIN.getException();
         }
         PlayerCache.getPlayerById(initiatorId).setTeam(false);
-        teamDTO.getMembers().stream().filter(member -> !member.equals(teamDTO.getCaptainId()))
-                .forEach(this::leaveTeam);
+        teamDTO.getMembers().forEach(memberId -> {
+            PlayerInfoDTO info = PlayerCache.getPlayerById(memberId);
+            info.setTeamId(null);
+            info.setTeam(false);
+        });
         TeamCache.deleteTeam(initiatorId);
     }
 

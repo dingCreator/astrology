@@ -66,10 +66,19 @@ public class SkillBelongToService {
                     response.setData(page.getRecords());
                     response.setPageIndex((int) page.getCurrent());
                     response.setPageSize((int) page.getSize());
-                    response.setTotal((int) page.getTotal());
+                    response.setTotal(selectSkillBelongToCount(belongTo, belongToId));
                     return response;
                 }
         );
+    }
+
+    public int selectSkillBelongToCount(String belongTo, Long belongToId) {
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
+            QueryWrapper<SkillBelongTo> wrapper = new QueryWrapper<SkillBelongTo>()
+                    .eq(SkillBelongTo.BELONG_TO, belongTo)
+                    .eq(SkillBelongTo.BELONG_TO_ID, belongToId);
+            return sqlSession.getMapper(SkillBelongToMapper.class).selectCount(wrapper);
+        });
     }
 
     /**

@@ -24,17 +24,18 @@ public enum SkillExceptionEnum {
     JOB_SKILL_NOT_ALLOW_2(Constants.SKILL_EXCEPTION_PREFIX + "005", "你的职业无法学习该技能"),
     SKILL_ALREADY_EXIST(Constants.SKILL_EXCEPTION_PREFIX + "006", "你已学会此技能，无需重复学习"),
     DONT_HAVE_SKILL(Constants.SKILL_EXCEPTION_PREFIX + "007", "你并未拥有此技能"),
-    CANT_ANALYSE_SKILL(Constants.SKILL_EXCEPTION_PREFIX + "008", "无法识别的技能ID或名称：【%s】")
+    CANT_ANALYSE_SKILL(Constants.SKILL_EXCEPTION_PREFIX + "008", "无法识别的技能ID或名称：【%s】"),
+    NOT_ENOUGH_SKILL(Constants.SKILL_EXCEPTION_PREFIX + "009", "技能数量不足"),
     ;
 
     private final String code;
-    private final String cheDesc;
+    private final String chnDesc;
 
     public BusinessException getException() {
-        return new BusinessException(this.code, this.cheDesc);
+        return new BusinessException(this.code, this.chnDesc);
     }
 
     public BusinessException getException(String... param) {
-        return new BusinessException(this.code, String.format(this.cheDesc, param));
+        return new BusinessException(this.code, String.format(this.chnDesc, param));
     }
 }

@@ -28,9 +28,14 @@ public class ArticleSkillItem extends ArticleItemDTO {
     }
 
     @Override
-    public void send2Player(Long playerId, int cnt) {
+    public void changeCnt(Long playerId, int cnt) {
         SkillEnum.getById(skillId);
         SkillBagService.getInstance().sendSkill(playerId, skillId, cnt);
+    }
+
+    @Override
+    public void checkCnt(long playerId, int requireCnt) {
+
     }
 
     @Override

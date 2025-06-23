@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.vo;
 
 import com.dingCreator.astrology.entity.Loot;
+import com.dingCreator.astrology.enums.AssetTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -9,6 +10,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author ding
@@ -25,6 +27,14 @@ public class DungeonResultVO implements Serializable {
      * playerId : LootVO
      */
     private Map<Long, LootVO> playerLootMap;
+    /**
+     * 已完成的层数
+     */
+    private Integer completeFloor;
+    /**
+     * 最大层数
+     */
+    private Integer maxFloor;
 
     public DungeonResultVO() {
         playerLootMap = new HashMap<>();
@@ -36,8 +46,8 @@ public class DungeonResultVO implements Serializable {
 
     public void addLoot(Long id, LootVO vo) {
         LootVO exist = playerLootMap.getOrDefault(id, new LootVO());
-        exist.setAstrologyCoin(exist.getAstrologyCoin() + vo.getAstrologyCoin());
-        exist.setDiamond(exist.getDiamond() + vo.getDiamond());
+        Map<AssetTypeEnum, Long> assetMap = Objects.isNull(exist.getAssetMap()) ? new HashMap<>() : exist.getAssetMap();
+        vo.getAssetMap().forEach((k, v) -> assetMap.merge(k, v, Long::sum));
         exist.setExp(exist.getExp() + vo.getExp());
         exist.getItemVOList().addAll(vo.getItemVOList());
     }

@@ -38,9 +38,9 @@ public class MailBoxService {
     public PageResponse<MailBoxDTO> getUnreceivedPage(Long playerId, int pageIndex, int pageSize) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
             Page<MailBox> page = sqlSession.getMapper(MailBoxMapper.class)
-                    .selectPage(new Page<>(pageIndex, pageSize), constructQueryUnreceived(playerId));
+                    .selectPage(new Page<>(pageIndex, pageSize, true), constructQueryUnreceived(playerId));
             List<MailBoxDTO> dtoList = page.getRecords().stream().map(MailBox::convert2Dto).collect(Collectors.toList());
-            return PageUtil.addPageDesc(dtoList, pageIndex, pageSize, (int) page.getTotal());
+            return PageUtil.addPageDesc(dtoList, pageIndex, pageSize, countUnreceived(playerId));
         });
     }
 
@@ -52,7 +52,7 @@ public class MailBoxService {
                     return mailBoxList.stream().peek(mailBox -> {
                                 mailBox.setReceived(true);
                                 mapper.updateById(mailBox);
-                            }).map(MailBox::convert2Dto).peek(dto -> dto.getItem().send2Player(playerId, dto.getItemCnt()))
+                            }).map(MailBox::convert2Dto).peek(dto -> dto.getItem().changeCnt(playerId, dto.getItemCnt()))
                             .collect(Collectors.toList());
                 })
         );

@@ -278,8 +278,6 @@ public class DungeonService {
         if (CollectionUtil.isEmpty(floorConfigList)) {
             return exploreSuccess(playerIds, dungeon.getId(), nextFloor, true, totalLootMap);
         }
-        playerIds.forEach(id -> PlayerCache.getPlayerById(id).getPlayerDTO().setStatus(PlayerStatusEnum.EXPLORE.getCode()));
-        PlayerCache.save(playerIds);
 
         Map<Integer, List<DungeonConfig>> waveConfigMap = floorConfigList.stream()
                 .sorted(Comparator.comparing(DungeonConfig::getWave))
@@ -332,6 +330,9 @@ public class DungeonService {
             DungeonRecordService.getInstance().insertOrUpdate(playerIds, dungeonId, LocalDateTime.now(), floor,
                     DungeonExploreStatusEnum.EXPLORE.getCode());
             dungeonResultVO.setExploreResult(DungeonResultVO.ExploreResult.COMPLETE);
+            // 状态变更为探索中
+            playerIds.forEach(id -> PlayerCache.getPlayerById(id).getPlayerDTO().setStatus(PlayerStatusEnum.EXPLORE.getCode()));
+            PlayerCache.save(playerIds);
         } else {
             // 探索完成
             DungeonRecordService.getInstance().insertOrUpdate(playerIds, dungeonId, LocalDateTime.now(), floor,

@@ -1,4 +1,4 @@
-package com.dingCreator.astrology.dto.loot;
+package com.dingCreator.astrology.vo;
 
 import com.dingCreator.astrology.enums.AssetTypeEnum;
 import lombok.AllArgsConstructor;
@@ -11,27 +11,19 @@ import java.util.Map;
 
 /**
  * @author ding
- * @date 2024/8/27
+ * @date 2025/6/21
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LootDTO {
+public class JoinActivityResultVO {
     /**
-     * 资产
+     * 消耗
      */
-    private Map<AssetTypeEnum, Long> assetMap;
+    private Map<AssetTypeEnum, Long> costMap;
     /**
-     * 经验
+     * 获得的奖品
      */
-    private Long exp;
-    /**
-     * 扩展信息
-     */
-    private String extInfo;
-    /**
-     * 实物
-     */
-    private List<LootItemDTO> itemList;
+    private List<ArticleItemVO> itemVOList;
 }

@@ -122,9 +122,13 @@ public class BattleFieldDTO implements Serializable {
      * @param to   敌方
      */
     public void battleProcess(List<BattleDTO> from, List<BattleDTO> to) {
+        // 判断对方是否全体阵亡
+        if (to.stream().mapToLong(t -> t.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition()).sum() <= 0) {
+            return;
+        }
         from.stream()
                 // 过滤已阵亡角色
-                .filter(o -> to.stream().mapToLong(t -> t.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition()).sum() > 0)
+                .filter(o -> o.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() > 0)
                 // 计算行动值
                 .peek(o -> {
                     long speed = o.getOrganismInfoDTO().getOrganismDTO().getBehaviorSpeed();

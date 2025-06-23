@@ -14,6 +14,7 @@ import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Activity;
 import com.dingCreator.astrology.entity.ActivityRecord;
 import com.dingCreator.astrology.entity.ActivityStatics;
+import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.enums.activity.ActivityLimitTypeEnum;
 import com.dingCreator.astrology.enums.exception.ActivityExceptionEnum;
 import com.dingCreator.astrology.mapper.ActivityMapper;
@@ -24,9 +25,12 @@ import com.dingCreator.astrology.request.ActivityPageQryReq;
 import com.dingCreator.astrology.util.ActivityUtil;
 import com.dingCreator.astrology.util.LockUtil;
 import com.dingCreator.astrology.vo.ArticleItemVO;
+import com.dingCreator.astrology.vo.JoinActivityResultVO;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -122,7 +126,7 @@ public interface ActivityService {
      * @param info     玩家信息
      * @return 参与结果
      */
-    default List<ArticleItemVO> joinActivity(ActivityDTO activity, PlayerInfoDTO info) {
+    default JoinActivityResultVO joinActivity(ActivityDTO activity, PlayerInfoDTO info) {
         return joinActivity(activity, info, 1);
     }
 
@@ -134,7 +138,7 @@ public interface ActivityService {
      * @param times    连续参与次数
      * @return 参与结果
      */
-    default List<ArticleItemVO> joinActivity(ActivityDTO activity, PlayerInfoDTO info, int times) {
+    default JoinActivityResultVO joinActivity(ActivityDTO activity, PlayerInfoDTO info, int times) {
         String lockKey = Constants.JOIN_ACTIVITY_LOCK_PREFIX + activity.getId() + Constants.UNDERLINE + info.getPlayerDTO().getId();
         return LockUtil.execute(lockKey, () -> {
             // 查询参与统计
@@ -155,7 +159,7 @@ public interface ActivityService {
                         .collect(Collectors.toList());
                 PlayerService.getInstance().changeAsset(info, changeList);
                 // 发放奖励
-                awards.forEach(award -> award.send2Player(info.getPlayerDTO().getId(), 1));
+                awards.forEach(award -> award.changeCnt(info.getPlayerDTO().getId(), 1));
                 // 插入记录
                 ActivityRecordMapper activityRecordMapper = sqlSession.getMapper(ActivityRecordMapper.class);
                 ActivityStaticsMapper activityStaticsMapper = sqlSession.getMapper(ActivityStaticsMapper.class);
@@ -188,8 +192,12 @@ public interface ActivityService {
                     activityStaticsMapper.insert(newStatics);
                 }
             });
+            Map<AssetTypeEnum, Long> finalCostMap = new HashMap<>();
+            activity.getCostMap().forEach((key, val) -> finalCostMap.put(key, val * times));
             // 转化奖品信息
-            return awards.stream().map(ArticleItemDTO::view).collect(Collectors.toList());
+            return JoinActivityResultVO.builder()
+                    .itemVOList(awards.stream().map(ArticleItemDTO::view).collect(Collectors.toList()))
+                    .costMap(finalCostMap).build();
         });
     }
 

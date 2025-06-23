@@ -22,9 +22,9 @@ public enum ExpExceptionEnum {
     ;
 
     private final String code;
-    private final String cheDesc;
+    private final String chnDesc;
 
     public BusinessException getException() {
-        return new BusinessException(this.code, this.cheDesc);
+        return new BusinessException(this.code, this.chnDesc);
     }
 }

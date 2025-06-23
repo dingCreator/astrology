@@ -1,10 +1,12 @@
 package com.dingCreator.astrology.vo;
 
+import com.dingCreator.astrology.enums.AssetTypeEnum;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ding
@@ -15,8 +17,7 @@ public class LootVO implements Serializable {
     /**
      * 货币
      */
-    private Long astrologyCoin;
-    private Long diamond;
+    private Map<AssetTypeEnum, Long> assetMap;
     /**
      * 经验值
      */

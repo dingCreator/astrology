@@ -1745,7 +1745,7 @@ public enum SkillEnum implements Serializable {
     )),
 
     SKILL_1038(1038L, "年兽之力",
-            "年兽的特殊能力，战斗开始时，当对方无人装备“轰天雷”时，属性大幅提升",
+            "年兽的特殊能力，战斗开始时，当对方无人装备“轰天雷”时，属性特大幅提升",
             "None", false, new ExtraBattleProcessTemplate() {
         @Override
         public void beforeBattle(BattleFieldDTO battleField) {
@@ -1757,18 +1757,18 @@ public enum SkillEnum implements Serializable {
                     .noneMatch(bar -> Objects.nonNull(bar)
                             && EquipmentEnum.EQUIPMENT_8.getId().equals(bar.getWeapon().getEquipmentId()))
             ) {
-                builder.append(organism.getName()).append("的被动【年兽之力】被触发").append("，属性大幅提升");
-                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.ATK, "年兽之力", 8.88F, builder);
-                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.MAGIC_ATK, "年兽之力", 8.88F, builder);
-                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.DEF, "年兽之力", 8.88F, builder);
-                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.MAGIC_DEF, "年兽之力", 8.88F, builder);
-                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.HIT, "年兽之力", 8.88F, builder);
-                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.DODGE, "年兽之力", 8.88F, builder);
-                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.SPEED, "年兽之力", 8.88F, builder);
-                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.CRITICAL, "年兽之力", 1.5F, builder);
-                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.CRITICAL_DAMAGE, "年兽之力", 10F, builder);
-                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.CRITICAL_REDUCTION, "年兽之力", 2F, builder);
-                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.CRITICAL_DAMAGE_REDUCTION, "年兽之力", 1F, builder);
+                builder.append(organism.getName()).append("的被动【年兽之力】被触发").append("，属性特大幅提升");
+                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.ATK, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.MAGIC_ATK, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.DEF, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.MAGIC_DEF, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.HIT, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.DODGE, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.SPEED, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.CRITICAL, "年兽之力", 0.88F, builder);
+                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.CRITICAL_DAMAGE, "年兽之力", 8.8F, builder);
+                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.CRITICAL_REDUCTION, "年兽之力", 0.88F, builder);
+                RuleUtil.addRule(this.getOwner(), BuffTypeEnum.CRITICAL_DAMAGE_REDUCTION, "年兽之力", 0.88F, builder);
                 RuleUtil.addRule(this.getOwner(), BuffTypeEnum.LIFE_STEAL, "年兽之力", 8.88F, builder);
             } else {
                 builder.append("因对方装备了“轰天雷”，").append(organism.getName()).append("的【年兽之力】失效");

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.entity.PlayerHerb;
+import com.dingCreator.astrology.enums.exception.HerbExceptionEnum;
 import com.dingCreator.astrology.mapper.PlayerHerbMapper;
 import com.dingCreator.astrology.util.LockUtil;
 
@@ -31,9 +32,15 @@ public class PlayerHerbService {
                             .eq(PlayerHerb.PLAYER_ID, playerId)
                             .eq(PlayerHerb.HERB_ID, herbId));
                     if (Objects.nonNull(playerHerb)) {
+                        if (playerHerb.getHerbCnt() + cnt < 0) {
+                            throw HerbExceptionEnum.NOT_ENOUGH_HERB.getException();
+                        }
                         playerHerb.setHerbCnt(playerHerb.getHerbCnt() + cnt);
                         mapper.updateById(playerHerb);
                     } else {
+                        if (cnt < 0) {
+                            throw HerbExceptionEnum.NOT_ENOUGH_HERB.getException();
+                        }
                         playerHerb = PlayerHerb.builder().playerId(playerId).herbId(herbId).herbCnt(cnt).build();
                         mapper.insert(playerHerb);
                     }

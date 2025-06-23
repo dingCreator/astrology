@@ -25,7 +25,14 @@ public class ArticleTitleItem extends ArticleItemDTO {
     }
 
     @Override
-    public void send2Player(Long playerId, int cnt) {
+    public void changeCnt(Long playerId, int cnt) {
+        if (cnt < 0) {
+            throw new UnsupportedOperationException("不能删除称号");
+        }
+    }
+
+    @Override
+    public void checkCnt(long playerId, int requireCnt) {
 
     }
 

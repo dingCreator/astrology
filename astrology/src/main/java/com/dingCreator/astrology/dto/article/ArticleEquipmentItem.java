@@ -26,10 +26,11 @@ public class ArticleEquipmentItem extends ArticleItemDTO {
     public ArticleEquipmentItem(Long equipmentId) {
         super(ArticleTypeEnum.EQUIPMENT.getType());
         this.equipmentId = equipmentId;
+        this.rare = EquipmentEnum.getById(equipmentId).getEquipmentRankEnum().getRare();
     }
 
     @Override
-    public void send2Player(Long playerId, int cnt) {
+    public void changeCnt(Long playerId, int cnt) {
         EquipmentBelongTo equipmentBelongTo = new EquipmentBelongTo();
         equipmentBelongTo.setBelongTo(BelongToEnum.PLAYER.getBelongTo());
         equipmentBelongTo.setBelongToId(playerId);
@@ -38,6 +39,11 @@ public class ArticleEquipmentItem extends ArticleItemDTO {
         equipmentBelongTo.setEquip(false);
         equipmentBelongTo.setTotalCnt(cnt);
         EquipmentBelongToService.getInstance().addBelongTo(equipmentBelongTo);
+    }
+
+    @Override
+    public void checkCnt(long playerId, int requireCnt) {
+
     }
 
     @Override

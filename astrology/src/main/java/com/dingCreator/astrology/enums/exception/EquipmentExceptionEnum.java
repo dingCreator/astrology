@@ -25,12 +25,13 @@ public enum EquipmentExceptionEnum {
     NOT_EQUIP_WEAPON(Constants.EQUIPMENT_EXCEPTION_PREFIX + "006", "你未穿戴武器"),
     NOT_EQUIP_ARMOR(Constants.EQUIPMENT_EXCEPTION_PREFIX + "007", "你未穿戴防具"),
     NOT_EQUIP_JEWELRY(Constants.EQUIPMENT_EXCEPTION_PREFIX + "008", "你未穿戴饰品"),
+    NOT_ENOUGH_EQUIPMENT(Constants.EQUIPMENT_EXCEPTION_PREFIX + "009", "装备数量不足"),
     ;
 
     private final String code;
-    private final String cheDesc;
+    private final String chnDesc;
 
     public BusinessException getException() {
-        return new BusinessException(this.code, this.cheDesc);
+        return new BusinessException(this.code, this.chnDesc);
     }
 }

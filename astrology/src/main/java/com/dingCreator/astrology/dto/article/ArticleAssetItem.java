@@ -5,6 +5,7 @@ import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.enums.ArticleTypeEnum;
 import com.dingCreator.astrology.enums.AssetTypeEnum;
+import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.vo.ArticleItemVO;
 import lombok.Getter;
@@ -44,10 +45,26 @@ public class ArticleAssetItem extends ArticleItemDTO {
     }
 
     @Override
-    public void send2Player(Long playerId, int cnt) {
+    public void changeCnt(Long playerId, int cnt) {
         List<PlayerAssetDTO> assetList = Collections.singletonList(
                 PlayerAssetDTO.builder().playerId(playerId).assetType(this.assetType).assetCnt(this.cnt * cnt).build());
         PlayerService.getInstance().changeAsset(PlayerCache.getPlayerById(playerId), assetList);
+    }
+
+    @Override
+    public void checkCnt(long playerId, int requireCnt) {
+        if (requireCnt <= 0) {
+            return;
+        }
+        PlayerAssetDTO assetDTO = PlayerService.getInstance().getPlayerDTOById(playerId).getAssetList().stream()
+                .filter(asset -> Objects.equals(asset.getAssetType(), this.assetType))
+                .findFirst().orElse(null);
+        if (assetDTO == null) {
+            throw AssetTypeEnum.getByCode(this.assetType).getNotEnoughException().getException();
+        }
+        if (assetDTO.getAssetCnt() < requireCnt) {
+            throw AssetTypeEnum.getByCode(assetDTO.getAssetType()).getNotEnoughException().getException();
+        }
     }
 
     @Override

@@ -28,9 +28,15 @@ public class SkillBagService {
                         .eq(SkillBag.SKILL_ID, skillId)
                 );
                 if (Objects.isNull(bag)) {
+                    if (count < 0) {
+                        throw SkillExceptionEnum.NOT_ENOUGH_SKILL.getException();
+                    }
                     bag = SkillBag.builder().playerId(playerId).skillId(skillId).skillCnt(count).build();
                     mapper.insert(bag);
                 } else {
+                    if (bag.getSkillCnt() + count < 0) {
+                        throw SkillExceptionEnum.NOT_ENOUGH_SKILL.getException();
+                    }
                     bag.setSkillCnt(bag.getSkillCnt() + count);
                     mapper.updateById(bag);
                 }
@@ -59,7 +65,7 @@ public class SkillBagService {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession.getMapper(SkillBagMapper.class)
                 .selectList(new QueryWrapper<SkillBag>()
                         .eq(SkillBag.PLAYER_ID, playerId)
-                        .ge(SkillBag.SKILL_CNT, 0)
+                        .gt(SkillBag.SKILL_CNT, 0)
                         .last(" limit " + (pageIndex - 1) * pageSize + " , " + pageSize)
                 )
         );

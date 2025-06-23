@@ -23,11 +23,11 @@ public class PlayerAssetDTO {
      */
     private Long playerId;
     /**
-     * 圣星币
+     * 资产类型
      */
     private String assetType;
     /**
-     * 缘石
+     * 资产数量
      */
     private Long assetCnt;
 }

@@ -33,12 +33,13 @@ public enum PlayerExceptionEnum {
     NOT_ENOUGH_WORLD_BOSS_TOKEN(Constants.PLAYER_EXCEPTION_PREFIX + "015", "世界boss令牌不足"),
     NOT_ENOUGH_MIN_SHUI_HE_XI(Constants.PLAYER_EXCEPTION_PREFIX + "016", "冥水河隙不足"),
     NOT_ENOUGH_ORIGIN_DRAGON_BALL(Constants.PLAYER_EXCEPTION_PREFIX + "017", "起源龙珠不足"),
+    NOT_ENOUGH_TRIAL_AFTERGLOW(Constants.PLAYER_EXCEPTION_PREFIX + "018", "审判余晖不足"),
     ;
 
     private final String code;
-    private final String cheDesc;
+    private final String chnDesc;
 
     public BusinessException getException() {
-        return new BusinessException(this.code, this.cheDesc);
+        return new BusinessException(this.code, this.chnDesc);
     }
 }

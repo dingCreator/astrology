@@ -95,9 +95,13 @@ public enum RankEnum {
             }),
     EVIL_RANK_2(JobEnum.EVIL.getJobCode(), 2, "孽镜", 21, 40, 0.4F,
             (playerId, builder) -> {
+                builder.append("获得装备【").append(EquipmentEnum.EQUIPMENT_409.getName()).append("】\n");
+                EquipmentBehavior.getInstance().sendEquipment(EquipmentEnum.EQUIPMENT_409.getId(), playerId);
             }),
     EVIL_RANK_3(JobEnum.EVIL.getJobCode(), 3, "舂臼", 41, 60, 0.3F,
             (playerId, builder) -> {
+                builder.append("获得装备【").append(EquipmentEnum.EQUIPMENT_500.getName()).append("】\n");
+                EquipmentBehavior.getInstance().sendEquipment(EquipmentEnum.EQUIPMENT_500.getId(), playerId);
             }),
     EVIL_RANK_4(JobEnum.EVIL.getJobCode(), 4, "破劫", 61, 80, 0.2F,
             (playerId, builder) -> {

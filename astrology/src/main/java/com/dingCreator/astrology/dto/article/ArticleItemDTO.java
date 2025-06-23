@@ -1,7 +1,6 @@
 package com.dingCreator.astrology.dto.article;
 
 import com.dingCreator.astrology.vo.ArticleItemVO;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -41,7 +40,16 @@ public abstract class ArticleItemDTO implements Serializable {
      *
      * @param playerId 玩家ID
      */
-    public abstract void send2Player(Long playerId, int cnt);
+    public abstract void changeCnt(Long playerId, int cnt);
+
+
+    /**
+     * 数量校验
+     *
+     * @param playerId   玩家ID
+     * @param requireCnt 需求数量
+     */
+    public abstract void checkCnt(long playerId, int requireCnt);
 
     /**
      * 反显
