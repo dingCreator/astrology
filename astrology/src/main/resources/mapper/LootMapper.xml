@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dingCreator.astrology.mapper.LootMapper">
+
+    <resultMap id="baseResultMap" type="com.dingCreator.astrology.dto.loot.LootQueryDTO">
+        <id column="id" property="id"/>
+        <result column="belong_to" property="belongTo" />
+        <result column="belong_to_id" property="belongToId" />
+        <result column="exp" property="exp" />
+        <result column="asset" property="asset" />
+        <result column="ext_info" property="extInfo" />
+        <collection property="itemList" ofType="com.dingCreator.astrology.dto.loot.LootItemQueryDTO">
+            <id column="item_id" property="id" />
+            <result column="item_loot_id" property="lootId" />
+            <result column="item_rate" property="rate" />
+            <result column="item_article_json" property="articleJson" />
+        </collection>
+    </resultMap>
+
+    <select id="getByBelongToId" resultMap="baseResultMap">
+        <include refid="selectSql" />
+        where loot.belong_to=#{belongTo} and belong_to_id=#{belongToId}
+    </select>
+
+    <select id="getByBelongToIdList" resultMap="baseResultMap">
+        <include refid="selectSql" />
+        where
+            loot.belong_to=#{belongTo} and belong_to_id IN
+            <foreach collection='belongToIdList' item='belongToId' index='belongToId' open="(" separator=',' close=")">
+                #{belongToId}
+            </foreach>
+    </select>
+
+    <sql id="selectSql">
+        select
+            loot.id as id,
+            loot.belong_to as belong_to,
+            loot.belong_to_id as belong_to_id,
+            loot.exp as exp,
+            loot.asset as asset,
+            loot.ext_info as ext_info,
+            item.id as item_id,
+            item.loot_id as item_loot_id,
+            item.article_json as item_article_json,
+            item.rate as item_rate
+        from
+            astrology_loot loot
+        left join
+            astrology_loot_item item on loot.id=item.loot_id
+    </sql>
+</mapper>

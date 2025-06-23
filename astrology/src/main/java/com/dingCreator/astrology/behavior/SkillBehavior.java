@@ -5,16 +5,20 @@ import com.dingCreator.astrology.cache.SkillCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
+import com.dingCreator.astrology.entity.SkillBag;
 import com.dingCreator.astrology.entity.SkillBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.exception.SkillExceptionEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
+import com.dingCreator.astrology.response.PageResponse;
+import com.dingCreator.astrology.service.SkillBagService;
 import com.dingCreator.astrology.service.SkillBarItemService;
 import com.dingCreator.astrology.service.SkillBelongToService;
+import com.dingCreator.astrology.util.PageUtil;
 import com.dingCreator.astrology.util.SkillUtil;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -22,6 +26,10 @@ import java.util.stream.Collectors;
  * @date 2024/2/21
  */
 public class SkillBehavior {
+
+    private final SkillBarItemService skillBarItemService = SkillBarItemService.getInstance();
+
+    private final SkillBelongToService skillBelongToService = SkillBelongToService.getInstance();
 
     /**
      * 获取技能循环链
@@ -41,7 +49,7 @@ public class SkillBehavior {
      */
     public void createSkillBarItem(Long belongToId, List<Long> skillIds) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(belongToId).getPlayerDTO();
-        List<Long> validSkillIds = SkillBelongToService.querySkillBelongToBySkillId(BelongToEnum.PLAYER.getBelongTo(),
+        List<Long> validSkillIds = skillBelongToService.querySkillBelongToBySkillId(BelongToEnum.PLAYER.getBelongTo(),
                 belongToId, skillIds).stream().map(SkillBelongTo::getSkillId).collect(Collectors.toList());
         if (skillIds.stream().distinct().count() != validSkillIds.size()) {
             throw SkillExceptionEnum.INVALID_SKILL_ID.getException();
@@ -55,16 +63,14 @@ public class SkillBehavior {
             List<String> jobEnumList = skillEnum.getJobCode();
             if (jobEnumList.contains(Constants.NONE)) {
                 throw SkillExceptionEnum.JOB_SKILL_NOT_ALLOW.getException();
-            } else if (jobEnumList.contains(Constants.ALL)) {
-                return;
-            } else if (!jobEnumList.contains(playerDTO.getJob())) {
+            } else if (!jobEnumList.contains(playerDTO.getJob()) && !jobEnumList.contains(Constants.ALL)) {
                 throw SkillExceptionEnum.JOB_SKILL_NOT_ALLOW.getException();
             }
         });
 
         SkillCache.deleteSkillBar(belongToId);
-        SkillBarItemService.deleteSkillBarItem(BelongToEnum.PLAYER.getBelongTo(), belongToId);
-        SkillBarItemService.addSkillBarItem(SkillUtil.buildSkillBarItemChain(skillIds, BelongToEnum.PLAYER, belongToId));
+        skillBarItemService.deleteSkillBarItem(BelongToEnum.PLAYER.getBelongTo(), belongToId);
+        skillBarItemService.addSkillBarItem(SkillUtil.buildSkillBarItemChain(skillIds, BelongToEnum.PLAYER, belongToId));
         SkillCache.deleteSkillBar(belongToId);
     }
 
@@ -75,7 +81,43 @@ public class SkillBehavior {
      * @param skillId    技能ID
      */
     public void createSkillBelongTo(Long belongToId, Long skillId) {
-        SkillBelongToService.createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), belongToId, skillId);
+        skillBelongToService.createSkillBelongTo(BelongToEnum.PLAYER.getBelongTo(), belongToId, skillId);
+    }
+
+    /**
+     * 学习技能
+     *
+     * @param playerId 玩家ID
+     * @param idOrName 技能ID或技能名称
+     */
+    public SkillEnum learnSkill(Long playerId, String idOrName) {
+        PlayerDTO player = PlayerCache.getPlayerById(playerId).getPlayerDTO();
+        SkillEnum skillEnum = SkillUtil.analyseSkill(idOrName);
+        if (Objects.isNull(skillEnum)) {
+            throw SkillExceptionEnum.CANT_ANALYSE_SKILL.getException(idOrName);
+        }
+        List<String> jobCodes = skillEnum.getJobCode();
+        if (jobCodes.contains(Constants.NONE)) {
+            throw SkillExceptionEnum.JOB_SKILL_NOT_ALLOW_2.getException();
+        } else if (!jobCodes.contains(player.getJob()) && !jobCodes.contains(Constants.ALL)) {
+            throw SkillExceptionEnum.JOB_SKILL_NOT_ALLOW_2.getException();
+        }
+        SkillBagService.getInstance().learnSkill(playerId, skillEnum.getId());
+        return skillEnum;
+    }
+
+    /**
+     * 技能背包
+     *
+     * @param playerId  玩家ID
+     * @param pageIndex 页码
+     * @param pageSize  页面大小
+     * @return 技能背包
+     */
+    public PageResponse<SkillBag> pageSkillBag(Long playerId, int pageIndex, int pageSize) {
+        int count = SkillBagService.getInstance().countSkillBag(playerId);
+        List<SkillBag> list = SkillBagService.getInstance().pageSkillBag(playerId, pageIndex, pageSize);
+        return PageUtil.addPageDesc(list, pageIndex, pageSize, count);
     }
 
     /**
@@ -84,8 +126,8 @@ public class SkillBehavior {
      * @param belongToId 归属ID
      * @return 技能列表
      */
-    public List<SkillBelongTo> getSkillBelongTo(Long belongToId) {
-        return SkillBelongToService.querySkillBelongToList(BelongToEnum.PLAYER.getBelongTo(), belongToId);
+    public PageResponse<SkillBelongTo> getSkillBelongTo(Long belongToId, int pageIndex, int pageSize) {
+        return skillBelongToService.querySkillBelongToPage(BelongToEnum.PLAYER.getBelongTo(), belongToId, pageIndex, pageSize);
     }
 
     /**
@@ -110,10 +152,12 @@ public class SkillBehavior {
     /**
      * 获取技能列表
      *
+     * @param pageSize  每页条数
+     * @param pageIndex 页码
      * @return 技能列表
      */
-    public List<SkillEnum> listSkillEnum() {
-        return Arrays.asList(SkillEnum.values());
+    public PageResponse<SkillEnum> listSkillEnum(int pageIndex, int pageSize) {
+        return PageUtil.buildPage(SkillEnum.values(), pageIndex, pageSize);
     }
 
     private static class Holder {

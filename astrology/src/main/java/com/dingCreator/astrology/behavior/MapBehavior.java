@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
  */
 public class MapBehavior {
 
+    private final MapService mapService = MapService.getInstance();
+
     /**
      * 获取距离
      *
@@ -25,7 +27,7 @@ public class MapBehavior {
      */
     public long getDistance(Long playerId, String mapName) {
         long fromMapId = PlayerCache.getPlayerById(playerId).getPlayerDTO().getMapId();
-        Map target = MapService.getMapByName(mapName);
+        Map target = mapService.getMapByName(mapName);
         return MapUtil.manhattanDistance(fromMapId, target.getId());
     }
 
@@ -37,11 +39,11 @@ public class MapBehavior {
      * @return 需要花费时间
      */
     public long getMoveSeconds(Long playerId, String mapName) {
-        Map target = MapService.getMapByName(mapName);
+        Map target = mapService.getMapByName(mapName);
         if (MapUtil.getNowLocation(playerId).equals(target.getId())) {
             throw MapExceptionEnum.SAME_MAP.getException();
         }
-        PlayerBehavior.getInstance().flushStatus(PlayerCache.getPlayerById(playerId).getPlayerDTO());
+        PlayerCache.getPlayerById(playerId).getPlayerDTO().getStatus();
         return MapUtil.moveTime(playerId, target.getId());
     }
 
@@ -52,11 +54,11 @@ public class MapBehavior {
      * @param mapName  地图名称
      */
     public long startMove(Long playerId, String mapName) {
-        Map target = MapService.getMapByName(mapName);
+        Map target = mapService.getMapByName(mapName);
         if (MapUtil.getNowLocation(playerId).equals(target.getId())) {
             throw MapExceptionEnum.SAME_MAP.getException();
         }
-        PlayerBehavior.getInstance().flushStatus(PlayerCache.getPlayerById(playerId).getPlayerDTO());
+        PlayerCache.getPlayerById(playerId).getPlayerDTO().getStatus();
         MapUtil.startMove(playerId, target.getId());
         return MapUtil.moveTime(playerId, target.getId());
     }

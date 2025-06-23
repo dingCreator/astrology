@@ -6,8 +6,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * 击败怪物后的掉落物
  *
@@ -35,18 +33,18 @@ public class Loot {
     /**
      * 货币
      */
-    @TableField("money")
-    private Long money;
+    @TableField("asset")
+    private String asset;
     /**
      * 经验值
      */
     @TableField("exp")
     private Long exp;
     /**
-     * 掉落物集合json
+     * 扩展信息
      */
-    @TableField("loot_item_list")
-    private String lootItemList;
+    @TableField("ext_info")
+    private String extInfo;
 
     public static final String BELONG_TO = "belong_to";
 

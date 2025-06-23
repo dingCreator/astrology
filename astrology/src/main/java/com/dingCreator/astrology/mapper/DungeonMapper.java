@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.dingCreator.astrology.entity.Dungeon;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -12,7 +13,7 @@ import java.util.List;
  * @date 2024/4/4
  */
 @Mapper
-public interface DungeonMapper {
+public interface DungeonMapper extends BaseMapper<Dungeon> {
 
     /**
      * 根据ID获取副本

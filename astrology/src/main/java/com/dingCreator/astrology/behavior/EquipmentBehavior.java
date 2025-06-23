@@ -1,11 +1,16 @@
 package com.dingCreator.astrology.behavior;
 
+import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
+import com.dingCreator.astrology.dto.equipment.EquipmentDTO;
+import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.EquipmentBelongTo;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
+import com.dingCreator.astrology.enums.equipment.EquipmentTypeEnum;
 import com.dingCreator.astrology.enums.exception.EquipmentExceptionEnum;
 import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.service.EquipmentBelongToService;
@@ -14,7 +19,7 @@ import com.dingCreator.astrology.util.PageUtil;
 import com.dingCreator.astrology.vo.EquipmentGroupVO;
 import com.dingCreator.astrology.vo.EquipmentVO;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -25,13 +30,40 @@ import java.util.stream.Collectors;
  */
 public class EquipmentBehavior {
 
+    private final EquipmentBelongToService equipmentBelongToService = EquipmentBelongToService.getInstance();
+
     /**
      * 穿装备
      */
-    public void equip(long playerId, long id) {
-        EquipmentBelongTo equipmentBelongTo = EquipmentBelongToService.getById(id);
+    public void equip(long playerId, String equipmentName, int level) {
+        EquipmentBelongTo equipmentBelongTo = equipmentBelongToService
+                .getByNameAndLevel(BelongToEnum.PLAYER.getBelongTo(), playerId, equipmentName, level);
         EquipmentUtil.validate(playerId, equipmentBelongTo);
-        EquipmentUtil.updateEquipment(playerId, equipmentBelongTo, true);
+        PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
+        EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentBelongTo.getEquipmentId());
+        EquipmentBarDTO equipmentBarDTO = playerInfoDTO.getEquipmentBarDTO();
+
+        if (EquipmentTypeEnum.WEAPON.equals(equipmentEnum.getEquipmentTypeEnum())) {
+            if (Objects.nonNull(equipmentBarDTO.getWeapon())) {
+                equipmentBelongToService.updateEquipment(equipmentBarDTO.getWeapon().getId(), false);
+            }
+            equipmentBarDTO.setWeapon(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
+                    equipmentBelongTo.getEquipmentLevel()));
+        } else if (EquipmentTypeEnum.ARMOR.equals(equipmentEnum.getEquipmentTypeEnum())) {
+            if (Objects.nonNull(equipmentBarDTO.getArmor())) {
+                equipmentBelongToService.updateEquipment(equipmentBarDTO.getArmor().getId(), false);
+            }
+            equipmentBarDTO.setArmor(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
+                    equipmentBelongTo.getEquipmentLevel()));
+        } else if (EquipmentTypeEnum.JEWELRY.equals(equipmentEnum.getEquipmentTypeEnum())) {
+            if (Objects.nonNull(equipmentBarDTO.getJewelry())) {
+                equipmentBelongToService.updateEquipment(equipmentBarDTO.getJewelry().getId(), false);
+            }
+            equipmentBarDTO.setJewelry(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
+                    equipmentBelongTo.getEquipmentLevel()));
+        }
+        playerInfoDTO.getPlayerDTO().clearAdditionVal();
+        equipmentBelongToService.updateEquipment(equipmentBelongTo.getId(), true);
     }
 
     /**
@@ -39,10 +71,8 @@ public class EquipmentBehavior {
      *
      * @param playerId 玩家ID
      */
-    public void remove(long playerId, long id) {
-        EquipmentBelongTo equipmentBelongTo = EquipmentBelongToService.getById(id);
-        EquipmentUtil.validate(playerId, equipmentBelongTo);
-        EquipmentUtil.updateEquipment(playerId, equipmentBelongTo, false);
+    public void remove(long playerId, EquipmentTypeEnum equipmentTypeEnum) {
+        equipmentTypeEnum.getRemove().accept(playerId);
     }
 
     /**
@@ -51,11 +81,23 @@ public class EquipmentBehavior {
      * @param playerId 玩家ID
      * @return 装备概览
      */
-    public PageResponse<EquipmentGroupVO> listEquipmentGroup(long playerId, int pageIndex, int pageSize) {
-        PageResponse<EquipmentGroupVO> response = new PageResponse<>();
+    public PageResponse<EquipmentGroupVO> listEquipmentGroup(long playerId, int pageIndex, int pageSize, String equipmentName) {
         // 校验一下有没有创建角色
         PlayerCache.getPlayerById(playerId);
-        List<EquipmentGroupVO> list = EquipmentBelongToService.listGroupByBelongToId(BelongToEnum.PLAYER.getBelongTo(), playerId);
+        List<EquipmentGroupVO> list = new ArrayList<>();
+        int total = 0;
+        if (StringUtils.isBlank(equipmentName)) {
+            total = equipmentBelongToService.selectCount(BelongToEnum.PLAYER.getBelongTo(), playerId, null);
+            list = equipmentBelongToService.listGroupByBelongToId(BelongToEnum.PLAYER.getBelongTo(), playerId, null);
+        } else {
+            // 获取含关键字的装备ID
+            List<EquipmentEnum> enumList = EquipmentEnum.fuzzyQryByName(equipmentName);
+            if (CollectionUtil.isNotEmpty(enumList)) {
+                List<Long> equipmentIds = enumList.stream().map(EquipmentEnum::getId).collect(Collectors.toList());
+                total = equipmentBelongToService.selectCount(BelongToEnum.PLAYER.getBelongTo(), playerId, equipmentIds);
+                list = equipmentBelongToService.listGroupByBelongToId(BelongToEnum.PLAYER.getBelongTo(), playerId, equipmentIds);
+            }
+        }
         return PageUtil.buildPage(list, pageIndex, pageSize);
     }
 
@@ -66,45 +108,52 @@ public class EquipmentBehavior {
      * @param equipmentName 装备名称
      * @return 装备背包
      */
-    public List<EquipmentVO> listPlayerEquipmentByName(long playerId, String equipmentName) {
+    public EquipmentVO getPlayerEquipmentByName(long playerId, String equipmentName) {
         PlayerCache.getPlayerById(playerId);
         EquipmentEnum equipmentEnum = EquipmentEnum.getByName(equipmentName);
 
-        List<EquipmentBelongTo> equipmentBelongToList = EquipmentBelongToService.getByBelongToIdAndEquipmentId(
+        EquipmentBelongTo equipmentBelongTo = equipmentBelongToService.getByBelongToIdAndEquipmentId(
                 BelongToEnum.PLAYER.getBelongTo(), playerId, equipmentEnum.getId());
-        if (Objects.isNull(equipmentBelongToList) || equipmentBelongToList.size() == 0) {
+        if (Objects.isNull(equipmentBelongTo)) {
             throw EquipmentExceptionEnum.DONT_HAVE_EQUIPMENT.getException();
         }
 
-        return equipmentBelongToList.stream().map(equipmentBelongTo -> {
-            String propStr = equipmentEnum.getProp().stream().map(prop -> {
-                StringBuilder builder = new StringBuilder();
-                if (prop.getProp().getVal() != 0) {
-                    builder.append(prop.getEquipmentPropertiesTypeEnum().getNameCh());
-                    if (prop.getProp().getVal() > 0) {
-                        builder.append("+");
+        String propStr = equipmentEnum.getProp().stream()
+                .map(prop -> {
+                    StringBuilder builder = new StringBuilder();
+                    if (prop.getProp().getVal() != 0) {
+                        builder.append(prop.getEquipmentPropertiesTypeEnum().getNameCh());
+                        if (prop.getProp().getVal() > 0) {
+                            builder.append("+");
+                        }
+                        builder.append(prop.getProp().getVal()).append(Constants.BLANK);
                     }
-                    builder.append(prop.getProp().getVal()).append(Constants.BLANK);
-                }
-                if (prop.getProp().getRate() != 0) {
-                    builder.append(prop.getEquipmentPropertiesTypeEnum().getNameCh());
-                    if (prop.getProp().getVal() > 0) {
-                        builder.append("+");
+                    if (prop.getProp().getRate() != 0) {
+                        builder.append(prop.getEquipmentPropertiesTypeEnum().getNameCh());
+                        if (prop.getProp().getRate() > 0) {
+                            builder.append("+");
+                        }
+                        builder.append(prop.getProp().getRate() * 100);
+                        builder.append("%").append(Constants.BLANK);
                     }
-                    builder.append(prop.getProp().getRate() * 100);
-                    builder.append("%").append(Constants.BLANK);
-                }
-                return builder;
-            }).reduce(StringBuilder::append).orElse(new StringBuilder()).toString();
+                    return builder;
+                })
+                .reduce((builder1, builder2) -> builder1.append("\n").append(builder2))
+                .orElse(new StringBuilder()).toString();
 
-            EquipmentVO equipmentVO = new EquipmentVO();
-            equipmentVO.setId(equipmentBelongTo.getId());
-            equipmentVO.setEquipmentName(equipmentEnum.getName());
-            equipmentVO.setEquipmentProperty(propStr);
-            equipmentVO.setLevel(equipmentBelongTo.getLevel());
-            equipmentVO.setEquip(equipmentBelongTo.getEquip() ? "已装备" : "未装备");
-            return equipmentVO;
-        }).collect(Collectors.toList());
+        EquipmentVO equipmentVO = new EquipmentVO();
+        equipmentVO.setRank(equipmentEnum.getEquipmentRankEnum());
+        equipmentVO.setId(equipmentBelongTo.getId());
+        equipmentVO.setEquipmentName(equipmentEnum.getName());
+        equipmentVO.setType(equipmentEnum.getEquipmentTypeEnum());
+        equipmentVO.setLimitJob(equipmentEnum.getLimitJob());
+        equipmentVO.setLimitLevel(equipmentEnum.getLimitLevel());
+        equipmentVO.setEquipmentProperty(propStr);
+        equipmentVO.setLevel(equipmentBelongTo.getEquipmentLevel());
+        equipmentVO.setEquip(equipmentBelongTo.getEquip());
+        equipmentVO.setCnt(equipmentBelongTo.getTotalCnt());
+        equipmentVO.setDescription(equipmentEnum.getDesc());
+        return equipmentVO;
     }
 
     /**
@@ -145,9 +194,10 @@ public class EquipmentBehavior {
         belongTo.setBelongTo(BelongToEnum.PLAYER.getBelongTo());
         belongTo.setBelongToId(playerId);
         belongTo.setEquipmentId(equipmentId);
+        belongTo.setTotalCnt(1);
         belongTo.setEquip(false);
-        belongTo.setLevel(1);
-        EquipmentBelongToService.addBelongTo(belongTo);
+        belongTo.setEquipmentLevel(1);
+        equipmentBelongToService.addBelongTo(belongTo);
     }
 
     private static class Holder {

@@ -23,6 +23,10 @@ public class PlayerInfoDTO implements Serializable {
      */
     private Boolean team;
     /**
+     * 小队ID
+     */
+    private Long teamId;
+    /**
      * 技能栏
      */
     private SkillBarDTO skillBarDTO;
@@ -30,6 +34,10 @@ public class PlayerInfoDTO implements Serializable {
      * 装备栏
      */
     private EquipmentBarDTO equipmentBarDTO;
+    /**
+     * 货币
+     */
+    private List<PlayerAssetDTO> assetList;
     /**
      * 称号
      */

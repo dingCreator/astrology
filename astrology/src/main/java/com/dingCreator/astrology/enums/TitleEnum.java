@@ -1,6 +1,6 @@
 package com.dingCreator.astrology.enums;
 
-import com.dingCreator.astrology.dto.BuffDTO;
+import com.dingCreator.astrology.dto.battle.BuffDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

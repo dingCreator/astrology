@@ -14,14 +14,14 @@ public enum EquipmentRankEnum {
     /**
      * 装备级别
      */
-    SP("SP", "论外级", 0, 0),
-    ORDINARY("ORDINARY", "凡级", 0, 0),
-    NORMAL("NORMAL", "普通级", 0, 15),
-    DYNAMIC("DYNAMIC", "灵威级", 0, 30),
-    MYSTERY("MYSTERY", "通玄级", 0, 50),
-    WONDER("WONDER", "神迹级", 0, 75),
-    RULE("RULE", "法则级", 0, 81),
-    WORLD("WORLD", "世界级", 0, 200),
+    SP("SP", "论外级", 0, 0, 0),
+    ORDINARY("ORDINARY", "凡级", 0, 0, 100),
+    NORMAL("NORMAL", "普通级", 0, 0, 200),
+    DYNAMIC("DYNAMIC", "灵威级", 0, 20, 300),
+    MYSTERY("MYSTERY", "通玄级", 0, 50, 400),
+    WONDER("WONDER", "神迹级", 0, 75, 500),
+    RULE("RULE", "法则级", 0, 81, 600),
+    WORLD("WORLD", "世界级", 0, 500, 9999),
     ;
 
     private final String rank;
@@ -31,4 +31,6 @@ public enum EquipmentRankEnum {
     private final Integer maxEquipmentLevel;
 
     private final Integer defaultPlayerLimitLevel;
+
+    private final Integer rare;
 }

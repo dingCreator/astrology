@@ -1,14 +1,16 @@
 package com.dingCreator.astrology.service;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dingCreator.astrology.database.DatabaseContext;
 import com.dingCreator.astrology.database.DatabaseProvider;
+import com.dingCreator.astrology.dto.loot.LootDTO;
+import com.dingCreator.astrology.dto.loot.LootQueryDTO;
 import com.dingCreator.astrology.entity.Loot;
+import com.dingCreator.astrology.entity.LootItem;
+import com.dingCreator.astrology.mapper.LootItemMapper;
 import com.dingCreator.astrology.mapper.LootMapper;
-import org.apache.ibatis.annotations.Param;
+import com.dingCreator.astrology.util.LootUtil;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author ding
@@ -22,13 +24,9 @@ public class LootService {
      * @param belongToId 归属ID
      * @return 掉落物配置
      */
-    public static Loot getByBelongToId(String belongTo, Long belongToId) {
-        return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
-                    Wrapper<Loot> wrapper = new QueryWrapper<Loot>()
-                            .eq(Loot.BELONG_TO, belongTo)
-                            .eq(Loot.BELONG_TO_ID, belongToId);
-                    return sqlSession.getMapper(LootMapper.class).selectOne(wrapper);
-                }
+    public List<LootQueryDTO> getByBelongToId(String belongTo, Long belongToId) {
+        return DatabaseProvider.getInstance().executeReturn(sqlSession ->
+            sqlSession.getMapper(LootMapper.class).getByBelongToId(belongTo, belongToId)
         );
     }
 
@@ -39,8 +37,43 @@ public class LootService {
      * @param belongToIdList 归属ID
      * @return 掉落物配置
      */
-    public static List<Loot> getByBelongToId(String belongTo, List<Long> belongToIdList) {
+    public List<LootQueryDTO> getByBelongToId(String belongTo, List<Long> belongToIdList) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession.getMapper(LootMapper.class)
-                .getByBelongToId(belongTo, belongToIdList));
+                .getByBelongToIdList(belongTo, belongToIdList));
+    }
+
+    public void createLoot(String belongTo, Long belongToId, LootDTO lootDTO) {
+        DatabaseProvider.getInstance().transactionExecute(sqlSession -> {
+            LootQueryDTO lootQueryDTO = LootUtil.convertLoot(lootDTO);
+            if (Objects.isNull(lootQueryDTO)) {
+                return;
+            }
+            Loot loot = new Loot();
+            loot.setBelongTo(belongTo);
+            loot.setBelongToId(belongToId);
+            loot.setExp(lootQueryDTO.getExp());
+            loot.setAsset(lootQueryDTO.getAsset());
+            loot.setExtInfo(lootQueryDTO.getExtInfo());
+            sqlSession.getMapper(LootMapper.class).insert(loot);
+            lootQueryDTO.getItemList().forEach(itemQry -> {
+                LootItem lootItem = new LootItem();
+                lootItem.setLootId(loot.getId());
+                lootItem.setRate(itemQry.getRate());
+                lootItem.setArticleJson(itemQry.getArticleJson());
+                sqlSession.getMapper(LootItemMapper.class).insert(lootItem);
+            });
+        });
+    }
+
+    private LootService() {
+
+    }
+
+    public static LootService getInstance() {
+        return Holder.SERVICE;
+    }
+
+    private static class Holder {
+        private static final LootService SERVICE = new LootService();
     }
 }

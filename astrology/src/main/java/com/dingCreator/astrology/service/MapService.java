@@ -20,7 +20,7 @@ public class MapService {
      * @param mapId 地图ID
      * @return 地图信息
      */
-    public static Map getMapById(Long mapId) {
+    public Map getMapById(Long mapId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(MapDataMapper.class).getMapById(mapId));
     }
@@ -31,7 +31,7 @@ public class MapService {
      * @param name 地图名称
      * @return 地图信息
      */
-    public static Map getMapByName(String name) {
+    public Map getMapByName(String name) {
         Map map = DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(MapDataMapper.class).getMapByName(name));
         if (Objects.isNull(map)) {
@@ -48,5 +48,18 @@ public class MapService {
     public static List<Map> listMap() {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(MapDataMapper.class).listMap());
+    }
+
+
+    private static class Holder {
+        private static final MapService SERVICE = new MapService();
+    }
+
+    private MapService() {
+
+    }
+
+    public static MapService getInstance() {
+        return MapService.Holder.SERVICE;
     }
 }

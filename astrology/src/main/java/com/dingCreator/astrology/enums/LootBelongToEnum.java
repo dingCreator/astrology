@@ -15,9 +15,13 @@ public enum LootBelongToEnum {
      */
     DUNGEON("Dungeon"),
     /**
-     * 副本怪物
+     * 副本怪物波
      */
-    DUNGEON_BOSS("DungeonBoss"),
+    DUNGEON_WAVE("DungeonWave"),
+    /**
+     * 副本怪物层
+     */
+    DUNGEON_FLOOR("DungeonFloor"),
     /**
      * 守关boss
      */

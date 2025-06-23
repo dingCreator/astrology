@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -19,26 +20,45 @@ import java.util.function.Supplier;
  */
 public class DateUtil {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DateUtil.class);
     private static final List<DateTimeFormatter> DATE_TIME_FORMATTER = Arrays.asList(
-            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_1 + Constants.BLANK + Constants.TIME_FORMAT),
-            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_2 + Constants.BLANK + Constants.TIME_FORMAT),
-            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_3 + Constants.BLANK + Constants.TIME_FORMAT),
-            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_4 + Constants.BLANK + Constants.TIME_FORMAT)
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_1 + Constants.BLANK + Constants.TIME_FORMAT_1),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_2 + Constants.BLANK + Constants.TIME_FORMAT_1),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_3 + Constants.BLANK + Constants.TIME_FORMAT_1),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_4 + Constants.BLANK + Constants.TIME_FORMAT_1),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_1 + Constants.BLANK + Constants.TIME_FORMAT_2),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_2 + Constants.BLANK + Constants.TIME_FORMAT_2),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_3 + Constants.BLANK + Constants.TIME_FORMAT_2),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_4 + Constants.BLANK + Constants.TIME_FORMAT_2)
+    );
+
+    private static final List<DateTimeFormatter> DATE_FORMATTER = Arrays.asList(
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_1),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_2),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_3),
+            DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_4)
     );
 
     public static LocalDate parseDate(String str) {
-        return doParse(formatter -> LocalDate.parse(str, formatter));
+        for (DateTimeFormatter formatter : DATE_FORMATTER) {
+            try {
+                LocalDate localDate = LocalDate.parse(str, formatter);
+                if (Objects.nonNull(localDate)) {
+                    return localDate;
+                }
+            } catch (Exception e) {
+
+            }
+        }
+        return null;
     }
 
     public static LocalDateTime parseDateTime(String str) {
-        return doParse(formatter -> LocalDateTime.parse(str, formatter));
-    }
-
-    private static <T> T doParse(Function<DateTimeFormatter, T> function) {
         for (DateTimeFormatter formatter : DATE_TIME_FORMATTER) {
             try {
-                return function.apply(formatter);
+                LocalDateTime localDateTime = LocalDateTime.parse(str, formatter);
+                if (Objects.nonNull(localDateTime)) {
+                    return localDateTime;
+                }
             } catch (Exception e) {
 
             }

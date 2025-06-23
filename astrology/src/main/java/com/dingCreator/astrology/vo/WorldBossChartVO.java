@@ -23,17 +23,9 @@ public class WorldBossChartVO {
     /**
      * 参与者名称
      */
-    private List<String> memberNames;
+    private String playerName;
     /**
      * 伤害量
      */
     private Long damage;
-    /**
-     * 页码
-     */
-    private Integer pageIndex;
-    /**
-     * 页面大小
-     */
-    private Integer pageSize;
 }

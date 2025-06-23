@@ -10,6 +10,8 @@ public class RandomUtil {
 
     private static final Random RAND = new Random();
 
+    private static final int COEFFICIENT = 10000;
+
     /**
      * 将概率标准化到0-1,并保留n位小数
      *
@@ -43,11 +45,35 @@ public class RandomUtil {
     /**
      * 生成范围内的随机整形
      *
+     * @param bound 最大值
+     * @return 随机数
+     */
+    public static int rangeIntRandom(int bound) {
+        return RAND.nextInt(bound);
+    }
+
+    /**
+     * 生成范围内的随机整形
+     *
      * @param start 最小值
      * @param end   最大值
      * @return 随机数
      */
     public static int rangeIntRandom(int start, int end) {
         return start + RAND.nextInt(end - start);
+    }
+
+    /**
+     * 生成范围内的随机整形
+     *
+     * @param start 最小值
+     * @param end   最大值
+     * @return 随机数
+     */
+    public static float rangeFloatRandom(float start, float end) {
+        int startInt = (int) (start * COEFFICIENT);
+        int endInt = (int) (end * COEFFICIENT);
+        int result = startInt + RAND.nextInt(endInt - startInt);
+        return (float) result / (float) COEFFICIENT;
     }
 }

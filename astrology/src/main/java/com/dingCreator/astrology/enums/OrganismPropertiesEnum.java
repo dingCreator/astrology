@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -83,7 +82,7 @@ public enum OrganismPropertiesEnum {
     /**
      * 吸血
      */
-    LIFE_STEALING("lifeStealing", "吸血", (o, val) -> o.setLifeStealing(Float.parseFloat(val))),
+    LIFE_STEAL("lifeStealing", "吸血", (o, val) -> o.setLifeStealing(Float.parseFloat(val))),
     /**
      * 命中
      */
@@ -114,6 +113,10 @@ public enum OrganismPropertiesEnum {
     }
 
     public static OrganismPropertiesEnum getByChnDesc(String chnDesc) {
-        return PROP_MAP.getOrDefault(chnDesc, Collections.singletonList(null)).get(0);
+        return Arrays.stream(values()).filter(e -> e.getChnDesc().equals(chnDesc)).findFirst().orElse(null);
+    }
+
+    public static OrganismPropertiesEnum getByFieldName(String fieldName) {
+        return Arrays.stream(values()).filter(e -> e.getFieldName().equals(fieldName)).findFirst().orElse(null);
     }
 }

@@ -1,10 +1,12 @@
 package com.dingCreator.astrology.dto.equipment;
 
+import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentPropertiesTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @author ding

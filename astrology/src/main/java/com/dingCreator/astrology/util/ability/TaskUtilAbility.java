@@ -21,6 +21,7 @@ import com.dingCreator.astrology.service.TaskScheduleDetailService;
 import com.dingCreator.astrology.vo.TaskResultVO;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -58,7 +59,7 @@ public class TaskUtilAbility {
      */
     public static void validatePlayer(PlayerInfoDTO playerInfo, List<PlayerInfoDTO> teamPlayers) {
         teamPlayers.stream().map(PlayerInfoDTO::getPlayerDTO).forEach(teamPlayer -> {
-            if (PlayerBehavior.getInstance().getStatus(teamPlayer).equals(PlayerStatusEnum.MOVING.getCode())) {
+            if (playerInfo.getPlayerDTO().getStatus().equals(PlayerStatusEnum.MOVING.getCode())) {
                 throw TaskExceptionEnum.PLAYER_IS_MOVING.getException();
             }
         });
@@ -90,7 +91,7 @@ public class TaskUtilAbility {
      */
     public static PeakTaskDTO initPeakTaskTplDTO(PlayerInfoDTO playerInfo) {
         PlayerDTO playerDTO = playerInfo.getPlayerDTO();
-        PeakTaskDTO task = PeakTaskTemplateService.getPeakTaskDTO(playerDTO.getJob(), playerDTO.getRank());
+        PeakTaskDTO task = PeakTaskTemplateService.getInstance().getPeakTaskDTO(playerDTO.getJob(), playerDTO.getRank());
         if (Objects.isNull(task)) {
             throw TaskExceptionEnum.PEAK_TASK_NOT_EXIST.getException();
         }
@@ -242,7 +243,11 @@ public class TaskUtilAbility {
      * @return 进度详情
      */
     public static TaskScheduleDetailDTO initScheduleDetailById(long playerId, long scheduleDetailId) {
-        return TaskCache.getTaskScheduleDetailDTOById(playerId, scheduleDetailId);
+        TaskScheduleDetailDTO detailDTO = TaskCache.getTaskScheduleDetailDTOById(playerId, scheduleDetailId);
+        if (Objects.isNull(detailDTO)) {
+            throw TaskExceptionEnum.NO_NEED_COMPLETE_TASK_SCHEDULE.getException();
+        }
+        return detailDTO;
     }
 
     /**
@@ -253,7 +258,11 @@ public class TaskUtilAbility {
      * @return 任务总进度
      */
     public static TaskScheduleTitleDTO initScheduleTitleByDetailId(long playerId, long scheduleDetailId) {
-        return TaskCache.getTaskScheduleTitleDTOById(playerId, scheduleDetailId);
+        TaskScheduleTitleDTO title = TaskCache.getTaskScheduleTitleDTOById(playerId, scheduleDetailId);
+        if (Objects.isNull(title)) {
+            throw TaskExceptionEnum.NO_NEED_COMPLETE_TASK_SCHEDULE.getException();
+        }
+        return title;
     }
 
     /**
@@ -276,7 +285,10 @@ public class TaskUtilAbility {
             List<Long> sortedTaskTplIdList = tplTitle.getTemplateList().stream()
                     .sorted(Comparator.comparing(TaskTemplateDTO::getPriority))
                     .map(TaskTemplateDTO::getId).collect(Collectors.toList());
-            sortedTaskTplIdList.forEach(tplId -> {
+            AtomicBoolean continued = new AtomicBoolean(true);
+            sortedTaskTplIdList.stream()
+                    .filter(tplId -> continued.get())
+                    .forEach(tplId -> {
                 boolean completed = scheduleTitle.getScheduleList().stream()
                         .filter(schedule -> schedule.getTaskTemplateId().equals(tplId))
                         .map(TaskScheduleDTO::getTaskScheduleEnum)
@@ -285,6 +297,9 @@ public class TaskUtilAbility {
                 boolean completingThisTask = scheduleDetail.getTaskTemplateId().equals(tplId);
                 if (!completed && !completingThisTask) {
                     throw TaskExceptionEnum.MUST_COMPLETE_TASK_AS_SORT.getException();
+                }
+                if (completingThisTask) {
+                    continued.set(false);
                 }
             });
         }
@@ -312,7 +327,7 @@ public class TaskUtilAbility {
      * @param scheduleDetail 新的进度详情
      */
     public static void updateTaskSchedule(TaskScheduleDetailDTO scheduleDetail) {
-        TaskScheduleDetailService.updateSchedule(scheduleDetail);
+        TaskScheduleDetailService.getInstance().updateSchedule(scheduleDetail);
     }
 
     /**

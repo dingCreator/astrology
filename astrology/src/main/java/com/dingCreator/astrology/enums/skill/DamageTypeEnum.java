@@ -13,20 +13,22 @@ public enum DamageTypeEnum {
     /**
      * 物理攻击
      */
-    ATK("ATK"),
+    ATK("ATK", "物理"),
     /**
      * 法术攻击
      */
-    MAGIC("MAGIC"),
+    MAGIC("MAGIC", "法术"),
     /**
      * 特殊攻击
      */
-    SPECIAL("SPECIAL"),
+    SPECIAL("SPECIAL", "特殊"),
     /**
      * 真实伤害
      */
-    REAL("REAL"),
+    REAL("REAL", "真实"),
     ;
 
     private final String typeName;
+
+    private final String typeChnDesc;
 }

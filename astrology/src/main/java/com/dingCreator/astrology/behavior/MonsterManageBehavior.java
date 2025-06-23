@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.dingCreator.astrology.cache.SkillCache;
 import com.dingCreator.astrology.cache.WorldBossCache;
 import com.dingCreator.astrology.constants.Constants;
+import com.dingCreator.astrology.dto.WorldBossAwardDTO;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.entity.SkillBarItem;
 import com.dingCreator.astrology.entity.base.Monster;
@@ -13,17 +14,15 @@ import com.dingCreator.astrology.enums.exception.MonsterManageExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.exception.BusinessException;
-import com.dingCreator.astrology.service.MonsterService;
-import com.dingCreator.astrology.service.RankUpBossService;
-import com.dingCreator.astrology.service.SkillBarItemService;
-import com.dingCreator.astrology.service.WorldBossService;
+import com.dingCreator.astrology.response.PageResponse;
+import com.dingCreator.astrology.service.*;
+import com.dingCreator.astrology.util.BattleUtil;
 import com.dingCreator.astrology.util.DateUtil;
+import com.dingCreator.astrology.util.PageUtil;
+import com.dingCreator.astrology.vo.BattleResultVO;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -32,17 +31,25 @@ import java.util.stream.Collectors;
  */
 public class MonsterManageBehavior {
 
+    private final MonsterService monsterService = MonsterService.getInstance();
+
+    private final WorldBossService worldBossService = WorldBossService.getInstance();
+
+    private final RankUpBossService rankUpBossService = RankUpBossService.getInstance();
+
+    private final SkillBarItemService skillBarItemService = SkillBarItemService.getInstance();
+
     /**
      * 查询怪物信息
      *
      * @param pageIndex 页码
      * @return 怪物列表
      */
-    public List<Monster> listMonster(int pageIndex) {
+    public PageResponse<Monster> pageMonster(int pageIndex, int pageSize) {
         if (pageIndex <= 0) {
             throw MonsterManageExceptionEnum.LIST_MONSTER_PAGE_ERR.getException();
         }
-        return MonsterService.listMonster(pageIndex, Constants.DEFAULT_PAGE_SIZE);
+        return PageUtil.addPageDesc(monsterService.listMonster(pageIndex, pageSize), pageIndex, pageSize, countAllBoss());
     }
 
     /**
@@ -51,7 +58,7 @@ public class MonsterManageBehavior {
      * @return 数量
      */
     public int countAllBoss() {
-        return MonsterService.count();
+        return monsterService.count();
     }
 
     /**
@@ -61,7 +68,7 @@ public class MonsterManageBehavior {
      * @return 怪物详细信息
      */
     public Monster getMonsterById(Long id) {
-        return MonsterService.getMonsterById(id);
+        return monsterService.getMonsterById(id);
     }
 
     /**
@@ -71,7 +78,7 @@ public class MonsterManageBehavior {
      * @return 怪物详细信息
      */
     public List<Monster> getMonsterByName(String name) {
-        return MonsterService.listMonsterByName(name);
+        return monsterService.listMonsterByName(name);
     }
 
     /**
@@ -82,7 +89,7 @@ public class MonsterManageBehavior {
     public long createMonster(String name) {
         Monster monster = Monster.buildMonsterWithTemplate(name);
         setMonsterProp(new ArrayList<>(), monster);
-        return MonsterService.createMonster(monster);
+        return monsterService.createMonster(monster);
     }
 
     /**
@@ -93,7 +100,7 @@ public class MonsterManageBehavior {
     public long createMonster(String name, List<String> propertyTypeValList) {
         Monster monster = Monster.buildMonsterWithTemplate(name);
         setMonsterProp(propertyTypeValList, monster);
-        return MonsterService.createMonster(monster);
+        return monsterService.createMonster(monster);
     }
 
     /**
@@ -115,14 +122,14 @@ public class MonsterManageBehavior {
 
         List<String> exceptionList = setMonsterProp(propertyTypeValList, monster);
         if (exceptionList.size() < propertyTypeValList.size()) {
-            MonsterService.updateMonster(monster);
+            monsterService.updateMonster(monster);
         }
         return exceptionList;
     }
 
     private List<String> setMonsterProp(List<String> propertyTypeValList, Monster monster) {
         List<BusinessException> exceptionList = propertyTypeValList.stream()
-                .map(propertyTypeVal -> propertyTypeVal = propertyTypeVal.replace("：", Constants.COLON))
+                .map(propertyTypeVal -> propertyTypeVal.replace("：", Constants.COLON))
                 .map(propertyTypeVal -> {
                     if (!propertyTypeVal.contains(Constants.COLON)) {
                         return MonsterManageExceptionEnum.MONSTER_PROP_FORMAT_ERR.getException();
@@ -189,6 +196,20 @@ public class MonsterManageBehavior {
     }
 
     /**
+     * 获取怪物主动技能
+     *
+     * @param monsterId 怪物ID
+     * @return 怪物主动技能
+     */
+    public List<SkillEnum> getMonsterInActiveSkill(Long monsterId) {
+        if (Objects.isNull(getMonsterById(monsterId))) {
+            throw MonsterManageExceptionEnum.MONSTER_NOT_FOUND.getException();
+        }
+        return SkillCache.getInactiveSkill(BelongToEnum.MONSTER.getBelongTo(), monsterId)
+                .stream().map(SkillEnum::getById).collect(Collectors.toList());
+    }
+
+    /**
      * 设置怪物主动技能
      *
      * @param monsterId 怪物ID
@@ -203,46 +224,61 @@ public class MonsterManageBehavior {
                 .reduce((s1, s2) -> s1 + Constants.COMMA + s2)
                 .orElseThrow(MonsterManageExceptionEnum.MONSTER_SKILL_ID_NOT_FOUND::getException);
 
-        SkillBarItemService.deleteSkillBarItem(BelongToEnum.MONSTER.getBelongTo(), monsterId);
+        skillBarItemService.deleteSkillBarItem(BelongToEnum.MONSTER.getBelongTo(), monsterId);
         SkillBarItem skillBarItem = new SkillBarItem();
         skillBarItem.setBelongTo(BelongToEnum.MONSTER.getBelongTo());
         skillBarItem.setBelongToId(monsterId);
         skillBarItem.setSkillId(validSkillIdStr);
-        SkillBarItemService.deleteSkillBarItem(BelongToEnum.MONSTER.getBelongTo(), monsterId);
-        SkillBarItemService.addSkillBarItem(skillBarItem);
+        skillBarItemService.deleteSkillBarItem(BelongToEnum.MONSTER.getBelongTo(), monsterId);
+        skillBarItemService.addSkillBarItem(skillBarItem);
         SkillCache.deleteSkillBar(BelongToEnum.MONSTER.getBelongTo(), monsterId);
     }
 
     public void setMonsterInactiveSkill(Long monsterId, List<Long> skillIds) {
+        if (Objects.isNull(getMonsterById(monsterId))) {
+            throw MonsterManageExceptionEnum.MONSTER_NOT_FOUND.getException();
+        }
+        List<Long> validSkillIds = skillIds.stream()
+                .filter(id -> {
+                    SkillEnum skillEnum = SkillEnum.getById(id);
+                    return Objects.nonNull(skillEnum) && !skillEnum.getActive();
+                })
+                .collect(Collectors.toList());
+        if (CollectionUtil.isEmpty(validSkillIds)) {
+            throw MonsterManageExceptionEnum.MONSTER_SKILL_ID_NOT_FOUND.getException();
+        }
 
+        SkillBelongToService service = SkillBelongToService.getInstance();
+        service.deleteInactiveSkills(BelongToEnum.MONSTER, monsterId);
+        validSkillIds.forEach(id -> service.createSkillBelongTo(BelongToEnum.MONSTER.getBelongTo(), monsterId, id));
+        SkillCache.deleteInactiveSkillCache(BelongToEnum.MONSTER.getBelongTo(), monsterId);
     }
 
 
     /**
      * 创建或者更新世界boss
      *
-     * @param appearDateStr 出现日期
-     * @param startHour     开始时间
-     * @param endHour       结束时间
-     * @param monsterIds    怪物ID
+     * @param startTimeStr 开始时间
+     * @param endTimeStr   结束时间
+     * @param monsterIds   怪物ID
      */
-    public void insertOrUpdateWorldBoss(String appearDateStr, int startHour, int endHour, List<Long> monsterIds) {
-        boolean invalidStartHour = startHour < Constants.MIN_HOUR || startHour > Constants.MAX_HOUR + 1;
-        boolean invalidEndHour = endHour < Constants.MIN_HOUR || startHour > Constants.MAX_HOUR + 1;
-        boolean invalidHourRelation = startHour >= endHour;
-        if (invalidStartHour || invalidEndHour || invalidHourRelation) {
+    public void insertOrUpdateWorldBoss(String startTimeStr, String endTimeStr, List<Long> monsterIds,
+                                        List<WorldBossAwardDTO> awardList) {
+        LocalDateTime startTime = DateUtil.parseDateTime(startTimeStr);
+        LocalDateTime endTime = DateUtil.parseDateTime(endTimeStr);
+        if (Objects.isNull(startTime) || Objects.isNull(endTime)) {
             throw MonsterManageExceptionEnum.WORLD_BOSS_TIME_INVALID.getException();
         }
-        LocalDate appearDate = DateUtil.parseDate(appearDateStr);
-        if (Objects.isNull(appearDate)) {
+        boolean invalidHourRelation = startTime.isAfter(endTime);
+        if (invalidHourRelation) {
             throw MonsterManageExceptionEnum.WORLD_BOSS_TIME_INVALID.getException();
         }
         // 过滤非法boss ID
-        List<Long> validMonsterIds = MonsterService.getMonsterByIds(monsterIds).stream().map(Monster::getId)
+        List<Long> validMonsterIds = monsterService.getMonsterByIds(monsterIds).stream().map(Monster::getId)
                 .collect(Collectors.toList());
         String monsterId = validMonsterIds.stream().map(Objects::toString).reduce((id1, id2) -> id1 + Constants.COMMA + id2)
                 .orElseThrow(MonsterManageExceptionEnum.WORLD_BOSS_ID_INVALID::getException);
-        WorldBossService.insertOrUpdateWorldBoss(appearDate, startHour, endHour, monsterId);
+        worldBossService.insertOrUpdateWorldBoss(startTime, endTime, monsterId, awardList);
         WorldBossCache.clearCache();
     }
 
@@ -262,12 +298,20 @@ public class MonsterManageBehavior {
             throw MonsterManageExceptionEnum.RANK_UP_BOSS_RANK_INVALID.getException();
         }
         // 过滤非法boss ID
-        List<Long> validMonsterIds = MonsterService.getMonsterByIds(monsterIds).stream().map(Monster::getId)
+        List<Long> validMonsterIds = monsterService.getMonsterByIds(monsterIds).stream().map(Monster::getId)
                 .collect(Collectors.toList());
         if (CollectionUtil.isEmpty(validMonsterIds)) {
             throw MonsterManageExceptionEnum.WORLD_BOSS_ID_INVALID.getException();
         }
-        RankUpBossService.insertOrUpdateRankUpBoss(jobEnum.getJobCode(), rank, validMonsterIds);
+        rankUpBossService.insertOrUpdateRankUpBoss(jobEnum.getJobCode(), rank, validMonsterIds);
+    }
+
+    public BattleResultVO EVE(Long playerId, Long monsterId1, Long monsterId2) {
+        return BattleUtil.battleEVE(playerId, Collections.singletonList(monsterId1), Collections.singletonList(monsterId2));
+    }
+
+    public BattleResultVO PVE(Long playerId, Long monsterId) {
+        return BattleUtil.battlePVE(playerId, Collections.singletonList(monsterId));
     }
 
     private static class Holder {

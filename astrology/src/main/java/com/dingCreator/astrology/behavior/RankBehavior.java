@@ -10,8 +10,9 @@ import com.dingCreator.astrology.enums.exception.RankExceptionEnum;
 import com.dingCreator.astrology.service.RankUpBossService;
 import com.dingCreator.astrology.util.BattleUtil;
 import com.dingCreator.astrology.vo.BattleResultVO;
+import com.dingCreator.astrology.vo.RankUpResultVO;
 
-import java.util.Collections;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,12 +22,14 @@ import java.util.stream.Collectors;
  */
 public class RankBehavior {
 
+    private final RankUpBossService rankUpBossService = RankUpBossService.getInstance();
+
     /**
      * 突破
      *
      * @param id 突破者 ID
      */
-    public BattleResultVO rankUp(Long id) {
+    public RankUpResultVO rankUp(Long id) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(id).getPlayerDTO();
         if (Constants.MAX_RANK <= playerDTO.getRank()) {
             throw RankExceptionEnum.ALREADY_MAX_RANK.getException();
@@ -34,35 +37,80 @@ public class RankBehavior {
         if (playerDTO.getLevel() < RankEnum.getEnum(playerDTO.getJob(), playerDTO.getRank()).getMaxLevel()) {
             throw RankExceptionEnum.LEVEL_NOT_ENOUGH.getException();
         }
-        List<RankUpBoss> rankUpBossList = RankUpBossService.getRankUpBoss(playerDTO.getJob(), playerDTO.getRank());
+        List<RankUpBoss> rankUpBossList = rankUpBossService.getRankUpBoss(playerDTO.getJob(), playerDTO.getRank());
         if (CollectionUtil.isEmpty(rankUpBossList)) {
             throw RankExceptionEnum.RANK_BOSS_NOT_FOUND.getException();
         }
 
         BattleResultVO response = BattleUtil.battlePVE(id, rankUpBossList.stream().map(RankUpBoss::getMonsterId)
                 .collect(Collectors.toList()), false);
+        RankUpResultVO resultVO = new RankUpResultVO();
         if (BattleResultVO.BattleResult.WIN.equals(response.getBattleResult())
-                || BattleResultVO.BattleResult.DRAW.equals(response.getBattleResult())) {
-            playerDTO.setRank(playerDTO.getRank() + 1);
+//                || BattleResultVO.BattleResult.DRAW.equals(response.getBattleResult())
+        ) {
+            // 获取突破前阶级，触发突破成功奖励
+            int oldRank = playerDTO.getRank();
+            StringBuilder builder = new StringBuilder();
+            RankEnum oldRankEnum = RankEnum.getEnum(playerDTO.getJob(), oldRank);
+            oldRankEnum.getRankUpAward().accept(id, builder);
+            builder.append("属性提升：\n");
+            // 阶级+1
+            playerDTO.setRank(oldRank + 1);
             // 突破成功赠送1经验触发升级
             ExpBehavior.getInstance().getExp(playerDTO.getId(), 1L);
             // 属性提升
-            playerDTO.setHp((long) Math.round(playerDTO.getMaxHp() * 1.5F));
-            playerDTO.setMaxHp((long) Math.round(playerDTO.getMaxHp() * 1.5F));
-            // 蓝不受突破影响
-            playerDTO.setAtk((long) Math.round(playerDTO.getAtk() * 1.5F));
-            playerDTO.setMagicAtk((long) Math.round(playerDTO.getMagicAtk() * 1.5F));
-            playerDTO.setDef((long) Math.round(playerDTO.getDef() * 1.5F));
-            playerDTO.setMagicDef((long) Math.round(playerDTO.getMagicDef() * 1.5F));
-            playerDTO.setBehaviorSpeed((long) Math.round(playerDTO.getBehaviorSpeed() * 1.5F));
-            playerDTO.setHit((long) Math.round(playerDTO.getHit() * 1.5F));
-            playerDTO.setDodge((long) Math.round(playerDTO.getDodge() * 1.5F));
+            builder.append("最大血量：").append(playerDTO.getMaxHp());
+            playerDTO.setMaxHp(BigDecimal.valueOf(playerDTO.getMaxHp()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            builder.append(" -> ").append(playerDTO.getMaxHp()).append("\n");
+
+            builder.append("最大蓝量：").append(playerDTO.getMaxMp());
+            playerDTO.setMaxMp(playerDTO.getMaxMp() + 50L * oldRank);
+            builder.append(" -> ").append(playerDTO.getMaxMp()).append("\n");
+
+            playerDTO.setHp(playerDTO.getMaxHp());
+            playerDTO.setMp(playerDTO.getMaxMp());
+
+            builder.append("攻击：").append(playerDTO.getAtk());
+            playerDTO.setAtk(BigDecimal.valueOf(playerDTO.getAtk()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            builder.append(" -> ").append(playerDTO.getAtk()).append("\n");
+
+            builder.append("法强：").append(playerDTO.getMagicAtk());
+            playerDTO.setMagicAtk(BigDecimal.valueOf(playerDTO.getMagicAtk()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            builder.append(" -> ").append(playerDTO.getMagicAtk()).append("\n");
+
+            builder.append("防御：").append(playerDTO.getDef());
+            playerDTO.setDef(BigDecimal.valueOf(playerDTO.getDef()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            builder.append(" -> ").append(playerDTO.getDef()).append("\n");
+
+            builder.append("法抗：").append(playerDTO.getMagicDef());
+            playerDTO.setMagicDef(BigDecimal.valueOf(playerDTO.getMagicDef()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            builder.append(" -> ").append(playerDTO.getMagicDef()).append("\n");
+
+            builder.append("速度：").append(playerDTO.getBehaviorSpeed());
+            playerDTO.setBehaviorSpeed(BigDecimal.valueOf(playerDTO.getBehaviorSpeed()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            builder.append(" -> ").append(playerDTO.getBehaviorSpeed()).append("\n");
+
+            builder.append("命中：").append(playerDTO.getHit());
+            playerDTO.setHit(BigDecimal.valueOf(playerDTO.getHit()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            builder.append(" -> ").append(playerDTO.getHit()).append("\n");
+
+            builder.append("闪避：").append(playerDTO.getDodge());
+            playerDTO.setDodge(BigDecimal.valueOf(playerDTO.getDodge()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            builder.append(" -> ").append(playerDTO.getDodge()).append("\n");
+
+            playerDTO.clearAdditionVal();
+            resultVO.setSuccess(true);
+            resultVO.setMessage(builder.toString());
         } else {
+            long oldExp = playerDTO.getExp();
             // 突破失败扣除一半经验
-            playerDTO.setExp((long) Math.round(playerDTO.getExp() / 2F));
+            long newExp = Math.round(oldExp / 2F);
+            playerDTO.setExp(newExp);
+            resultVO.setSuccess(false);
+            resultVO.setMessage("经验值：" + oldExp + " -> " + newExp);
         }
-        PlayerCache.flush(Collections.singletonList(playerDTO.getId()));
-        return response;
+        PlayerCache.save(playerDTO.getId());
+        return resultVO;
     }
 
     public static RankBehavior getInstance() {

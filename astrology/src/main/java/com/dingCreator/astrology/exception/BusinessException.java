@@ -30,4 +30,8 @@ public class BusinessException extends RuntimeException {
         this.code = code;
         this.desc = String.format(desc, args);
     }
+
+    public BusinessException fillArgs(Object... args) {
+        return new BusinessException(this.code, String.format(this.desc, args));
+    }
 }

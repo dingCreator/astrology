@@ -24,4 +24,12 @@ public class ArticleItemVO {
      * 描述
      */
     private String description;
+    /**
+     * 数量
+     */
+    private Long count;
+    /**
+     * 稀有度
+     */
+    private Integer rare;
 }

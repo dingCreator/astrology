@@ -1,16 +1,13 @@
 package com.dingCreator.astrology.dto.skill;
 
-import com.dingCreator.astrology.dto.GiveBuffDTO;
 import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
-import com.dingCreator.astrology.enums.skill.SkillConditionEnum;
-import com.dingCreator.astrology.enums.skill.SkillTargetEnum;
+import com.dingCreator.astrology.enums.skill.TargetEnum;
+import com.dingCreator.astrology.util.template.ThisEffectExtraBattleProcessTemplate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author ding
@@ -23,7 +20,7 @@ public class SkillEffectDTO implements Serializable {
     /**
      * 目标
      */
-    private SkillTargetEnum skillTargetEnum;
+    private TargetEnum targetEnum;
     /**
      * 伤害类型
      */
@@ -35,27 +32,19 @@ public class SkillEffectDTO implements Serializable {
     /**
      * buff
      */
-    private List<GiveBuffDTO> giveBuffDTOList;
-    /**
-     * 触发的被动
-     */
-    private List<Long> inactiveSkillList;
+    private ThisEffectExtraBattleProcessTemplate template;
 
-    public SkillEffectDTO(SkillTargetEnum skillTargetEnum, DamageTypeEnum damageTypeEnum, Float damageRate) {
-        this.skillTargetEnum = skillTargetEnum;
-        this.damageTypeEnum = damageTypeEnum;
-        this.damageRate = damageRate;
+    public SkillEffectDTO(TargetEnum targetEnum){
+        this(targetEnum, DamageTypeEnum.ATK, 0F);
     }
 
-    public SkillEffectDTO(SkillTargetEnum skillTargetEnum, DamageTypeEnum damageTypeEnum, Float damageRate,
-                          GiveBuffDTO giveBuffDTO) {
-        this(skillTargetEnum, damageTypeEnum, damageRate);
-        this.giveBuffDTOList = Collections.singletonList(giveBuffDTO);
+    public SkillEffectDTO(TargetEnum targetEnum, ThisEffectExtraBattleProcessTemplate template){
+        this(targetEnum, DamageTypeEnum.ATK, 0F, template);
     }
 
-    public SkillEffectDTO(SkillTargetEnum skillTargetEnum, DamageTypeEnum damageTypeEnum, Float damageRate,
-                          List<GiveBuffDTO> giveBuffDTOList) {
-        this(skillTargetEnum, damageTypeEnum, damageRate);
-        this.giveBuffDTOList = giveBuffDTOList;
+    public SkillEffectDTO(TargetEnum targetEnum, DamageTypeEnum damageTypeEnum, Float damageRate) {
+        this(targetEnum, damageTypeEnum, damageRate, new ThisEffectExtraBattleProcessTemplate() {
+
+        });
     }
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dingCreator.astrology.mapper.WorldBossRecordMapper">
+    <select id="queryRankByPlayerId" resultType="com.dingCreator.astrology.dto.WorldBossRankRecordDTO">
+        select
+            t.id as id,
+            t.player_id as playerId,
+            t.damage as damage,
+            t.damage_rank as damageRank
+        from (
+        <include refid="damageRank"/> where world_boss_id=#{worldBossId}
+        ) t
+        where t.player_id=#{playerId}
+    </select>
+
+    <select id="queryRank" resultType="com.dingCreator.astrology.dto.WorldBossRankRecordDTO">
+        select
+            t.id as id,
+            t.player_id as playerId,
+            t.damage as damage,
+            t.damage_rank as damageRank,
+            t.world_boss_id as worldBossId
+        from (
+        <include refid="damageRank"/> where world_boss_id=#{worldBossId}
+        ) t
+        limit #{index},#{pageSize}
+    </select>
+
+    <sql id="damageRank">
+        select
+            id,
+            player_id,
+            damage,
+            world_boss_id,
+            rank() over(order by damage desc) as damage_rank
+        from astrology_world_boss_record
+    </sql>
+</mapper>

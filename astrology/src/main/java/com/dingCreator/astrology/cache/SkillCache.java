@@ -21,6 +21,10 @@ import java.util.stream.Collectors;
  */
 public class SkillCache {
 
+    private static final SkillBarItemService skillBarItemService = SkillBarItemService.getInstance();
+
+    private static final SkillBelongToService skillBelongToService = SkillBelongToService.getInstance();
+
     static Logger logger = LoggerFactory.getLogger(SkillCache.class);
 
     /**
@@ -72,7 +76,7 @@ public class SkillCache {
      * @param belongToId 对应的Id
      */
     public static SkillBarDTO initSkillBar(String belongTo, Long belongToId) {
-        SkillBarItem skillBarItem = SkillBarItemService.getSkillBarItemByBelongToId(belongTo, belongToId);
+        SkillBarItem skillBarItem = skillBarItemService.getSkillBarItemByBelongToId(belongTo, belongToId);
         if (Objects.isNull(skillBarItem)) {
             logger.error("invalid belong to [{}] and belong to id [{}]", belongTo, belongToId);
             throw new IllegalArgumentException("invalid belong to and belong to id");
@@ -145,7 +149,7 @@ public class SkillCache {
      * @param belongToId 对应的Id
      */
     public static List<Long> initInactiveSkill(String belongTo, Long belongToId) {
-        List<SkillBelongTo> belongToList = SkillBelongToService.querySkillBelongToList(belongTo, belongToId);
+        List<SkillBelongTo> belongToList = skillBelongToService.querySkillBelongToList(belongTo, belongToId);
         if (Objects.isNull(belongToList) || belongToList.isEmpty()) {
             return new ArrayList<>();
         }

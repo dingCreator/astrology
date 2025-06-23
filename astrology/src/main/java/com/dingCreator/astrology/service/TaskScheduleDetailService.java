@@ -19,7 +19,7 @@ public class TaskScheduleDetailService {
      *
      * @param detailList 任务进度详情
      */
-    public static void createTaskScheduleDetail(List<TaskScheduleDetail> detailList) {
+    public void createTaskScheduleDetail(List<TaskScheduleDetail> detailList) {
         DatabaseProvider.getInstance().execute(sqlSession -> detailList.forEach(detail ->
                         sqlSession.getMapper(TaskScheduleDetailMapper.class).insert(detail)
                 )
@@ -32,7 +32,7 @@ public class TaskScheduleDetailService {
      * @param playerId 玩家ID
      * @return 任务进度详情
      */
-    public static List<TaskScheduleDetail> listTaskScheduleDetail(Long playerId) {
+    public List<TaskScheduleDetail> listTaskScheduleDetail(Long playerId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
             QueryWrapper<TaskScheduleDetail> wrapper = new QueryWrapper<TaskScheduleDetail>()
                     .eq(TaskScheduleDetail.PLAYER_ID, playerId);
@@ -45,12 +45,24 @@ public class TaskScheduleDetailService {
      *
      * @param detailDTO 进度详情
      */
-    public static void updateSchedule(TaskScheduleDetailDTO detailDTO) {
+    public void updateSchedule(TaskScheduleDetailDTO detailDTO) {
         TaskScheduleDetail detail = TaskScheduleDetail.builder()
                 .id(detailDTO.getId())
                 .completeCnt(detailDTO.getCompleteCnt())
                 .taskScheduleType(detailDTO.getTaskScheduleType().getType())
                 .build();
         DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(TaskScheduleDetailMapper.class).updateById(detail));
+    }
+    
+    private static class Holder {
+        private static final TaskScheduleDetailService SERVICE = new TaskScheduleDetailService();
+    }
+
+    private TaskScheduleDetailService() {
+
+    }
+
+    public static TaskScheduleDetailService getInstance() {
+        return TaskScheduleDetailService.Holder.SERVICE;
     }
 }

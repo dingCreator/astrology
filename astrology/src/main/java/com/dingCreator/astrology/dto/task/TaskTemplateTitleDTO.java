@@ -1,6 +1,6 @@
 package com.dingCreator.astrology.dto.task;
 
-import com.dingCreator.astrology.dto.LootDTO;
+import com.dingCreator.astrology.dto.loot.LootDTO;
 import com.dingCreator.astrology.enums.task.TaskTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

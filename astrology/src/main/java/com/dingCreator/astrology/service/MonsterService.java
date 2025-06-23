@@ -23,7 +23,7 @@ public class MonsterService {
      * @param id ID
      * @return 怪物信息
      */
-    public static Monster getMonsterById(Long id) {
+    public Monster getMonsterById(Long id) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession
                 .getMapper(MonsterMapper.class).getMonsterById(id));
     }
@@ -34,7 +34,7 @@ public class MonsterService {
      * @param name 怪物名
      * @return 怪物信息
      */
-    public static List<Monster> listMonsterByName(String name) {
+    public List<Monster> listMonsterByName(String name) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
             QueryWrapper<Monster> wrapper = new QueryWrapper<Monster>().eq(Monster.NAME, name);
             return sqlSession.getMapper(MonsterMapper.class).selectList(wrapper);
@@ -48,9 +48,9 @@ public class MonsterService {
      * @param size  尺寸
      * @return 怪物列表
      */
-    public static List<Monster> listMonster(int index, int size) {
+    public List<Monster> listMonster(int index, int size) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession.getMapper(MonsterMapper.class)
-                .listMonster(index - 1, size));
+                .listMonster((index - 1) * size, size));
     }
 
     /**
@@ -58,7 +58,7 @@ public class MonsterService {
      *
      * @param monster 怪物信息
      */
-    public static long createMonster(Monster monster) {
+    public long createMonster(Monster monster) {
         DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(MonsterMapper.class).insert(monster));
         return monster.getId();
     }
@@ -69,20 +69,32 @@ public class MonsterService {
      * @param id 怪物id
      * @param hp 怪物血量
      */
-    public static void updateHpById(long id, long hp) {
+    public void updateHpById(long id, long hp) {
         Monster monster = new Monster();
         monster.setId(id);
         monster.setHp(hp);
         DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(MonsterMapper.class).updateById(monster));
     }
 
+    /**
+     * 完全恢复怪物血量
+     *
+     * @param id 怪物id
+     */
+    public void recoverById(long id) {
+        DatabaseProvider.getInstance().execute(sqlSession -> {
+            Monster monster = sqlSession.getMapper(MonsterMapper.class).getMonsterById(id);
+            monster.setHp(monster.getMaxHp());
+            MonsterService.getInstance().updateMonster(monster);
+        });
+    }
 
     /**
      * 编辑怪物信息
      *
      * @param monster 怪物信息
      */
-    public static void updateMonster(Monster monster) {
+    public void updateMonster(Monster monster) {
         DatabaseProvider.getInstance().execute(sqlSession -> sqlSession.getMapper(MonsterMapper.class).updateById(monster));
     }
 
@@ -92,7 +104,7 @@ public class MonsterService {
      * @param ids IDs
      * @return 怪物信息
      */
-    public static List<Monster> getMonsterByIds(List<Long> ids) {
+    public List<Monster> getMonsterByIds(List<Long> ids) {
         return getMonsterByIds(ids, true);
     }
 
@@ -103,7 +115,7 @@ public class MonsterService {
      * @param fullStatus 是否满状态
      * @return 怪物信息
      */
-    public static List<Monster> getMonsterByIds(List<Long> ids, boolean fullStatus) {
+    public List<Monster> getMonsterByIds(List<Long> ids, boolean fullStatus) {
         List<Monster> monsterList = DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession
                 .getMapper(MonsterMapper.class).getMonsterByIds(ids));
         if (fullStatus) {
@@ -115,9 +127,22 @@ public class MonsterService {
         return monsterList;
     }
 
-    public static int count() {
+    public int count() {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
             sqlSession.getMapper(MonsterMapper.class).selectCount(new QueryWrapper<>())
         );
+    }
+
+
+    private static class Holder {
+        private static final MonsterService SERVICE = new MonsterService();
+    }
+
+    private MonsterService() {
+
+    }
+
+    public static MonsterService getInstance() {
+        return MonsterService.Holder.SERVICE;
     }
 }

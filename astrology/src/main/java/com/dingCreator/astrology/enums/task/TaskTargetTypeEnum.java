@@ -26,7 +26,7 @@ public enum TaskTargetTypeEnum {
     BATTLE("battle", "战斗任务", (playerId, monsterId) -> {
         BattleResultVO resultVO = BattleUtil.battlePVE(playerId, monsterId);
         return BattleResultVO.BattleResult.WIN.equals(resultVO.getBattleResult());
-    }, monsterId -> MonsterService.getMonsterById(monsterId).getName()),
+    }, monsterId -> MonsterService.getInstance().getMonsterById(monsterId).getName()),
     /**
      * 提交物资
      */

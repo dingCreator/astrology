@@ -1,6 +1,5 @@
 package com.dingCreator.astrology.util;
 
-import com.dingCreator.astrology.behavior.PlayerBehavior;
 import com.dingCreator.astrology.behavior.TeamBehavior;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.cache.TeamCache;
@@ -12,6 +11,7 @@ import com.dingCreator.astrology.enums.PlayerStatusEnum;
 import com.dingCreator.astrology.enums.exception.MapExceptionEnum;
 import com.dingCreator.astrology.service.MapService;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class MapUtil {
 
     public static Map getMapById(long mapId) {
-        return MapService.getMapById(mapId);
+        return MapService.getInstance().getMapById(mapId);
     }
 
     /**
@@ -73,8 +73,8 @@ public class MapUtil {
      * @return 曼哈顿距离
      */
     public static long manhattanDistance(long map1Id, long map2Id) {
-        Map startMap = MapService.getMapById(map1Id);
-        Map endMap = MapService.getMapById(map2Id);
+        Map startMap = MapService.getInstance().getMapById(map1Id);
+        Map endMap = MapService.getInstance().getMapById(map2Id);
         if (Objects.isNull(startMap) || Objects.isNull(endMap)) {
             return 0;
         }
@@ -123,7 +123,7 @@ public class MapUtil {
      * @return 是/否
      */
     public static boolean moving(long playerId) {
-        String status = PlayerBehavior.getInstance().getStatus(PlayerCache.getPlayerById(playerId).getPlayerDTO());
+        String status = PlayerCache.getPlayerById(playerId).getPlayerDTO().getStatus();
         return PlayerStatusEnum.MOVING.getCode().equals(status);
     }
 
@@ -135,9 +135,6 @@ public class MapUtil {
     public static void startMove(long playerId, long mapId) {
         PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
         PlayerDTO playerDTO = playerInfoDTO.getPlayerDTO();
-        if (!PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(playerDTO))) {
-            throw MapExceptionEnum.NOT_FREE.getException();
-        }
         TeamBehavior.getInstance().captainOnlyValidate(playerId);
         List<PlayerDTO> playerList;
         if (playerInfoDTO.getTeam()) {
@@ -146,14 +143,15 @@ public class MapUtil {
         } else {
             playerList = Collections.singletonList(playerDTO);
         }
-
         playerList.forEach(p -> {
-            PlayerBehavior.getInstance().updatePlayerStatus(p, PlayerStatusEnum.MOVING,
-                    () -> PlayerStatusEnum.FREE.getCode().equals(PlayerBehavior.getInstance().getStatus(p)),
-                    MapExceptionEnum.NOT_FREE.getException());
+            if (!PlayerStatusEnum.FREE.getCode().equals(p.getStatus())) {
+                throw MapExceptionEnum.NOT_FREE.getException();
+            }
+            p.setStatus(PlayerStatusEnum.MOVING.getCode());
             p.setMapId(getMovingMapId(p.getMapId(), mapId));
+            p.setStatusStartTime(LocalDateTime.now());
         });
-        PlayerCache.flush(playerList.stream().map(PlayerDTO::getId).collect(Collectors.toList()));
+        PlayerCache.save(playerList.stream().map(PlayerDTO::getId).collect(Collectors.toList()));
     }
 
     public static long getMovingMapId(long startMapId, long endMapId) {

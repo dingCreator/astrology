@@ -1,15 +1,15 @@
 package com.dingCreator.astrology.cache;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.equipment.EquipmentBarDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerDTO;
 import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Player;
+import com.dingCreator.astrology.entity.PlayerAsset;
+import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.util.LockUtil;
-import com.dingCreator.astrology.util.ThreadPoolUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,19 +31,25 @@ public class PlayerCache {
      * @param player 新玩家
      */
     public static void createPlayer(Player player) {
-        if (PLAYER_MAP.containsKey(player.getId()) || Objects.nonNull(PlayerService.getPlayerById(player.getId()))) {
+        if (PLAYER_MAP.containsKey(player.getId())
+                || Objects.nonNull(PlayerService.getInstance().getPlayerById(player.getId()))) {
             throw PlayerExceptionEnum.PLAYER_EXIST.getException();
         }
         LockUtil.execute(Constants.PLAYER_LOCK_PREFIX + player.getId(), () -> {
-            if (PLAYER_MAP.containsKey(player.getId()) || Objects.nonNull(PlayerService.getPlayerById(player.getId()))) {
+            if (PLAYER_MAP.containsKey(player.getId())
+                    || Objects.nonNull(PlayerService.getInstance().getPlayerById(player.getId()))) {
                 throw PlayerExceptionEnum.PLAYER_EXIST.getException();
             }
-            if (!PlayerService.createPlayer(player)) {
+            List<PlayerAsset> assetList = Arrays.stream(AssetTypeEnum.values())
+                    .map(e -> PlayerAsset.builder().playerId(player.getId()).assetType(e.getCode()).assetCnt(0L).build())
+                    .collect(Collectors.toList());
+            if (!PlayerService.getInstance().createPlayer(player, assetList)) {
                 throw new IllegalStateException("创建角色失败");
             }
             PlayerInfoDTO playerInfoDTO = new PlayerInfoDTO();
             playerInfoDTO.setEquipmentBarDTO(new EquipmentBarDTO());
             playerInfoDTO.setTeam(false);
+            playerInfoDTO.setAssetList(assetList.stream().map(PlayerAsset::convert).collect(Collectors.toList()));
 
             PlayerDTO playerDTO = new PlayerDTO();
             playerDTO.copyProperties(player);
@@ -64,9 +70,12 @@ public class PlayerCache {
             return LockUtil.execute(Constants.PLAYER_LOCK_PREFIX + id, () -> {
                 PlayerInfoDTO temp = PLAYER_MAP.getOrDefault(id, null);
                 if (Objects.isNull(temp)) {
-                    temp = PlayerService.getPlayerDTOById(id);
+                    temp = PlayerService.getInstance().getPlayerDTOById(id);
                     if (Objects.isNull(temp)) {
                         throw PlayerExceptionEnum.PLAYER_NOT_FOUND.getException();
+                    }
+                    if (!temp.getPlayerDTO().getEnabled()) {
+                        throw PlayerExceptionEnum.PLAYER_DISABLED.getException();
                     }
                     PLAYER_MAP.put(id, temp);
                 }
@@ -78,30 +87,28 @@ public class PlayerCache {
 
     /**
      * 更新玩家数据
-     * 允许一段时间内缓存与数据库不一致的情况，保证最终一致性即可
      *
      * @param id 玩家ID
      */
-    public static void flush(Long id) {
-        flush(Collections.singletonList(id));
+    public static void save(Long id) {
+        save(Collections.singletonList(id));
     }
 
     /**
      * 更新玩家数据
-     * 允许一段时间内缓存与数据库不一致的情况，保证最终一致性即可
      *
      * @param ids 玩家ID
      */
-    public static void flush(List<Long> ids) {
+    public static void save(List<Long> ids) {
         List<Player> players = ids.stream()
                 .map(PLAYER_MAP::get)
                 .map(PlayerInfoDTO::getPlayerDTO)
                 .map(playerDTO -> {
                     Player player = new Player();
-                    BeanUtil.copyProperties(playerDTO, player, true);
+                    playerDTO.copyProperties2Player(player);
                     return player;
                 }).collect(Collectors.toList());
-        players.forEach(player -> ThreadPoolUtil.executeConsumer(PlayerService::updatePlayerById, player));
+        PlayerService.getInstance().updatePlayerByIds(players);
     }
 
     /**

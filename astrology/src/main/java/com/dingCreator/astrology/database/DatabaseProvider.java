@@ -4,7 +4,6 @@ import lombok.Getter;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -21,7 +20,7 @@ public class DatabaseProvider {
     }
 
     private DatabaseProvider() {
-
+        sqlSessionThreadLocal = new ThreadLocal<>();
     }
 
     public static DatabaseProvider getInstance() {
@@ -34,14 +33,40 @@ public class DatabaseProvider {
         }
     }
 
-    /**
-     * 执行SQL
-     *
-     * @param function 执行SQL
-     * @return 处理结果
-     */
-    public <T> T executeReturn(Function<SqlSession, T> function) {
-        return executeReturn(function, false, true);
+    private final ThreadLocal<SqlSession> sqlSessionThreadLocal;
+
+    public <T> T transactionExecuteReturn(Function<SqlSession, T> function, ExecutorType executorType) {
+        validateSqlSessionFactory();
+        SqlSession sqlSession;
+        // 若无事务，创建一个事务
+        if (Objects.isNull(sqlSession = sqlSessionThreadLocal.get())) {
+            sqlSession = DatabaseContext.getSqlSessionFactory().openSession(executorType, false);
+            sqlSessionThreadLocal.set(sqlSession);
+            try {
+                T result = function.apply(sqlSession);
+                sqlSession.commit();
+                return result;
+            } catch (Throwable t) {
+                if (sqlSession != null) {
+                    sqlSession.rollback();
+                }
+                throw t;
+            } finally {
+                if (sqlSession != null) {
+                    sqlSession.close();
+                }
+                sqlSessionThreadLocal.remove();
+            }
+        }
+        // 若有事务，加入已存在事务
+        try {
+            return function.apply(sqlSession);
+        } catch (Throwable t) {
+            sqlSessionThreadLocal.remove();
+            sqlSession.rollback();
+            sqlSession.close();
+            throw t;
+        }
     }
 
     /**
@@ -50,35 +75,11 @@ public class DatabaseProvider {
      * @param function 执行SQL
      * @return 处理结果
      */
-    public <T> T batchExecuteReturn(Function<SqlSession, T> function) {
-        return executeReturn(function, true, true);
-    }
-
-    /**
-     * 执行SQL
-     *
-     * @param function 执行SQL
-     * @return 处理结果
-     */
-    public <T> T batchTransactionExecuteReturn(Function<SqlSession, T> function) {
-        return executeReturn(function, true, false);
-    }
-
-    /**
-     * 执行SQL
-     *
-     * @param function 执行SQL
-     * @return 处理结果
-     */
-    public <T> T executeReturn(Function<SqlSession, T> function, boolean batch, boolean autoCommit) {
+    public <T> T executeReturn(Function<SqlSession, T> function, boolean autoCommit) {
         validateSqlSessionFactory();
         SqlSession sqlSession = null;
         try {
-            if (batch) {
-                sqlSession = DatabaseContext.getSqlSessionFactory().openSession(ExecutorType.BATCH, autoCommit);
-            } else {
-                sqlSession = DatabaseContext.getSqlSessionFactory().openSession(ExecutorType.SIMPLE, autoCommit);
-            }
+            sqlSession = DatabaseContext.getSqlSessionFactory().openSession(ExecutorType.SIMPLE, autoCommit);
             T result = function.apply(sqlSession);
             if (!autoCommit) {
                 sqlSession.commit();
@@ -94,6 +95,81 @@ public class DatabaseProvider {
                 sqlSession.close();
             }
         }
+    }
+
+    /**
+     * 批量-事务
+     *
+     * @param function 执行逻辑
+     * @param <T>      返回类型
+     * @return 返回值
+     */
+    public <T> T batchTransactionExecuteReturn(Function<SqlSession, T> function) {
+        return transactionExecuteReturn(function, ExecutorType.BATCH);
+    }
+
+    public void batchTransactionExecute(Consumer<SqlSession> consumer) {
+        batchTransactionExecuteReturn(sqlSession -> {
+            consumer.accept(sqlSession);
+            return null;
+        });
+    }
+
+    /**
+     * 单条-事务
+     *
+     * @param function 执行逻辑
+     * @param <T>      返回类型
+     * @return 返回值
+     */
+    public <T> T transactionExecuteReturn(Function<SqlSession, T> function) {
+        return transactionExecuteReturn(function, ExecutorType.SIMPLE);
+    }
+
+    public void transactionExecute(Consumer<SqlSession> consumer) {
+        transactionExecuteReturn(sqlSession -> {
+            consumer.accept(sqlSession);
+            return null;
+        });
+    }
+
+    /**
+     * 复用-事务
+     * @param function 执行逻辑
+     * @param <T> 返回类型
+     * @return 返回值
+     */
+    public <T> T reuseTransactionExecuteReturn(Function<SqlSession, T> function) {
+        return transactionExecuteReturn(function, ExecutorType.REUSE);
+    }
+
+    public void reuseTransactionExecute(Consumer<SqlSession> consumer) {
+        reuseTransactionExecuteReturn(sqlSession -> {
+            consumer.accept(sqlSession);
+            return null;
+        });
+    }
+
+    /**
+     * 执行SQL
+     *
+     * @param function 执行SQL
+     * @return 处理结果
+     */
+    public <T> T executeReturn(Function<SqlSession, T> function) {
+        return executeReturn(function, true);
+    }
+
+    /**
+     * 执行SQL
+     *
+     * @param consumer 执行SQL
+     */
+    public void batchExecute(Consumer<SqlSession> consumer) {
+        executeReturn(sqlSession -> {
+            consumer.accept(sqlSession);
+            return null;
+        }, true);
     }
 
     /**

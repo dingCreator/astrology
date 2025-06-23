@@ -35,4 +35,13 @@ public class SkillBelongTo {
      */
     @TableField("skill_id")
     private Long skillId;
+
+    public static final String ID = "id";
+
+    public static final String BELONG_TO = "belong_to";
+
+    public static final String BELONG_TO_ID = "belong_to_id";
+
+    public static final String SKILL_ID = "skill_id";
+
 }

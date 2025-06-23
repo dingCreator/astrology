@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.dingCreator.astrology.entity.SkillBelongTo;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -13,7 +14,7 @@ import java.util.List;
  * @date 2024/2/21
  */
 @Mapper
-public interface SkillBelongToMapper {
+public interface SkillBelongToMapper extends BaseMapper<SkillBelongTo> {
 
     /**
      * 创建技能归属

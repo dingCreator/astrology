@@ -11,13 +11,12 @@ public class RankUtil {
      *
      * @param fromRank 阶级
      * @param toRank   对方阶级
-     * @param val      压制前数值
      * @return 压制后数值
      */
-    public static long getRankSupression(long fromRank, long toRank, long val) {
+    public static float getRankSuppression(long fromRank, long toRank) {
         if (fromRank < toRank) {
-            val = Math.round(val * (1 + (fromRank - toRank) * 0.1F));
+            return -Double.valueOf(Math.pow(2, (toRank - fromRank - 1)) * 0.1).floatValue();
         }
-        return val;
+        return 0;
     }
 }

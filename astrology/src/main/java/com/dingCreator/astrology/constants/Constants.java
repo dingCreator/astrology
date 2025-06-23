@@ -69,6 +69,26 @@ public final class Constants {
      * 商店错误码前缀
      */
     public static final String SHOP_ITEM_EXCEPTION_PREFIX = "E_SHOP_ITEM_";
+    /**
+     * 活动错误码前缀
+     */
+    public static final String ACTIVITY_EXCEPTION_PREFIX = "E_ACTIVITY_";
+    /**
+     * 炼丹错误码前缀
+     */
+    public static final String ALCHEMY_EXCEPTION_PREFIX = "E_ALCHEMY_";
+    /**
+     * 物品错误码前缀
+     */
+    public static final String ARTICLE_EXCEPTION_PREFIX = "E_ARTICLE_";
+    /**
+     * 药材错误码前缀
+     */
+    public static final String HERB_EXCEPTION_PREFIX = "E_HERB_";
+    /**
+     * 市场错误码前缀
+     */
+    public static final String MARKET_EXCEPTION_PREFIX = "E_MARKET_";
 
     // **----** 经验相关配置 **----**
     /**
@@ -153,6 +173,18 @@ public final class Constants {
      */
     public static final float MAX_RATE = 1F;
     /**
+     * 抽奖概率之和（%）
+     */
+    public static final int LUCKY_RATE_PERCENT = 100;
+    /**
+     * 抽奖倍率
+     */
+    public static final int LUCKY_MAGNIFICATION = 100_000;
+    /**
+     * 抽奖范围
+     */
+    public static final int LUCKY_RANGE = LUCKY_RATE_PERCENT * LUCKY_MAGNIFICATION;
+    /**
      * 均不可
      */
     public static final String NONE = "None";
@@ -161,13 +193,35 @@ public final class Constants {
      */
     public static final String ALL = "All";
     /**
+     * 物品类型
+     */
+    public static final String ITEM_TYPE = "itemType";
+    /**
      * 时间配置
      */
+    public static final String YEAR_FORMAT_1 = "yyyy";
+    public static final String YEAR_FORMAT_2 = "yyyy年";
+
+    public static final String MONTH_FORMAT_1 = "yyyy-MM";
+    public static final String MONTH_FORMAT_2 = "yyyy/MM";
+    public static final String MONTH_FORMAT_3 = "yyyy年MM月";
+    public static final String MONTH_FORMAT_4 = "yyyy.MM";
+    public static final String MONTH_FORMAT_5 = "yyyyMM";
+
     public static final String DATE_FORMAT_1 = "yyyy-MM-dd";
     public static final String DATE_FORMAT_2 = "yyyy/MM/dd";
     public static final String DATE_FORMAT_3 = "yyyy年MM月dd日";
     public static final String DATE_FORMAT_4 = "yyyy.MM.dd";
-    public static final String TIME_FORMAT = "HH:mm:ss";
+    public static final String DATE_FORMAT_5 = "yyyyMMdd";
+
+    public static final String HOUR_FORMAT_1 = "HH";
+    public static final String HOUR_FORMAT_2 = "HH时";
+
+    public static final String MINUTE_FORMAT_1 = "HH:mm";
+    public static final String MINUTE_FORMAT_2 = "HH时mm分";
+
+    public static final String TIME_FORMAT_1 = "HH:mm:ss";
+    public static final String TIME_FORMAT_2 = "HH时mm分ss秒";
 
     public static final int MAX_HOUR = 23;
     public static final int MAX_MINUTE = 59;
@@ -191,7 +245,44 @@ public final class Constants {
     /**
      * 锁前缀-商店
      */
-    public static final String SHOP_BUY_LOCK_PREFIX = "LOCK_SHOP_BUY_";
+    public static final String SHOP_LOCK_PREFIX = "LOCK_SHOP_";
+    /**
+     * 锁前缀-参加活动
+     */
+    public static final String JOIN_ACTIVITY_LOCK_PREFIX = "LOCK_ACTIVITY_";
+    /**
+     * 锁前缀-资产变更
+     */
+    public static final String CHANGE_ASSET_LOCK_PREFIX = "LOCK_CHANGE_ASSET_";
+    /**
+     * 锁前缀-探索副本
+     */
+    public static final String EXPLORE_DUNGEON_LOCK_PREFIX = "LOCK_EXPLORE_DUNGEON_";
+    /**
+     * 锁前缀-炼丹
+     */
+    public static final String ALCHEMY_LOCK_PREFIX = "LOCK_ALCHEMY_";
+    /**
+     * 锁前缀-丹药
+     */
+    public static final String PILL_LOCK_PREFIX = "LOCK_PILL_";
+    /**
+     * 锁前缀-药材
+     */
+    public static final String HERB_LOCK_PREFIX = "LOCK_HERB_";
+    /**
+     * 锁前缀-技能背包
+     */
+    public static final String SKILL_BAG_LOCK_PREFIX = "LOCK_SKILL_BAG_";
+    /**
+     * 锁前缀-邮件
+     */
+    public static final String MAIL_LOCK_PREFIX = "LOCK_MAIL_";
+    /**
+     * 锁前缀-装备
+     */
+    public static final String EQUIPMENT_LOCK_PREFIX = "LOCK_EQUIPMENT_";
+
     /**
      * 每日最多攻击世界boss次数
      */
