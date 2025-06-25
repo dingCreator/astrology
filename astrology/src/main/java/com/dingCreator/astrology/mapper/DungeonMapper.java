@@ -27,19 +27,17 @@ public interface DungeonMapper extends BaseMapper<Dungeon> {
     /**
      * 根据副本名称和地图ID获取副本
      *
-     * @param mapId 地图ID
      * @param name  副本名称
      * @return 副本
      */
-    @Select("select * from astrology_dungeon where map_id=#{mapId} and `name`=#{name}")
-    Dungeon getByName(@Param("mapId") Long mapId, @Param("name") String name);
+    @Select("select * from astrology_dungeon where `name`=#{name}")
+    Dungeon getByName(@Param("name") String name);
 
     /**
-     * 根据地图ID获取副本
+     * 获取副本
      *
-     * @param mapId 地图ID
      * @return 副本列表
      */
-    @Select("select * from astrology_dungeon where map_id=#{mapId}")
-    List<Dungeon> list(@Param("mapId") Long mapId);
+    @Select("select * from astrology_dungeon")
+    List<Dungeon> list();
 }

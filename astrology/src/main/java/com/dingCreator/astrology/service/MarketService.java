@@ -95,14 +95,14 @@ public class MarketService {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
             QueryWrapper<MarketItem> wrapper = new QueryWrapper<MarketItem>()
                     .like(StringUtils.isNotBlank(itemName), MarketItem.ARTICLE_NAME, "%" + itemName + "%")
-                    .gt(MarketItem.ITEM_CNT, 0);
-            Page<MarketItem> page = new Page<>(pageIndex, pageSize);
+                    .gt(MarketItem.ITEM_CNT, 0)
+                    .last(" limit " + (pageIndex - 1) * pageSize + "," + pageSize);
             MarketItemMapper mapper = sqlSession.getMapper(MarketItemMapper.class);
-            page = mapper.selectPage(page, wrapper);
+            List<MarketItem> itemList = mapper.selectList(wrapper);
             PageResponse<MarketItemDTO> pageResponse = new PageResponse<>();
-            pageResponse.setData(page.getRecords().stream().map(MarketItem::convert).collect(Collectors.toList()));
-            pageResponse.setPageIndex((int) page.getCurrent());
-            pageResponse.setPageSize((int) page.getSize());
+            pageResponse.setData(itemList.stream().map(MarketItem::convert).collect(Collectors.toList()));
+            pageResponse.setPageIndex(pageIndex);
+            pageResponse.setPageSize(pageSize);
             pageResponse.setTotal(mapper.selectCount(wrapper));
             return pageResponse;
         });

@@ -37,10 +37,6 @@ public class PlayerDTO extends OrganismDTO {
      */
     private String job;
     /**
-     * 所处位置
-     */
-    private Long mapId;
-    /**
      * 状态
      */
     private volatile String status;
@@ -88,7 +84,6 @@ public class PlayerDTO extends OrganismDTO {
         this.level = player.getLevel();
         this.exp = player.getExp();
         this.job = player.getJob();
-        this.mapId = player.getMapId();
         this.status = player.getStatus();
         this.statusStartTime = player.getStatusStartTime();
         this.enabled = player.getEnabled();
@@ -119,48 +114,8 @@ public class PlayerDTO extends OrganismDTO {
         player.setLevel(this.level);
         player.setExp(this.exp);
         player.setJob(this.job);
-        player.setMapId(this.mapId);
         player.setStatus(this.status);
         player.setStatusStartTime(this.statusStartTime);
         player.setEnabled(this.enabled);
-    }
-
-    public synchronized void setStatus(String status) {
-        for (int i = 0; i < 10; i++) {
-            if (casStatus(getStatus(), status)) {
-                return;
-            }
-        }
-        throw PlayerExceptionEnum.STATUS_ERR.getException();
-    }
-
-    public synchronized boolean casStatus(String oldStatus, String newStatus) {
-        if (!Objects.equals(oldStatus, getStatus())) {
-            return false;
-        }
-        this.status = newStatus;
-        this.statusStartTime = LocalDateTime.now();
-        return true;
-    }
-
-    public synchronized String getStatus() {
-        if (PlayerStatusEnum.MOVING.getCode().equals(status)) {
-            long targetMapId = MapUtil.getTargetLocation(id);
-            if (targetMapId == 0L) {
-                status = PlayerStatusEnum.FREE.getCode();
-            } else {
-                long seconds = MapUtil.moveTime(id, MapUtil.getNowLocation(id), targetMapId);
-                LocalDateTime statusEndTime = Objects.isNull(statusStartTime) ?
-                        LocalDateTime.MIN : statusStartTime.plusSeconds(seconds);
-                if (LocalDateTime.now().isAfter(statusEndTime)) {
-                    // 已经到了
-                    status = PlayerStatusEnum.FREE.getCode();
-                    statusStartTime = LocalDateTime.now();
-                    mapId = MapUtil.getTargetLocation(id);
-                    PlayerCache.save(id);
-                }
-            }
-        }
-        return status;
     }
 }

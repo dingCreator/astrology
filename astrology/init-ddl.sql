@@ -111,12 +111,11 @@ CREATE TABLE astrology_dungeon
 (
     id         BIGINT auto_increment not null comment '主键',
     name       VARCHAR(32)           not null comment '副本名称',
-    map_id     INTEGER               not null comment '副本所在地图ID',
     max_rank   INTEGER               not null comment '副本最高可参与阶级',
     flush_time INTEGER               not null comment '探索副本冷却时间（秒）',
     pass_rate  DECIMAL(8,5)          not null comment '直接通过概率',
     PRIMARY KEY (`id`) using btree,
-    key idx_map_id (map_id)
+    key idx_name (name)
 ) engine = innodb comment = '副本表';
 
 CREATE TABLE astrology_dungeon_config (

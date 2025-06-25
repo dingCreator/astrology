@@ -72,10 +72,6 @@ public class SimplePlayerInfoVO {
      */
     private String job;
     /**
-     * 所处位置
-     */
-    private Long mapId;
-    /**
      * 状态
      */
     private String status;

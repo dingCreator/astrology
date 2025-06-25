@@ -140,8 +140,7 @@ public class PlayerBehavior {
                 .maxMp(playerDTO.getMaxMpWithAddition())
                 .atk(EquipmentUtil.getLongVal(playerDTO.getAtk(), EquipmentPropertiesTypeEnum.ATK, bar))
                 .magicAtk(EquipmentUtil.getLongVal(playerDTO.getMagicAtk(), EquipmentPropertiesTypeEnum.MAGIC_ATK, bar))
-                .status(playerDTO.getStatus())
-                .mapId(playerDTO.getMapId()).build();
+                .status(playerDTO.getStatus()).build();
     }
 
     /**
@@ -185,8 +184,7 @@ public class PlayerBehavior {
                         EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, bar))
                 .criticalDamageReduction(EquipmentUtil.getFloatVal(playerDTO.getCriticalDamageReduction(),
                         EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE_REDUCTION, bar))
-                .status(playerDTO.getStatus())
-                .mapId(playerDTO.getMapId()).build();
+                .status(playerDTO.getStatus()).build();
     }
 
     /**

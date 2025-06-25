@@ -59,13 +59,13 @@ public class SkillBelongToService {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
                     QueryWrapper<SkillBelongTo> wrapper = new QueryWrapper<SkillBelongTo>()
                             .eq(SkillBelongTo.BELONG_TO, belongTo)
-                            .eq(SkillBelongTo.BELONG_TO_ID, belongToId);
-                    Page<SkillBelongTo> page = new Page<>(pageIndex, pageSize);
-                    sqlSession.getMapper(SkillBelongToMapper.class).selectPage(page, wrapper);
+                            .eq(SkillBelongTo.BELONG_TO_ID, belongToId)
+                            .last(" limit " + (pageIndex - 1) * pageSize + "," + pageSize);
+                    List<SkillBelongTo> list = sqlSession.getMapper(SkillBelongToMapper.class).selectList(wrapper);
                     PageResponse<SkillBelongTo> response = new PageResponse<>();
-                    response.setData(page.getRecords());
-                    response.setPageIndex((int) page.getCurrent());
-                    response.setPageSize((int) page.getSize());
+                    response.setData(list);
+                    response.setPageIndex(pageIndex);
+                    response.setPageSize(pageSize);
                     response.setTotal(selectSkillBelongToCount(belongTo, belongToId));
                     return response;
                 }

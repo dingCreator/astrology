@@ -55,24 +55,22 @@ public class DungeonService {
     /**
      * 通过名称获取副本
      *
-     * @param mapId       地图ID
      * @param dungeonName 副本名称
      * @return 副本信息
      */
-    public Dungeon getByName(Long mapId, String dungeonName) {
+    public Dungeon getByName(String dungeonName) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
-                sqlSession.getMapper(DungeonMapper.class).getByName(mapId, dungeonName));
+                sqlSession.getMapper(DungeonMapper.class).getByName(dungeonName));
     }
 
     /**
-     * 通过地图ID获取副本
+     * 获取副本
      *
-     * @param mapId 地图ID
      * @return 副本信息
      */
-    public List<Dungeon> list(Long mapId) {
-        return DatabaseProvider.getInstance()
-                .transactionExecuteReturn(sqlSession -> sqlSession.getMapper(DungeonMapper.class).list(mapId));
+    public List<Dungeon> list() {
+        return DatabaseProvider.getInstance().transactionExecuteReturn(sqlSession ->
+                sqlSession.getMapper(DungeonMapper.class).list());
     }
 
     /**
@@ -176,8 +174,8 @@ public class DungeonService {
      * @return 副本
      */
     private Dungeon getDungeon(List<Long> playerIds, int index) {
-        // 当前地图的副本
-        List<Dungeon> dungeonList = list(MapUtil.getNowLocation(playerIds.get(0)));
+        // 获取副本
+        List<Dungeon> dungeonList = list();
         if (CollectionUtil.isEmpty(dungeonList)) {
             throw DungeonExceptionEnum.NO_DUNGEON_CAN_EXPLORE.getException();
         }
@@ -369,11 +367,10 @@ public class DungeonService {
         return dungeonResultVO;
     }
 
-    public void createDungeon(Long mapId, String dungeonName, Integer maxRank, Long flushTime, BigDecimal passRate,
+    public void createDungeon(String dungeonName, Integer maxRank, Long flushTime, BigDecimal passRate,
                               DungeonConfigSettingsDTO setting) {
         DatabaseProvider.getInstance().transactionExecute(sqlSession -> {
             Dungeon dungeon = new Dungeon();
-            dungeon.setMapId(mapId);
             dungeon.setName(dungeonName);
             dungeon.setMaxRank(maxRank);
             dungeon.setFlushTime(flushTime);

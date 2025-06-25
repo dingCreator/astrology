@@ -35,9 +35,10 @@ public class MapUtil {
      * @return 地图ID
      */
     public static Long getNowLocation(long playerId) {
-        PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId).getPlayerDTO();
-        long mapId = playerDTO.getMapId();
-        return mapId << 32 >> 32;
+//        PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId).getPlayerDTO();
+//        long mapId = playerDTO.getMapId();
+//        return mapId << 32 >> 32;
+        return 0L;
     }
 
     /**
@@ -60,9 +61,10 @@ public class MapUtil {
      * @return 地图ID 如果不是移动中，则返回0
      */
     public static Long getTargetLocation(long playerId) {
-        PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId).getPlayerDTO();
-        long mapId = playerDTO.getMapId();
-        return mapId >> 32;
+//        PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId).getPlayerDTO();
+//        long mapId = playerDTO.getMapId();
+//        return mapId >> 32;
+        return 0L;
     }
 
     /**
@@ -148,7 +150,7 @@ public class MapUtil {
                 throw MapExceptionEnum.NOT_FREE.getException();
             }
             p.setStatus(PlayerStatusEnum.MOVING.getCode());
-            p.setMapId(getMovingMapId(p.getMapId(), mapId));
+//            p.setMapId(getMovingMapId(p.getMapId(), mapId));
             p.setStatusStartTime(LocalDateTime.now());
         });
         PlayerCache.save(playerList.stream().map(PlayerDTO::getId).collect(Collectors.toList()));

@@ -153,10 +153,10 @@ public class TaskUtilAbility {
                 throw TaskExceptionEnum.NOT_ALLOW_MUTUAL.getException();
             }
         }
-        if (CollectionUtil.isNotEmpty(title.getLimitMapId())
-                && !title.getLimitMapId().contains(playerInfo.getPlayerDTO().getMapId())) {
-            throw TaskExceptionEnum.NOT_ALLOW_MAP.getException();
-        }
+//        if (CollectionUtil.isNotEmpty(title.getLimitMapId())
+//                && !title.getLimitMapId().contains(playerInfo.getPlayerDTO().getMapId())) {
+//            throw TaskExceptionEnum.NOT_ALLOW_MAP.getException();
+//        }
     }
 
     /**

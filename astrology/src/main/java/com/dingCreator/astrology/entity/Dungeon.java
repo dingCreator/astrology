@@ -28,11 +28,6 @@ public class Dungeon {
     @TableField("name")
     private String name;
     /**
-     * 地图ID
-     */
-    @TableField("map_id")
-    private Long mapId;
-    /**
      * 可挑战此副本的最高Rank
      */
     @TableField("max_rank")

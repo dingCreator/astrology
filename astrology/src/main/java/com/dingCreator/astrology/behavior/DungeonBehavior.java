@@ -35,7 +35,8 @@ public class DungeonBehavior {
      * @return 副本信息
      */
     public PageResponse<String> dungeonPage(Long playerId, int pageIndex, int pageSize) {
-        List<Dungeon> dungeonList = dungeonService.list(MapUtil.getNowLocation(playerId));
+        PlayerCache.getPlayerById(playerId);
+        List<Dungeon> dungeonList = dungeonService.list();
         return PageUtil.buildPage(dungeonList.stream()
                 .map(d -> "副本名称：" + d.getName() + " 冷却时间：" + d.getFlushTime() + "s")
                 .collect(Collectors.toList()), pageIndex, pageSize);
@@ -97,7 +98,7 @@ public class DungeonBehavior {
      */
     public DungeonVO getDungeonInfoByIndex(Long playerId, int index) {
         PlayerDTO playerDTO = PlayerCache.getPlayerById(playerId).getPlayerDTO();
-        List<Dungeon> dungeonList = dungeonService.list(MapUtil.getNowLocation(playerId));
+        List<Dungeon> dungeonList = dungeonService.list();
         if (index < 1 || index > dungeonList.size()) {
             throw DungeonExceptionEnum.DUNGEON_NOT_FOUND.getException();
         }
@@ -115,14 +116,13 @@ public class DungeonBehavior {
     /**
      * 创建副本
      *
-     * @param mapId       地图Id
      * @param dungeonName 副本名称
      * @param maxRank     最高阶级
      * @param flushTime   刷新时间
      */
-    public void createDungeon(Long mapId, String dungeonName, Integer maxRank, Long flushTime, BigDecimal passRate,
+    public void createDungeon(String dungeonName, Integer maxRank, Long flushTime, BigDecimal passRate,
                               DungeonConfigSettingsDTO settings) {
-        DungeonService.getInstance().createDungeon(mapId, dungeonName, maxRank, flushTime, passRate, settings);
+        DungeonService.getInstance().createDungeon(dungeonName, maxRank, flushTime, passRate, settings);
     }
 
     public void addLoot(String mapName, String dungeonName, Integer rate, String lootType) {

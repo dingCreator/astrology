@@ -26,9 +26,10 @@ public class MapBehavior {
      * @return 距离
      */
     public long getDistance(Long playerId, String mapName) {
-        long fromMapId = PlayerCache.getPlayerById(playerId).getPlayerDTO().getMapId();
-        Map target = mapService.getMapByName(mapName);
-        return MapUtil.manhattanDistance(fromMapId, target.getId());
+//        long fromMapId = PlayerCache.getPlayerById(playerId).getPlayerDTO().getMapId();
+//        Map target = mapService.getMapByName(mapName);
+//        return MapUtil.manhattanDistance(fromMapId, target.getId());
+        return 0L;
     }
 
     /**
