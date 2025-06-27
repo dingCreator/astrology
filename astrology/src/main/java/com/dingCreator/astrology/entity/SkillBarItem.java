@@ -39,4 +39,9 @@ public class SkillBarItem {
      */
     @TableField("skill_id")
     private String skillId;
+    /**
+     * 是否正在使用此配置
+     */
+    @TableField("using")
+    private Boolean using;
 }

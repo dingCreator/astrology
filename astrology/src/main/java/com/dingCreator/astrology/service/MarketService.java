@@ -140,6 +140,9 @@ public class MarketService {
             if (Objects.isNull(marketItem) || marketItem.getItemCnt() <= 0) {
                 throw MarketExceptionEnum.ITEM_NOT_EXIST.getException();
             }
+            if (!marketItem.getPlayerId().equals(playerId)) {
+                throw MarketExceptionEnum.NOT_YOUR_ITEM.getException();
+            }
             marketItem.setCostMapJson(JSONObject.toJSONString(assetMap));
             sqlSession.getMapper(MarketItemMapper.class).updateById(marketItem);
         });

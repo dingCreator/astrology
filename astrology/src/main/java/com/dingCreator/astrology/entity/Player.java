@@ -36,11 +36,6 @@ public class Player extends Organism {
     @TableField("job")
     private String job;
     /**
-     * 所处位置
-     */
-    @TableField("map_id")
-    private Long mapId;
-    /**
      * 状态
      */
     @TableField("`status`")

@@ -60,7 +60,6 @@ public class PlayerBehavior {
         player.setId(id);
         player.setName(name);
         player.setStatus(PlayerStatusEnum.FREE.getCode());
-        player.setMapId(job.getMapId());
         player.setJob(job.getJobCode());
         player.setExp(0L);
         player.setLevel(Constants.MIN_LEVEL);

@@ -73,7 +73,7 @@ public class SkillBagService {
 
     public int countSkillBag(Long playerId) {
         return DatabaseProvider.getInstance().executeReturn(sqlSession -> sqlSession.getMapper(SkillBagMapper.class)
-                .selectCount(new QueryWrapper<SkillBag>().eq(SkillBag.PLAYER_ID, playerId).ge(SkillBag.SKILL_CNT, 0)));
+                .selectCount(new QueryWrapper<SkillBag>().eq(SkillBag.PLAYER_ID, playerId).gt(SkillBag.SKILL_CNT, 0)));
     }
 
     private SkillBagService() {
