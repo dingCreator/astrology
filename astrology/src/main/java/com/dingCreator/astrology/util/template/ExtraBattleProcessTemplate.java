@@ -212,6 +212,15 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
         }
     }
 
+    public final void executeAfterEnemyBehavior(BattleEffectDTO battleEffect) {
+        if (!effect()) {
+            return;
+        }
+        if (this.getOwnerEnemy().contains(battleEffect.getFrom())) {
+            afterEnemyBehavior(battleEffect);
+        }
+    }
+
     public final void executeBeforeDeath(BattleEffectDTO battleEffect) {
         if (battleEffect.getTar().equals(this.owner)) {
             beforeMeDeath(battleEffect);
@@ -312,6 +321,12 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
      * 我的行动后
      */
     public void afterMyBehavior(BattleEffectDTO battleEffect) {
+    }
+
+    /**
+     * 对方行动后
+     */
+    public void afterEnemyBehavior(BattleEffectDTO battleEffect) {
     }
 
     /**

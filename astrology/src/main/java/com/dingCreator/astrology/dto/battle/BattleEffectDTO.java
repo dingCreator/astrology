@@ -103,7 +103,10 @@ public class BattleEffectDTO {
         // 插入结算-我的行动后
         skillEffect.getTemplate().afterEffect(this);
         nowSkill.getThisBehaviorExtraProcess().afterEffect(this);
-        extraBattleProcessList.forEach(ext -> ext.executeAfterMyBehavior(this));
+        extraBattleProcessList.forEach(ext -> {
+            ext.executeAfterMyBehavior(this);
+            ext.executeAfterEnemyBehavior(this);
+        });
     }
 
     public void executeBehavior() {
