@@ -5,6 +5,7 @@ import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.battle.*;
 import com.dingCreator.astrology.dto.equipment.EquipmentPropertiesDTO;
 import com.dingCreator.astrology.dto.organism.OrganismDTO;
+import com.dingCreator.astrology.enums.BuffOverrideStrategyEnum;
 import com.dingCreator.astrology.enums.BuffTypeEnum;
 import com.dingCreator.astrology.enums.EquipmentSuitEnum;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
@@ -111,7 +112,7 @@ public enum EquipmentEnum {
             EquipmentRankEnum.SP, EquipmentTypeEnum.ARMOR
     ),
     EQUIPMENT_13(13L, "门板",
-            "邪修洗劫完某家后，顺手拆下的门，可以当做盾牌使用",
+            "邪修洗劫完某户人家后，顺手拆下的门，可以当做盾牌使用",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 2L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 1L)
@@ -1242,6 +1243,109 @@ public enum EquipmentEnum {
                     sk1032Tpl.setPriority(this.getPriority());
                     sk1032Tpl.executeBeforeBattle(battleField);
 
+                }
+            }
+    ),
+    EQUIPMENT_604(604L, "元素之心",
+            "九道太初法则之一，原初五行能量狂暴而又混乱的集合体，修仙王朝至宝之一。" +
+                    "曾协助数人成就巅峰强者，也曾引发元素浪潮导致数以万计生灵的灭亡。" +
+                    "现存于修仙王朝“天国阶梯”之内，为天骄子弟训练使用。\n" +
+                    "法则之力∶五行乱数——太初法则\n" +
+                    "回合开始时对敌方全体随机附加一种五行毒素，触发如下效果。五行毒素最多附加两层。\n" +
+                    "1.朽木——敌方血量回复效果降低60%\n" +
+                    "2.碎金——敌方防御与法抗降低40%\n" +
+                    "3.邪火——敌方受到伤害提高30%\n" +
+                    "4.冥水——敌方速度降低35%\n" +
+                    "5.垢土——敌方命中与闪避降低30%\n" +
+                    "隐藏技能∶元素紊乱\n" +
+                    "我方闪避敌方技能时，随机为敌方附加一层五行毒素。\n" +
+                    "每层五行毒素于敌方行动后结算并消失，对敌方造成5000点真实伤害。\n" +
+                    "神煅加护∶速度+15% 闪避+20%\n",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 9500L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 9500L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.9F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 2.1F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DODGE, 3100L, 0.2F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 3100L, 0.15F)
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.JEWELRY,
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeMyRound(BattleRoundDTO battleRound) {
+                    effect(battleRound.getBuilder());
+                }
+
+                @Override
+                public void ifEnemyNotHit(BattleEffectDTO battleEffect) {
+                    effect(battleEffect.getBattleRound().getBuilder());
+                }
+
+                private void effect(StringBuilder builder) {
+                    this.getOwnerEnemy().forEach(b -> {
+                        String name = b.getOrganismInfoDTO().getOrganismDTO().getName();
+                        int cnt = b.getMarkMap().getOrDefault("五行毒素", 0);
+                        if (cnt >= 2) {
+                            return;
+                        }
+                        b.getMarkMap().put("五行毒素", cnt + 1);
+                        int mode = RandomUtil.rangeIntRandom(5);
+                        switch (mode) {
+                            case 0:
+                                builder.append("，").append(name).append("触发“朽木”");
+                                BuffDTO buff0 = new BuffDTO(BuffTypeEnum.HEAL, "五行毒素", -0.6F,
+                                        BuffOverrideStrategyEnum.NONINTERFERENCE);
+                                BuffUtil.addBuff(this.getOwner(), b, buff0, builder);
+                                break;
+                            case 1:
+                                builder.append("，").append(name).append("触发“碎金”");
+                                BuffDTO buff10 = new BuffDTO(BuffTypeEnum.DEF, "五行毒素", -0.4F,
+                                        BuffOverrideStrategyEnum.NONINTERFERENCE);
+                                BuffUtil.addBuff(this.getOwner(), b, buff10, builder);
+                                BuffDTO buff11 = new BuffDTO(BuffTypeEnum.MAGIC_DEF, "五行毒素", -0.4F,
+                                        BuffOverrideStrategyEnum.NONINTERFERENCE);
+                                BuffUtil.addBuff(this.getOwner(), b, buff11, builder);
+                                break;
+                            case 2:
+                                builder.append("，").append(name).append("触发“邪火”");
+                                BuffDTO buff20 = new BuffDTO(BuffTypeEnum.DAMAGE, "五行毒素", 0.3F,
+                                        BuffOverrideStrategyEnum.NONINTERFERENCE);
+                                BuffUtil.addBuff(this.getOwner(), b, buff20, builder);
+                                BuffDTO buff21 = new BuffDTO(BuffTypeEnum.MAGIC_DAMAGE, "五行毒素", 0.3F,
+                                        BuffOverrideStrategyEnum.NONINTERFERENCE);
+                                BuffUtil.addBuff(this.getOwner(), b, buff21, builder);
+                                break;
+                            case 3:
+                                builder.append("，").append(name).append("触发“冥水”");
+                                BuffDTO buff3 = new BuffDTO(BuffTypeEnum.SPEED, "五行毒素", -0.35F,
+                                        BuffOverrideStrategyEnum.NONINTERFERENCE);
+                                BuffUtil.addBuff(this.getOwner(), b, buff3, builder);
+                                break;
+                            case 4:
+                                builder.append("，").append(name).append("触发“垢土”");
+                                BuffDTO buff40 = new BuffDTO(BuffTypeEnum.HIT, "五行毒素", -0.3F,
+                                        BuffOverrideStrategyEnum.NONINTERFERENCE);
+                                BuffUtil.addBuff(this.getOwner(), b, buff40, builder);
+                                BuffDTO buff41 = new BuffDTO(BuffTypeEnum.DODGE, "五行毒素", -0.3F,
+                                        BuffOverrideStrategyEnum.NONINTERFERENCE);
+                                BuffUtil.addBuff(this.getOwner(), b, buff41, builder);
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+                }
+
+                @Override
+                public void afterEnemyBehavior(BattleEffectDTO battleEffect) {
+                    BattleDTO from = battleEffect.getFrom();
+                    int cnt = from.getMarkMap().getOrDefault("五行毒素", 0);
+                    if (cnt > 0) {
+                        StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+                        builder.append("，共计").append(cnt).append("层五行毒素");
+                        BattleUtil.doRealDamage(from, 5000L * cnt, builder);
+                        from.getBuffMap().forEach((buffTypeEnum, buffList) ->
+                                buffList.removeIf(buff -> "五行毒素".equals(buff.getBuffDTO().getBuffName())));
+                    }
                 }
             }
     ),
