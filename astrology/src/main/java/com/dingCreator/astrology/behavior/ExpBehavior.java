@@ -154,14 +154,12 @@ public class ExpBehavior {
         if (PlayerStatusEnum.HANG_UP.getCode().equals(playerDTO.getStatus())) {
             throw ExpExceptionEnum.ALREADY_HANG_UP.getException();
         }
-        if (PlayerStatusEnum.MOVING.getCode().equals(playerDTO.getStatus())) {
-            throw ExpExceptionEnum.MOVING.getException();
-        }
         if (PlayerStatusEnum.EXPLORE.getCode().equals(playerDTO.getStatus())) {
             throw ExpExceptionEnum.EXPLORING.getException();
         }
         playerDTO.setStatus(PlayerStatusEnum.HANG_UP.getCode());
-        PlayerCache.save(Collections.singletonList(id));
+        playerDTO.setStatusStartTime(LocalDateTime.now());
+        PlayerCache.save(id);
     }
 
     /**
@@ -179,6 +177,7 @@ public class ExpBehavior {
         HangUpVO hangUpVO = new HangUpVO();
         long between = Duration.between(playerDTO.getStatusStartTime(), LocalDateTime.now()).toMinutes();
         playerDTO.setStatus(PlayerStatusEnum.FREE.getCode());
+        playerDTO.setStatusStartTime(LocalDateTime.now());
         // 回显真正的挂机时间
         hangUpVO.setHangUpTime(between);
         // 最长有收益挂机时间24h
@@ -221,6 +220,7 @@ public class ExpBehavior {
                 }
             }
         }
+        PlayerCache.save(id);
         BaseResponse<HangUpVO> response = new BaseResponse<>();
         response.setContent(hangUpVO);
         return response;

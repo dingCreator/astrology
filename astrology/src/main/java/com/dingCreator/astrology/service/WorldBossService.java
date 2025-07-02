@@ -58,6 +58,7 @@ public class WorldBossService {
         return DatabaseProvider.getInstance().executeReturn(sqlSession ->
                 sqlSession.getMapper(WorldBossMapper.class).selectList(
                         new QueryWrapper<WorldBoss>().eq(WorldBoss.DISTRIBUTE, false)
+                                .lt(WorldBoss.START_TIME, LocalDateTime.now())
                 )
         );
     }

@@ -1273,6 +1273,7 @@ public enum EquipmentEnum {
                 @Override
                 public void beforeMyRound(BattleRoundDTO battleRound) {
                     effect(battleRound.getBuilder());
+                    battleRound.getBuilder().append("，");
                 }
 
                 @Override
@@ -1345,6 +1346,7 @@ public enum EquipmentEnum {
                         BattleUtil.doRealDamage(from, 5000L * cnt, builder);
                         from.getBuffMap().forEach((buffTypeEnum, buffList) ->
                                 buffList.removeIf(buff -> "五行毒素".equals(buff.getBuffDTO().getBuffName())));
+                        from.getMarkMap().remove("五行毒素");
                     }
                 }
             }
