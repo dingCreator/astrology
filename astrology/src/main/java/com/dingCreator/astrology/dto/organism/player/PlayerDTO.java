@@ -49,6 +49,11 @@ public class PlayerDTO extends OrganismDTO {
      */
     private Boolean enabled;
 
+    public void setStatus(String newStatus) {
+        this.status = newStatus;
+        this.statusStartTime = LocalDateTime.now();
+    }
+
     @Override
     protected synchronized void initPropWithAddition() {
         this.maxHpWithAddition = EquipmentUtil.getLongVal(this.maxHp, EquipmentPropertiesTypeEnum.HP,
