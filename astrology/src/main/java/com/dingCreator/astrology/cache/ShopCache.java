@@ -112,6 +112,12 @@ public class ShopCache {
                     .costMap(costMap).count(1).stock(-1).build());
 
             costMap = new HashMap<>();
+            costMap.put(AssetTypeEnum.ORIGIN_DRAGON_BALL, 500L);
+            originShopItemList.add(ShopItemDTO.builder()
+                    .article(new ArticleEquipmentItem(EquipmentEnum.EQUIPMENT_604.getId()))
+                    .costMap(costMap).count(1).stock(-1).build());
+
+            costMap = new HashMap<>();
             costMap.put(AssetTypeEnum.ORIGIN_DRAGON_BALL, 100L);
             originShopItemList.add(ShopItemDTO.builder()
                     .article(new ArticleEquipmentItem(EquipmentEnum.EQUIPMENT_502.getId()))
