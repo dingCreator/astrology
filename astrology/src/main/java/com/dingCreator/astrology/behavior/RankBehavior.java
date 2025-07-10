@@ -60,7 +60,7 @@ public class RankBehavior {
             ExpBehavior.getInstance().getExp(playerDTO.getId(), 1L);
             // 属性提升
             builder.append("最大血量：").append(playerDTO.getMaxHp());
-            playerDTO.setMaxHp(BigDecimal.valueOf(playerDTO.getMaxHp()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setMaxHp(BigDecimal.valueOf(playerDTO.getMaxHp()).multiply(BigDecimal.valueOf(1.5)).longValue());
             builder.append(" -> ").append(playerDTO.getMaxHp()).append("\n");
 
             builder.append("最大蓝量：").append(playerDTO.getMaxMp());
@@ -71,32 +71,32 @@ public class RankBehavior {
             playerDTO.setMp(playerDTO.getMaxMp());
 
             builder.append("攻击：").append(playerDTO.getAtk());
-            playerDTO.setAtk(BigDecimal.valueOf(playerDTO.getAtk()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setAtk(BigDecimal.valueOf(playerDTO.getAtk()).multiply(BigDecimal.valueOf(1.5)).longValue());
             builder.append(" -> ").append(playerDTO.getAtk()).append("\n");
 
             builder.append("法强：").append(playerDTO.getMagicAtk());
-            playerDTO.setMagicAtk(BigDecimal.valueOf(playerDTO.getMagicAtk()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setMagicAtk(BigDecimal.valueOf(playerDTO.getMagicAtk()).multiply(BigDecimal.valueOf(1.5)).longValue());
             builder.append(" -> ").append(playerDTO.getMagicAtk()).append("\n");
 
             builder.append("防御：").append(playerDTO.getDef());
-            playerDTO.setDef(BigDecimal.valueOf(playerDTO.getDef()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setDef(BigDecimal.valueOf(playerDTO.getDef()).multiply(BigDecimal.valueOf(1.5)).longValue());
             builder.append(" -> ").append(playerDTO.getDef()).append("\n");
 
             builder.append("法抗：").append(playerDTO.getMagicDef());
-            playerDTO.setMagicDef(BigDecimal.valueOf(playerDTO.getMagicDef()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setMagicDef(BigDecimal.valueOf(playerDTO.getMagicDef()).multiply(BigDecimal.valueOf(1.5)).longValue());
             builder.append(" -> ").append(playerDTO.getMagicDef()).append("\n");
 
             builder.append("速度：").append(playerDTO.getBehaviorSpeed());
-            playerDTO.setBehaviorSpeed(BigDecimal.valueOf(playerDTO.getBehaviorSpeed()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setBehaviorSpeed(BigDecimal.valueOf(playerDTO.getBehaviorSpeed()).multiply(BigDecimal.valueOf(1.5)).longValue());
             builder.append(" -> ").append(playerDTO.getBehaviorSpeed()).append("\n");
 
             builder.append("命中：").append(playerDTO.getHit());
-            playerDTO.setHit(BigDecimal.valueOf(playerDTO.getHit()).multiply(BigDecimal.valueOf(1.5F)).longValue());
+            playerDTO.setHit(BigDecimal.valueOf(playerDTO.getHit()).multiply(BigDecimal.valueOf(1.5)).longValue());
             builder.append(" -> ").append(playerDTO.getHit()).append("\n");
 
             builder.append("闪避：").append(playerDTO.getDodge());
-            playerDTO.setDodge(BigDecimal.valueOf(playerDTO.getDodge()).multiply(BigDecimal.valueOf(1.5F)).longValue());
-            builder.append(" -> ").append(playerDTO.getDodge()).append("\n");
+            playerDTO.setDodge(BigDecimal.valueOf(playerDTO.getDodge()).multiply(BigDecimal.valueOf(1.5)).longValue());
+            builder.append(" -> ").append(playerDTO.getDodge());
 
             playerDTO.clearAdditionVal();
             resultVO.setSuccess(true);

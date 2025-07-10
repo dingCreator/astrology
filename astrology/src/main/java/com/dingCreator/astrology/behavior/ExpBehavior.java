@@ -14,6 +14,7 @@ import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.job.JobInitPropertiesEnum;
 import com.dingCreator.astrology.enums.job.JobLevelAwardEnum;
 import com.dingCreator.astrology.response.BaseResponse;
+import com.dingCreator.astrology.util.LockUtil;
 import com.dingCreator.astrology.vo.HangUpVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -39,62 +40,64 @@ public class ExpBehavior {
      * @param id  玩家ID
      * @param exp 改变的经验值
      */
-    public synchronized LevelChange getExp(Long id, Long exp) {
-        PlayerDTO playerDTO = PlayerCache.getPlayerById(id).getPlayerDTO();
-        long currentExp = playerDTO.getExp() + exp;
-        int oldLevel = playerDTO.getLevel();
-        long realExp = exp;
+    public LevelChange getExp(Long id, Long exp) {
+        return LockUtil.execute(Constants.PLAYER_LOCK_PREFIX + id, () -> {
+            PlayerDTO playerDTO = PlayerCache.getPlayerById(id).getPlayerDTO();
+            long currentExp = playerDTO.getExp() + exp;
+            int oldLevel = playerDTO.getLevel();
+            long realExp = exp;
 
-        List<String> awardDescList = new ArrayList<>();
-        while (currentExp >= getCurrentLevelMaxExp(playerDTO.getLevel())) {
-            RankEnum rankEnum = RankEnum.getEnum(playerDTO.getJob(), playerDTO.getRank());
-            if (playerDTO.getLevel() >= Constants.MAX_LEVEL) {
-                long maxExp = getCurrentLevelMaxExp(Constants.MAX_LEVEL) - 1;
-                // 减掉溢出经验值
-                realExp -= (currentExp - maxExp);
-                currentExp = maxExp;
-                break;
-            } else if (playerDTO.getLevel() >= rankEnum.getMaxLevel()) {
-                // 上限了，不突破不允许升级
-                long expLimit = getExpLimit(playerDTO.getLevel());
-                if (currentExp >= expLimit) {
+            List<String> awardDescList = new ArrayList<>();
+            while (currentExp >= getCurrentLevelMaxExp(playerDTO.getLevel())) {
+                RankEnum rankEnum = RankEnum.getEnum(playerDTO.getJob(), playerDTO.getRank());
+                if (playerDTO.getLevel() >= Constants.MAX_LEVEL) {
+                    long maxExp = getCurrentLevelMaxExp(Constants.MAX_LEVEL) - 1;
                     // 减掉溢出经验值
-                    realExp -= (currentExp - expLimit);
-                    currentExp = expLimit;
-                }
-                break;
-            } else {
-                long currentLevelMaxExp = getCurrentLevelMaxExp(playerDTO.getLevel());
-                currentExp -= currentLevelMaxExp;
-                int newLevel = playerDTO.getLevel() + 1;
-                playerDTO.setLevel(newLevel);
-                JobLevelAwardEnum award = JobLevelAwardEnum.getByJobAndLv(JobEnum.getByCode(playerDTO.getJob()), newLevel);
-                if (Objects.nonNull(award)) {
-                    awardDescList.add(award.getSendAward().apply(id));
-                }
-                // 属性提升
-                JobInitPropertiesEnum base = JobInitPropertiesEnum.getByCode(playerDTO.getJob());
-                // 先更新上限，否则当前值加不上去
-                playerDTO.setMaxHp(playerDTO.getMaxHp() + getLevelUpIncrease(base.getInitHp(), playerDTO.getLevel()));
-                playerDTO.setMaxMp(playerDTO.getMaxMp() + getLevelUpIncrease(base.getInitMp(), BigDecimal.valueOf(0.03)));
-                playerDTO.setHp(playerDTO.getMaxHp());
-                playerDTO.setMp(playerDTO.getMaxMp());
-                // 四种特殊属性赋空值，下次获取时重新计算
-                playerDTO.clearAdditionVal();
+                    realExp -= (currentExp - maxExp);
+                    currentExp = maxExp;
+                    break;
+                } else if (playerDTO.getLevel() >= rankEnum.getMaxLevel()) {
+                    // 上限了，不突破不允许升级
+                    long expLimit = getExpLimit(playerDTO.getLevel());
+                    if (currentExp >= expLimit) {
+                        // 减掉溢出经验值
+                        realExp -= (currentExp - expLimit);
+                        currentExp = expLimit;
+                    }
+                    break;
+                } else {
+                    long currentLevelMaxExp = getCurrentLevelMaxExp(playerDTO.getLevel());
+                    currentExp -= currentLevelMaxExp;
+                    int newLevel = playerDTO.getLevel() + 1;
+                    playerDTO.setLevel(newLevel);
+                    JobLevelAwardEnum award = JobLevelAwardEnum.getByJobAndLv(JobEnum.getByCode(playerDTO.getJob()), newLevel);
+                    if (Objects.nonNull(award)) {
+                        awardDescList.add(award.getSendAward().apply(id));
+                    }
+                    // 属性提升
+                    JobInitPropertiesEnum base = JobInitPropertiesEnum.getByCode(playerDTO.getJob());
+                    // 先更新上限，否则当前值加不上去
+                    playerDTO.setMaxHp(playerDTO.getMaxHp() + getLevelUpIncrease(base.getInitHp(), newLevel));
+                    playerDTO.setMaxMp(playerDTO.getMaxMp() + getLevelUpIncrease(base.getInitMp(), BigDecimal.valueOf(0.03)));
+                    playerDTO.setHp(playerDTO.getMaxHp());
+                    playerDTO.setMp(playerDTO.getMaxMp());
+                    // 四种特殊属性赋空值，下次获取时重新计算
+                    playerDTO.clearAdditionVal();
 
-                playerDTO.setAtk(playerDTO.getAtk() + getLevelUpIncrease(base.getInitAtk(), playerDTO.getLevel()));
-                playerDTO.setMagicAtk(playerDTO.getMagicAtk() + getLevelUpIncrease(base.getInitMagicAtk(), playerDTO.getLevel()));
-                playerDTO.setDef(playerDTO.getDef() + getLevelUpIncrease(base.getInitDef(), playerDTO.getLevel()));
-                playerDTO.setMagicDef(playerDTO.getMagicDef() + getLevelUpIncrease(base.getInitMagicDef(), playerDTO.getLevel()));
-                playerDTO.setBehaviorSpeed(playerDTO.getBehaviorSpeed()
-                        + getLevelUpIncrease(playerDTO.getBehaviorSpeed(), BigDecimal.valueOf(0.03)));
-                playerDTO.setHit(playerDTO.getHit() + getLevelUpIncrease(base.getInitHit(), playerDTO.getLevel()));
-                playerDTO.setDodge(playerDTO.getDodge() + getLevelUpIncrease(base.getInitDodge(), playerDTO.getLevel()));
+                    playerDTO.setAtk(playerDTO.getAtk() + getLevelUpIncrease(base.getInitAtk(), newLevel));
+                    playerDTO.setMagicAtk(playerDTO.getMagicAtk() + getLevelUpIncrease(base.getInitMagicAtk(), newLevel));
+                    playerDTO.setDef(playerDTO.getDef() + getLevelUpIncrease(base.getInitDef(), newLevel));
+                    playerDTO.setMagicDef(playerDTO.getMagicDef() + getLevelUpIncrease(base.getInitMagicDef(), newLevel));
+                    playerDTO.setBehaviorSpeed(playerDTO.getBehaviorSpeed()
+                            + getLevelUpIncrease(playerDTO.getBehaviorSpeed(), BigDecimal.valueOf(0.03)));
+                    playerDTO.setHit(playerDTO.getHit() + getLevelUpIncrease(base.getInitHit(), newLevel));
+                    playerDTO.setDodge(playerDTO.getDodge() + getLevelUpIncrease(base.getInitDodge(), newLevel));
+                }
             }
-        }
-        playerDTO.setExp(currentExp);
-        PlayerCache.save(id);
-        return new LevelChange(oldLevel, playerDTO.getLevel(), realExp, awardDescList);
+            playerDTO.setExp(currentExp);
+            PlayerCache.save(id);
+            return new LevelChange(oldLevel, playerDTO.getLevel(), realExp, awardDescList);
+        });
     }
 
     /**

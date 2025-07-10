@@ -35,7 +35,7 @@ public class ArticleUtil {
         JSONArray jsonArray = JSONObject.parseArray(json);
         return jsonArray.stream().map(arrItem -> {
             String itemType = ((Map<?, ?>) arrItem).get(Constants.ITEM_TYPE).toString();
-            return ArticleTypeEnum.getByType(itemType).getConvertJsonFunc().apply(arrItem.toString());
+            return ArticleTypeEnum.getByType(itemType).getConvertJsonFunc().apply(JSONObject.toJSONString(arrItem));
         }).collect(Collectors.toList());
     }
 
@@ -43,7 +43,7 @@ public class ArticleUtil {
         JSONArray jsonArray = JSONObject.parseArray(json);
         return jsonArray.stream().map(arrItem -> {
             String itemType = ((Map<?, ?>) arrItem).get(Constants.ITEM_TYPE).toString();
-            return ArticleTypeEnum.getByType(itemType).getConvertJsonFunc().apply(arrItem.toString());
+            return ArticleTypeEnum.getByType(itemType).getConvertJsonFunc().apply(JSONObject.toJSONString(arrItem));
         }).collect(Collectors.toSet());
     }
 

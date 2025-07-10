@@ -36,7 +36,7 @@ public abstract class ArticleItemDTO implements Serializable {
     }
 
     /**
-     * 发放方式
+     * 数量变更
      *
      * @param playerId 玩家ID
      */
@@ -58,6 +58,11 @@ public abstract class ArticleItemDTO implements Serializable {
      */
     protected abstract ArticleItemVO fillView(ArticleItemVO vo);
 
+    /**
+     * 默认反显
+     *
+     * @return 反显内容
+     */
     public ArticleItemVO view() {
         ArticleItemVO vo = ArticleItemVO.builder().count(this.cnt).rare(this.rare).build();
         return fillView(vo);

@@ -37,6 +37,10 @@ public enum ArticleTypeEnum {
      * 资产
      */
     ASSET("asset", str -> JSONObject.parseObject(str, ArticleAssetItem.class)),
+    /**
+     * 经验
+     */
+    EXP("exp", str -> JSONObject.parseObject(str, ArticleExpItem.class)),
     ;
 
     private final String type;

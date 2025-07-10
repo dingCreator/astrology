@@ -9,9 +9,11 @@ import com.dingCreator.astrology.dto.activity.SignActivityAwardRuleDTO;
 import com.dingCreator.astrology.dto.article.ArticleItemDTO;
 import com.dingCreator.astrology.entity.Activity;
 import com.dingCreator.astrology.enums.activity.ActivityTypeEnum;
+import com.dingCreator.astrology.enums.activity.SignAwardTypeEnum;
 import com.dingCreator.astrology.enums.exception.ActivityExceptionEnum;
 import com.dingCreator.astrology.mapper.ActivityMapper;
 import com.dingCreator.astrology.request.ActivityAwardSettingReq;
+import com.dingCreator.astrology.request.SignActivityAwardSettingReq;
 import com.dingCreator.astrology.util.ArticleUtil;
 
 import java.util.ArrayList;
@@ -55,6 +57,8 @@ public class SignActivityServiceImpl implements ActivityService {
                 .map(jsonObj -> {
                     SignActivityAwardRuleDTO sign = new SignActivityAwardRuleDTO();
                     String articleJson = jsonObj.getString(BaseActivityAwardRuleDTO.FIELD_ARTICLE_ITEM_SET);
+                    String signAwardType = jsonObj.getString(SignActivityAwardRuleDTO.FIELD_SIGN_AWARD_TYPE);
+                    sign.setSignAwardType(signAwardType);
                     sign.setArticleItemSet(ArticleUtil.convertSet(articleJson));
                     return sign;
                 }).collect(Collectors.toList());
@@ -65,6 +69,7 @@ public class SignActivityServiceImpl implements ActivityService {
     public List<ArticleItemDTO> join(ActivityDTO activity, int times) {
         List<SignActivityAwardRuleDTO> awardRuleList = activity.getAwardRuleList().stream()
                 .map(award -> (SignActivityAwardRuleDTO) award)
+                .filter(award -> SignAwardTypeEnum.SINGLE.getTypeCode().equals(award.getSignAwardType()))
                 .collect(Collectors.toList());
         return awardRuleList.stream()
                 .flatMap(award -> award.getArticleItemSet().stream())
@@ -78,12 +83,33 @@ public class SignActivityServiceImpl implements ActivityService {
 
     @Override
     public void easySettingAward(ActivityDTO activityDTO, ActivityAwardSettingReq activityAwardSettingReq) {
-        activityDTO.getActivityType().getService().easySettingAward(activityDTO, activityAwardSettingReq);
+        SignActivityAwardSettingReq req = (SignActivityAwardSettingReq) activityAwardSettingReq;
+        List<BaseActivityAwardRuleDTO> ruleList = req.getSignAwardMap().entrySet().stream()
+                .map(award -> {
+                    SignActivityAwardRuleDTO rule = new SignActivityAwardRuleDTO();
+                    rule.setSignAwardType(award.getKey().getTypeCode());
+                    rule.setArticleItemSet(award.getValue());
+                    return rule;
+                }).collect(Collectors.toList());
+        activityDTO.setAwardRuleList(ruleList);
     }
 
     @Override
     public List<String> queryAwardList(ActivityDTO activityDTO) {
-        return new ArrayList<>();
+        List<BaseActivityAwardRuleDTO> ruleList = activityDTO.getAwardRuleList();
+        if (Objects.isNull(ruleList)) {
+            return new ArrayList<>();
+        }
+        return ruleList.stream().map(rule -> {
+            SignActivityAwardRuleDTO signRule = (SignActivityAwardRuleDTO) rule;
+            SignAwardTypeEnum e = SignAwardTypeEnum.getByTypeCode(signRule.getSignAwardType());
+            if (Objects.isNull(e)) {
+                return "";
+            }
+            return e.getChnDesc() + ":" + signRule.getArticleItemSet().stream()
+                    .map(articleItemDTO -> articleItemDTO.view().getName() + "*" + articleItemDTO.view().getCount())
+                    .collect(Collectors.joining(","));
+        }).collect(Collectors.toList());
     }
 
     private static class Holder {

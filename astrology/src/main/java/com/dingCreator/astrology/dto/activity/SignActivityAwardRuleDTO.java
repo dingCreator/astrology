@@ -8,6 +8,9 @@ import lombok.Data;
  */
 @Data
 public class SignActivityAwardRuleDTO extends BaseActivityAwardRuleDTO {
+
+    public static final String FIELD_SIGN_AWARD_TYPE = "signAwardType";
+
     /**
      * 签到奖励类型
      */
