@@ -1,7 +1,6 @@
 package com.dingCreator.astrology.dto.battle;
 
-import com.dingCreator.astrology.enums.BuffTypeEnum;
-import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
+import com.dingCreator.astrology.enums.EffectTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,7 +27,7 @@ public class RuleDTO implements Serializable {
     /**
      * 属性
      */
-    private BuffTypeEnum buffTypeEnum;
+    private EffectTypeEnum effectTypeEnum;
     /**
      * 值
      */

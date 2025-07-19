@@ -6,7 +6,7 @@ import com.dingCreator.astrology.dto.battle.*;
 import com.dingCreator.astrology.dto.equipment.EquipmentPropertiesDTO;
 import com.dingCreator.astrology.dto.organism.OrganismDTO;
 import com.dingCreator.astrology.enums.BuffOverrideStrategyEnum;
-import com.dingCreator.astrology.enums.BuffTypeEnum;
+import com.dingCreator.astrology.enums.EffectTypeEnum;
 import com.dingCreator.astrology.enums.EquipmentSuitEnum;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 import com.dingCreator.astrology.enums.exception.EquipmentExceptionEnum;
@@ -613,7 +613,7 @@ public enum EquipmentEnum {
                             .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【阴阳轮转】被触发");
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(BuffTypeEnum.SPEED, "", 0.1F), 3, builder);
+                            new BuffDTO(EffectTypeEnum.SPEED, "", 0.1F), 3, builder);
                     battleField.getBattleMsg().add(builder.toString());
                 }
             }
@@ -636,8 +636,8 @@ public enum EquipmentEnum {
                         StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                         builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                                 .append("的武器技能【毒牙】被触发");
-                        BuffUtil.addBuff(from, tar, new BuffDTO(BuffTypeEnum.ATK, "中毒", -0.1F, true), 2, builder);
-                        BuffUtil.addBuff(from, tar, new BuffDTO(BuffTypeEnum.BLEEDING, "中毒", -0.05F, true), 2, builder);
+                        BuffUtil.addBuff(from, tar, new BuffDTO(EffectTypeEnum.ATK, "中毒", -0.1F, true), 2, builder);
+                        BuffUtil.addBuff(from, tar, new BuffDTO(EffectTypeEnum.BLEEDING, "中毒", -0.05F, true), 2, builder);
                     }
                 }
             }
@@ -657,7 +657,7 @@ public enum EquipmentEnum {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器【五色斑霞】被触发");
-                    BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(BuffTypeEnum.DODGE, "", 0.1F), 3, builder);
+                    BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DODGE, "", 0.1F), 3, builder);
                     battleField.getBattleMsg().add(builder.toString());
                 }
             }
@@ -679,7 +679,7 @@ public enum EquipmentEnum {
                             .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【镇山之力】被触发");
                     battleField.getEnemy(this.getOwner()).forEach(enemy ->
-                            BuffUtil.addBuff(this.getOwner(), enemy, new BuffDTO(BuffTypeEnum.SPEED, -800L), 3, builder));
+                            BuffUtil.addBuff(this.getOwner(), enemy, new BuffDTO(EffectTypeEnum.SPEED, -800L), 3, builder));
                     battleField.getBattleMsg().add(builder.toString());
                 }
             }
@@ -702,7 +702,7 @@ public enum EquipmentEnum {
                         StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                         builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                                 .append("的武器技能【蔽天云紫】被触发");
-                        BuffUtil.addBuff(from, tar, new BuffDTO(BuffTypeEnum.HIT, "", -0.1F), 1, builder);
+                        BuffUtil.addBuff(from, tar, new BuffDTO(EffectTypeEnum.HIT, "", -0.1F), 1, builder);
                     }
                 }
             }
@@ -722,7 +722,7 @@ public enum EquipmentEnum {
                     StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【牙狼噬】被触发");
-                    BuffUtil.addBuff(from, tar, new BuffDTO(BuffTypeEnum.DEF, "", -0.1F), 2, builder);
+                    BuffUtil.addBuff(from, tar, new BuffDTO(EffectTypeEnum.DEF, "", -0.1F), 2, builder);
                 }
             }
     ),
@@ -738,7 +738,7 @@ public enum EquipmentEnum {
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON, JobEnum.SI_DI_WU_SHI.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
-                public void ifEnemyNotHit(BattleEffectDTO battleEffect) {
+                public void ifEnemyNotHitMe(BattleEffectDTO battleEffect) {
                     BattleDTO tar = battleEffect.getTar();
                     BattleDTO from = battleEffect.getFrom();
                     StringBuilder builder = battleEffect.getBattleRound().getBuilder();
@@ -756,7 +756,7 @@ public enum EquipmentEnum {
                         builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                                 .append("的武器技能【凌锋】被触发");
                         BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                                new BuffDTO(BuffTypeEnum.ATK, "", 0.1F), 2, builder);
+                                new BuffDTO(EffectTypeEnum.ATK, "", 0.1F), 2, builder);
                     }
                 }
             }
@@ -804,9 +804,9 @@ public enum EquipmentEnum {
                                 .append("的武器技能【星庭献礼】被触发");
                         battleEffect.getOur().forEach(o -> {
                             BuffUtil.addBuff(battleEffect.getFrom(), o,
-                                    new BuffDTO(BuffTypeEnum.ATK, "", 0.1F), 1, builder);
+                                    new BuffDTO(EffectTypeEnum.ATK, "", 0.1F), 1, builder);
                             BuffUtil.addBuff(battleEffect.getFrom(), o,
-                                    new BuffDTO(BuffTypeEnum.MAGIC_ATK, "", 0.1F), 1, builder);
+                                    new BuffDTO(EffectTypeEnum.MAGIC_ATK, "", 0.1F), 1, builder);
                         });
                     }
                 }
@@ -828,9 +828,9 @@ public enum EquipmentEnum {
                             .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【摩诃无量】被触发");
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(BuffTypeEnum.ATK, "摩诃无量", 0.8F), 6, builder);
+                            new BuffDTO(EffectTypeEnum.ATK, "摩诃无量", 0.8F), 6, builder);
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(BuffTypeEnum.PENETRATE, "摩诃无量", 0.5F), 6, builder);
+                            new BuffDTO(EffectTypeEnum.PENETRATE, "摩诃无量", 0.5F), 6, builder);
                     battleField.getBattleMsg().add(builder.toString());
                 }
             }
@@ -900,7 +900,7 @@ public enum EquipmentEnum {
                     StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【兰芽短浸】被触发");
-                    BuffUtil.addBuff(from, tar, new BuffDTO(BuffTypeEnum.DODGE, "", 0.35F), 2, builder);
+                    BuffUtil.addBuff(from, tar, new BuffDTO(EffectTypeEnum.DODGE, "", 0.35F), 2, builder);
                 }
             }
     ),
@@ -958,7 +958,7 @@ public enum EquipmentEnum {
                         round = 9;
                     }
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(BuffTypeEnum.ATK, "九日临空", 0.15F), round, builder);
+                            new BuffDTO(EffectTypeEnum.ATK, "九日临空", 0.15F), round, builder);
                     battleField.getBattleMsg().add(builder.toString());
                 }
 
@@ -976,9 +976,9 @@ public enum EquipmentEnum {
                         builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                                 .append("的武器技能【九日临空】被触发");
                         BuffUtil.addBuff(battleEffect.getFrom(), battleEffect.getTar(),
-                                new BuffDTO(BuffTypeEnum.HEAL, "焚毁", -0.3F, true), 1, builder);
+                                new BuffDTO(EffectTypeEnum.HEAL, "焚毁", -0.3F, true), 1, builder);
                         BuffUtil.addBuff(battleEffect.getFrom(), battleEffect.getTar(),
-                                new BuffDTO(BuffTypeEnum.BLEEDING, "焚毁", -0.08F, true), 1, builder);
+                                new BuffDTO(EffectTypeEnum.BLEEDING, "焚毁", -0.08F, true), 1, builder);
                     }
                 }
             }
@@ -1000,11 +1000,11 @@ public enum EquipmentEnum {
                             .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【神·摩诃无量】被触发");
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(BuffTypeEnum.ATK, "摩诃无量", 1.5F), 12, builder);
+                            new BuffDTO(EffectTypeEnum.ATK, "摩诃无量", 1.5F), 12, builder);
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(BuffTypeEnum.DEF, "摩诃无量", 0.2F), 12, builder);
+                            new BuffDTO(EffectTypeEnum.DEF, "摩诃无量", 0.2F), 12, builder);
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(BuffTypeEnum.PENETRATE, "摩诃无量", 0.5F), 12, builder);
+                            new BuffDTO(EffectTypeEnum.PENETRATE, "摩诃无量", 0.5F), 12, builder);
                     battleField.getBattleMsg().add(builder.toString());
                 }
             }
@@ -1030,7 +1030,7 @@ public enum EquipmentEnum {
                         BuffUtil.clearAbnormalBuff(this.getOwner(), builder);
                         BuffUtil.clearInactiveBuff(this.getOwner(), builder);
                         BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                                new BuffDTO(BuffTypeEnum.DODGE, "沧白之祈", 0.4F), 2, builder);
+                                new BuffDTO(EffectTypeEnum.DODGE, "沧白之祈", 0.4F), 2, builder);
                     } else {
                         markMap.put("沧白之祈", markMap.get("沧白之祈") - 1);
                     }
@@ -1066,7 +1066,7 @@ public enum EquipmentEnum {
                             .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的防具技能【圣者尊崇·零度法则】被触发");
                     BuffUtil.addBuff(battleEffect.getFrom(), battleEffect.getTar(),
-                            new BuffDTO(BuffTypeEnum.SPEED, -0.15F), 1,
+                            new BuffDTO(EffectTypeEnum.SPEED, -0.15F), 1,
                             battleEffect.getBattleRound().getBuilder());
                 }
             }
@@ -1091,9 +1091,9 @@ public enum EquipmentEnum {
                     String name = this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName();
                     StringBuilder builder = new StringBuilder("※" + name + "的饰品法则【零度法则】被触发");
                     battleField.getOur(this.getOwner()).forEach(o ->
-                            RuleUtil.addRule(o, BuffTypeEnum.SPEED, "零度法则", 0.2F, builder));
+                            RuleUtil.addRule(o, EffectTypeEnum.SPEED, "零度法则", 0.2F, builder));
                     battleField.getEnemy(this.getOwner()).forEach(o ->
-                            RuleUtil.addRule(o, BuffTypeEnum.SPEED, "零度法则", -0.2F, builder));
+                            RuleUtil.addRule(o, EffectTypeEnum.SPEED, "零度法则", -0.2F, builder));
                     battleField.getBattleMsg().add(builder.toString());
                 }
 
@@ -1103,14 +1103,14 @@ public enum EquipmentEnum {
                     builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的饰品技能【永冻世界】被触发");
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(BuffTypeEnum.MAGIC_ATK, "", 0.3F), 1, builder);
+                            new BuffDTO(EffectTypeEnum.MAGIC_ATK, "", 0.3F), 1, builder);
                 }
 
                 @Override
                 public void ifOurHitEnemy(BattleEffectDTO battleEffect) {
                     BattleDTO tar = battleEffect.getTar();
                     StringBuilder builder = battleEffect.getBattleRound().getBuilder();
-                    List<BattleBuffDTO> buffList = tar.getBuffMap().get(BuffTypeEnum.PAUSE);
+                    List<BattleBuffDTO> buffList = tar.getBuffMap().get(EffectTypeEnum.PAUSE);
                     if (CollectionUtils.isNotEmpty(buffList) &&
                             buffList.stream().anyMatch(buff -> "冻结".equals(buff.getBuffDTO().getBuffName()))) {
                         builder.append("，饰品法则【零度法则】被触发，伤害提升至1.5倍");
@@ -1122,12 +1122,12 @@ public enum EquipmentEnum {
                 public void ifOurNotHit(BattleEffectDTO battleEffect) {
                     StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(BuffTypeEnum.HIT, "永冻世界", 0.3F), 1, builder);
+                            new BuffDTO(EffectTypeEnum.HIT, "永冻世界", 0.3F), 1, builder);
                     battleEffect.getEnemy().forEach(enemy -> {
                         BuffUtil.addBuff(this.getOwner(), enemy,
-                                new BuffDTO(BuffTypeEnum.PAUSE, "冻结", 0.3F, true), 1, builder);
+                                new BuffDTO(EffectTypeEnum.PAUSE, "冻结", 0.3F, true), 1, builder);
                         BuffUtil.addBuff(this.getOwner(), enemy, new
-                                BuffDTO(BuffTypeEnum.SPEED, "永冻世界", -0.1F), 2, builder);
+                                BuffDTO(EffectTypeEnum.SPEED, "永冻世界", -0.1F), 2, builder);
                     });
                 }
             }
@@ -1182,9 +1182,9 @@ public enum EquipmentEnum {
                     long def = BattleUtil.getLongProperty(o.getDef(), OrganismPropertiesEnum.DEF.getFieldName(), from, battleField);
                     long magicDef = BattleUtil.getLongProperty(o.getMagicDef(), OrganismPropertiesEnum.MAGIC_DEF.getFieldName(), from, battleField);
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(BuffTypeEnum.DAMAGE, "", -2 * def), 8, builder);
+                            new BuffDTO(EffectTypeEnum.DAMAGE, "", -2 * def), 8, builder);
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(BuffTypeEnum.MAGIC_DAMAGE, "", -2 * magicDef), 8, builder);
+                            new BuffDTO(EffectTypeEnum.MAGIC_DAMAGE, "", -2 * magicDef), 8, builder);
                     battleField.getBattleMsg().add(builder.toString());
                 }
 
@@ -1204,9 +1204,9 @@ public enum EquipmentEnum {
                         battleEffect.getDamage().set(0L);
                         builder.append("，").append(organism.getName()).append("的防具技能【金身虚影】被触发");
                         BuffUtil.addBuff(from, tar,
-                                new BuffDTO(BuffTypeEnum.DAMAGE, "", -2 * def), 3, builder);
+                                new BuffDTO(EffectTypeEnum.DAMAGE, "", -2 * def), 3, builder);
                         BuffUtil.addBuff(from, tar,
-                                new BuffDTO(BuffTypeEnum.MAGIC_DAMAGE, "", -2 * magicDef), 3, builder);
+                                new BuffDTO(EffectTypeEnum.MAGIC_DAMAGE, "", -2 * magicDef), 3, builder);
                     }
                 }
             }
@@ -1273,11 +1273,10 @@ public enum EquipmentEnum {
                 @Override
                 public void beforeMyRound(BattleRoundDTO battleRound) {
                     effect(battleRound.getBuilder());
-                    battleRound.getBuilder().append("，");
                 }
 
                 @Override
-                public void ifEnemyNotHit(BattleEffectDTO battleEffect) {
+                public void ifEnemyNotHitOur(BattleEffectDTO battleEffect) {
                     effect(battleEffect.getBattleRound().getBuilder());
                 }
 
@@ -1293,40 +1292,40 @@ public enum EquipmentEnum {
                         switch (mode) {
                             case 0:
                                 builder.append("，").append(name).append("触发“朽木”");
-                                BuffDTO buff0 = new BuffDTO(BuffTypeEnum.HEAL, "五行毒素", -0.6F,
+                                BuffDTO buff0 = new BuffDTO(EffectTypeEnum.HEAL, "五行毒素", -0.6F,
                                         BuffOverrideStrategyEnum.NONINTERFERENCE);
                                 BuffUtil.addBuff(this.getOwner(), b, buff0, builder);
                                 break;
                             case 1:
                                 builder.append("，").append(name).append("触发“碎金”");
-                                BuffDTO buff10 = new BuffDTO(BuffTypeEnum.DEF, "五行毒素", -0.4F,
+                                BuffDTO buff10 = new BuffDTO(EffectTypeEnum.DEF, "五行毒素", -0.4F,
                                         BuffOverrideStrategyEnum.NONINTERFERENCE);
                                 BuffUtil.addBuff(this.getOwner(), b, buff10, builder);
-                                BuffDTO buff11 = new BuffDTO(BuffTypeEnum.MAGIC_DEF, "五行毒素", -0.4F,
+                                BuffDTO buff11 = new BuffDTO(EffectTypeEnum.MAGIC_DEF, "五行毒素", -0.4F,
                                         BuffOverrideStrategyEnum.NONINTERFERENCE);
                                 BuffUtil.addBuff(this.getOwner(), b, buff11, builder);
                                 break;
                             case 2:
                                 builder.append("，").append(name).append("触发“邪火”");
-                                BuffDTO buff20 = new BuffDTO(BuffTypeEnum.DAMAGE, "五行毒素", 0.3F,
+                                BuffDTO buff20 = new BuffDTO(EffectTypeEnum.DAMAGE, "五行毒素", 0.3F,
                                         BuffOverrideStrategyEnum.NONINTERFERENCE);
                                 BuffUtil.addBuff(this.getOwner(), b, buff20, builder);
-                                BuffDTO buff21 = new BuffDTO(BuffTypeEnum.MAGIC_DAMAGE, "五行毒素", 0.3F,
+                                BuffDTO buff21 = new BuffDTO(EffectTypeEnum.MAGIC_DAMAGE, "五行毒素", 0.3F,
                                         BuffOverrideStrategyEnum.NONINTERFERENCE);
                                 BuffUtil.addBuff(this.getOwner(), b, buff21, builder);
                                 break;
                             case 3:
                                 builder.append("，").append(name).append("触发“冥水”");
-                                BuffDTO buff3 = new BuffDTO(BuffTypeEnum.SPEED, "五行毒素", -0.35F,
+                                BuffDTO buff3 = new BuffDTO(EffectTypeEnum.SPEED, "五行毒素", -0.35F,
                                         BuffOverrideStrategyEnum.NONINTERFERENCE);
                                 BuffUtil.addBuff(this.getOwner(), b, buff3, builder);
                                 break;
                             case 4:
                                 builder.append("，").append(name).append("触发“垢土”");
-                                BuffDTO buff40 = new BuffDTO(BuffTypeEnum.HIT, "五行毒素", -0.3F,
+                                BuffDTO buff40 = new BuffDTO(EffectTypeEnum.HIT, "五行毒素", -0.3F,
                                         BuffOverrideStrategyEnum.NONINTERFERENCE);
                                 BuffUtil.addBuff(this.getOwner(), b, buff40, builder);
-                                BuffDTO buff41 = new BuffDTO(BuffTypeEnum.DODGE, "五行毒素", -0.3F,
+                                BuffDTO buff41 = new BuffDTO(EffectTypeEnum.DODGE, "五行毒素", -0.3F,
                                         BuffOverrideStrategyEnum.NONINTERFERENCE);
                                 BuffUtil.addBuff(this.getOwner(), b, buff41, builder);
                                 break;

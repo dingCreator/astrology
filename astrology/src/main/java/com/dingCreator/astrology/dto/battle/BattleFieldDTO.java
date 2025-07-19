@@ -1,6 +1,6 @@
 package com.dingCreator.astrology.dto.battle;
 
-import com.dingCreator.astrology.enums.BuffTypeEnum;
+import com.dingCreator.astrology.enums.EffectTypeEnum;
 import com.dingCreator.astrology.enums.FieldEffectEnum;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 import com.dingCreator.astrology.util.BattleUtil;
@@ -133,7 +133,7 @@ public class BattleFieldDTO implements Serializable {
                 .peek(o -> {
                     long speed = o.getOrganismInfoDTO().getOrganismDTO().getBehaviorSpeed();
                     long behavior = o.getBehavior()
-                            + BattleUtil.getLongProperty(speed, BuffTypeEnum.SPEED.getName(), o, this);
+                            + BattleUtil.getLongProperty(speed, EffectTypeEnum.SPEED.getName(), o, this);
                     o.setBehavior(behavior);
                 })
                 // 行动值大于阈值的才行动

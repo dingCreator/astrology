@@ -3,7 +3,7 @@ package com.dingCreator.astrology.enums.skill;
 import cn.hutool.core.collection.CollectionUtil;
 import com.dingCreator.astrology.dto.battle.BattleBuffDTO;
 import com.dingCreator.astrology.dto.battle.BattleDTO;
-import com.dingCreator.astrology.enums.BuffTypeEnum;
+import com.dingCreator.astrology.enums.EffectTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -58,7 +58,7 @@ public enum TargetEnum {
             return Collections.emptyList();
         }
         List<BattleDTO> taunt = target.stream().filter(t -> {
-            List<BattleBuffDTO> buffList = t.getBuffMap().getOrDefault(BuffTypeEnum.TAUNT, null);
+            List<BattleBuffDTO> buffList = t.getBuffMap().getOrDefault(EffectTypeEnum.TAUNT, null);
             return CollectionUtil.isNotEmpty(buffList);
         }).collect(Collectors.toList());
 

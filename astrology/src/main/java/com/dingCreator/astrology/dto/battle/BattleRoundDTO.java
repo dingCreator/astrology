@@ -3,7 +3,7 @@ package com.dingCreator.astrology.dto.battle;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
-import com.dingCreator.astrology.enums.BuffTypeEnum;
+import com.dingCreator.astrology.enums.EffectTypeEnum;
 import com.dingCreator.astrology.enums.FieldEffectEnum;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
@@ -88,11 +88,9 @@ public class BattleRoundDTO implements Serializable {
      * 回合后
      */
     public void afterRound() {
-        // 插入结算
-        List<ExtraBattleProcessTemplate> extraBattleProcessList = this.getBattleField().getExtraBattleProcessTemplateList();
         // 计算流血效果
-        if (from.getBuffMap().containsKey(BuffTypeEnum.BLEEDING)) {
-            from.getBuffMap().get(BuffTypeEnum.BLEEDING)
+        if (from.getBuffMap().containsKey(EffectTypeEnum.BLEEDING)) {
+            from.getBuffMap().get(EffectTypeEnum.BLEEDING)
                     .forEach(battleBuff -> {
                         builder.append("，状态：").append(battleBuff.getBuffDTO().getBuffName());
                         BigDecimal bleedingRate = battleBuff.getBuffDTO().getRate();
@@ -121,8 +119,17 @@ public class BattleRoundDTO implements Serializable {
         from.setRound(from.getRound() + 1);
         // 计算行动值
         from.setBehavior(from.getBehavior() - battleField.getTotalBehavior());
+        // 场地效果
+        if (Objects.nonNull(this.getBattleField().getFieldEffectEnum())) {
+            this.getBattleField().getFieldEffectEnum().getEffect().afterRound(this);
+        }
+        // 插入结算
+        List<ExtraBattleProcessTemplate> extraBattleProcessList = this.getBattleField().getExtraBattleProcessTemplateList();
         // 每回合
         extraBattleProcessList.forEach(ext -> ext.executeAfterRound(this));
+        // 移除阵亡召唤物
+        our.removeIf(b -> b.getSummoned() && b.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() <= 0);
+        enemy.removeIf(b -> b.getSummoned() && b.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() <= 0);
     }
 
     /**
@@ -132,13 +139,16 @@ public class BattleRoundDTO implements Serializable {
         if (from.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() <= 0) {
             return;
         }
+        if (builder.lastIndexOf(">") != builder.length() - 1) {
+            builder.append("，");
+        }
         builder.append(from.getOrganismInfoDTO().getOrganismDTO().getName());
         // 获取技能栏
         SkillBarDTO bar = from.getOrganismInfoDTO().getSkillBarDTO();
         // 技能轮转
         from.getOrganismInfoDTO().setSkillBarDTO(Objects.isNull(bar.getNext()) ? bar.getHead() : bar.getNext());
         // 计算暂停效果
-        List<BattleBuffDTO> pauseBuff = from.getBuffMap().get(BuffTypeEnum.PAUSE);
+        List<BattleBuffDTO> pauseBuff = from.getBuffMap().get(EffectTypeEnum.PAUSE);
         if (CollectionUtils.isNotEmpty(pauseBuff)) {
             String pauseBuffName = pauseBuff.stream()
                     .map(battleBuff -> battleBuff.getBuffDTO().getBuffName() + battleBuff.getRound() + "回合")
@@ -171,10 +181,10 @@ public class BattleRoundDTO implements Serializable {
         // 轮次开始前插入结算
         skillEnum.getThisBehaviorExtraProcess().beforeThisRound(this);
         final SkillEnum nowSkill = skillEnum;
-        skillEnum.getSkillEffects().forEach(skillEffect ->
-                executeSingleEffectBehavior(skillEffect, nowSkill));
+        skillEnum.getSkillEffects().forEach(skillEffect -> executeSingleEffectBehavior(skillEffect, nowSkill));
+        // 显示敌方血量
         enemy.forEach(e -> builder.append("，").append(e.getOrganismInfoDTO().getOrganismDTO().getName())
-                .append("生命值：").append(e.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition())
+                .append("血量：").append(e.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition())
                 .append("/").append(e.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition()));
         // 轮次结束后插入结算
         skillEnum.getThisBehaviorExtraProcess().afterThisRound(this);
@@ -211,8 +221,7 @@ public class BattleRoundDTO implements Serializable {
             BattleEffectDTO battleEffect = BattleEffectDTO.builder()
                     .from(from).tar(tar).our(our).enemy(enemy)
                     .damageRate(BigDecimal.valueOf(skillEffect.getDamageRate()))
-                    .nowSkill(nowSkill).skillEffect(skillEffect).battleRound(this)
-                    .build();
+                    .nowSkill(nowSkill).skillEffect(skillEffect).battleRound(this).build();
             battleEffect.executeSingleTarBehavior();
         });
     }

@@ -2,7 +2,7 @@ package com.dingCreator.astrology.util;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.dingCreator.astrology.dto.battle.*;
-import com.dingCreator.astrology.enums.BuffTypeEnum;
+import com.dingCreator.astrology.enums.EffectTypeEnum;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -34,8 +34,8 @@ public class BuffUtil {
         if (target.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() <= 0) {
             return;
         }
-        if (buffDTO.getAbnormal() && (target.getBuffMap().containsKey(BuffTypeEnum.IMMUNITY)
-                || target.getRuleList().stream().anyMatch(rule -> BuffTypeEnum.IMMUNITY.equals(rule.getBuffTypeEnum())))) {
+        if (buffDTO.getAbnormal() && (target.getBuffMap().containsKey(EffectTypeEnum.IMMUNITY)
+                || target.getRuleList().stream().anyMatch(rule -> EffectTypeEnum.IMMUNITY.equals(rule.getEffectTypeEnum())))) {
             builder.append("，免疫异常【").append(buffDTO.getBuffName()).append("】");
             return;
         }
@@ -52,7 +52,7 @@ public class BuffUtil {
         if (!buffDTO.getBuffName().isEmpty() && !builder.toString().contains(buffDTO.getBuffName())) {
             builder.append("附加<").append(buffDTO.getBuffName()).append(">，");
         }
-        if (BuffTypeEnum.BuffEffectTypeEnum.PROPERTY.equals(buffDTO.getBuffType().getBuffEffectTypeEnum())) {
+        if (EffectTypeEnum.BuffEffectTypeEnum.PROPERTY.equals(buffDTO.getBuffType().getBuffEffectTypeEnum())) {
             builder.append(buffDTO.getBuffType().getChnDesc());
             if (buffDTO.getValue() != 0) {
                 builder.append(buffDTO.getValue() > 0 ? "+" + buffDTO.getValue() : buffDTO.getValue());
@@ -61,7 +61,7 @@ public class BuffUtil {
                 float absVal = buffDTO.getRate().multiply(BigDecimal.valueOf(100)).floatValue();
                 builder.append(buffDTO.getRate().floatValue() > 0 ? "+" + absVal : absVal).append("%");
             }
-        } else if (BuffTypeEnum.BuffEffectTypeEnum.MARK.equals(buffDTO.getBuffType().getBuffEffectTypeEnum())) {
+        } else if (EffectTypeEnum.BuffEffectTypeEnum.MARK.equals(buffDTO.getBuffType().getBuffEffectTypeEnum())) {
             builder.append(buffDTO.getBuffName());
         }
         // 最多300回合，比这个多的可以认为是持续整场的buff，无需显示持续多少回合
@@ -207,32 +207,32 @@ public class BuffUtil {
      * @param name buff名称
      * @return buff
      */
-    public static BuffDTO getBuffByName(String name, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
+    public static BuffDTO getBuffByName(String name, Map<EffectTypeEnum, List<BattleBuffDTO>> buffMap) {
         return null;
     }
 
     /**
      * 根据buff类型获取累计buff
      *
-     * @param buffTypeEnum buff类型
+     * @param effectTypeEnum buff类型
      * @return buff
      */
-    public static BuffDTO getBuffByType(BuffTypeEnum buffTypeEnum, Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap) {
-        List<BattleBuffDTO> list = buffMap.getOrDefault(buffTypeEnum, new ArrayList<>());
+    public static BuffDTO getBuffByType(EffectTypeEnum effectTypeEnum, Map<EffectTypeEnum, List<BattleBuffDTO>> buffMap) {
+        List<BattleBuffDTO> list = buffMap.getOrDefault(effectTypeEnum, new ArrayList<>());
         return list.stream().map(BattleBuffDTO::getBuffDTO).reduce((buff1, buff2) -> {
             buff2.setValue(buff1.getValue() + buff2.getValue());
             buff2.setRate(buff1.getRate().add(buff2.getRate()));
             return buff2;
-        }).orElse(new BuffDTO(buffTypeEnum, "tmp", 0L, 0F));
+        }).orElse(new BuffDTO(effectTypeEnum, "tmp", 0L, 0F));
     }
 
-    public static Long getVal(long val, BuffTypeEnum buffTypeEnum, BattleDTO battleDTO) {
-        List<BattleBuffDTO> buffList = battleDTO.getBuffMap().get(buffTypeEnum);
+    public static Long getVal(long val, EffectTypeEnum effectTypeEnum, BattleDTO battleDTO) {
+        List<BattleBuffDTO> buffList = battleDTO.getBuffMap().get(effectTypeEnum);
         return buffRate(buffList, buffVal(buffList, val));
     }
 
-    public static Float getRate(Float rate, BuffTypeEnum buffTypeEnum, BattleDTO battleDTO) {
-        List<BattleBuffDTO> buffList = battleDTO.getBuffMap().get(buffTypeEnum);
+    public static Float getRate(Float rate, EffectTypeEnum effectTypeEnum, BattleDTO battleDTO) {
+        List<BattleBuffDTO> buffList = battleDTO.getBuffMap().get(effectTypeEnum);
         return buffRate(buffList, rate);
     }
 
@@ -254,7 +254,7 @@ public class BuffUtil {
      */
     public static void clearActiveBuff(BattleDTO battleDTO, StringBuilder builder) {
         battleDTO.getBuffMap().forEach((buffTypeEnum, buffList) -> {
-            if (buffTypeEnum.getBuffEffectTypeEnum().equals(BuffTypeEnum.BuffEffectTypeEnum.PROPERTY)) {
+            if (buffTypeEnum.getBuffEffectTypeEnum().equals(EffectTypeEnum.BuffEffectTypeEnum.PROPERTY)) {
                 buffList.removeIf(buff -> buff.getBuffDTO().getRate().floatValue() > 0 || buff.getBuffDTO().getValue() > 0);
             }
         });
@@ -269,7 +269,7 @@ public class BuffUtil {
      */
     public static void clearInactiveBuff(BattleDTO battleDTO, StringBuilder builder) {
         battleDTO.getBuffMap().forEach((buffTypeEnum, buffList) -> {
-            if (buffTypeEnum.getBuffEffectTypeEnum().equals(BuffTypeEnum.BuffEffectTypeEnum.PROPERTY)) {
+            if (buffTypeEnum.getBuffEffectTypeEnum().equals(EffectTypeEnum.BuffEffectTypeEnum.PROPERTY)) {
                 buffList.removeIf(buff -> buff.getBuffDTO().getRate().floatValue() < 0 || buff.getBuffDTO().getValue() < 0);
             }
         });
@@ -294,7 +294,7 @@ public class BuffUtil {
      * @return 是否无敌
      */
     public static boolean calInvincible(BattleEffectDTO battleEffect) {
-        List<BattleBuffDTO> invincibleBuffList = battleEffect.getTar().getBuffMap().get(BuffTypeEnum.INVINCIBLE);
+        List<BattleBuffDTO> invincibleBuffList = battleEffect.getTar().getBuffMap().get(EffectTypeEnum.TIMES_SHIELD);
         if (CollectionUtil.isNotEmpty(invincibleBuffList)) {
             BattleBuffDTO buff = invincibleBuffList.stream().min(Comparator.comparing(BattleBuffDTO::getRound)).orElse(null);
             if (Objects.nonNull(buff)) {
@@ -305,7 +305,7 @@ public class BuffUtil {
                 if (times > 0) {
                     --times;
                     if (times == 0) {
-                        battleEffect.getTar().getBuffMap().get(BuffTypeEnum.INVINCIBLE).remove(buff);
+                        battleEffect.getTar().getBuffMap().get(EffectTypeEnum.TIMES_SHIELD).remove(buff);
                     } else {
                         buff.getBuffDTO().setValue(times);
                     }

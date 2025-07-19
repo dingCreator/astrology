@@ -3,7 +3,7 @@ package com.dingCreator.astrology.dto.battle;
 import cn.hutool.core.collection.CollectionUtil;
 import com.dingCreator.astrology.dto.organism.OrganismDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
-import com.dingCreator.astrology.enums.BuffTypeEnum;
+import com.dingCreator.astrology.enums.EffectTypeEnum;
 import com.dingCreator.astrology.enums.FieldEffectEnum;
 import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
@@ -15,7 +15,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
@@ -147,7 +146,7 @@ public class BattleEffectDTO {
         // 造成伤害
         BattleUtil.doDamage(this, damageRate.floatValue() > 0);
         // 若对方仍有存活，且出手方身上有反伤buff，计算反伤
-        List<BattleBuffDTO> reflectDamageBuffList = from.getBuffMap().get(BuffTypeEnum.REFLECT_DAMAGE);
+        List<BattleBuffDTO> reflectDamageBuffList = from.getBuffMap().get(EffectTypeEnum.REFLECT_DAMAGE);
         if (CollectionUtil.isNotEmpty(reflectDamageBuffList)
                 && enemy.stream().anyMatch(battleDTO ->
                 battleDTO.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() > 0)) {

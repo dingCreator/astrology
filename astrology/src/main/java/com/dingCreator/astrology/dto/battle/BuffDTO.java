@@ -1,7 +1,7 @@
 package com.dingCreator.astrology.dto.battle;
 
 import com.dingCreator.astrology.enums.BuffOverrideStrategyEnum;
-import com.dingCreator.astrology.enums.BuffTypeEnum;
+import com.dingCreator.astrology.enums.EffectTypeEnum;
 import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +23,7 @@ public class BuffDTO implements Serializable {
     /**
      * buff类型
      */
-    private BuffTypeEnum buffType;
+    private EffectTypeEnum buffType;
     /**
      * buff名称
      * 用于一些技能限制
@@ -58,47 +58,47 @@ public class BuffDTO implements Serializable {
         return "";
     }
 
-    public BuffDTO(BuffTypeEnum buffType) {
+    public BuffDTO(EffectTypeEnum buffType) {
         this(buffType, 0L);
     }
 
-    public BuffDTO(BuffTypeEnum buffType, String buffName, Boolean abnormal) {
+    public BuffDTO(EffectTypeEnum buffType, String buffName, Boolean abnormal) {
         this(buffType, buffName, 0L, 0F, abnormal);
     }
 
-    public BuffDTO(BuffTypeEnum buffType, Long value) {
+    public BuffDTO(EffectTypeEnum buffType, Long value) {
         this(buffType, "", value);
     }
 
-    public BuffDTO(BuffTypeEnum buffType, String buffName, Long value) {
+    public BuffDTO(EffectTypeEnum buffType, String buffName, Long value) {
         this(buffType, buffName, value, 0F);
     }
 
-    public BuffDTO(BuffTypeEnum buffType, Float rate) {
+    public BuffDTO(EffectTypeEnum buffType, Float rate) {
         this(buffType, "", rate);
     }
 
-    public BuffDTO(BuffTypeEnum buffType, String buffName, Float rate, Boolean abnormal) {
+    public BuffDTO(EffectTypeEnum buffType, String buffName, Float rate, Boolean abnormal) {
         this(buffType, buffName, 0L, rate, abnormal);
     }
 
-    public BuffDTO(BuffTypeEnum buffType, String buffName, Float rate) {
+    public BuffDTO(EffectTypeEnum buffType, String buffName, Float rate) {
         this(buffType, buffName, 0L, rate);
     }
 
-    public BuffDTO(BuffTypeEnum buffType, String buffName, Long value, Float rate) {
+    public BuffDTO(EffectTypeEnum buffType, String buffName, Long value, Float rate) {
         this(buffType, buffName, value, rate, false);
     }
 
-    public BuffDTO(BuffTypeEnum buffType, String buffName, Long value, Float rate, Boolean abnormal) {
+    public BuffDTO(EffectTypeEnum buffType, String buffName, Long value, Float rate, Boolean abnormal) {
         this(buffType, buffName, value, rate, abnormal, BuffOverrideStrategyEnum.MAX_ROUND);
     }
 
-    public BuffDTO(BuffTypeEnum buffType, String buffName, Long value, BuffOverrideStrategyEnum buffOverrideStrategyEnum) {
+    public BuffDTO(EffectTypeEnum buffType, String buffName, Long value, BuffOverrideStrategyEnum buffOverrideStrategyEnum) {
         this(buffType, buffName, value, 0F, false, buffOverrideStrategyEnum);
     }
 
-    public BuffDTO(BuffTypeEnum buffType, String buffName, Float rate, BuffOverrideStrategyEnum buffOverrideStrategyEnum) {
+    public BuffDTO(EffectTypeEnum buffType, String buffName, Float rate, BuffOverrideStrategyEnum buffOverrideStrategyEnum) {
         this.buffType = buffType;
         this.buffName = buffName;
         this.value = 0L;
@@ -108,12 +108,12 @@ public class BuffDTO implements Serializable {
         this.level = 1;
     }
 
-    public BuffDTO(BuffTypeEnum buffType, String buffName, Float rate, BuffOverrideStrategyEnum buffOverrideStrategyEnum,
+    public BuffDTO(EffectTypeEnum buffType, String buffName, Float rate, BuffOverrideStrategyEnum buffOverrideStrategyEnum,
                    int level) {
         this(buffType, buffName, 0L, rate, false, buffOverrideStrategyEnum, level);
     }
 
-    public BuffDTO(BuffTypeEnum buffType, String buffName, Long value, Float rate, Boolean abnormal,
+    public BuffDTO(EffectTypeEnum buffType, String buffName, Long value, Float rate, Boolean abnormal,
                    BuffOverrideStrategyEnum buffOverrideStrategyEnum) {
         this.buffType = buffType;
         this.buffName = buffName;
@@ -124,7 +124,7 @@ public class BuffDTO implements Serializable {
         this.level = 1;
     }
 
-    public BuffDTO(BuffTypeEnum buffType, String buffName, Long value, Float rate, Boolean abnormal,
+    public BuffDTO(EffectTypeEnum buffType, String buffName, Long value, Float rate, Boolean abnormal,
                    BuffOverrideStrategyEnum buffOverrideStrategyEnum, int level) {
         this.buffType = buffType;
         this.buffName = buffName;

@@ -1,7 +1,7 @@
 package com.dingCreator.astrology.dto.battle;
 
 import com.dingCreator.astrology.dto.organism.OrganismInfoDTO;
-import com.dingCreator.astrology.enums.BuffTypeEnum;
+import com.dingCreator.astrology.enums.EffectTypeEnum;
 import com.dingCreator.astrology.util.BuffUtil;
 import lombok.Data;
 
@@ -29,7 +29,7 @@ public class BattleDTO implements Serializable {
     /**
      * 获得的buff
      */
-    private Map<BuffTypeEnum, List<BattleBuffDTO>> buffMap;
+    private Map<EffectTypeEnum, List<BattleBuffDTO>> buffMap;
     /**
      * 标记
      */
@@ -42,6 +42,10 @@ public class BattleDTO implements Serializable {
      * 轮次
      */
     private Long round;
+    /**
+     * 是否为召唤物
+     */
+    private Boolean summoned;
 
     public void giveBuff(BattleDTO target, List<GiveBuffDTO> giveBuffList, StringBuilder builder)  {
         BuffUtil.addBuff(this, target, giveBuffList, builder);

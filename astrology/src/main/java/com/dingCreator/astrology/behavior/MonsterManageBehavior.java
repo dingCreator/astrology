@@ -306,8 +306,9 @@ public class MonsterManageBehavior {
         rankUpBossService.insertOrUpdateRankUpBoss(jobEnum.getJobCode(), rank, validMonsterIds);
     }
 
-    public BattleResultVO EVE(Long playerId, Long monsterId1, Long monsterId2) {
-        return BattleUtil.battleEVE(playerId, Collections.singletonList(monsterId1), Collections.singletonList(monsterId2));
+    public BattleResultVO EVE(Long playerId, Long monsterId1, Long monsterId2, int maxRound) {
+        return BattleUtil.battleEVE(
+                playerId, Collections.singletonList(monsterId1), Collections.singletonList(monsterId2), maxRound);
     }
 
     public BattleResultVO PVE(Long playerId, Long monsterId) {

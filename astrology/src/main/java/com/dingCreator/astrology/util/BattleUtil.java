@@ -20,8 +20,7 @@ import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
 import com.dingCreator.astrology.entity.base.Monster;
 import com.dingCreator.astrology.enums.BelongToEnum;
-import com.dingCreator.astrology.enums.BuffTypeEnum;
-import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
+import com.dingCreator.astrology.enums.EffectTypeEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentPropertiesTypeEnum;
 import com.dingCreator.astrology.enums.exception.BattleExceptionEnum;
@@ -437,8 +436,13 @@ public class BattleUtil {
      * @param monsterIdList2 怪物列表2
      * @return 斗蛐蛐结果
      */
-    public static BattleResultVO battleEVE(Long playerId, List<Long> monsterIdList1, List<Long> monsterIdList2) {
-        BattleResultVO vo = battle(getOrganismByMonsterId(monsterIdList1), getOrganismByMonsterId(monsterIdList2));
+    public static BattleResultVO battleEVE(Long playerId, List<Long> monsterIdList1, List<Long> monsterIdList2, int maxRound) {
+        BattleResultVO vo;
+        if (maxRound > 0) {
+            vo = battle(getOrganismByMonsterId(monsterIdList1), getOrganismByMonsterId(monsterIdList2), maxRound);
+        } else {
+            vo = battle(getOrganismByMonsterId(monsterIdList1), getOrganismByMonsterId(monsterIdList2));
+        }
         ThreadPoolUtil.executeBiConsumer(BattleUtil::writeBattleProcess, Collections.singletonList(playerId), vo.getInfo());
         ThreadPoolUtil.executeBiConsumer(BattleUtil::addBattleRoundRecord, Collections.singletonList(playerId), vo.getRoundRecordList());
         return vo;
@@ -544,17 +548,26 @@ public class BattleUtil {
      * @return 战斗信息
      */
     public static BattleResultVO battle(List<OrganismInfoDTO> initiator, List<OrganismInfoDTO> recipient) {
+        return battle(initiator, recipient, (initiator.size() + recipient.size()) * 50);
+    }
+
+    /**
+     * 战斗
+     *
+     * @param initiator 发起方
+     * @param recipient 接收方
+     * @return 战斗信息
+     */
+    public static BattleResultVO battle(List<OrganismInfoDTO> initiator, List<OrganismInfoDTO> recipient, int maxRound) {
         List<BattleDTO> initiatorBattleTmp = new ArrayList<>(initiator.size());
         List<BattleDTO> recipientBattleTmp = new ArrayList<>(recipient.size());
         // 包装
         for (OrganismInfoDTO o : initiator) {
-            initiatorBattleTmp.add(buildBattleDTO(o));
+            initiatorBattleTmp.add(buildBattleDTO(o, false));
         }
         for (OrganismInfoDTO o : recipient) {
-            recipientBattleTmp.add(buildBattleDTO(o));
+            recipientBattleTmp.add(buildBattleDTO(o, false));
         }
-
-        int maxRound = (initiator.size() + recipient.size()) * 50;
         // 初始化插入结算列表
         List<ExtraBattleProcessTemplate> tmpBattleProcessList = new ArrayList<>();
         List<ExtraBattleProcessTemplate> extraBattleProcessList = new ArrayList<>();
@@ -595,13 +608,13 @@ public class BattleUtil {
                 .peek(r -> {
                     OrganismDTO organismDTO = r.getOrganismInfoDTO().getOrganismDTO();
                     float rate = RankUtil.getRankSuppression(organismDTO.getRank(), highestRank);
-                    RuleUtil.addRule(r, BuffTypeEnum.ATK, "境界压制", rate, builder);
-                    RuleUtil.addRule(r, BuffTypeEnum.MAGIC_ATK, "境界压制", rate, builder);
-                    RuleUtil.addRule(r, BuffTypeEnum.DEF, "境界压制", rate, builder);
-                    RuleUtil.addRule(r, BuffTypeEnum.MAGIC_DEF, "境界压制", rate, builder);
-                    RuleUtil.addRule(r, BuffTypeEnum.HIT, "境界压制", rate, builder);
-                    RuleUtil.addRule(r, BuffTypeEnum.DODGE, "境界压制", rate, builder);
-                    RuleUtil.addRule(r, BuffTypeEnum.SPEED, "境界压制", rate, builder);
+                    RuleUtil.addRule(r, EffectTypeEnum.ATK, "境界压制", rate, builder);
+                    RuleUtil.addRule(r, EffectTypeEnum.MAGIC_ATK, "境界压制", rate, builder);
+                    RuleUtil.addRule(r, EffectTypeEnum.DEF, "境界压制", rate, builder);
+                    RuleUtil.addRule(r, EffectTypeEnum.MAGIC_DEF, "境界压制", rate, builder);
+                    RuleUtil.addRule(r, EffectTypeEnum.HIT, "境界压制", rate, builder);
+                    RuleUtil.addRule(r, EffectTypeEnum.DODGE, "境界压制", rate, builder);
+                    RuleUtil.addRule(r, EffectTypeEnum.SPEED, "境界压制", rate, builder);
                 }).count();
         if (count > 0) {
             battleMsg.add("※" + builder);
@@ -676,7 +689,7 @@ public class BattleUtil {
      * @param organismInfoDTO 生物信息
      * @return 战斗包装
      */
-    private static BattleDTO buildBattleDTO(OrganismInfoDTO organismInfoDTO) {
+    public static BattleDTO buildBattleDTO(OrganismInfoDTO organismInfoDTO, boolean summoned) {
         BattleDTO battleDTO = new BattleDTO();
         battleDTO.setOrganismInfoDTO(organismInfoDTO);
         battleDTO.setBehavior(0L);
@@ -684,6 +697,7 @@ public class BattleUtil {
         battleDTO.setMarkMap(new HashMap<>());
         battleDTO.setRuleList(new ArrayList<>());
         battleDTO.setRound(0L);
+        battleDTO.setSummoned(summoned);
         return battleDTO;
     }
 
@@ -711,13 +725,13 @@ public class BattleUtil {
         DamageTypeEnum damageTypeEnum = battleEffect.getSkillEffect().getDamageTypeEnum();
         // 1.基础属性 2.装备加成 3.buff
         if (DamageTypeEnum.ATK.equals(damageTypeEnum)) {
-            realAtk = getLongProperty(fromOrganism.getAtk(), BuffTypeEnum.ATK.getName(), from, battleField);
-            realPenetrate = getRateProperty(fromOrganism.getPenetrate(), BuffTypeEnum.PENETRATE.getName(), from, battleField);
-            realDef = getLongProperty(tarOrganism.getDef(), BuffTypeEnum.DEF.getName(), tar, battleField);
+            realAtk = getLongProperty(fromOrganism.getAtk(), EffectTypeEnum.ATK.getName(), from, battleField);
+            realPenetrate = getRateProperty(fromOrganism.getPenetrate(), EffectTypeEnum.PENETRATE.getName(), from, battleField);
+            realDef = getLongProperty(tarOrganism.getDef(), EffectTypeEnum.DEF.getName(), tar, battleField);
         } else if (DamageTypeEnum.MAGIC.equals(damageTypeEnum)) {
-            realAtk = getLongProperty(fromOrganism.getMagicAtk(), BuffTypeEnum.MAGIC_ATK.getName(), from, battleField);
-            realPenetrate = getRateProperty(fromOrganism.getMagicPenetrate(), BuffTypeEnum.MAGIC_PENETRATE.getName(), from, battleField);
-            realDef = getLongProperty(tarOrganism.getMagicDef(), BuffTypeEnum.MAGIC_DEF.getName(), tar, battleField);
+            realAtk = getLongProperty(fromOrganism.getMagicAtk(), EffectTypeEnum.MAGIC_ATK.getName(), from, battleField);
+            realPenetrate = getRateProperty(fromOrganism.getMagicPenetrate(), EffectTypeEnum.MAGIC_PENETRATE.getName(), from, battleField);
+            realDef = getLongProperty(tarOrganism.getMagicDef(), EffectTypeEnum.MAGIC_DEF.getName(), tar, battleField);
         } else {
             return 0;
         }
@@ -759,8 +773,11 @@ public class BattleUtil {
         OrganismDTO fromOrganism = from.getOrganismInfoDTO().getOrganismDTO();
         OrganismDTO tarOrganism = tar.getOrganismInfoDTO().getOrganismDTO();
         // 命中率 = 1 + (命中 - 闪避) / 闪避
-        float fromHit = getLongProperty(fromOrganism.getHit(), BuffTypeEnum.HIT.getName(), from, field);
-        float targetDodge = getLongProperty(tarOrganism.getDodge(), BuffTypeEnum.DODGE.getName(), from, field);
+        float fromHit = getLongProperty(fromOrganism.getHit(), EffectTypeEnum.HIT.getName(), from, field);
+        float targetDodge = getLongProperty(tarOrganism.getDodge(), EffectTypeEnum.DODGE.getName(), from, field);
+        if (targetDodge == 0) {
+            return true;
+        }
         float hitRate = 1 + (fromHit - targetDodge) / targetDodge;
         return RandomUtil.isHit(RandomUtil.format(hitRate, 4));
     }
@@ -771,15 +788,15 @@ public class BattleUtil {
         BattleFieldDTO battleField = battleEffect.getBattleRound().getBattleField();
         // 若伤害不为0，计算是否暴击
         if (battleEffect.getDamage().get() > 0) {
-            float criticalRate = getRateProperty(fromOrganism.getCriticalRate(), BuffTypeEnum.CRITICAL.getName(),
+            float criticalRate = getRateProperty(fromOrganism.getCriticalRate(), EffectTypeEnum.CRITICAL.getName(),
                     battleEffect.getFrom(), battleField);
             float criticalReductionRate = getRateProperty(tarOrganism.getCriticalReductionRate(),
-                    BuffTypeEnum.CRITICAL_REDUCTION.getName(), battleEffect.getFrom(), battleField);
+                    EffectTypeEnum.CRITICAL_REDUCTION.getName(), battleEffect.getFrom(), battleField);
             if (RandomUtil.isHit(Math.max(criticalRate - criticalReductionRate, 0))) {
                 float criticalDamage = getRateProperty(fromOrganism.getCriticalDamage(),
-                        BuffTypeEnum.CRITICAL_DAMAGE.getName(), battleEffect.getFrom(), battleField);
+                        EffectTypeEnum.CRITICAL_DAMAGE.getName(), battleEffect.getFrom(), battleField);
                 float criticalDamageReduction = getRateProperty(tarOrganism.getCriticalDamageReduction(),
-                        BuffTypeEnum.CRITICAL_DAMAGE_REDUCTION.getName(), battleEffect.getTar(), battleField);
+                        EffectTypeEnum.CRITICAL_DAMAGE_REDUCTION.getName(), battleEffect.getTar(), battleField);
                 float realCriticalDamage = criticalDamage - criticalDamageReduction;
                 battleEffect.getBattleRound().getBuilder()
                         .append("，暴击，伤害提升至").append(realCriticalDamage * 100).append("%");
@@ -793,21 +810,21 @@ public class BattleUtil {
     public static Long getLongProperty(long src, String propName, BattleDTO battleDTO, BattleFieldDTO field) {
         Long result = EquipmentUtil.getLongVal(src, EquipmentPropertiesTypeEnum.getByNameEn(propName),
                 battleDTO.getOrganismInfoDTO().getEquipmentBarDTO());
-        result = RuleUtil.getVal(battleDTO, BuffTypeEnum.getByName(propName), result);
+        result = RuleUtil.getVal(battleDTO, EffectTypeEnum.getByName(propName), result);
         if (Objects.nonNull(field.getFieldEffectEnum())) {
-            result = field.getFieldEffectEnum().getEffect().getVal(result, BuffTypeEnum.getByName(propName));
+            result = field.getFieldEffectEnum().getEffect().getVal(result, EffectTypeEnum.getByName(propName));
         }
-        return Math.max(BuffUtil.getVal(result, BuffTypeEnum.getByName(propName), battleDTO), 0);
+        return Math.max(BuffUtil.getVal(result, EffectTypeEnum.getByName(propName), battleDTO), 0);
     }
 
     public static Float getRateProperty(float rate, String propName, BattleDTO battleDTO, BattleFieldDTO field) {
         Float result = EquipmentUtil.getFloatVal(rate, EquipmentPropertiesTypeEnum.getByNameEn(propName),
                 battleDTO.getOrganismInfoDTO().getEquipmentBarDTO());
-        result = RuleUtil.getRate(battleDTO, BuffTypeEnum.getByName(propName), result);
+        result = RuleUtil.getRate(battleDTO, EffectTypeEnum.getByName(propName), result);
         if (Objects.nonNull(field.getFieldEffectEnum())) {
-            result = field.getFieldEffectEnum().getEffect().getRate(result, BuffTypeEnum.getByName(propName));
+            result = field.getFieldEffectEnum().getEffect().getRate(result, EffectTypeEnum.getByName(propName));
         }
-        return Math.max(BuffUtil.getRate(result, BuffTypeEnum.getByName(propName), battleDTO), 0F);
+        return Math.max(BuffUtil.getRate(result, EffectTypeEnum.getByName(propName), battleDTO), 0F);
     }
 
     public static void doHealing(BattleDTO battleDTO, long heal, StringBuilder builder, BattleFieldDTO battleField) {
@@ -816,9 +833,9 @@ public class BattleUtil {
             return;
         }
         long healAfterCal = heal;
-        if (battleDTO.getBuffMap().containsKey(BuffTypeEnum.HEAL)) {
-            healAfterCal = getLongProperty(heal, BuffTypeEnum.HEAL.getName(), battleDTO, battleField);
-            float rate = getRateProperty(1F, BuffTypeEnum.HEAL.getName(), battleDTO, battleField);
+        if (battleDTO.getBuffMap().containsKey(EffectTypeEnum.HEAL)) {
+            healAfterCal = getLongProperty(heal, EffectTypeEnum.HEAL.getName(), battleDTO, battleField);
+            float rate = getRateProperty(1F, EffectTypeEnum.HEAL.getName(), battleDTO, battleField);
             healAfterCal = Math.round(healAfterCal * rate);
         }
         long newHp = Math.min(organismDTO.getHpWithAddition() + healAfterCal, organismDTO.getMaxHpWithAddition());
@@ -869,21 +886,21 @@ public class BattleUtil {
         // 计算伤害变更
         // 先计算造成伤害变化，再计算受到伤害变化
         if (DamageTypeEnum.ATK.equals(damageTypeEnum)) {
-            long tmp = BattleUtil.getLongProperty(battleEffect.getDamage().get(), BuffTypeEnum.DO_DAMAGE.getName(),
+            long tmp = BattleUtil.getLongProperty(battleEffect.getDamage().get(), EffectTypeEnum.DO_DAMAGE.getName(),
                     battleEffect.getFrom(), battleField);
-            tmp = BattleUtil.getLongProperty(tmp, BuffTypeEnum.DAMAGE.getName(), battleEffect.getTar(), battleField);
+            tmp = BattleUtil.getLongProperty(tmp, EffectTypeEnum.DAMAGE.getName(), battleEffect.getTar(), battleField);
             battleEffect.getDamage().set(tmp);
         } else if (DamageTypeEnum.MAGIC.equals(damageTypeEnum)) {
-            long tmp = BattleUtil.getLongProperty(battleEffect.getDamage().get(), BuffTypeEnum.DO_MAGIC_DAMAGE.getName(),
+            long tmp = BattleUtil.getLongProperty(battleEffect.getDamage().get(), EffectTypeEnum.DO_MAGIC_DAMAGE.getName(),
                     battleEffect.getFrom(), battleField);
-            tmp = BattleUtil.getLongProperty(tmp, BuffTypeEnum.MAGIC_DAMAGE.getName(), battleEffect.getTar(), battleField);
+            tmp = BattleUtil.getLongProperty(tmp, EffectTypeEnum.MAGIC_DAMAGE.getName(), battleEffect.getTar(), battleField);
             battleEffect.getDamage().set(tmp);
         }
         // 造成伤害前
         battleField.getExtraBattleProcessTemplateList().forEach(ext -> ext.executeBeforeDamage(battleEffect));
         long damageBf = battleEffect.getDamage().get();
         // 计算盾
-        List<BattleBuffDTO> battleBuffList = battleEffect.getTar().getBuffMap().get(BuffTypeEnum.SHIELD);
+        List<BattleBuffDTO> battleBuffList = battleEffect.getTar().getBuffMap().get(EffectTypeEnum.VAL_SHIELD);
         if (CollectionUtils.isNotEmpty(battleBuffList)) {
             battleBuffList.stream().peek(battleBuff -> {
                 long shieldVal = battleBuff.getBuffDTO().getValue();
@@ -907,7 +924,7 @@ public class BattleUtil {
         if (battleEffect.getDamage().get() > 0) {
             float lifeStealRate = BattleUtil.getRateProperty(
                     battleEffect.getFrom().getOrganismInfoDTO().getOrganismDTO().getLifeStealing(),
-                    BuffTypeEnum.LIFE_STEAL.getName(), battleEffect.getFrom(), battleField
+                    EffectTypeEnum.LIFE_STEAL.getName(), battleEffect.getFrom(), battleField
             );
             if (lifeStealRate > 0) {
                 long heal = Math.round(lifeStealRate * battleEffect.getDamage().get());

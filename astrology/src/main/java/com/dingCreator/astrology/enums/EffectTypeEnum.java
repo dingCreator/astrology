@@ -11,7 +11,7 @@ import java.util.Arrays;
  */
 @Getter
 @AllArgsConstructor
-public enum BuffTypeEnum {
+public enum EffectTypeEnum {
     /**
      * 物攻
      */
@@ -79,6 +79,14 @@ public enum BuffTypeEnum {
     MAGIC_PENETRATE(OrganismPropertiesEnum.MAGIC_PENETRATE.getFieldName(),
             OrganismPropertiesEnum.MAGIC_PENETRATE.getChnDesc(), BuffEffectTypeEnum.PROPERTY),
     /**
+     * 血量上限
+     */
+    MAX_HP(OrganismPropertiesEnum.MAX_HP.getFieldName(), OrganismPropertiesEnum.MAX_HP.getChnDesc(), BuffEffectTypeEnum.PROPERTY),
+    /**
+     * 蓝量上限
+     */
+    MAX_MP(OrganismPropertiesEnum.MAX_MP.getFieldName(), OrganismPropertiesEnum.MAX_MP.getChnDesc(), BuffEffectTypeEnum.PROPERTY),
+    /**
      * 免疫
      */
     IMMUNITY("immunity", "免疫", BuffEffectTypeEnum.MARK),
@@ -99,13 +107,13 @@ public enum BuffTypeEnum {
      */
     BLEEDING("bleeding", "流血", BuffEffectTypeEnum.MARK),
     /**
-     * 无敌
+     * 次数护盾
      */
-    INVINCIBLE("invincible", "无敌", BuffEffectTypeEnum.MARK),
+    TIMES_SHIELD("timesShield", "次数护盾", BuffEffectTypeEnum.MARK),
     /**
-     * 护盾
+     * 数值护盾
      */
-    SHIELD("shield", "护盾", BuffEffectTypeEnum.MARK),
+    VAL_SHIELD("valShield", "数值护盾", BuffEffectTypeEnum.MARK),
     /**
      * 伤害
      */
@@ -141,7 +149,7 @@ public enum BuffTypeEnum {
      */
     private final BuffEffectTypeEnum buffEffectTypeEnum;
 
-    public static BuffTypeEnum getByName(String name) {
+    public static EffectTypeEnum getByName(String name) {
         return Arrays.stream(values()).filter(e -> e.getName().equals(name)).findFirst().orElse(null);
     }
 

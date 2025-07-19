@@ -1,5 +1,7 @@
 package com.dingCreator.astrology.util.template;
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.battle.BattleDTO;
 import com.dingCreator.astrology.dto.battle.BattleEffectDTO;
 import com.dingCreator.astrology.dto.battle.BattleFieldDTO;
@@ -178,12 +180,21 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
         boolean fromOur = this.ownerOur.contains(battleEffect.getFrom());
         boolean fromEnemy = this.ownerEnemy.contains(battleEffect.getFrom());
 
+        boolean toMe = this.owner.equals(battleEffect.getTar());
+        boolean toOur = this.ownerOur.contains(battleEffect.getTar());
+        boolean toEnemy = this.ownerEnemy.contains(battleEffect.getTar());
+
         if (fromMe) {
             ifMeNotHit(battleEffect);
         } else if (fromOur) {
             ifOurNotHit(battleEffect);
         } else if (fromEnemy) {
-            ifEnemyNotHit(battleEffect);
+            if (toMe) {
+                ifEnemyNotHitMe(battleEffect);
+            }
+            if (toOur) {
+                ifEnemyNotHitOur(battleEffect);
+            }
         }
     }
 
@@ -246,6 +257,12 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
             if (battleEffect.getTar().equals(this.getOwner())) {
                 afterMeDamage(battleEffect);
             }
+        }
+    }
+
+    public final void executeSpecialExecute(Object obj) {
+        if (effect()) {
+            specialExecute(obj);
         }
     }
 
@@ -392,7 +409,10 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
     public void ifOurNotHit(BattleEffectDTO battleEffect) {
     }
 
-    public void ifEnemyNotHit(BattleEffectDTO battleEffect) {
+    public void ifEnemyNotHitMe(BattleEffectDTO battleEffect) {
+    }
+
+    public void ifEnemyNotHitOur(BattleEffectDTO battleEffect) {
     }
 
     public final void changeDamageRate(BattleEffectDTO battleEffect) {
@@ -424,5 +444,13 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
      * @param battleEffect 单个技能单个目标的战斗效果
      */
     public void afterMeDamage(BattleEffectDTO battleEffect) {
+    }
+
+    /**
+     * 特殊触发
+     *
+     * @param obj 入参
+     */
+    public void specialExecute(Object obj) {
     }
 }

@@ -158,9 +158,8 @@ public class WorldBossCache {
     }
 
     private static boolean bossInTime() {
-        return Objects.nonNull(worldBoss) && (
-                LocalDateTime.now().isBefore(worldBoss.getStartTime())
-                        || (LocalDateTime.now().isAfter(worldBoss.getEndTime()))
-        );
+        return Objects.nonNull(worldBoss)
+                && LocalDateTime.now().isAfter(worldBoss.getStartTime())
+                && LocalDateTime.now().isBefore(worldBoss.getEndTime());
     }
 }
