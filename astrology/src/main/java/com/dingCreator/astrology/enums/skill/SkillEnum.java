@@ -2646,7 +2646,10 @@ public enum SkillEnum implements Serializable {
         private OrganismDTO getUndeadOrganismDTO() {
             OrganismDTO undeadOrganism = new MonsterDTO();
             undeadOrganism.setName("亡灵");
+            undeadOrganism.setMaxHp(50000L);
+            undeadOrganism.setMaxMp(0L);
             undeadOrganism.setHp(50000L);
+            undeadOrganism.setMp(0L);
             undeadOrganism.setAtk(8500L);
             undeadOrganism.setDef(5200L);
             undeadOrganism.setMagicAtk(0L);
