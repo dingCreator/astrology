@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author ding
@@ -126,7 +127,8 @@ public class BattleFieldDTO implements Serializable {
         if (to.stream().mapToLong(t -> t.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition()).sum() <= 0) {
             return;
         }
-        from.stream()
+        // 过滤出本次行动的角色
+        List<BattleDTO> behaviorMembers = from.stream()
                 // 过滤已阵亡角色
                 .filter(o -> o.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition() > 0)
                 // 计算行动值
@@ -137,11 +139,12 @@ public class BattleFieldDTO implements Serializable {
                     o.setBehavior(behavior);
                 })
                 // 行动值大于阈值的才行动
-                .filter(o -> o.getBehavior() > this.getTotalBehavior())
-                .forEach(o -> {
-                    BattleRoundDTO round = BattleRoundDTO.builder().from(o).our(from).enemy(to).battleField(this).build();
-                    round.executeRound();
-                });
+                .filter(o -> o.getBehavior() > this.getTotalBehavior()).collect(Collectors.toList());
+        // 把行动者抽出来，不要对原集合进行迭代，避免concurrentModificationException
+        behaviorMembers.forEach(o -> {
+            BattleRoundDTO round = BattleRoundDTO.builder().from(o).our(from).enemy(to).battleField(this).build();
+            round.executeRound();
+        });
     }
 
     public void changeFieldEffect(FieldEffectEnum newEffect) {

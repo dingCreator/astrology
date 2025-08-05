@@ -18,19 +18,19 @@ public class OrganismDTO implements Serializable {
     /**
      * 血量
      */
-    protected Long hp;
+    protected volatile Long hp;
     /**
      * 血量上限
      */
-    protected Long maxHp;
+    protected volatile Long maxHp;
     /**
      * 蓝
      */
-    protected Long mp;
+    protected volatile Long mp;
     /**
      * 蓝上限
      */
-    protected Long maxMp;
+    protected volatile Long maxMp;
     /**
      * 攻击力
      */

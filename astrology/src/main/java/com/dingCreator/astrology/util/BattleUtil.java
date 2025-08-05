@@ -965,4 +965,19 @@ public class BattleUtil {
         }
         return recordList.get(roundIdx - 1);
     }
+
+    public static void addBattleDTO(OrganismDTO summoner, OrganismDTO summon, SkillBarDTO bar, int count,
+                                    List<BattleDTO> list, int index, StringBuilder builder) {
+        if (count <= 0) {
+            return;
+        }
+        OrganismInfoDTO undeadInfo = new OrganismInfoDTO();
+        undeadInfo.setOrganismDTO(summon);
+        undeadInfo.setInactiveSkills(new ArrayList<>());
+        undeadInfo.setSkillBarDTO(bar);
+        BattleDTO battleDTO = BattleUtil.buildBattleDTO(undeadInfo, true);
+        list.add(index, battleDTO);
+        builder.append("，").append(summoner.getName()).append("召唤了").append(count).append("只【")
+                .append(summon.getName()).append("】");
+    }
 }

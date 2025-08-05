@@ -95,13 +95,13 @@ public enum FieldEffectEnum implements Serializable {
                     StringBuilder builder = battleRound.getBuilder();
                     Map<String, Integer> markMap = from.getMarkMap();
                     if (RandomUtil.isHit(0.2F)) {
-                        builder.append("，").append(from.getOrganismInfoDTO().getOrganismDTO()).append("获得“生魂”");
+                        builder.append("，").append(from.getOrganismInfoDTO().getOrganismDTO().getName()).append("获得“生魂”");
                         BattleUtil.doHealing(from, 10000L, builder, battleRound.getBattleField());
                         markMap.put("生魂", markMap.getOrDefault("生魂", 0) + 1);
                     }
                     if (RandomUtil.isHit(0.7F)) {
-                        builder.append("，").append(from.getOrganismInfoDTO().getOrganismDTO()).append("获得“死魂”");
-                        BattleUtil.doRealDamage(from, 2100L, builder);
+                        builder.append("，").append(from.getOrganismInfoDTO().getOrganismDTO().getName()).append("获得“死魂”");
+                        BattleUtil.doRealDamage(battleRound.getEnemy().get(0), 2100L, builder);
                         markMap.put("死魂", markMap.getOrDefault("死魂", 0) + 1);
                         ExtraBattleProcessTemplate specialExecuteTpl = battleRound.getBattleField()
                                 .getExtraBattleProcessTemplateList().stream()

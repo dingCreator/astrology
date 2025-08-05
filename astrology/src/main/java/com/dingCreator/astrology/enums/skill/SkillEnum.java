@@ -2543,38 +2543,13 @@ public enum SkillEnum implements Serializable {
         }
 
         private void addUndead(BattleRoundDTO battleRound) {
-            OrganismDTO undeadOrganism = getUndeadOrganismDTO();
-
             SkillBarDTO skillBar = new SkillBarDTO();
             skillBar.setSkillId(SkillEnum.SKILL_11.getId());
             skillBar.setHead(skillBar);
-
-            OrganismInfoDTO undeadInfo = new OrganismInfoDTO();
-            undeadInfo.setOrganismDTO(undeadOrganism);
-            undeadInfo.setInactiveSkills(new ArrayList<>());
-            undeadInfo.setSkillBarDTO(skillBar);
-            BattleDTO undead = BattleUtil.buildBattleDTO(undeadInfo, true);
-            battleRound.getOur().add(0, undead);
-        }
-
-        private OrganismDTO getUndeadOrganismDTO() {
-            OrganismDTO undeadOrganism = new MonsterDTO();
-            undeadOrganism.setName("亡灵");
-            undeadOrganism.setHp(50000L);
-            undeadOrganism.setAtk(8500L);
-            undeadOrganism.setDef(5200L);
-            undeadOrganism.setMagicAtk(0L);
-            undeadOrganism.setMagicDef(5200L);
-            undeadOrganism.setHit(6500L);
-            undeadOrganism.setDodge(6500L);
-            undeadOrganism.setBehaviorSpeed(3000L);
-            undeadOrganism.setCriticalRate(0.1F);
-            undeadOrganism.setCriticalDamage(1.5F);
-            undeadOrganism.setCriticalReductionRate(0F);
-            undeadOrganism.setCriticalDamageReduction(0F);
-            undeadOrganism.setPenetrate(0F);
-            undeadOrganism.setMagicPenetrate(0F);
-            return undeadOrganism;
+            OrganismDTO undeadOrganism = SummonTemplateEnum.UNDEAD
+                    .constructOrganism(battleRound.getFrom().getOrganismInfoDTO().getOrganismDTO());
+            BattleUtil.addBattleDTO(battleRound.getFrom().getOrganismInfoDTO().getOrganismDTO(), undeadOrganism, skillBar,
+                    1, battleRound.getOur(), 0, battleRound.getBuilder());
         }
     }),
 
@@ -2610,8 +2585,7 @@ public enum SkillEnum implements Serializable {
             new SkillEffectDTO(TargetEnum.ME), new ThisBehaviorExtraBattleProcessTemplate() {
         @Override
         public void ifHit(BattleEffectDTO battleEffect) {
-            addUndead(battleEffect.getBattleRound());
-            addUndead(battleEffect.getBattleRound());
+            addUndead(battleEffect.getBattleRound(), 2);
             StringBuilder builder = battleEffect.getBattleRound().getBuilder();
             battleEffect.getOur().stream()
                     .filter(BattleDTO::getSummoned)
@@ -2628,42 +2602,14 @@ public enum SkillEnum implements Serializable {
                     });
         }
 
-        private void addUndead(BattleRoundDTO battleRound) {
-            OrganismDTO undeadOrganism = getUndeadOrganismDTO();
-
+        private void addUndead(BattleRoundDTO battleRound, int count) {
             SkillBarDTO skillBar = new SkillBarDTO();
             skillBar.setSkillId(SkillEnum.SKILL_11.getId());
             skillBar.setHead(skillBar);
-
-            OrganismInfoDTO undeadInfo = new OrganismInfoDTO();
-            undeadInfo.setOrganismDTO(undeadOrganism);
-            undeadInfo.setInactiveSkills(new ArrayList<>());
-            undeadInfo.setSkillBarDTO(skillBar);
-            BattleDTO undead = BattleUtil.buildBattleDTO(undeadInfo, true);
-            battleRound.getOur().add(0, undead);
-        }
-
-        private OrganismDTO getUndeadOrganismDTO() {
-            OrganismDTO undeadOrganism = new MonsterDTO();
-            undeadOrganism.setName("亡灵");
-            undeadOrganism.setMaxHp(50000L);
-            undeadOrganism.setMaxMp(0L);
-            undeadOrganism.setHp(50000L);
-            undeadOrganism.setMp(0L);
-            undeadOrganism.setAtk(8500L);
-            undeadOrganism.setDef(5200L);
-            undeadOrganism.setMagicAtk(0L);
-            undeadOrganism.setMagicDef(5200L);
-            undeadOrganism.setHit(6500L);
-            undeadOrganism.setDodge(6500L);
-            undeadOrganism.setBehaviorSpeed(3000L);
-            undeadOrganism.setCriticalRate(0.1F);
-            undeadOrganism.setCriticalDamage(1.5F);
-            undeadOrganism.setCriticalReductionRate(0F);
-            undeadOrganism.setCriticalDamageReduction(0F);
-            undeadOrganism.setPenetrate(0F);
-            undeadOrganism.setMagicPenetrate(0F);
-            return undeadOrganism;
+            OrganismDTO undeadOrganism = SummonTemplateEnum.UNDEAD
+                    .constructOrganism(battleRound.getFrom().getOrganismInfoDTO().getOrganismDTO());
+            BattleUtil.addBattleDTO(battleRound.getFrom().getOrganismInfoDTO().getOrganismDTO(), undeadOrganism, skillBar,
+                    count, battleRound.getOur(), 0, battleRound.getBuilder());
         }
     }),
 
