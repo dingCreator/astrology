@@ -1,6 +1,7 @@
 package com.dingCreator.astrology.enums;
 
 import com.dingCreator.astrology.dto.battle.BuffDTO;
+import com.dingCreator.astrology.dto.battle.RuleDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,12 +15,21 @@ public enum TitleEnum {
     /**
      * 获取方式：星术师rank1巅峰任务
      */
-    TITLE_1(1L, "巅峰.圣星之子", new BuffDTO()),
+    MAGICIAN_PEAK_1(1L, "MAGICIAN_PEAK_1", "巅峰.圣星之子", new RuleDTO()),
+    /**
+     * 获取方式：转职
+     */
+    REINCARNATION(2L, "reincarnation", "轮回之人", new RuleDTO()),
     ;
+
     /**
      * id
      */
     private final Long id;
+    /**
+     * 编码
+     */
+    private final String titleCode;
     /**
      * 称号名
      */
@@ -27,5 +37,5 @@ public enum TitleEnum {
     /**
      * 称号加成
      */
-    private final BuffDTO buffDTO;
+    private final RuleDTO rule;
 }

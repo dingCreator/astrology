@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dingCreator.astrology.mapper.PlayerDataMapper">
+
+    <select id="queryChartPage" resultType="com.dingCreator.astrology.vo.PlayerLevelChartVO">
+        select * from (
+            select
+                rank() over(order by `rank` desc,`level` desc,`exp` desc) as `rank`,
+                id as playerId,
+                name as playerName,
+                job as job,
+                `rank` as playerRank,
+                level as playerLevel
+            from
+                astrology_player
+        ) tmp
+        <where>
+            <if test="playerId != null">
+                tmp.playerId = #{playerId}
+            </if>
+        </where>
+        limit #{pageIndex}, #{offset}
+    </select>
+</mapper>

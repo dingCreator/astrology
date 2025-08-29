@@ -3,3 +3,18 @@ delete from bot.astrology_player_asset where player_id=1;
 delete from bot.astrology_skill_bar_item where belong_to ='Player' and belong_to_id =1;
 delete from bot.astrology_skill_belong_to where belong_to ='Player' and belong_to_id =1;
 update bot.astrology_equipment_belong_to set equip=0 where belong_to='Player' and belong_to_id=1 and equip=1;
+
+delete from bot.astrology_player;
+delete from bot.astrology_player_asset;
+DELETE from bot.astrology_skill_bag ;
+delete from bot.astrology_skill_bar_item WHERE belong_to ='Player';
+delete from bot.astrology_skill_belong_to WHERE belong_to ='Player';
+delete from bot.astrology_equipment_belong_to;
+delete from bot.astrology_activity_statics ;
+DELETE from bot.astrology_activity_record ;
+DELETE from bot.astrology_mail_box ;
+DELETE from bot.astrology_market_item ;
+DELETE from bot.astrology_player_alchemy ;
+DELETE from bot.astrology_player_herb ;
+DELETE from bot.astrology_player_pill ;
+DELETE from bot.astrology_world_boss_record ;

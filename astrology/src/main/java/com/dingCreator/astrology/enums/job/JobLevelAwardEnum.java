@@ -121,11 +121,11 @@ public enum JobLevelAwardEnum {
         return "习得技能【" + SkillEnum.SKILL_46.getName() + "】";
     }),
 
-    CHEATER_LV_15(JobEnum.CHEATER, 15, playerId -> {return "";}),
-    CHEATER_LV_25(JobEnum.CHEATER, 25, playerId -> {return "";}),
-    CHEATER_LV_35(JobEnum.CHEATER, 35, playerId -> {return "";}),
-    CHEATER_LV_50(JobEnum.CHEATER, 50, playerId -> {return "";}),
-    CHEATER_LV_61(JobEnum.CHEATER, 61, playerId -> {return "";}),
+//    CHEATER_LV_15(JobEnum.CHEATER, 15, playerId -> {return "";}),
+//    CHEATER_LV_25(JobEnum.CHEATER, 25, playerId -> {return "";}),
+//    CHEATER_LV_35(JobEnum.CHEATER, 35, playerId -> {return "";}),
+//    CHEATER_LV_50(JobEnum.CHEATER, 50, playerId -> {return "";}),
+//    CHEATER_LV_61(JobEnum.CHEATER, 61, playerId -> {return "";}),
     ;
     /**
      * 职业

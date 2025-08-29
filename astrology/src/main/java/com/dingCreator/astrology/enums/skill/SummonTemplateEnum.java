@@ -139,6 +139,7 @@ public enum SummonTemplateEnum {
 
     public OrganismDTO constructOrganism(OrganismDTO summoner) {
         OrganismDTO organismDTO = new OrganismDTO();
+        organismDTO.setName(name);
         organismDTO.setMaxHp(maxHp + Math.round(summoner.getMaxHpWithAddition() * maxHpRate));
         organismDTO.setMaxMp(maxMp + Math.round(summoner.getMaxMpWithAddition() * maxMpRate));
         organismDTO.setHp(hp + Math.round(summoner.getHpWithAddition() * hpRate));

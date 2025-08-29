@@ -64,18 +64,18 @@ public enum EquipmentEnum {
     ),
     EQUIPMENT_6(6L, "兽角",
             "不知道是何种兽角，似乎没有任何能量遗留在上面，本身也不算坚硬，但用来顶一下人还是可以的",
-            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 6L)),
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 8L)),
             EquipmentRankEnum.SP, EquipmentTypeEnum.WEAPON
     ),
     EQUIPMENT_7(7L, "大骨棒子",
             "野外随意捡来的还算完整的大骨棒子，砸人还挺顺手的",
-            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 7L)),
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 10L)),
             EquipmentRankEnum.SP, EquipmentTypeEnum.WEAPON
     ),
     EQUIPMENT_8(8L, "轰天雷",
             "只是一种名叫“轰天雷”的鞭炮罢了",
             Arrays.asList(
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 10L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 20L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, -5L)
             ),
             EquipmentRankEnum.SP, EquipmentTypeEnum.WEAPON
@@ -84,16 +84,16 @@ public enum EquipmentEnum {
     EQUIPMENT_9(9L, "纸糊的衣服",
             "纸糊成的衣服，上面画着一些修真界无法解析的鬼画符",
             Arrays.asList(
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 1L),
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 2L)
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 3L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 3L)
             ),
             EquipmentRankEnum.SP, EquipmentTypeEnum.ARMOR
     ),
     EQUIPMENT_10(10L, "漏风的棉袄",
             "心里哇凉哇凉的",
             Arrays.asList(
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 2L),
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 2L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 5L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 5L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, -2L)
             ),
             EquipmentRankEnum.SP, EquipmentTypeEnum.ARMOR
@@ -101,21 +101,21 @@ public enum EquipmentEnum {
     EQUIPMENT_11(11L, "铁桶",
             "游戏《法器大战邪修》爆火后，一些人参照游戏中某位邪修的造型，将铁桶戴在头上，意外发现防御效果不错",
             Arrays.asList(
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 3L),
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 3L)
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 4L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 4L)
             ),
             EquipmentRankEnum.SP, EquipmentTypeEnum.ARMOR
     ),
     EQUIPMENT_12(12L, "硬纸板",
             "趁废品店老板不注意顺走的硬纸板，上面有修真者随意画上的加固符文，使得此硬纸板的硬度堪比石头",
-            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 3L)),
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 6L)),
             EquipmentRankEnum.SP, EquipmentTypeEnum.ARMOR
     ),
     EQUIPMENT_13(13L, "门板",
             "邪修洗劫完某户人家后，顺手拆下的门，可以当做盾牌使用",
             Arrays.asList(
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 2L),
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 1L)
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 8L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 2L)
             ),
             EquipmentRankEnum.SP, EquipmentTypeEnum.ARMOR
     ),
@@ -158,20 +158,20 @@ public enum EquipmentEnum {
             "通体漆黑的石碑，在一处遗迹中获得。从其残存的字迹所交代的信息中可以了解到，在遥远的无尽海域中央有一处圣山名唤“太衍”，" +
                     "是古修真者们尊为神迹的圣地。作为武器来说，抡起来伤害可观，但十分费劲",
             Arrays.asList(
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 15L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 30L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, -10L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, -10L)
             ),
             EquipmentRankEnum.ORDINARY, EquipmentTypeEnum.WEAPON
     ),
     EQUIPMENT_106(106L, "款式独特的玉佩",
-            "土里偶然挖出来的，款式与现代的款式都不相同，上面也没有任何文字，无法辨别是何人遗失的。似乎也无法作为正常武器使用。",
-            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 2L)),
+            "土里偶然挖出来的，款式与现代的款式都不相同，上面也没有任何文字，无法辨别是何人遗失的",
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 15L)),
             EquipmentRankEnum.ORDINARY, EquipmentTypeEnum.JEWELRY
     ),
     EQUIPMENT_107(107L, "锄头",
             "农夫种地的农具，也是农民起义常用武器之一",
-            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 10L)),
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 20L)),
             EquipmentRankEnum.ORDINARY, EquipmentTypeEnum.WEAPON
     ),
     EQUIPMENT_108(108L, "量产型乒乓球发射器",
@@ -182,13 +182,13 @@ public enum EquipmentEnum {
     ),
     EQUIPMENT_109(109L, "量产型一阶剑符",
             "现今的修真界学习工业化技术的产物，一条流水线一分钟就能产出200张",
-            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 20L)),
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 25L)),
             EquipmentRankEnum.ORDINARY, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode()
     ),
     EQUIPMENT_110(110L, "屠刀",
             "屠夫用于宰杀牲畜的刀",
             Arrays.asList(
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 15L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 18L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.PENETRATE, 0.01F)
             ),
             EquipmentRankEnum.ORDINARY, EquipmentTypeEnum.WEAPON
@@ -269,19 +269,19 @@ public enum EquipmentEnum {
             EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON
     ),
     EQUIPMENT_207(207L, "破损的大钟",
-            "一处废墟中找到的破损大钟，上面可识别的字迹中记载着“（此处请根据故事背景，插入一些信息）”，其中还有一丝灵力残留，修真者可引导出力量",
-            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 30L)),
+            "一处废墟中找到的破损大钟，上面有一些可识别的字迹，其中还有一丝灵力残留，修真者可引导出力量",
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 90L)),
             EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode()
     ),
     EQUIPMENT_208(208L, "量产型8086芯片",
             "某处遗迹中找到的唯一还能用的一块芯片，可以用于计算对方的移动轨迹，增加一定的命中率",
-            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 100L)),
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 130L)),
             EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON, JobEnum.GUN.getJobCode()
     ),
     EQUIPMENT_209(209L, "量产型阿卡",
             "上古年代的产物，居然还能使用，其中藏着一张纸，上面似乎写着些什么，但字迹难以辨认，像是上一任主人临终前写下的",
             Arrays.asList(
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 120L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 150L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.PENETRATE, 0.2F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, -100L)
             ), EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON, JobEnum.GUN.getJobCode()
@@ -295,7 +295,7 @@ public enum EquipmentEnum {
     ),
     EQUIPMENT_211(211L, "量产型二阶剑符",
             "现今的修真界学习工业化技术的产物，一条流水线一分钟能产出20张",
-            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 200L)),
+            Collections.singletonList(new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 220L)),
             EquipmentRankEnum.NORMAL, EquipmentTypeEnum.WEAPON, JobEnum.XIU_ZHEN.getJobCode()
     ),
     EQUIPMENT_212(212L, "量产型二阶甲符",
@@ -1235,14 +1235,22 @@ public enum EquipmentEnum {
                 @Override
                 public void beforeBattle(BattleFieldDTO battleField) {
                     OrganismDTO organism = this.getOwner().getOrganismInfoDTO().getOrganismDTO();
-                    battleField.getBattleMsg().add("※" + organism.getName() + "的饰品法则【泯灭法则】被触发");
-
+                    StringBuilder builder = new StringBuilder("※").append(organism.getName()).append("的饰品法则【泯灭法则】被触发");
+                    battleField.getEnemy(this.getOwner()).forEach(b -> RuleUtil.addRule(b, EffectTypeEnum.HEAL,
+                            "泯灭法则", -0.9F, builder));
+                    battleField.getBattleMsg().add(builder.toString());
                     // 触发技能
                     ExtraBattleProcessTemplate sk1032Tpl = SkillEnum.SKILL_1032.getGlobalExtraProcess();
                     sk1032Tpl.setOwner(this.getOwner());
                     sk1032Tpl.setPriority(this.getPriority());
                     sk1032Tpl.executeBeforeBattle(battleField);
+                }
 
+                @Override
+                public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
+                    if (battleEffect.getDamage().get() > 0) {
+                        battleEffect.getDamage().set(Math.round(battleEffect.getDamage().get() * 1.15));
+                    }
                 }
             }
     ),

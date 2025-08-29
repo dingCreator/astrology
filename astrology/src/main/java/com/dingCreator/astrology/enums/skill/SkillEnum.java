@@ -105,7 +105,7 @@ public enum SkillEnum implements Serializable {
 
     SKILL_6(6L, "芬芳",
             "小嘴抹蜜口吐芬芳，对敌方全体造成80%物理伤害并且有10%概率嘲讽对方1回合",
-            JobEnum.CHEATER.getJobCode(),
+            Constants.ALL,
             new SkillEffectDTO(TargetEnum.ALL_ENEMY, DamageTypeEnum.ATK, 0.8F),
             new ThisBehaviorExtraBattleProcessTemplate() {
                 @Override
@@ -794,10 +794,11 @@ public enum SkillEnum implements Serializable {
                 @Override
                 public void ifHit(BattleEffectDTO battleEffect) {
                     BattleDTO tar = battleEffect.getTar();
-                    BattleDTO from = battleEffect.getFrom();
                     StringBuilder builder = battleEffect.getBattleRound().getBuilder();
-                    BuffUtil.addBuff(from, tar, new BuffDTO(EffectTypeEnum.SPEED, "", 0.3F), 3, builder);
-                    BuffUtil.addBuff(from, tar, new BuffDTO(EffectTypeEnum.DODGE, "", 0.4F), 3, builder);
+                    long maxHp = tar.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition();
+                    long maxHpDecrease = Math.min(Math.round(maxHp * 0.05), 100000);
+                    builder.append("，").append(tar.getOrganismInfoDTO().getOrganismDTO().getName()).append("血量上限降低").append(maxHpDecrease);
+                    tar.getOrganismInfoDTO().getOrganismDTO().setMaxHpWithAddition(maxHp - maxHpDecrease);
                 }
             }
     ),
@@ -945,7 +946,7 @@ public enum SkillEnum implements Serializable {
     ),
 
     SKILL_48(48L, "机灵自愈/众生虚妙",
-            "每回合回复自身8%血量4%蓝量持续三回合。伪神姿态下每回合回复全体友方12%血量,8%蓝量持续三回合",
+            "每回合回复自身2%血量4%蓝量持续三回合。伪神姿态下每回合回复全体友方4%血量,8%蓝量持续三回合",
             JobEnum.GUN.getJobCode(), 120L, new SkillEffectDTO(TargetEnum.ME, DamageTypeEnum.ATK, 0F),
             new ThisBehaviorExtraBattleProcessTemplate() {
                 @Override
@@ -2691,7 +2692,7 @@ public enum SkillEnum implements Serializable {
         DEFAULT_SKILL_MAP.put(JobEnum.MAGICIAN.getJobCode(), 3L);
         DEFAULT_SKILL_MAP.put(JobEnum.GUN.getJobCode(), 4L);
         DEFAULT_SKILL_MAP.put(JobEnum.EVIL.getJobCode(), 5L);
-        DEFAULT_SKILL_MAP.put(JobEnum.CHEATER.getJobCode(), 6L);
+//        DEFAULT_SKILL_MAP.put(JobEnum.CHEATER.getJobCode(), 6L);
     }
 
     public static SkillEnum getById(Long id) {

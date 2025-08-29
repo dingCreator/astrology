@@ -38,7 +38,7 @@ public class DungeonBehavior {
         PlayerCache.getPlayerById(playerId);
         List<Dungeon> dungeonList = dungeonService.list();
         return PageUtil.buildPage(dungeonList.stream()
-                .map(d -> "副本名称：" + d.getName() + " 冷却时间：" + d.getFlushTime() + "s")
+                .map(d -> "副本名称：" + d.getName() + "\n冷却时间：" + d.getFlushTime() + "s")
                 .collect(Collectors.toList()), pageIndex, pageSize);
     }
 

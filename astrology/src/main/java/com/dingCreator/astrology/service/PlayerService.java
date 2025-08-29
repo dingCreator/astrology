@@ -20,9 +20,12 @@ import com.dingCreator.astrology.enums.job.JobEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.mapper.PlayerAssetMapper;
 import com.dingCreator.astrology.mapper.PlayerDataMapper;
+import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.util.EquipmentUtil;
 import com.dingCreator.astrology.util.LockUtil;
+import com.dingCreator.astrology.util.PageUtil;
 import com.dingCreator.astrology.util.SkillUtil;
+import com.dingCreator.astrology.vo.PlayerLevelChartVO;
 import org.apache.ibatis.session.SqlSession;
 
 import java.util.ArrayList;
@@ -188,6 +191,17 @@ public class PlayerService {
                     infoDTO.setAssetList(assetList.stream().map(PlayerAsset::convert).collect(Collectors.toList()));
                 })
         );
+    }
+
+    public PageResponse<PlayerLevelChartVO> queryChartPage(int pageIndex, int pageSize, Long playerId) {
+        int index = pageIndex - 1;
+        return DatabaseProvider.getInstance().executeReturn(sqlSession -> {
+            QueryWrapper<Player> wrapper = new QueryWrapper<>();
+            int count = sqlSession.getMapper(PlayerDataMapper.class).selectCount(wrapper);
+            List<PlayerLevelChartVO> list = sqlSession.getMapper(PlayerDataMapper.class).queryChartPage(
+                    index * pageSize, pageSize, playerId);
+            return PageUtil.addPageDesc(list, pageIndex, pageSize, count);
+        });
     }
 
     private static class Holder {

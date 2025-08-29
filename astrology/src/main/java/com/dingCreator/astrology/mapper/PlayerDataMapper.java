@@ -2,7 +2,10 @@ package com.dingCreator.astrology.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.dingCreator.astrology.entity.Player;
+import com.dingCreator.astrology.vo.PlayerLevelChartVO;
 import org.apache.ibatis.annotations.*;
+
+import java.util.List;
 
 /**
  * @author ding
@@ -44,4 +47,7 @@ public interface PlayerDataMapper extends BaseMapper<Player> {
             "#{behaviorSpeed}, #{hit}, #{dodge}, #{lifeStealing}, #{rank}, #{level}, #{exp}, #{job}, #{mapId}," +
             "#{status}, #{statusStartTime}, #{enabled})")
     Boolean createPlayer(Player player);
+
+    List<PlayerLevelChartVO> queryChartPage(@Param("pageIndex") int pageIndex, @Param("offset") int offset,
+                                            @Param("playerId") Long playerId);
 }

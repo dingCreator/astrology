@@ -110,21 +110,21 @@ public enum RankEnum {
             (playerId, builder) -> {
             }),
 
-    CHEATER_RANK_1(JobEnum.CHEATER.getJobCode(), 1, "谵妄", 1, 20, 0.5F,
-            (playerId, builder) -> {
-            }),
-    CHEATER_RANK_2(JobEnum.CHEATER.getJobCode(), 2, "诳语", 21, 40, 0.4F,
-            (playerId, builder) -> {
-            }),
-    CHEATER_RANK_3(JobEnum.CHEATER.getJobCode(), 3, "盗名", 41, 60, 0.3F,
-            (playerId, builder) -> {
-            }),
-    CHEATER_RANK_4(JobEnum.CHEATER.getJobCode(), 4, "诡道", 61, 80, 0.2F,
-            (playerId, builder) -> {
-            }),
-    CHEATER_RANK_5(JobEnum.CHEATER.getJobCode(), 5, "欺天", 81, 100, 0.1F,
-            (playerId, builder) -> {
-            }),
+//    CHEATER_RANK_1(JobEnum.CHEATER.getJobCode(), 1, "谵妄", 1, 20, 0.5F,
+//            (playerId, builder) -> {
+//            }),
+//    CHEATER_RANK_2(JobEnum.CHEATER.getJobCode(), 2, "诳语", 21, 40, 0.4F,
+//            (playerId, builder) -> {
+//            }),
+//    CHEATER_RANK_3(JobEnum.CHEATER.getJobCode(), 3, "盗名", 41, 60, 0.3F,
+//            (playerId, builder) -> {
+//            }),
+//    CHEATER_RANK_4(JobEnum.CHEATER.getJobCode(), 4, "诡道", 61, 80, 0.2F,
+//            (playerId, builder) -> {
+//            }),
+//    CHEATER_RANK_5(JobEnum.CHEATER.getJobCode(), 5, "欺天", 81, 100, 0.1F,
+//            (playerId, builder) -> {
+//            }),
     ;
     /**
      * 所属职业
