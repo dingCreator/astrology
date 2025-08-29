@@ -71,14 +71,14 @@ public enum JobInitPropertiesEnum {
     /**
      * 神棍
      */
-    CHEATER("CHEATER",
-            300L, 180L,
-            20L, 10L,
-            0L, 5L,
-            0F, 0F,
-            0.01F, 0F,
-            1.5F, 0F,
-            100L, 10L, 20L, 0F, SkillEnum.SKILL_6),
+//    CHEATER("CHEATER",
+//            300L, 180L,
+//            20L, 10L,
+//            0L, 5L,
+//            0F, 0F,
+//            0.01F, 0F,
+//            1.5F, 0F,
+//            100L, 10L, 20L, 0F, SkillEnum.SKILL_6),
     ;
     /**
      * 职业编号
