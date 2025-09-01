@@ -19,6 +19,7 @@ import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
 import com.dingCreator.astrology.entity.base.Monster;
+import com.dingCreator.astrology.enums.BattleTypeEnum;
 import com.dingCreator.astrology.enums.BelongToEnum;
 import com.dingCreator.astrology.enums.EffectTypeEnum;
 import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
@@ -333,7 +334,7 @@ public class BattleUtil {
             throw BattleExceptionEnum.INITIATOR_LOW_HP.getException();
         }
 
-        BattleResultVO vo = battle(initiatorList, recipientList);
+        BattleResultVO vo = battle(initiatorList, recipientList, BattleTypeEnum.PVP);
         vo.setInitiatorId(initiatorId);
         vo.setRecipientId(recipientId);
 
@@ -418,7 +419,7 @@ public class BattleUtil {
             throw BattleExceptionEnum.INITIATOR_LOW_HP.getException();
         }
 
-        BattleResultVO vo = battle(playerList, monsterList);
+        BattleResultVO vo = battle(playerList, monsterList, BattleTypeEnum.PVE);
         if (Objects.nonNull(functionExecutor)) {
             ThreadPoolUtil.execute(functionExecutor);
         }
@@ -439,9 +440,11 @@ public class BattleUtil {
     public static BattleResultVO battleEVE(Long playerId, List<Long> monsterIdList1, List<Long> monsterIdList2, int maxRound) {
         BattleResultVO vo;
         if (maxRound > 0) {
-            vo = battle(getOrganismByMonsterId(monsterIdList1), getOrganismByMonsterId(monsterIdList2), maxRound);
+            vo = battle(getOrganismByMonsterId(monsterIdList1), getOrganismByMonsterId(monsterIdList2), maxRound,
+                    BattleTypeEnum.EVE);
         } else {
-            vo = battle(getOrganismByMonsterId(monsterIdList1), getOrganismByMonsterId(monsterIdList2));
+            vo = battle(getOrganismByMonsterId(monsterIdList1), getOrganismByMonsterId(monsterIdList2),
+                    BattleTypeEnum.EVE);
         }
         ThreadPoolUtil.executeBiConsumer(BattleUtil::writeBattleProcess, Collections.singletonList(playerId), vo.getInfo());
         ThreadPoolUtil.executeBiConsumer(BattleUtil::addBattleRoundRecord, Collections.singletonList(playerId), vo.getRoundRecordList());
@@ -547,8 +550,9 @@ public class BattleUtil {
      * @param recipient 接收方
      * @return 战斗信息
      */
-    public static BattleResultVO battle(List<OrganismInfoDTO> initiator, List<OrganismInfoDTO> recipient) {
-        return battle(initiator, recipient, (initiator.size() + recipient.size()) * 50);
+    public static BattleResultVO battle(List<OrganismInfoDTO> initiator, List<OrganismInfoDTO> recipient,
+                                        BattleTypeEnum battleTypeEnum) {
+        return battle(initiator, recipient, (initiator.size() + recipient.size()) * 50, battleTypeEnum);
     }
 
     /**
@@ -558,7 +562,8 @@ public class BattleUtil {
      * @param recipient 接收方
      * @return 战斗信息
      */
-    public static BattleResultVO battle(List<OrganismInfoDTO> initiator, List<OrganismInfoDTO> recipient, int maxRound) {
+    public static BattleResultVO battle(List<OrganismInfoDTO> initiator, List<OrganismInfoDTO> recipient, int maxRound,
+                                        BattleTypeEnum battleTypeEnum) {
         List<BattleDTO> initiatorBattleTmp = new ArrayList<>(initiator.size());
         List<BattleDTO> recipientBattleTmp = new ArrayList<>(recipient.size());
         // 包装
@@ -584,6 +589,7 @@ public class BattleUtil {
                 .recipientList(recipientBattleTmp)
                 .maxRound(maxRound)
                 .roundRecordList(new ArrayList<>())
+                .battleTypeEnum(battleTypeEnum)
                 .extraBattleProcessTemplateList(extraBattleProcessList).build();
         return battle(field);
     }

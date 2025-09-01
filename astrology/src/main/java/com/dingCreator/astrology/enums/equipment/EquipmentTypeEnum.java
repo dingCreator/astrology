@@ -71,9 +71,9 @@ public enum EquipmentTypeEnum {
                 bar.setArmor(null);
             }),
     /**
-     * 饰品
+     * 宝物
      */
-    JEWELRY("jewelry", "饰品",
+    JEWELRY("jewelry", "宝物",
             (playerId, equipmentBelongTo) -> {
                 EquipmentUtil.validate(playerId, equipmentBelongTo);
                 PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);

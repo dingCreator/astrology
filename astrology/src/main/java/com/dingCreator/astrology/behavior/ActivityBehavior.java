@@ -28,10 +28,10 @@ public class ActivityBehavior {
      * @param playerId     玩家ID
      * @return 参与结果
      */
-    public JoinActivityResultVO joinActivity(String activityName, long playerId) {
+    public JoinActivityResultVO joinActivity(String activityName, long playerId, int times) {
         ActivityDTO activityDTO = ActivityService.getByName(activityName);
         return activityDTO.getActivityType().getService()
-                .joinActivity(activityDTO, PlayerCache.getPlayerById(playerId));
+                .joinActivity(activityDTO, PlayerCache.getPlayerById(playerId), times);
     }
 
     /**

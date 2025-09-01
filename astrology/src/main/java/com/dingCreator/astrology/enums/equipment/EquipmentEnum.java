@@ -775,10 +775,10 @@ public enum EquipmentEnum {
             new ExtraBattleProcessTemplate() {
                 @Override
                 public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
-                    BattleDTO from = battleEffect.getFrom();
                     BattleDTO tar = battleEffect.getTar();
                     StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     long extraDamage = Math.round(tar.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition() * 0.03);
+                    extraDamage = Math.min(100000, extraDamage);
                     battleEffect.getDamage().addAndGet(extraDamage);
                     builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【极道】被触发，额外造成").append(extraDamage).append("点伤害");
@@ -900,7 +900,8 @@ public enum EquipmentEnum {
                     StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                     builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【兰芽短浸】被触发");
-                    BuffUtil.addBuff(from, tar, new BuffDTO(EffectTypeEnum.DODGE, "", 0.35F), 2, builder);
+                    BuffUtil.addBuff(from, tar, new BuffDTO(EffectTypeEnum.DODGE, "兰芽短浸", 0.35F,
+                            BuffOverrideStrategyEnum.IGNORE), 2, builder);
                 }
             }
     ),

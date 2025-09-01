@@ -1,5 +1,6 @@
 package com.dingCreator.astrology.dto.battle;
 
+import com.dingCreator.astrology.enums.BattleTypeEnum;
 import com.dingCreator.astrology.enums.EffectTypeEnum;
 import com.dingCreator.astrology.enums.FieldEffectEnum;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
@@ -60,6 +61,10 @@ public class BattleFieldDTO implements Serializable {
      * 插入结算
      */
     private List<ExtraBattleProcessTemplate> extraBattleProcessTemplateList;
+    /**
+     * 战斗类型
+     */
+    private BattleTypeEnum battleTypeEnum;
 
     public BattleResultVO startBattle() {
         battleMsg = new ArrayList<>(maxRound + 2);
@@ -106,13 +111,7 @@ public class BattleFieldDTO implements Serializable {
         BattleResultVO response = new BattleResultVO();
         response.setInfo(battleMsg);
         response.setRoundRecordList(roundRecordList);
-        if (initiatorAliveNum > recipientAliveNum) {
-            response.setBattleResult(BattleResultVO.BattleResult.WIN);
-        } else if (initiatorAliveNum == recipientAliveNum) {
-            response.setBattleResult(BattleResultVO.BattleResult.DRAW);
-        } else {
-            response.setBattleResult(BattleResultVO.BattleResult.LOSE);
-        }
+        response.setBattleResult(battleTypeEnum.getResultJudgeFunc().apply(initiatorAliveNum, recipientAliveNum));
         return response;
     }
 
