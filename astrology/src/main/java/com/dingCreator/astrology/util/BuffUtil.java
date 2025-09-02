@@ -288,12 +288,17 @@ public class BuffUtil {
     }
 
     /**
-     * 计算无敌
+     * 计算护盾
      *
      * @param battleEffect 战斗信息包装
-     * @return 是否无敌
+     * @return 是否抵挡了伤害
      */
     public static boolean calInvincible(BattleEffectDTO battleEffect) {
+        if (battleEffect.getFrom().equals(battleEffect.getTar())
+                || battleEffect.getDamageRate().compareTo(BigDecimal.ZERO) == 0) {
+            // 不阻挡来源于自己或者没有伤害的技能
+            return false;
+        }
         List<BattleBuffDTO> invincibleBuffList = battleEffect.getTar().getBuffMap().get(EffectTypeEnum.TIMES_SHIELD);
         if (CollectionUtil.isNotEmpty(invincibleBuffList)) {
             BattleBuffDTO buff = invincibleBuffList.stream().min(Comparator.comparing(BattleBuffDTO::getRound)).orElse(null);
@@ -306,6 +311,8 @@ public class BuffUtil {
                     --times;
                     if (times == 0) {
                         battleEffect.getTar().getBuffMap().get(EffectTypeEnum.TIMES_SHIELD).remove(buff);
+                        battleEffect.getBattleRound().getBattleField().getExtraBattleProcessTemplateList()
+                                .forEach(ext -> ext.timesShieldBroken(buff.getBuffDTO().getBuffName(), battleEffect));
                     } else {
                         buff.getBuffDTO().setValue(times);
                     }

@@ -266,6 +266,15 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
         }
     }
 
+    /**
+     * 次数盾破碎
+     */
+    public final void executeTimesShieldBroken(String shieldName, BattleEffectDTO battleEffect) {
+        if (effect()) {
+            timesShieldBroken(shieldName, battleEffect);
+        }
+    }
+
     // 以下为钩子方法
 
     /**
@@ -444,6 +453,12 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
      * @param battleEffect 单个技能单个目标的战斗效果
      */
     public void afterMeDamage(BattleEffectDTO battleEffect) {
+    }
+
+    /**
+     * 次数盾破碎
+     */
+    public void timesShieldBroken(String shieldName, BattleEffectDTO battleEffect) {
     }
 
     /**

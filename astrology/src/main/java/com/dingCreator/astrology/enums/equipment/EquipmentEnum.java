@@ -11,6 +11,7 @@ import com.dingCreator.astrology.enums.EquipmentSuitEnum;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 import com.dingCreator.astrology.enums.exception.EquipmentExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
+import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.util.BattleUtil;
 import com.dingCreator.astrology.util.BuffUtil;
@@ -984,10 +985,116 @@ public enum EquipmentEnum {
                 }
             }
     ),
+    EQUIPMENT_415(415L, "星海环遥", "仁慈的星神X给予有缘人畅游星海的宝物，保护他们免受星海的侵蚀"
+            + "\n隐藏技能：星游皎夜"
+            + "\n战斗开始时获得完全抵挡一次伤害的星源护盾，护盾在抵挡一次伤害后碎裂，溢出能量碎屑在星源护盾破碎期间内提升自身20%攻击与20%法强，" +
+            "且有10%概率使当前攻击暴击伤害翻倍，星源护盾破碎15回合后重新生成",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 2500L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 2500L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DODGE, 450L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 0.7F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 450L)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.JEWELRY,
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeBattle(BattleFieldDTO battleField) {
+                    StringBuilder builder = new StringBuilder("※")
+                            .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的宝物技能【星游皎夜】被触发");
+                    RuleUtil.addRule(this.getOwner(), EffectTypeEnum.TIMES_SHIELD, "星源护盾", 1L, builder);
+                    battleField.getBattleMsg().add(builder.toString());
+                }
 
-    EQUIPMENT_500(500L, "彼岸·净天无涯",
-            "陪伴邪修长大的魔剑——天无涯的完全形态，四大魔器之初，零号魔器——天喑无道上掉落的碎屑打造的仿制品，拥有同源于天喑无道的力量，除开本源之外，" +
-                    "其本体由无垠之精——一种域外神铁打造而成\n隐藏技能\n神·摩诃无量：战斗开始时提升自身攻击力150% 防御力20% 穿甲50%持续12回合",
+                @Override
+                public void beforeMyRound(BattleRoundDTO battleRound) {
+                    BattleDTO owner = this.getOwner();
+                    Map<String, Integer> markMap = owner.getMarkMap();
+                    if (markMap.containsKey("破碎的星源护盾")) {
+                        StringBuilder builder = battleRound.getBuilder().append("※");
+                        int round = markMap.get("破碎的星源护盾") - 1;
+                        if (round > 0) {
+                            markMap.put("破碎的星源护盾", round);
+                            BuffUtil.addBuff(owner, owner, new BuffDTO(EffectTypeEnum.ATK, 0.2F), 0, builder);
+                            BuffUtil.addBuff(owner, owner, new BuffDTO(EffectTypeEnum.MAGIC_ATK, 0.2F), 0, builder);
+                        } else {
+                            markMap.remove("破碎的星源护盾");
+                            builder.append(owner.getOrganismInfoDTO().getOrganismDTO().getName()).append("的宝物技能【星游皎夜】被触发");
+                            RuleUtil.addRule(owner, EffectTypeEnum.TIMES_SHIELD, "星源护盾", 1L, builder);
+                        }
+                    }
+                }
+
+                @Override
+                public void timesShieldBroken(String shieldName, BattleEffectDTO battleEffect) {
+                    if ("星源护盾".equals(shieldName)) {
+                        this.getOwner().getMarkMap().put("破碎的星源护盾", 15);
+                    }
+                }
+
+                @Override
+                public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
+                    if (this.getOwner().getMarkMap().containsKey("破碎的星源护盾")
+                            && battleEffect.getCritical()
+                            && RandomUtil.isHit(0.1F)) {
+                        battleEffect.getBattleRound().getBuilder().append("，")
+                                .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                                .append("的宝物技能【星游皎夜】被触发，暴击伤害翻倍");
+                    }
+                }
+            }
+    ),
+    EQUIPMENT_416(416L, "玦", "无名的“玦”，其形象便是“玦”字本身，对使用者的身体能力有着超乎想象的提升。闪耀在星海的废墟之上，歌颂着无名英雄的赞歌"
+            + "\n隐藏技能：玦"
+            + "\n自身行动后积攒一层气力，气力达到十层时进入爆发状态对敌方全体造成一次800%物理伤害，后续十回合开始时持续消耗气力，" +
+            "每消耗一层气力使自身攻击力提升30%，防御提升30%持续一回合。爆发状态结束后气力重新累计",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.35F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 1.8F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 1000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.PENETRATE, 0.1F)
+            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.JEWELRY,
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void afterMyBehavior(BattleEffectDTO battleEffect) {
+                    Map<String, Integer> markMap = this.getOwner().getMarkMap();
+                    OrganismDTO organism = this.getOwner().getOrganismInfoDTO().getOrganismDTO();
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+                    int power = markMap.getOrDefault("气力-玦", 0);
+
+                    builder.append("，").append(organism.getName()).append("的宝物技能【玦】被触发");
+                    if (markMap.getOrDefault("爆发-玦", 0) == 0) {
+                        power++;
+                        markMap.put("气力-玦", power);
+                        builder.append("，积攒了一层气力，当前气力值：").append(power);
+                        if (power >= 10) {
+                            builder.append("，玦进入爆发状态，并对敌方全体造成一次800%物理伤害");
+                            battleEffect.getEnemy().forEach(tar -> {
+                                long atk = BattleUtil.getLongProperty(organism.getAtk(),
+                                        OrganismPropertiesEnum.ATK.getFieldName(), this.getOwner(),
+                                        battleEffect.getBattleRound().getBattleField());
+                                BattleUtil.doDamage(this.getOwner(), tar, DamageTypeEnum.ATK, 800 * atk, battleEffect.getBattleRound());
+                            });
+                            markMap.put("爆发-玦", 1);
+                        }
+                    } else {
+                        markMap.put("气力-玦", power - 1);
+                        builder.append("，消耗了一层气力，当前气力值：").append(power);
+                        BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.ATK, 0.3F), 1, builder);
+                        BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DEF, 0.3F), 1, builder);
+                        if (power <= 0) {
+                            builder.append("，玦进入恢复状态");
+                            markMap.put("爆发-玦", 0);
+                        }
+                    }
+                }
+            }
+    ),
+
+    EQUIPMENT_500(500L, "彼岸·净天无涯", "陪伴邪修长大的魔剑——天无涯的完全形态，四大魔器之初，"
+            + "零号魔器——天喑无道上掉落的碎屑打造的仿制品，拥有同源于天喑无道的力量，除开本源之外，其本体由无垠之精——一种域外神铁打造而成"
+            + "\n隐藏技能：神·摩诃无量"
+            + "\n战斗开始时提升自身攻击力150% 防御力20% 穿甲50%持续12回合",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 5500L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 2100L, 0.2F),
@@ -1010,9 +1117,9 @@ public enum EquipmentEnum {
                 }
             }
     ),
-    EQUIPMENT_501(501L, "星神·沧白之祈",
-            "审判双神之一——星神.沧白之祈的分身， 在获得了其认可之后获得的星神权能\n" +
-                    "隐藏技能\n明神：沧白之祈每三回合降下神谕，我的行动前解除自身所处的异常状态和弱化状态，并提升自身40%闪避持续2回合",
+    EQUIPMENT_501(501L, "星神·沧白之祈", "审判双神之一——星神·沧白之祈的分身，在获得了其认可之后获得的星神权能"
+            + "\n隐藏技能：明神"
+            + "\n沧白之祈每三回合降下神谕，我的行动前解除自身所处的异常状态和弱化状态，并提升自身40%闪避持续2回合",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 7000L, 0.5F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 7000L, 0.5F),
@@ -1026,7 +1133,6 @@ public enum EquipmentEnum {
                     Map<String, Integer> markMap = this.getOwner().getMarkMap();
                     if (!markMap.containsKey("沧白之祈") || markMap.get("沧白之祈") == 0) {
                         markMap.put("沧白之祈", 3);
-                        BattleDTO from = battleEffect.getFrom();
                         StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                         BuffUtil.clearAbnormalBuff(this.getOwner(), builder);
                         BuffUtil.clearInactiveBuff(this.getOwner(), builder);
@@ -1038,11 +1144,12 @@ public enum EquipmentEnum {
                 }
             }
     ),
-    EQUIPMENT_502(502L, "寒星·圣者之冠",
-            "以冰海沉星为原型，并针对其特性打造出来的神煅之器，为古圣城圣者权位与力量的标志。\n" +
-                    "传闻圣者之冠具有锁定冰海沉星所在位置的能力，古圣城历代圣者都有着寻找冰海沉星的记录，但他们最终都无功而返或身死道消。\n" +
-                    "隐藏技能\n圣者尊崇·零度法则:装备者受到的伤害减少20%，攻击命中后使敌方速度降低15%持续一回合。" +
-                    "神煅加护 寒星之赐\n法抗+20%，法强+15%",
+    EQUIPMENT_502(502L, "寒星·圣者之冠", "以冰海沉星为原型，并针对其特性打造出来的神煅之器，为古圣城圣者权位与力量的标志。"
+            + "传闻圣者之冠具有锁定冰海沉星所在位置的能力，古圣城历代圣者都有着寻找冰海沉星的记录，但他们最终都无功而返或身死道消"
+            + "\n隐藏技能：圣者尊崇·零度法则"
+            + "\n装备者受到的伤害减少20%，攻击命中后使敌方速度降低15%持续一回合"
+            + "\n神煅加护 寒星之赐"
+            + "\n法抗+20%，法强+15%",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 10000L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 0.2F),
@@ -1072,12 +1179,56 @@ public enum EquipmentEnum {
                 }
             }
     ),
+    EQUIPMENT_503(503L, "M10·幻水冥神铠", ""
+            + "\n隐藏技能：腐沼为岸"
+            + "\n战斗开始时获得免伤5%持续整场战斗，与“M10·覆海冥神戟”和“M10·崇渊荡神珠”同时装备时修改为——战斗开始时获得10%免伤持续整场，"
+            + "且有5%概率在受到攻击后额外提高50%免伤持续两回合"
+            + "\n神煅加护：冥水寒荫"
+            + "\n防御+12% 法抗+12%",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 8000L, 0.12F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 8000L, 0.12F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 280000L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 650L)
+            ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.ARMOR,
+            new ExtraBattleProcessTemplate() {
 
-    EQUIPMENT_600(600L, "冰海沉星",
-            "传闻，死烬之渊的深处是一片蔚蓝的海洋，而在这片海域的中央，沉没着一颗璀璨的明星。" +
-                    "无人知道它真正的样貌为何，因为那些不顾死活而觊觎这颗明珠的人们，已经全部死在了它可怕的凛寒之下" +
-                    "\n隐藏技能\n永冻世界：攻击命中时提升自身30%法伤持续一回合，若该次攻击未命中，则提升自身30%命中（持续一回合）后对敌方全体造成冻结持续一回合" +
-                    "\n法则之力\n零度法则：进入战斗后我方全体成员提升20%速度，敌方全体成员降低20%速度，且我方成员对冻结状态敌人造成的伤害额外提升50%",
+            }
+    ),
+//1.等级：神迹级 限制等级：lv61
+//    名称：
+//    防御+8000 法抗+8000 血量+280000 速度+650
+//
+//
+//
+//            2.等级：通玄级 限制等级：lv61
+//    名称：M10.覆海冥神戟
+//    攻击+7500 法强+7500 暴击+35% 命中+3100
+//    冥水寒荫∶攻击+12% 法强+12%
+//    隐藏技能：唤潮咏歌
+//    回合开始时装备者造成的伤害提高8%持续一回合，与“M10.幻水冥神铠”和“M10.崇渊荡神珠”同时装备时修改为——回合开始时装备者造成的伤害提高15%持续一回合，且全部攻击命中敌方单位时，使敌方吸血降低30%持续一回合。
+//            3.等级：通玄级 限制等级lv61
+//    名称∶M10.崇渊荡神珠
+//    暴伤+150% 暴击+10% 穿甲+15% 法穿+15%
+//    冥水寒荫∶速度+15%
+//    隐藏技能∶镜河揽月
+//    回合开始时提高8%攻击与8%法强持续一回合 ，与“M10.覆海冥神戟”和“M10.幻水冥神铠”同时装备时修改为——回合开始时提高15%攻击与15%法强持续一回合，全部攻击命中敌方单位时使敌方攻击与法强降低15%持续一回合，且在攻击命中后有15%概率使敌方陷入“溺水”异常持续一回合。
+//    溺水∶造成的物理与法术伤害减少30%，且每回合扣除自身最大血量的8%。
+
+//    名称：中天枢页 （宝物）
+//    限制等级：lv60
+//    属性：攻击+5500 法强+5500 血量+100000 防御+2000 法抗+2000 命中+880 闪避+880 速度+880 蓝量+180 暴击+25% 暴伤+60% 穿甲+10% 法穿+10%
+//    隐藏技能：博天万法
+//    每回合开始时提高自身25%攻击，25%法强，25%命中持续一回合。回合结束时提高自身25%防御，25%法抗25%闪避持续一回合。每回合开始时回复自身15点蓝量。
+//    神煅加护：寰宇皆知
+//    获得“博识”状态，攻击命中时有70%概率识破敌人弱点使该次伤害提升至150%，受到攻击时有70%概率看破敌人的攻击，使该次伤害降低至80%。
+//    描述：幻梦星海，传说中存在着世界所知真理的地方，为无数学者追崇和向往。“去寻找吧，在这片星海之中，有着你所追求的一切。这其中充满着无数的危险与挑战，你可能会受伤更可能会死亡，但当你真正踏足了中天的土地，你会发现，真理一直在那里等待着你。”——圣星城.博天翁
+
+
+    EQUIPMENT_600(600L, "冰海沉星", "传闻，死烬之渊的深处是一片蔚蓝的海洋，而在这片海域的中央，沉没着一颗璀璨的明星。" +
+            "无人知道它真正的样貌为何，因为那些不顾死活而觊觎这颗明珠的人们，已经全部死在了它可怕的凛寒之下" +
+            "\n隐藏技能\n永冻世界：攻击命中时提升自身30%法伤持续一回合，若该次攻击未命中，则提升自身30%命中（持续一回合）后对敌方全体造成冻结持续一回合" +
+            "\n法则之力\n零度法则：进入战斗后我方全体成员提升20%速度，敌方全体成员降低20%速度，且我方成员对冻结状态敌人造成的伤害额外提升50%",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 15000L, 0.3F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 1.0F),

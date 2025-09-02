@@ -48,6 +48,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -875,6 +877,17 @@ public class BattleUtil {
     }
 
     public static void doDamage(BattleEffectDTO battleEffect) {
+        doDamage(battleEffect, true);
+    }
+
+    public static void doDamage(BattleDTO from, BattleDTO tar, DamageTypeEnum damageTypeEnum, Long damage,
+                                BattleRoundDTO round) {
+        BattleEffectDTO battleEffect = new BattleEffectDTO();
+        battleEffect.setFrom(from);
+        battleEffect.setTar(tar);
+        battleEffect.setDamageTypeEnum(damageTypeEnum);
+        battleEffect.setDamage(new AtomicLong(damage));
+        battleEffect.setBattleRound(round);
         doDamage(battleEffect, true);
     }
 
