@@ -1192,28 +1192,56 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 650L)
             ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.ARMOR,
             new ExtraBattleProcessTemplate() {
-
+                @Override
+                public void beforeBattle(BattleFieldDTO battleField) {
+                    StringBuilder builder = new StringBuilder("※")
+                            .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的防具技能【腐沼为岸】被触发");
+                    float rate = EquipmentSuitEnum.getByEquipmentId(503L).getEquipmentSuit()
+                            .suitNum(this.getOwner().getOrganismInfoDTO().getEquipmentBarDTO()) == 3 ? -0.1F : -0.05F;
+                    BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DAMAGE, "腐沼为岸", rate), builder);
+                    battleField.getBattleMsg().add(builder.toString());
+                }
             }
     ),
-//1.等级：神迹级 限制等级：lv61
-//    名称：
-//    防御+8000 法抗+8000 血量+280000 速度+650
-//
-//
-//
-//            2.等级：通玄级 限制等级：lv61
-//    名称：M10.覆海冥神戟
-//    攻击+7500 法强+7500 暴击+35% 命中+3100
-//    冥水寒荫∶攻击+12% 法强+12%
-//    隐藏技能：唤潮咏歌
-//    回合开始时装备者造成的伤害提高8%持续一回合，与“M10.幻水冥神铠”和“M10.崇渊荡神珠”同时装备时修改为——回合开始时装备者造成的伤害提高15%持续一回合，且全部攻击命中敌方单位时，使敌方吸血降低30%持续一回合。
-//            3.等级：通玄级 限制等级lv61
-//    名称∶M10.崇渊荡神珠
-//    暴伤+150% 暴击+10% 穿甲+15% 法穿+15%
-//    冥水寒荫∶速度+15%
-//    隐藏技能∶镜河揽月
-//    回合开始时提高8%攻击与8%法强持续一回合 ，与“M10.覆海冥神戟”和“M10.幻水冥神铠”同时装备时修改为——回合开始时提高15%攻击与15%法强持续一回合，全部攻击命中敌方单位时使敌方攻击与法强降低15%持续一回合，且在攻击命中后有15%概率使敌方陷入“溺水”异常持续一回合。
-//    溺水∶造成的物理与法术伤害减少30%，且每回合扣除自身最大血量的8%。
+    EQUIPMENT_504(504L, "M10·覆海冥神戟", ""
+            + "\n隐藏技能：唤潮咏歌"
+            + "\n回合开始时装备者造成的伤害提高8%持续一回合，与“M10·幻水冥神铠”和“M10·崇渊荡神珠”同时装备时修改为——回合开始时装备者造成的伤害提高15%持续一回合，"
+            + "且全部攻击命中敌方单位时，使敌方吸血降低30%持续一回合"
+            + "\n神煅加护：冥水寒荫"
+            + "\n攻击+12% 法强+12%",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 7500L, 0.12F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 7500L, 0.12F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.35F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 3100L)
+            ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.WEAPON,
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeMyRound(BattleRoundDTO battleRound) {
+                    StringBuilder builder = battleRound.getBuilder();
+                    builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的防具技能【腐沼为岸】被触发");
+                }
+            }
+    ),
+    EQUIPMENT_505(505L, "M10·崇渊荡神珠", ""
+            + "\n隐藏技能∶镜河揽月"
+            + "\n回合开始时提高8%攻击与8%法强持续一回合，与“M10·覆海冥神戟”和“M10·幻水冥神铠”同时装备时修改为——回合开始时提高15%攻击与15%法强持续一回合，"
+            + "全部攻击命中敌方单位时使敌方攻击与法强降低15%持续一回合，且在攻击命中后有15%概率使敌方陷入“溺水”异常持续一回合"
+            + "\n神煅加护：冥水寒荫"
+            + "\n速度+15%",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 1.5F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.1F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.PENETRATE, 0.15F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_PENETRATE, 0.15F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 0.15F)
+            ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.JEWELRY,
+            new ExtraBattleProcessTemplate() {
+
+    }
+    ),
 
 //    名称：中天枢页 （宝物）
 //    限制等级：lv60
@@ -1467,10 +1495,10 @@ public enum EquipmentEnum {
                                 break;
                             case 2:
                                 builder.append("，").append(name).append("触发“邪火”");
-                                BuffDTO buff20 = new BuffDTO(EffectTypeEnum.DAMAGE, "五行毒素", 0.3F,
+                                BuffDTO buff20 = new BuffDTO(EffectTypeEnum.DAMAGE, "五行毒素", -0.3F,
                                         BuffOverrideStrategyEnum.NONINTERFERENCE);
                                 BuffUtil.addBuff(this.getOwner(), b, buff20, builder);
-                                BuffDTO buff21 = new BuffDTO(EffectTypeEnum.MAGIC_DAMAGE, "五行毒素", 0.3F,
+                                BuffDTO buff21 = new BuffDTO(EffectTypeEnum.MAGIC_DAMAGE, "五行毒素", -0.3F,
                                         BuffOverrideStrategyEnum.NONINTERFERENCE);
                                 BuffUtil.addBuff(this.getOwner(), b, buff21, builder);
                                 break;

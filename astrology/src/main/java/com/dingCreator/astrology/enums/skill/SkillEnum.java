@@ -327,13 +327,10 @@ public enum SkillEnum implements Serializable {
                     .map(OrganismInfoDTO::getOrganismDTO)
                     .mapToInt(OrganismDTO::getRank).max().orElse(0);
             if (fromRank >= highestTarRank) {
-                BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DAMAGE, "", -0.2F),
-                        1000, builder);
-                BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.ATK, "", 0.24F),
-                        1000, builder);
+                BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DAMAGE, -0.2F), builder);
+                BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.ATK, 0.24F), builder);
             } else {
-                BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DAMAGE, "", 0.15F),
-                        1000, builder);
+                BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DAMAGE, -0.15F), builder);
             }
             battleField.getBattleMsg().add(builder.toString());
         }

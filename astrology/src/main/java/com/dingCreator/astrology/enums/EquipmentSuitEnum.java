@@ -40,6 +40,11 @@ public enum EquipmentSuitEnum {
             return src;
         }
     }),
+    SUIT_503_504_505("", new EquipmentSuit(
+            EquipmentEnum.EQUIPMENT_503.getId(),
+            EquipmentEnum.EQUIPMENT_504.getId(),
+            EquipmentEnum.EQUIPMENT_505.getId()
+    )),
     ;
     private final String suitEffectName;
     private final EquipmentSuit equipmentSuit;
@@ -49,6 +54,10 @@ public enum EquipmentSuitEnum {
     static {
         EQUIPMENT_ENUM_SUIT_MAP.put(EquipmentEnum.EQUIPMENT_413.getId(), SUIT_413_414);
         EQUIPMENT_ENUM_SUIT_MAP.put(EquipmentEnum.EQUIPMENT_414.getId(), SUIT_413_414);
+
+        EQUIPMENT_ENUM_SUIT_MAP.put(EquipmentEnum.EQUIPMENT_503.getId(), SUIT_503_504_505);
+        EQUIPMENT_ENUM_SUIT_MAP.put(EquipmentEnum.EQUIPMENT_504.getId(), SUIT_503_504_505);
+        EQUIPMENT_ENUM_SUIT_MAP.put(EquipmentEnum.EQUIPMENT_505.getId(), SUIT_503_504_505);
     }
 
     @Data
