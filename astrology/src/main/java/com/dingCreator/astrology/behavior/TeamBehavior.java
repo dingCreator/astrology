@@ -49,6 +49,9 @@ public class TeamBehavior {
         if (Objects.isNull(teamDTO)) {
             throw TeamExceptionEnum.TEAM_NOT_EXIST.getException();
         }
+        if (PlayerCache.getPlayerById(initiatorId).getTeam()) {
+            throw TeamExceptionEnum.ALREADY_IN_TEAM.getException();
+        }
         PlayerDTO initiator = PlayerCache.getPlayerById(initiatorId).getPlayerDTO();
         PlayerDTO captain = PlayerCache.getPlayerById(teamId).getPlayerDTO();
 
@@ -57,9 +60,6 @@ public class TeamBehavior {
         }
         if (!PlayerStatusEnum.FREE.getCode().equals(captain.getStatus())) {
             throw TeamExceptionEnum.TEAM_NOT_FREE.getException();
-        }
-        if (!MapUtil.getNowLocation(initiator.getId()).equals(MapUtil.getNowLocation(captain.getId()))) {
-            throw TeamExceptionEnum.NOT_IN_SAME_MAP.getException();
         }
         if (teamDTO.getMembers().size() >= Constants.TEAM_MEMBER_LIMIT) {
             throw TeamExceptionEnum.TEAM_MEMBER_OVER_LIMIT.getException();
