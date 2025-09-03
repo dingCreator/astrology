@@ -129,8 +129,11 @@ public class WorldBossService {
                         .getHpWithAddition()).sum();
                 // 开打
                 BattleUtil.battlePVE(captainId, new ArrayList<>(prop.getMonsterMap().values()), true, false,
-                        () -> prop.getMonsterMap().forEach((key, value) ->
-                                monsterService.updateHpById(key, value.getOrganismDTO().getHp()))
+                        () -> prop.getMonsterMap().forEach((key, value) -> {
+                            monsterService.updateHpById(key, value.getOrganismDTO().getHp());
+                            // 蓝回满
+                            value.getOrganismDTO().setMpWithAddition(value.getOrganismDTO().getMaxMpWithAddition());
+                        })
                 );
                 // 消耗令牌
                 useToken(playerIdList);
