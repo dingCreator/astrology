@@ -97,6 +97,8 @@ public class RuleUtil {
                 --times;
                 if (times == 0) {
                     battleEffect.getTar().getRuleList().remove(invincibleRule);
+                    battleEffect.getBattleRound().getBattleField().getExtraBattleProcessTemplateList()
+                            .forEach(ext -> ext.timesShieldBroken(invincibleRule.getRuleName(), battleEffect));
                 } else {
                     invincibleRule.setVal(times);
                 }

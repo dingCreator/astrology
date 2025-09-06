@@ -34,6 +34,7 @@ public enum PlayerExceptionEnum {
     NOT_ENOUGH_MIN_SHUI_HE_XI(Constants.PLAYER_EXCEPTION_PREFIX + "016", "冥水河隙不足"),
     NOT_ENOUGH_ORIGIN_DRAGON_BALL(Constants.PLAYER_EXCEPTION_PREFIX + "017", "起源龙珠不足"),
     NOT_ENOUGH_TRIAL_AFTERGLOW(Constants.PLAYER_EXCEPTION_PREFIX + "018", "审判余晖不足"),
+    NOT_ENOUGH_SECRET_SCROLL(Constants.PLAYER_EXCEPTION_PREFIX + "019", "天枢密卷不足"),
     ;
 
     private final String code;

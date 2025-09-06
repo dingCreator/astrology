@@ -52,6 +52,11 @@ public enum AssetTypeEnum {
             (assetList, cost) -> validateCache(assetList, "trialAfterglow", cost),
             PlayerExceptionEnum.NOT_ENOUGH_TRIAL_AFTERGLOW, false
     ),
+
+    SECRET_SCROLL("secretScroll", "天枢密卷", "天枢密卷", "天枢密卷，可用于商店购买商品",
+            (assetList, cost) -> validateCache(assetList, "secretScroll", cost),
+            PlayerExceptionEnum.NOT_ENOUGH_TRIAL_AFTERGLOW, false
+    ),
     ;
 
     private final String code;

@@ -186,6 +186,9 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
 
         if (fromMe) {
             ifMeNotHit(battleEffect);
+            if (toEnemy) {
+                ifMeNotHitEnemy(battleEffect);
+            }
         } else if (fromOur) {
             ifOurNotHit(battleEffect);
         } else if (fromEnemy) {
@@ -263,6 +266,15 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
     public final void executeSpecialExecute(Object obj) {
         if (effect()) {
             specialExecute(obj);
+        }
+    }
+
+    /**
+     * 次数盾破碎
+     */
+    public final void executeTimesShieldBroken(String shieldName, BattleEffectDTO battleEffect) {
+        if (effect()) {
+            timesShieldBroken(shieldName, battleEffect);
         }
     }
 
@@ -406,6 +418,9 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
     public void ifMeNotHit(BattleEffectDTO battleEffect) {
     }
 
+    public void ifMeNotHitEnemy(BattleEffectDTO battleEffect){
+    }
+
     public void ifOurNotHit(BattleEffectDTO battleEffect) {
     }
 
@@ -444,6 +459,12 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
      * @param battleEffect 单个技能单个目标的战斗效果
      */
     public void afterMeDamage(BattleEffectDTO battleEffect) {
+    }
+
+    /**
+     * 次数盾破碎
+     */
+    public void timesShieldBroken(String shieldName, BattleEffectDTO battleEffect) {
     }
 
     /**

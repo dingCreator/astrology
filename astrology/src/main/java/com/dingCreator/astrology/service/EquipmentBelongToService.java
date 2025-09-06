@@ -90,6 +90,7 @@ public class EquipmentBelongToService {
                         new QueryWrapper<EquipmentBelongTo>()
                                 .eq(EquipmentBelongTo.BELONG_TO, belongTo)
                                 .eq(EquipmentBelongTo.BELONG_TO_ID, belongToId)
+                                .gt(EquipmentBelongTo.TOTAL_CNT, 0)
                                 .in(CollectionUtil.isNotEmpty(ids), EquipmentBelongTo.EQUIPMENT_ID, ids)
                 ));
         return belongToList.stream().map(query -> {

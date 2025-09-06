@@ -336,6 +336,15 @@ public class DungeonService {
             DungeonRecordService.getInstance().insertOrUpdate(playerIds, dungeonId, LocalDateTime.now(), floor,
                     DungeonExploreStatusEnum.COMPLETE.getCode());
             // 发奖
+            // 直通奖励
+            if (floor == -1) {
+                List<LootQueryDTO> dungeonLootList
+                        = LootService.getInstance().getByBelongToId(LootBelongToEnum.DUNGEON_STRAIGHT_PASS.getBelongTo(), dungeonId);
+                if (CollectionUtil.isNotEmpty(dungeonLootList)) {
+                    totalLootMap.putAll(LootUtil.sendLoot(dungeonLootList.get(0), playerIds));
+                }
+            }
+            // 探索完成奖励
             List<LootQueryDTO> dungeonLootList
                     = LootService.getInstance().getByBelongToId(LootBelongToEnum.DUNGEON.getBelongTo(), dungeonId);
             if (CollectionUtil.isNotEmpty(dungeonLootList)) {
@@ -377,7 +386,12 @@ public class DungeonService {
             dungeon.setPassRate(passRate);
             sqlSession.getMapper(DungeonMapper.class).insert(dungeon);
 
+            // 通关奖励
             LootService.getInstance().createLoot(LootBelongToEnum.DUNGEON.getBelongTo(), dungeon.getId(), setting.getDungeonLoot());
+            // 直通奖励
+            LootService.getInstance().createLoot(LootBelongToEnum.DUNGEON_STRAIGHT_PASS.getBelongTo(), dungeon.getId(),
+                    setting.getStraightPassLoot());
+            // 层奖励
             setting.getFloorList().forEach(floor -> {
                 LootService.getInstance().createLoot(LootBelongToEnum.DUNGEON_FLOOR.getBelongTo(),
                         dungeon.getId(), floor.getFloorLoot());
