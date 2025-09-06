@@ -2610,6 +2610,107 @@ public enum SkillEnum implements Serializable {
                     count, battleRound.getOur(), 0, battleRound.getBuilder());
         }
     }),
+    SKILL_1085(1085L, "寰宇皆知",
+            "获得“博识”状态，攻击命中时有70%概率识破敌人弱点使该次伤害提升至150%，受到攻击时有70%概率看破敌人的攻击，使该次伤害降低至80%",
+            Constants.NONE, false, new ExtraBattleProcessTemplate() {
+        @Override
+        public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
+            if (RandomUtil.isHit(0.7F)) {
+                StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+                builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                        .append("识破敌人弱点，伤害提升至150%");
+                battleEffect.getDamage().set(Math.round(battleEffect.getDamage().get() * 1.5F));
+                if (SKILL_1086.equals(battleEffect.getNowSkill())) {
+                    SKILL_1086.getGlobalExtraProcess().executeSpecialExecute(battleEffect);
+                }
+                if (SKILL_1087.equals(battleEffect.getNowSkill())) {
+                    SKILL_1087.getGlobalExtraProcess().executeSpecialExecute(battleEffect);
+                }
+                if (SKILL_1089.equals(battleEffect.getNowSkill())) {
+                    long damage = BattleUtil.getDamage(this.getOwner(), battleEffect.getTar(), battleEffect.getBattleRound(),
+                            new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 17F));
+                    BattleUtil.doDamage(this.getOwner(), battleEffect.getTar(), DamageTypeEnum.ATK, damage, battleEffect.getBattleRound());
+                }
+                if (this.getOwner().getMarkMap().containsKey("众法守相")) {
+                    BuffUtil.addBuff(this.getOwner(), this.getOwner(),
+                            new BuffDTO(EffectTypeEnum.ATK, "众法守相", 0.25F, BuffOverrideStrategyEnum.ROUND_PLUS),
+                            3, builder);
+                    BuffUtil.addBuff(this.getOwner(), this.getOwner(),
+                            new BuffDTO(EffectTypeEnum.MAGIC_ATK, "众法守相", 0.25F, BuffOverrideStrategyEnum.ROUND_PLUS),
+                            3, builder);
+                }
+            }
+        }
+
+        @Override
+        public void beforeMeDamage(BattleEffectDTO battleEffect) {
+            if (RandomUtil.isHit(0.7F)) {
+                battleEffect.getBattleRound().getBuilder().append("，")
+                        .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                        .append("看破敌人的攻击，伤害降低至80%");
+                battleEffect.getDamage().set(Math.round(battleEffect.getDamage().get() * 0.8F));
+            }
+        }
+    }),
+    SKILL_1086(1086L, "以理服人", "造成750%物理伤害，若命中敌人“弱点”则使敌方眩晕一回合", Constants.NONE, 100L,
+            new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 7.5F),
+            new ThisBehaviorExtraBattleProcessTemplate() {
+            },
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void specialExecute(Object obj) {
+                    BattleEffectDTO battleEffect = (BattleEffectDTO) obj;
+                    AbnormalEnum.AbnormalInput input = AbnormalEnum.AbnormalInput.builder()
+                            .from(battleEffect.getFrom()).tar(battleEffect.getTar()).round(1).build();
+                    AbnormalEnum.VERTIGO.doEffect(input);
+                }
+            }
+    ),
+    SKILL_1087(1087L, "百法缭乱", "造成750%法术伤害，若命中敌人弱点则使敌人陷入“焚毁”与“溺水”持续一回合", Constants.NONE, 100L,
+            new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 7.5F),
+            new ThisBehaviorExtraBattleProcessTemplate() {
+            },
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void specialExecute(Object obj) {
+                    BattleEffectDTO battleEffect = (BattleEffectDTO) obj;
+                    AbnormalEnum.AbnormalInput input = AbnormalEnum.AbnormalInput.builder()
+                            .from(battleEffect.getFrom()).tar(battleEffect.getTar()).round(1).build();
+                    AbnormalEnum.BURN_DOWN.doEffect(input);
+                    AbnormalEnum.DROWNING.doEffect(input);
+                }
+            }
+    ),
+    SKILL_1088(1088L, "众法守相", "提高自身25%攻击 25%法强 25%防御 25%法抗持续三回合，"
+            + "三回合内若看破敌人攻击则提高自身50%攻击 50%法强持续一回合。装备该技能时每回合回复自身10蓝量", Constants.NONE, 100L,
+            new SkillEffectDTO(TargetEnum.ANY_ENEMY), new ThisBehaviorExtraBattleProcessTemplate() {
+        @Override
+        public void ifHit(BattleEffectDTO battleEffect) {
+            BattleDTO from = battleEffect.getFrom();
+            StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+            BuffUtil.addBuff(from, from, new BuffDTO(EffectTypeEnum.ATK, 0.25F), 3, builder);
+            BuffUtil.addBuff(from, from, new BuffDTO(EffectTypeEnum.MAGIC_ATK, 0.25F), 3, builder);
+            BuffUtil.addBuff(from, from, new BuffDTO(EffectTypeEnum.DEF, 0.25F), 3, builder);
+            BuffUtil.addBuff(from, from, new BuffDTO(EffectTypeEnum.MAGIC_DEF, 0.25F), 3, builder);
+            from.getMarkMap().put("众法守相", 3);
+        }
+    }, new ExtraBattleProcessTemplate() {
+        @Override
+        public void beforeMyRound(BattleRoundDTO battleRound) {
+            BattleDTO owner = this.getOwner();
+            if (owner.getMarkMap().containsKey("众法守相")) {
+                int round = owner.getMarkMap().get("众法守相") - 1;
+                if (round <= 1) {
+                    owner.getMarkMap().remove("众法守相");
+                } else {
+                    owner.getMarkMap().put("众法守相", round);
+                }
+            }
+        }
+    }),
+    SKILL_1089(1089L, "万法归一", "造成1700%法术伤害，若识破敌人弱点，则额外造成1700%物理伤害", Constants.NONE, 100L,
+            new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 17F)
+    ),
 
     /*
     被动：偃相归一——太初法则

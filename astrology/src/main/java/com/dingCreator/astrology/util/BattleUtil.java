@@ -709,9 +709,18 @@ public class BattleUtil {
         return battleDTO;
     }
 
+    /**
+     * 计算伤害量
+     *
+     * @param from        来源
+     * @param tar         目标
+     * @param battleRound 战斗轮次
+     * @param skillEffect 技能效果
+     * @return 伤害值
+     */
     public static long getDamage(BattleDTO from, BattleDTO tar, BattleRoundDTO battleRound, SkillEffectDTO skillEffect) {
         return getDamage(BattleEffectDTO.builder().from(from).tar(tar).battleRound(battleRound)
-                .skillEffect(skillEffect).build());
+                .skillEffect(skillEffect).damageRate(BigDecimal.valueOf(skillEffect.getDamageRate())).build());
     }
 
     /**

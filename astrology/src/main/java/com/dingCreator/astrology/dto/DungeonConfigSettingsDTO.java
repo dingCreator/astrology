@@ -18,6 +18,10 @@ public class DungeonConfigSettingsDTO {
      */
     private LootDTO dungeonLoot;
     /**
+     * 直通奖励
+     */
+    private LootDTO straightPassLoot;
+    /**
      * 分层
      */
     private List<DungeonFloor> floorList;

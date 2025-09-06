@@ -5,14 +5,17 @@ import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.battle.*;
 import com.dingCreator.astrology.dto.equipment.EquipmentPropertiesDTO;
 import com.dingCreator.astrology.dto.organism.OrganismDTO;
+import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
 import com.dingCreator.astrology.enums.BuffOverrideStrategyEnum;
 import com.dingCreator.astrology.enums.EffectTypeEnum;
 import com.dingCreator.astrology.enums.EquipmentSuitEnum;
 import com.dingCreator.astrology.enums.OrganismPropertiesEnum;
 import com.dingCreator.astrology.enums.exception.EquipmentExceptionEnum;
 import com.dingCreator.astrology.enums.job.JobEnum;
+import com.dingCreator.astrology.enums.skill.AbnormalEnum;
 import com.dingCreator.astrology.enums.skill.DamageTypeEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
+import com.dingCreator.astrology.enums.skill.TargetEnum;
 import com.dingCreator.astrology.util.BattleUtil;
 import com.dingCreator.astrology.util.BuffUtil;
 import com.dingCreator.astrology.util.RandomUtil;
@@ -988,12 +991,13 @@ public enum EquipmentEnum {
     EQUIPMENT_415(415L, "星海环遥", "仁慈的星神X给予有缘人畅游星海的宝物，保护他们免受星海的侵蚀"
             + "\n隐藏技能：星游皎夜"
             + "\n战斗开始时获得完全抵挡一次伤害的星源护盾，护盾在抵挡一次伤害后碎裂，溢出能量碎屑在星源护盾破碎期间内提升自身20%攻击与20%法强，" +
-            "且有10%概率使当前攻击暴击伤害翻倍，星源护盾破碎15回合后重新生成",
+            "且有50%概率使当前攻击暴击伤害翻倍，星源护盾破碎15回合后重新生成",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 2500L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 2500L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DODGE, 450L),
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 0.7F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.15F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 0.8F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 450L)
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.JEWELRY,
             new ExtraBattleProcessTemplate() {
@@ -1036,7 +1040,7 @@ public enum EquipmentEnum {
                 public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
                     if (this.getOwner().getMarkMap().containsKey("破碎的星源护盾")
                             && battleEffect.getCritical()
-                            && RandomUtil.isHit(0.1F)) {
+                            && RandomUtil.isHit(0.5F)) {
                         battleEffect.getBattleRound().getBuilder().append("，")
                                 .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                                 .append("的宝物技能【星游皎夜】被触发，暴击伤害翻倍");
@@ -1046,11 +1050,11 @@ public enum EquipmentEnum {
     ),
     EQUIPMENT_416(416L, "玦", "无名的“玦”，其形象便是“玦”字本身，对使用者的身体能力有着超乎想象的提升。闪耀在星海的废墟之上，歌颂着无名英雄的赞歌"
             + "\n隐藏技能：玦"
-            + "\n自身行动后积攒一层气力，气力达到十层时进入爆发状态对敌方全体造成一次800%物理伤害，后续十回合开始时持续消耗气力，" +
+            + "\n自身行动后积攒一层气力，气力达到十层时进入爆发状态对敌方全体造成一次850%物理伤害，后续十回合开始时持续消耗气力，" +
             "每消耗一层气力使自身攻击力提升30%，防御提升30%持续一回合。爆发状态结束后气力重新累计",
             Arrays.asList(
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.35F),
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 1.8F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 1.6F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 1000L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.PENETRATE, 0.1F)
             ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.JEWELRY,
@@ -1068,20 +1072,19 @@ public enum EquipmentEnum {
                         markMap.put("气力-玦", power);
                         builder.append("，积攒了一层气力，当前气力值：").append(power);
                         if (power >= 10) {
-                            builder.append("，玦进入爆发状态，并对敌方全体造成一次800%物理伤害");
+                            builder.append("，玦进入爆发状态，并对敌方全体造成一次850%物理伤害");
                             battleEffect.getEnemy().forEach(tar -> {
-                                long atk = BattleUtil.getLongProperty(organism.getAtk(),
-                                        OrganismPropertiesEnum.ATK.getFieldName(), this.getOwner(),
-                                        battleEffect.getBattleRound().getBattleField());
-                                BattleUtil.doDamage(this.getOwner(), tar, DamageTypeEnum.ATK, 800 * atk, battleEffect.getBattleRound());
+                                long damage = BattleUtil.getDamage(this.getOwner(), battleEffect.getTar(), battleEffect.getBattleRound(),
+                                        new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 8.5F));
+                                BattleUtil.doDamage(this.getOwner(), tar, DamageTypeEnum.ATK, damage, battleEffect.getBattleRound());
                             });
                             markMap.put("爆发-玦", 1);
                         }
                     } else {
                         markMap.put("气力-玦", power - 1);
                         builder.append("，消耗了一层气力，当前气力值：").append(power);
-                        BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.ATK, 0.3F), 1, builder);
-                        BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DEF, 0.3F), 1, builder);
+                        BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.ATK, 0.25F), 1, builder);
+                        BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DEF, 0.25F), 1, builder);
                         if (power <= 0) {
                             builder.append("，玦进入恢复状态");
                             markMap.put("爆发-玦", 0);
@@ -1094,12 +1097,13 @@ public enum EquipmentEnum {
     EQUIPMENT_500(500L, "彼岸·净天无涯", "陪伴邪修长大的魔剑——天无涯的完全形态，四大魔器之初，"
             + "零号魔器——天喑无道上掉落的碎屑打造的仿制品，拥有同源于天喑无道的力量，除开本源之外，其本体由无垠之精——一种域外神铁打造而成"
             + "\n隐藏技能：神·摩诃无量"
-            + "\n战斗开始时提升自身攻击力150% 防御力20% 穿甲50%持续12回合",
+            + "\n战斗开始时提升自身攻击力150% 防御力20% 穿甲50%持续15回合",
             Arrays.asList(
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 5500L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 6500L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 2100L, 0.2F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 2100L),
-                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.LIFE_STEALING, 0.3F)
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.LIFE_STEALING, 0.3F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.15F)
             ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.WEAPON, JobEnum.EVIL.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
@@ -1108,11 +1112,11 @@ public enum EquipmentEnum {
                             .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的武器技能【神·摩诃无量】被触发");
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(EffectTypeEnum.ATK, "摩诃无量", 1.5F), 12, builder);
+                            new BuffDTO(EffectTypeEnum.ATK, "摩诃无量", 1.5F), 15, builder);
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(EffectTypeEnum.DEF, "摩诃无量", 0.2F), 12, builder);
+                            new BuffDTO(EffectTypeEnum.DEF, "摩诃无量", 0.2F), 15, builder);
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(),
-                            new BuffDTO(EffectTypeEnum.PENETRATE, "摩诃无量", 0.5F), 12, builder);
+                            new BuffDTO(EffectTypeEnum.PENETRATE, "摩诃无量", 0.5F), 15, builder);
                     battleField.getBattleMsg().add(builder.toString());
                 }
             }
@@ -1197,17 +1201,34 @@ public enum EquipmentEnum {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的防具技能【腐沼为岸】被触发");
-                    float rate = EquipmentSuitEnum.getByEquipmentId(503L).getEquipmentSuit()
-                            .suitNum(this.getOwner().getOrganismInfoDTO().getEquipmentBarDTO()) == 3 ? -0.1F : -0.05F;
+                    boolean suit = EquipmentSuitEnum.getByEquipmentId(503L).getEquipmentSuit()
+                            .suitNum(this.getOwner().getOrganismInfoDTO().getEquipmentBarDTO()) == 3;
+                    float rate = suit ? -0.1F : -0.05F;
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DAMAGE, "腐沼为岸", rate), builder);
                     battleField.getBattleMsg().add(builder.toString());
+                }
+
+                @Override
+                public void afterMeDamage(BattleEffectDTO battleEffect) {
+                    if (battleEffect.getDamage().get() > 0) {
+                        boolean suit = EquipmentSuitEnum.getByEquipmentId(503L).getEquipmentSuit()
+                                .suitNum(this.getOwner().getOrganismInfoDTO().getEquipmentBarDTO()) == 3;
+                        if (suit && RandomUtil.isHit(0.05F)) {
+                            StringBuilder builder = battleEffect.getBattleRound().getBuilder().append("，")
+                                    .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                                    .append("的防具技能【腐沼为岸】被触发");
+                            BuffUtil.addBuff(this.getOwner(), this.getOwner(),
+                                    new BuffDTO(EffectTypeEnum.DAMAGE, "腐沼为岸-额外减伤", -0.5F),
+                                    2, builder);
+                        }
+                    }
                 }
             }
     ),
     EQUIPMENT_504(504L, "M10·覆海冥神戟", ""
             + "\n隐藏技能：唤潮咏歌"
             + "\n回合开始时装备者造成的伤害提高8%持续一回合，与“M10·幻水冥神铠”和“M10·崇渊荡神珠”同时装备时修改为——回合开始时装备者造成的伤害提高15%持续一回合，"
-            + "且全部攻击命中敌方单位时，使敌方吸血降低30%持续一回合"
+            + "且全部攻击，命中敌方单位时，使敌方吸血降低30%持续一回合"
             + "\n神煅加护：冥水寒荫"
             + "\n攻击+12% 法强+12%",
             Arrays.asList(
@@ -1221,14 +1242,30 @@ public enum EquipmentEnum {
                 public void beforeMyRound(BattleRoundDTO battleRound) {
                     StringBuilder builder = battleRound.getBuilder();
                     builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
-                            .append("的防具技能【腐沼为岸】被触发");
+                            .append("的防具技能【唤潮咏歌】被触发");
+                    boolean suit = EquipmentSuitEnum.getByEquipmentId(504L).getEquipmentSuit()
+                            .suitNum(this.getOwner().getOrganismInfoDTO().getEquipmentBarDTO()) == 3;
+                    float rate = suit ? 0.15F : 0.08F;
+                    BuffUtil.addBuff(this.getOwner(), this.getOwner(),
+                            new BuffDTO(EffectTypeEnum.ATK, "唤潮咏歌", rate), 1, builder);
+                }
+
+                @Override
+                public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
+                    boolean suit = EquipmentSuitEnum.getByEquipmentId(504L).getEquipmentSuit()
+                            .suitNum(this.getOwner().getOrganismInfoDTO().getEquipmentBarDTO()) == 3;
+                    if (suit) {
+                        BuffUtil.addBuff(this.getOwner(), battleEffect.getTar(),
+                                new BuffDTO(EffectTypeEnum.LIFE_STEAL, "唤潮咏歌", -0.3F, BuffOverrideStrategyEnum.IGNORE),
+                                1, battleEffect.getBattleRound().getBuilder());
+                    }
                 }
             }
     ),
     EQUIPMENT_505(505L, "M10·崇渊荡神珠", ""
             + "\n隐藏技能∶镜河揽月"
             + "\n回合开始时提高8%攻击与8%法强持续一回合，与“M10·覆海冥神戟”和“M10·幻水冥神铠”同时装备时修改为——回合开始时提高15%攻击与15%法强持续一回合，"
-            + "全部攻击命中敌方单位时使敌方攻击与法强降低15%持续一回合，且在攻击命中后有15%概率使敌方陷入“溺水”异常持续一回合"
+            + "全部攻击，命中敌方单位时使敌方攻击与法强降低15%持续一回合，且在攻击命中后有15%概率使敌方陷入“溺水”异常持续一回合"
             + "\n神煅加护：冥水寒荫"
             + "\n速度+15%",
             Arrays.asList(
@@ -1239,19 +1276,86 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 0.15F)
             ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.JEWELRY,
             new ExtraBattleProcessTemplate() {
+                @Override
+                public void beforeMyRound(BattleRoundDTO battleRound) {
+                    StringBuilder builder = battleRound.getBuilder();
+                    builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                            .append("的宝物技能【镜河揽月】被触发");
+                    boolean suit = EquipmentSuitEnum.getByEquipmentId(505L).getEquipmentSuit()
+                            .suitNum(this.getOwner().getOrganismInfoDTO().getEquipmentBarDTO()) == 3;
+                    float rate = suit ? 0.15F : 0.08F;
+                    BuffUtil.addBuff(this.getOwner(), this.getOwner(),
+                            new BuffDTO(EffectTypeEnum.ATK, "镜河揽月", rate), 1, builder);
+                    BuffUtil.addBuff(this.getOwner(), this.getOwner(),
+                            new BuffDTO(EffectTypeEnum.MAGIC_ATK, "镜河揽月", rate), 1, builder);
+                }
 
-    }
+                @Override
+                public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
+                    boolean suit = EquipmentSuitEnum.getByEquipmentId(505L).getEquipmentSuit()
+                            .suitNum(this.getOwner().getOrganismInfoDTO().getEquipmentBarDTO()) == 3;
+                    if (suit) {
+                        StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+                        BuffUtil.addBuff(this.getOwner(), battleEffect.getTar(),
+                                new BuffDTO(EffectTypeEnum.ATK, "镜河揽月", -0.15F, BuffOverrideStrategyEnum.IGNORE),
+                                1, builder);
+                        BuffUtil.addBuff(this.getOwner(), battleEffect.getTar(),
+                                new BuffDTO(EffectTypeEnum.MAGIC_ATK, "镜河揽月", -0.15F, BuffOverrideStrategyEnum.IGNORE),
+                                1, builder);
+                        if (RandomUtil.isHit(0.15F)) {
+                            AbnormalEnum.AbnormalInput input = AbnormalEnum.AbnormalInput.builder()
+                                    .from(this.getOwner()).tar(battleEffect.getTar())
+                                    .round(1).builder(builder).build();
+                            AbnormalEnum.DROWNING.doEffect(input);
+                        }
+                    }
+                }
+            }
     ),
+    EQUIPMENT_506(506L, "中天枢页", "幻梦星海，传说中存在着世界所知真理的地方，为无数学者追崇和向往。“去寻找吧，在这片星海之中，有着你所追求的一切。"
+            + "这其中充满着无数的危险与挑战，你可能会受伤更可能会死亡，但当你真正踏足了中天的土地，你会发现，真理一直在那里等待着你。”——圣星城.博天翁"
+            + "\n隐藏技能：博天万法"
+            + "\n每回合开始时提高自身25%攻击，25%法强，25%命中持续一回合。回合结束时提高自身25%防御，25%法抗25%闪避持续一回合。每回合开始时回复自身15点蓝量"
+            + "\n神煅加护：寰宇皆知"
+            + "\n攻击+15% 法强+15% 命中+8% 闪避+8% 速度+8% 血量+8% 防御+8% 法抗+8%"
+            + "\n获得“博识”状态，攻击命中时有70%概率识破敌人弱点使该次伤害提升至150%，受到攻击时有70%概率看破敌人的攻击，使该次伤害降低至80%",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 5500L, 0.15F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 5500L, 0.15F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HP, 100_000L, 0.08F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MP, 180L),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DEF, 2000L, 0.08F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 2000L, 0.08F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 880L, 0.08F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DODGE, 880L, 0.08F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 880L, 0.08F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.25F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 0.6F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.PENETRATE, 0.1F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_PENETRATE, 0.1F)
+            ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.JEWELRY,
+            new ExtraBattleProcessTemplate() {
+                @Override
+                public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
+                    if (RandomUtil.isHit(0.7F)) {
+                        battleEffect.getBattleRound().getBuilder().append("，")
+                                .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                                .append("的宝物技能【博天万法】被触发，识破敌人弱点，伤害提升至150%");
+                        battleEffect.getDamage().set(Math.round(battleEffect.getDamage().get() * 1.5F));
+                    }
+                }
 
-//    名称：中天枢页 （宝物）
-//    限制等级：lv60
-//    属性：攻击+5500 法强+5500 血量+100000 防御+2000 法抗+2000 命中+880 闪避+880 速度+880 蓝量+180 暴击+25% 暴伤+60% 穿甲+10% 法穿+10%
-//    隐藏技能：博天万法
-//    每回合开始时提高自身25%攻击，25%法强，25%命中持续一回合。回合结束时提高自身25%防御，25%法抗25%闪避持续一回合。每回合开始时回复自身15点蓝量。
-//    神煅加护：寰宇皆知
-//    获得“博识”状态，攻击命中时有70%概率识破敌人弱点使该次伤害提升至150%，受到攻击时有70%概率看破敌人的攻击，使该次伤害降低至80%。
-//    描述：幻梦星海，传说中存在着世界所知真理的地方，为无数学者追崇和向往。“去寻找吧，在这片星海之中，有着你所追求的一切。这其中充满着无数的危险与挑战，你可能会受伤更可能会死亡，但当你真正踏足了中天的土地，你会发现，真理一直在那里等待着你。”——圣星城.博天翁
-
+                @Override
+                public void beforeMeDamage(BattleEffectDTO battleEffect) {
+                    if (RandomUtil.isHit(0.7F)) {
+                        battleEffect.getBattleRound().getBuilder().append("，")
+                                .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
+                                .append("的宝物技能【博天万法】被触发，看破敌人的攻击，伤害降低至80%");
+                        battleEffect.getDamage().set(Math.round(battleEffect.getDamage().get() * 0.8F));
+                    }
+                }
+            }
+    ),
 
     EQUIPMENT_600(600L, "冰海沉星", "传闻，死烬之渊的深处是一片蔚蓝的海洋，而在这片海域的中央，沉没着一颗璀璨的明星。" +
             "无人知道它真正的样貌为何，因为那些不顾死活而觊觎这颗明珠的人们，已经全部死在了它可怕的凛寒之下" +

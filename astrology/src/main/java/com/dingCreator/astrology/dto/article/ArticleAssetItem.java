@@ -69,8 +69,9 @@ public class ArticleAssetItem extends ArticleItemDTO {
 
     @Override
     public ArticleItemVO fillView(ArticleItemVO vo) {
-        vo.setName(AssetTypeEnum.getByCode(assetType).getChnName());
-        vo.setDescription(AssetTypeEnum.ASTROLOGY_COIN.getDesc());
+        AssetTypeEnum assetTypeEnum = AssetTypeEnum.getByCode(assetType);
+        vo.setName(assetTypeEnum.getChnName());
+        vo.setDescription(assetTypeEnum.getDesc());
         return vo;
     }
 }

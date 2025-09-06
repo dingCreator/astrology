@@ -23,9 +23,9 @@ public enum LootBelongToEnum {
      */
     DUNGEON_FLOOR("DungeonFloor"),
     /**
-     * 守关boss
+     * 直接通关副本
      */
-    MAP_BOSS("MapBoss"),
+    DUNGEON_STRAIGHT_PASS("DungeonStraightPass"),
     /**
      * 世界boss
      */

@@ -186,6 +186,9 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
 
         if (fromMe) {
             ifMeNotHit(battleEffect);
+            if (toEnemy) {
+                ifMeNotHitEnemy(battleEffect);
+            }
         } else if (fromOur) {
             ifOurNotHit(battleEffect);
         } else if (fromEnemy) {
@@ -413,6 +416,9 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
      * 技能没有命中时
      */
     public void ifMeNotHit(BattleEffectDTO battleEffect) {
+    }
+
+    public void ifMeNotHitEnemy(BattleEffectDTO battleEffect){
     }
 
     public void ifOurNotHit(BattleEffectDTO battleEffect) {
