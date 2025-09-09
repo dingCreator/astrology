@@ -90,6 +90,22 @@ public class ShopCache {
             worldShopItemList.add(ShopItemDTO.builder()
                     .article(new ArticleEquipmentItem(EquipmentEnum.EQUIPMENT_501.getId()))
                     .costMap(costMap).count(1).stock(-1).build());
+            costMap = new HashMap<>();
+            costMap.put(AssetTypeEnum.SECRET_SCROLL, 100L);
+            worldShopItemList.add(ShopItemDTO.builder()
+                    .article(new ArticleEquipmentItem(EquipmentEnum.EQUIPMENT_415.getId()))
+                    .costMap(costMap).count(1).stock(-1).build());
+            costMap = new HashMap<>();
+            costMap.put(AssetTypeEnum.SECRET_SCROLL, 100L);
+            worldShopItemList.add(ShopItemDTO.builder()
+                    .article(new ArticleEquipmentItem(EquipmentEnum.EQUIPMENT_416.getId()))
+                    .costMap(costMap).count(1).stock(-1).build());
+            costMap = new HashMap<>();
+            costMap.put(AssetTypeEnum.SECRET_SCROLL, 5000L);
+            worldShopItemList.add(ShopItemDTO.builder()
+                    .article(new ArticleEquipmentItem(EquipmentEnum.EQUIPMENT_506.getId()))
+                    .costMap(costMap).count(1).stock(-1).build());
+
             SHOP_ITEM_MAP.put("世界商店", worldShopItemList);
 
             List<ShopItemDTO> originShopItemList = new ArrayList<>();

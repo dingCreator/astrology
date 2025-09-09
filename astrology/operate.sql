@@ -33,6 +33,7 @@ group by activity_id
 ,player_id
 ORDER by sum(count) desc;
 
-SELECT belong_to_id , equipment_id ,COUNT(total_cnt) from bot.astrology_equipment_belong_to
+SELECT belong_to_id , equipment_id ,sum(total_cnt) cnt from bot.astrology_equipment_belong_to
 where equipment_id >600
 group by belong_to_id ,equipment_id
+HAVING cnt>0

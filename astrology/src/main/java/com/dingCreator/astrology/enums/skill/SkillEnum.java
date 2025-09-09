@@ -330,7 +330,7 @@ public enum SkillEnum implements Serializable {
                 BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DAMAGE, -0.2F), builder);
                 BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.ATK, 0.24F), builder);
             } else {
-                BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DAMAGE, -0.15F), builder);
+                BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DAMAGE, 0.15F), builder);
             }
             battleField.getBattleMsg().add(builder.toString());
         }
@@ -2620,11 +2620,13 @@ public enum SkillEnum implements Serializable {
                 builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                         .append("识破敌人弱点，伤害提升至150%");
                 battleEffect.getDamage().set(Math.round(battleEffect.getDamage().get() * 1.5F));
-                if (SKILL_1086.equals(battleEffect.getNowSkill())) {
-                    SKILL_1086.getGlobalExtraProcess().executeSpecialExecute(battleEffect);
-                }
-                if (SKILL_1087.equals(battleEffect.getNowSkill())) {
-                    SKILL_1087.getGlobalExtraProcess().executeSpecialExecute(battleEffect);
+                if (SKILL_1086.equals(battleEffect.getNowSkill()) || SKILL_1087.equals(battleEffect.getNowSkill())) {
+                    ExtraBattleProcessTemplate specialExecuteTpl = battleEffect.getBattleRound().getBattleField()
+                            .getExtraBattleProcessTemplateList().stream()
+                            .filter(extra -> battleEffect.getFrom().equals(extra.getOwner()))
+                            .filter(extra -> extra.getClass().equals(battleEffect.getNowSkill().getGlobalExtraProcess().getClass()))
+                            .findFirst().orElse(null);
+                    specialExecuteTpl.executeSpecialExecute(battleEffect);
                 }
                 if (SKILL_1089.equals(battleEffect.getNowSkill())) {
                     long damage = BattleUtil.getDamage(this.getOwner(), battleEffect.getTar(), battleEffect.getBattleRound(),
@@ -2661,7 +2663,8 @@ public enum SkillEnum implements Serializable {
                 public void specialExecute(Object obj) {
                     BattleEffectDTO battleEffect = (BattleEffectDTO) obj;
                     AbnormalEnum.AbnormalInput input = AbnormalEnum.AbnormalInput.builder()
-                            .from(battleEffect.getFrom()).tar(battleEffect.getTar()).round(1).build();
+                            .from(battleEffect.getFrom()).tar(battleEffect.getTar())
+                            .builder(battleEffect.getBattleRound().getBuilder()).round(1).build();
                     AbnormalEnum.VERTIGO.doEffect(input);
                 }
             }
@@ -2675,7 +2678,8 @@ public enum SkillEnum implements Serializable {
                 public void specialExecute(Object obj) {
                     BattleEffectDTO battleEffect = (BattleEffectDTO) obj;
                     AbnormalEnum.AbnormalInput input = AbnormalEnum.AbnormalInput.builder()
-                            .from(battleEffect.getFrom()).tar(battleEffect.getTar()).round(1).build();
+                            .from(battleEffect.getFrom()).tar(battleEffect.getTar())
+                            .builder(battleEffect.getBattleRound().getBuilder()).round(1).build();
                     AbnormalEnum.BURN_DOWN.doEffect(input);
                     AbnormalEnum.DROWNING.doEffect(input);
                 }

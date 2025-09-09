@@ -89,7 +89,12 @@ public enum AbnormalEnum {
     }),
 
     POISONING("POISONING", "中毒", "", input -> {
-
+        BuffUtil.addBuff(input.getFrom(), input.getTar(),
+                new BuffDTO(EffectTypeEnum.ATK, "中毒", -0.1F, true),
+                input.getRound(), input.getBuilder());
+        BuffUtil.addBuff(input.getFrom(), input.getTar(),
+                new BuffDTO(EffectTypeEnum.BLEEDING, "中毒", -0.05F, true),
+                input.getRound(), input.getBuilder());
     }),
     ;
 
