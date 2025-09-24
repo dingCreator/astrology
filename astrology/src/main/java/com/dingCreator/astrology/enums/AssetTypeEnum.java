@@ -44,7 +44,7 @@ public enum AssetTypeEnum {
     ),
 
     ORIGIN_DRAGON_BALL("originDragonBall", "起源龙珠", "起源龙珠", "挑战M10获得的奖励，可用于商店购买商品",
-            (assetList, cost) -> validateCache(assetList, "minShuiHeXi", cost),
+            (assetList, cost) -> validateCache(assetList, "originalDragonBall", cost),
             PlayerExceptionEnum.NOT_ENOUGH_ORIGIN_DRAGON_BALL, false
     ),
 

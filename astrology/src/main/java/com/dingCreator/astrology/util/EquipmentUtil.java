@@ -37,7 +37,7 @@ public class EquipmentUtil {
      * @param equipmentBelongTo 装备
      */
     public static void validate(long playerId, EquipmentBelongTo equipmentBelongTo) {
-        if (Objects.isNull(equipmentBelongTo)) {
+        if (Objects.isNull(equipmentBelongTo) || equipmentBelongTo.getTotalCnt() <= 0) {
             throw EquipmentExceptionEnum.DONT_HAVE_EQUIPMENT.getException();
         }
         EquipmentEnum equipmentEnum = EquipmentEnum.getById(equipmentBelongTo.getEquipmentId());

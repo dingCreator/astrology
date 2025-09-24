@@ -13,6 +13,7 @@ import com.dingCreator.astrology.response.ShopItemPageResponse;
 import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.util.LockUtil;
 import com.dingCreator.astrology.util.PageUtil;
+import com.dingCreator.astrology.vo.ArticleItemVO;
 
 import java.util.Collection;
 import java.util.List;
@@ -83,6 +84,16 @@ public class ShopBehavior {
         ).collect(Collectors.toList());
         PlayerService.getInstance().changeAsset(info, assetList);
         item.getArticle().changeCnt(playerId, item.getCount());
+    }
+
+    public ArticleItemVO getShopItemDetail(Long playerId, String shopName, Integer no) {
+        int idx = no - 1;
+        List<ShopItemDTO> itemList = ShopCache.listShopItems(shopName);
+        if (idx < 0 || idx >= itemList.size()) {
+            throw ShopExceptionEnum.SHOP_ITEM_NO_INVALID.getException();
+        }
+        PlayerInfoDTO info = PlayerCache.getPlayerById(playerId);
+        return itemList.get(idx).getArticle().view();
     }
 
     private static class Holder {

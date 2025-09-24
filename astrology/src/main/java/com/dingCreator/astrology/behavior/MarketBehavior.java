@@ -1,7 +1,11 @@
 package com.dingCreator.astrology.behavior;
 
 import com.dingCreator.astrology.dto.MarketItemDTO;
+import com.dingCreator.astrology.dto.article.ArticleEquipmentItem;
 import com.dingCreator.astrology.dto.article.ArticleItemDTO;
+import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
+import com.dingCreator.astrology.enums.equipment.EquipmentRankEnum;
+import com.dingCreator.astrology.enums.exception.MarketExceptionEnum;
 import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.service.MarketService;
 import com.dingCreator.astrology.util.ArticleUtil;
@@ -21,6 +25,10 @@ public class MarketBehavior {
 
     public Long shelve(long playerId, String itemName, int itemCnt, Map<String, Long> assetMap) {
         ArticleItemDTO item = ArticleUtil.constructArticleByName(itemName);
+        if (item instanceof ArticleEquipmentItem &&
+                EquipmentRankEnum.RULE.equals(EquipmentEnum.getById(((ArticleEquipmentItem) item).getEquipmentId()).getEquipmentRankEnum())) {
+            throw MarketExceptionEnum.CANT_DEAL_RULE_EQUIPMENT.getException();
+        }
         return MarketService.getInstance().shelve(playerId, item, itemCnt, assetMap);
     }
 

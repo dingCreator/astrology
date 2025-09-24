@@ -379,7 +379,7 @@ public enum SkillEnum implements Serializable {
 
     SKILL_26(26L, "战衅怒吼",
             "死地武士抓取一名敌人对其造成500%物理伤害并给自身附加嘲讽状态，持续2回合",
-            JobEnum.XIU_ZHEN.getJobCode(), 50L,
+            JobEnum.SI_DI_WU_SHI.getJobCode(), 50L,
             new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 5F),
             new ThisBehaviorExtraBattleProcessTemplate() {
                 @Override
