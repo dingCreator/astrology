@@ -25,15 +25,13 @@ import com.dingCreator.astrology.request.ActivityAwardSettingReq;
 import com.dingCreator.astrology.request.ActivityPageQryReq;
 import com.dingCreator.astrology.util.ActivityUtil;
 import com.dingCreator.astrology.util.ArticleUtil;
+import com.dingCreator.astrology.util.CopyUtil;
 import com.dingCreator.astrology.util.LockUtil;
 import com.dingCreator.astrology.vo.ArticleItemVO;
 import com.dingCreator.astrology.vo.JoinActivityResultVO;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -151,6 +149,7 @@ public interface ActivityService {
             validateJoin();
             // 参与活动
             List<ArticleItemDTO> awards = join(activity, times);
+            List<ArticleItemDTO> awards4Send = awards.stream().map(CopyUtil::copyNewInstance).collect(Collectors.toList());
             // 发放奖品并写入记录
             DatabaseProvider.getInstance().transactionExecute(sqlSession -> {
                 Long playerId = info.getPlayerDTO().getId();
@@ -161,7 +160,7 @@ public interface ActivityService {
                         .collect(Collectors.toList());
                 PlayerService.getInstance().changeAsset(info, changeList);
                 // 发放奖励
-                awards.forEach(award -> award.changeCnt(info.getPlayerDTO().getId(), 1));
+                ArticleUtil.batchSendArticle(playerId, awards4Send);
                 // 插入记录
                 ActivityRecordMapper activityRecordMapper = sqlSession.getMapper(ActivityRecordMapper.class);
                 ActivityStaticsMapper activityStaticsMapper = sqlSession.getMapper(ActivityStaticsMapper.class);

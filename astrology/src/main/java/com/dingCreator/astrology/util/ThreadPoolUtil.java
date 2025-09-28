@@ -1,19 +1,23 @@
 package com.dingCreator.astrology.util;
 
 import com.dingCreator.astrology.util.function.FunctionExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * @author ding
  * @date 2024/7/24
  */
 public class ThreadPoolUtil {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ThreadPoolUtil.class);
+
     /**
      * 线程池
      */
@@ -25,6 +29,22 @@ public class ThreadPoolUtil {
      */
     public static void execute(FunctionExecutor functionExecutor) {
         EXECUTOR.execute(functionExecutor::execute);
+    }
+
+    public static void join(List<FunctionExecutor> executorList) {
+        List<CompletableFuture<?>> list = executorList.stream().map(executor ->
+            CompletableFuture.supplyAsync(() -> {
+                executor.execute();
+                return null;
+            }, EXECUTOR)
+        ).collect(Collectors.toList());
+        list.forEach(future -> {
+            try {
+                future.get();
+            } catch (Exception e) {
+                LOG.error("", e);
+            }
+        });
     }
 
     /**

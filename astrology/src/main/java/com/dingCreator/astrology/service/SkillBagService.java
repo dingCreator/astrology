@@ -10,8 +10,12 @@ import com.dingCreator.astrology.enums.exception.SkillExceptionEnum;
 import com.dingCreator.astrology.mapper.SkillBagMapper;
 import com.dingCreator.astrology.util.LockUtil;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author ding
@@ -42,6 +46,37 @@ public class SkillBagService {
                 }
             });
         });
+    }
+
+    public void batchSendSkill(List<SkillBag> skillBagList) {
+        List<String> lockNames = skillBagList.stream().map(SkillBag::getPlayerId).map(Objects::toString).collect(Collectors.toList());
+        LockUtil.execute(Constants.SKILL_BAG_LOCK_PREFIX, lockNames, () ->
+            DatabaseProvider.getInstance().batchTransactionExecute(sqlSession -> {
+                SkillBagMapper mapper = sqlSession.getMapper(SkillBagMapper.class);
+                List<Long> skillIds = new ArrayList<>();
+                List<Long> playerIds = new ArrayList<>();
+                skillBagList.forEach(skillBag -> {
+                    skillIds.add(skillBag.getSkillId());
+                    playerIds.add(skillBag.getPlayerId());
+                });
+
+                List<SkillBag> oldList = mapper.selectList(new QueryWrapper<SkillBag>()
+                        .in(SkillBag.PLAYER_ID, playerIds).in(SkillBag.SKILL_ID, skillIds));
+                Map<String, SkillBag> skillBagMap = oldList.stream().collect(Collectors.toMap(
+                        skillBag -> skillBag.getPlayerId() + "_" + skillBag.getSkillId(), Function.identity()
+                ));
+                skillBagList.forEach(skillBag -> {
+                    String key = skillBag.getPlayerId() + "_" + skillBag.getSkillId();
+                    if (skillBagMap.containsKey(key)) {
+                        SkillBag old = skillBagMap.get(key);
+                        old.setSkillCnt(skillBag.getSkillCnt() + old.getSkillCnt());
+                        mapper.updateById(old);
+                    } else {
+                        mapper.insert(skillBag);
+                    }
+                });
+            })
+        );
     }
 
     public void learnSkill(Long playerId, Long skillId) {

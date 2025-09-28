@@ -11,11 +11,9 @@ import com.dingCreator.astrology.enums.equipment.EquipmentEnum;
 import com.dingCreator.astrology.enums.exception.ArticleExceptionEnum;
 import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.exception.BusinessException;
+import com.dingCreator.astrology.util.function.FunctionExecutor;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -57,5 +55,15 @@ public class ArticleUtil {
             return new ArticleSkillItem(skillEnum.getId());
         }
         throw ArticleExceptionEnum.ARTICLE_NOT_EXIST.getException(name);
+    }
+
+    public static void batchSendArticle(Long playerId, List<ArticleItemDTO> articleItems) {
+        List<ArticleItemDTO> sendingQueue = new ArrayList<>(articleItems.size());
+        articleItems.forEach(item -> item.add2SendingQueue(sendingQueue));
+        Map<String, List<ArticleItemDTO>> itemMap = sendingQueue.stream().collect(Collectors.groupingBy(ArticleItemDTO::getItemType));
+        ThreadPoolUtil.join(itemMap.entrySet().stream().map(entry -> (FunctionExecutor) () -> {
+            ArticleTypeEnum articleTypeEnum = ArticleTypeEnum.getByType(entry.getKey());
+            articleTypeEnum.getBatchSendFunc().accept(playerId, entry.getValue());
+        }).collect(Collectors.toList()));
     }
 }
