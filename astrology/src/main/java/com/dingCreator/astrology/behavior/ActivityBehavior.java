@@ -4,16 +4,14 @@ import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.dto.activity.ActivityDTO;
 import com.dingCreator.astrology.enums.activity.ActivityTypeEnum;
 import com.dingCreator.astrology.request.ActivityAwardSettingReq;
-import com.dingCreator.astrology.request.LuckyActivityAwardSettingReq;
-import com.dingCreator.astrology.request.ActivityPageQryReq;
+import com.dingCreator.astrology.request.ActivityListQryReq;
 import com.dingCreator.astrology.response.PageResponse;
 import com.dingCreator.astrology.service.ActivityService;
 import com.dingCreator.astrology.util.PageUtil;
-import com.dingCreator.astrology.vo.ActivityAwardVO;
-import com.dingCreator.astrology.vo.ArticleItemVO;
 import com.dingCreator.astrology.vo.JoinActivityResultVO;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author ding
@@ -49,6 +47,32 @@ public class ActivityBehavior {
     }
 
     /**
+     * 参与指定类型的所有活动
+     *
+     * @param activityTypeEnum 活动类型
+     * @param playerId         玩家ID
+     * @return 参与结果
+     */
+    public JoinActivityResultVO joinAllActivity(ActivityTypeEnum activityTypeEnum, long playerId) {
+        List<ActivityDTO> activities = ActivityService.listActivity(ActivityListQryReq.builder().activityType(activityTypeEnum.getCode()).admin(false).build());
+        ActivityService service = activityTypeEnum.getService();
+        List<JoinActivityResultVO> voList = activities.stream()
+                .map(activity -> service.joinActivity(activity, PlayerCache.getPlayerById(playerId)))
+                .collect(Collectors.toList());
+        return voList.stream().reduce((vo1, vo2) -> {
+            vo1.getCostMap().forEach((assetType, val) -> {
+                if (vo2.getCostMap().containsKey(assetType)) {
+                    vo2.getCostMap().put(assetType, vo2.getCostMap().get(assetType) + val);
+                } else {
+                    vo2.getCostMap().put(assetType, val);
+                }
+            });
+            vo2.getItemVOList().addAll(vo1.getItemVOList());
+            return vo2;
+        }).orElse(null);
+    }
+
+    /**
      * 查询活动列表
      *
      * @param pageIndex 页码
@@ -56,7 +80,7 @@ public class ActivityBehavior {
      * @param qryReq    查询条件
      * @return 活动列表
      */
-    public PageResponse<ActivityDTO> qryActivityPage(int pageIndex, int pageSize, ActivityPageQryReq qryReq) {
+    public PageResponse<ActivityDTO> qryActivityPage(int pageIndex, int pageSize, ActivityListQryReq qryReq) {
         List<ActivityDTO> activityList = ActivityService.listActivity(qryReq);
         return PageUtil.buildPage(activityList, pageIndex, pageSize);
     }

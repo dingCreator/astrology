@@ -38,10 +38,19 @@ public abstract class ArticleItemDTO implements Serializable {
     /**
      * 数量变更
      *
-     * @param playerId 玩家ID
+     * @param playerId  玩家ID
      */
-    public abstract void changeCnt(Long playerId, int cnt);
+    public void changeCnt(Long playerId, int cnt) {
+        changeCnt(playerId, cnt, false);
+    }
 
+    /**
+     * 数量变更
+     *
+     * @param playerId  玩家ID
+     * @param checkBind 是否校验绑定关系
+     */
+    public abstract void changeCnt(Long playerId, int cnt, boolean checkBind);
 
     /**
      * 数量校验

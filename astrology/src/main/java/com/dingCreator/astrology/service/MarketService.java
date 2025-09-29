@@ -3,7 +3,6 @@ package com.dingCreator.astrology.service;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.database.DatabaseProvider;
@@ -80,7 +79,7 @@ public class MarketService {
         PlayerCache.getPlayerById(playerId);
         return DatabaseProvider.getInstance().transactionExecuteReturn(sqlSession ->
                 LockUtil.execute(Constants.SHOP_LOCK_PREFIX + playerId, () -> {
-                    item.changeCnt(playerId, -itemCnt);
+                    item.changeCnt(playerId, -itemCnt, true);
                     MarketItem marketItem = MarketItem.builder().playerId(playerId)
                             .articleName(item.view().getName())
                             .articleJson(JSONObject.toJSONString(item)).itemCnt(itemCnt)

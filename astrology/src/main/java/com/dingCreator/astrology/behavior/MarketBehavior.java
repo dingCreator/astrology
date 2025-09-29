@@ -25,9 +25,13 @@ public class MarketBehavior {
 
     public Long shelve(long playerId, String itemName, int itemCnt, Map<String, Long> assetMap) {
         ArticleItemDTO item = ArticleUtil.constructArticleByName(itemName);
-        if (item instanceof ArticleEquipmentItem &&
-                EquipmentRankEnum.RULE.equals(EquipmentEnum.getById(((ArticleEquipmentItem) item).getEquipmentId()).getEquipmentRankEnum())) {
-            throw MarketExceptionEnum.CANT_DEAL_RULE_EQUIPMENT.getException();
+        if (item instanceof ArticleEquipmentItem) {
+            if (EquipmentRankEnum.RULE.equals(EquipmentEnum.getById(((ArticleEquipmentItem) item).getEquipmentId()).getEquipmentRankEnum())) {
+                throw MarketExceptionEnum.CANT_DEAL_RULE_EQUIPMENT.getException();
+            }
+            if (EquipmentEnum.EQUIPMENT_20251001.equals(EquipmentEnum.getById(((ArticleEquipmentItem) item).getEquipmentId()))) {
+                throw MarketExceptionEnum.CANT_DEAL_BIND.getException();
+            }
         }
         return MarketService.getInstance().shelve(playerId, item, itemCnt, assetMap);
     }

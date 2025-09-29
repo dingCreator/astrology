@@ -1,7 +1,6 @@
 package com.dingCreator.astrology.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.dto.MailBoxDTO;

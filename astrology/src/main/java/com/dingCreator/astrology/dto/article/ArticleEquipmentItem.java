@@ -30,7 +30,7 @@ public class ArticleEquipmentItem extends ArticleItemDTO {
     }
 
     @Override
-    public void changeCnt(Long playerId, int cnt) {
+    public void changeCnt(Long playerId, int cnt, boolean checkBind) {
         EquipmentBelongTo equipmentBelongTo = new EquipmentBelongTo();
         equipmentBelongTo.setBelongTo(BelongToEnum.PLAYER.getBelongTo());
         equipmentBelongTo.setBelongToId(playerId);

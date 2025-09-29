@@ -446,7 +446,7 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
     }
 
     /**
-     * 受到伤害后
+     * 受到伤害前
      *
      * @param battleEffect 单个技能单个目标的战斗效果
      */

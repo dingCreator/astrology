@@ -1,13 +1,19 @@
 package com.dingCreator.astrology.request;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author ding
  * @date 2024/12/23
  */
 @Data
-public class ActivityPageQryReq {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ActivityListQryReq {
     /**
      * 活动类型
      */

@@ -25,7 +25,7 @@ public class ArticleTitleItem extends ArticleItemDTO {
     }
 
     @Override
-    public void changeCnt(Long playerId, int cnt) {
+    public void changeCnt(Long playerId, int cnt, boolean checkBind) {
         if (cnt < 0) {
             throw new UnsupportedOperationException("不能删除称号");
         }

@@ -5,7 +5,6 @@ import com.dingCreator.astrology.enums.skill.SkillEnum;
 import com.dingCreator.astrology.service.SkillBagService;
 import com.dingCreator.astrology.vo.ArticleItemVO;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -28,7 +27,7 @@ public class ArticleSkillItem extends ArticleItemDTO {
     }
 
     @Override
-    public void changeCnt(Long playerId, int cnt) {
+    public void changeCnt(Long playerId, int cnt, boolean checkBind) {
         SkillEnum.getById(skillId);
         SkillBagService.getInstance().sendSkill(playerId, skillId, cnt);
     }

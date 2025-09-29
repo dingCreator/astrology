@@ -16,8 +16,8 @@ public enum ActivityExceptionEnum {
     /**
      * 活动错误
      */
-    OVER_JOIN_TIMES_LIMIT(Constants.ACTIVITY_EXCEPTION_PREFIX + "000", "参与次数已达上限"),
-    ACTIVITY_NOT_START(Constants.ACTIVITY_EXCEPTION_PREFIX + "001", "活动尚未开始"),
+    OVER_JOIN_TIMES_LIMIT(Constants.ACTIVITY_EXCEPTION_PREFIX + "000", "参与次数已达上限，%s"),
+    ACTIVITY_NOT_START(Constants.ACTIVITY_EXCEPTION_PREFIX + "001", "尚未开始，敬请期待"),
     ACTIVITY_HAS_BEEN_END(Constants.ACTIVITY_EXCEPTION_PREFIX + "002", "活动已结束"),
     NOT_ENOUGH_ASSET(Constants.ACTIVITY_EXCEPTION_PREFIX + "003", "货币不足，参与失败"),
     ACTIVITY_NOT_EXIST(Constants.ACTIVITY_EXCEPTION_PREFIX + "004", "活动不存在"),

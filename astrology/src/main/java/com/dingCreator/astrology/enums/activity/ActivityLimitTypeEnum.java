@@ -35,7 +35,7 @@ public enum ActivityLimitTypeEnum {
     DAY(3, "每天", () -> LocalDate.now().format(DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_5))),
     MONTH(4, "每月", () -> LocalDate.now().format(DateTimeFormatter.ofPattern(Constants.MONTH_FORMAT_5))),
     YEAR(5, "每年", () -> LocalDate.now().format(DateTimeFormatter.ofPattern(Constants.YEAR_FORMAT_1))),
-    ALL(6, "总", () -> null),
+    ALL(6, "", () -> null),
     ;
 
     private final Integer code;

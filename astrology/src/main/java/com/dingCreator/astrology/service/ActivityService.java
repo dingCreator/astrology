@@ -14,7 +14,6 @@ import com.dingCreator.astrology.dto.organism.player.PlayerInfoDTO;
 import com.dingCreator.astrology.entity.Activity;
 import com.dingCreator.astrology.entity.ActivityRecord;
 import com.dingCreator.astrology.entity.ActivityStatics;
-import com.dingCreator.astrology.enums.ArticleTypeEnum;
 import com.dingCreator.astrology.enums.AssetTypeEnum;
 import com.dingCreator.astrology.enums.activity.ActivityLimitTypeEnum;
 import com.dingCreator.astrology.enums.exception.ActivityExceptionEnum;
@@ -22,11 +21,9 @@ import com.dingCreator.astrology.mapper.ActivityMapper;
 import com.dingCreator.astrology.mapper.ActivityRecordMapper;
 import com.dingCreator.astrology.mapper.ActivityStaticsMapper;
 import com.dingCreator.astrology.request.ActivityAwardSettingReq;
-import com.dingCreator.astrology.request.ActivityPageQryReq;
+import com.dingCreator.astrology.request.ActivityListQryReq;
 import com.dingCreator.astrology.util.ActivityUtil;
-import com.dingCreator.astrology.util.ArticleUtil;
 import com.dingCreator.astrology.util.LockUtil;
-import com.dingCreator.astrology.vo.ArticleItemVO;
 import com.dingCreator.astrology.vo.JoinActivityResultVO;
 
 import java.time.LocalDateTime;
@@ -79,14 +76,14 @@ public interface ActivityService {
      * @param qryReq 查询条件
      * @return 活动列表
      */
-    static List<ActivityDTO> listActivity(ActivityPageQryReq qryReq) {
+    static List<ActivityDTO> listActivity(ActivityListQryReq qryReq) {
         List<Activity> activityList = DatabaseProvider.getInstance().executeReturn(sqlSession -> {
                     boolean admin = Objects.nonNull(qryReq.getAdmin()) && qryReq.getAdmin();
                     QueryWrapper<Activity> wrapper = new QueryWrapper<Activity>()
                             .eq(Objects.nonNull(qryReq.getActivityType()), Activity.ACTIVITY_TYPE, qryReq.getActivityType())
-                            .eq(admin, Activity.ENABLED, true)
-                            .ge(admin, Activity.START_TIME, LocalDateTime.now())
-                            .le(admin, Activity.END_TIME, LocalDateTime.now());
+                            .eq(!admin, Activity.ENABLED, true)
+                            .le(!admin, Activity.START_TIME, LocalDateTime.now())
+                            .ge(!admin, Activity.END_TIME, LocalDateTime.now());
                     return sqlSession.getMapper(ActivityMapper.class).selectList(wrapper);
                 }
         );
@@ -266,11 +263,12 @@ public interface ActivityService {
         if (ActivityLimitTypeEnum.NONE.equals(activity.getLimitTypeEnum())) {
             return;
         }
+        String limitInfo = activity.getLimitTypeEnum().getChnDesc() + "限制" + activity.getLimitTypeCnt() + "次";
         if (Objects.isNull(statics) && activity.getLimitTypeCnt() < times) {
-            throw ActivityExceptionEnum.OVER_JOIN_TIMES_LIMIT.getException();
+            throw ActivityExceptionEnum.OVER_JOIN_TIMES_LIMIT.getException().fillArgs(limitInfo);
         }
         if (Objects.nonNull(statics) && statics.getCount() + times > activity.getLimitTypeCnt()) {
-            throw ActivityExceptionEnum.OVER_JOIN_TIMES_LIMIT.getException();
+            throw ActivityExceptionEnum.OVER_JOIN_TIMES_LIMIT.getException().fillArgs(limitInfo);
         }
     }
 

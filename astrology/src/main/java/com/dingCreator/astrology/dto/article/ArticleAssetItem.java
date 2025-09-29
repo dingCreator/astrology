@@ -5,11 +5,9 @@ import com.dingCreator.astrology.cache.PlayerCache;
 import com.dingCreator.astrology.dto.organism.player.PlayerAssetDTO;
 import com.dingCreator.astrology.enums.ArticleTypeEnum;
 import com.dingCreator.astrology.enums.AssetTypeEnum;
-import com.dingCreator.astrology.enums.exception.PlayerExceptionEnum;
 import com.dingCreator.astrology.service.PlayerService;
 import com.dingCreator.astrology.vo.ArticleItemVO;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Collections;
@@ -45,7 +43,7 @@ public class ArticleAssetItem extends ArticleItemDTO {
     }
 
     @Override
-    public void changeCnt(Long playerId, int cnt) {
+    public void changeCnt(Long playerId, int cnt, boolean checkBind) {
         List<PlayerAssetDTO> assetList = Collections.singletonList(
                 PlayerAssetDTO.builder().playerId(playerId).assetType(this.assetType).assetCnt(this.cnt * cnt).build());
         PlayerService.getInstance().changeAsset(PlayerCache.getPlayerById(playerId), assetList);

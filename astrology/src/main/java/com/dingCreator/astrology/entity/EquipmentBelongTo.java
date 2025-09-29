@@ -50,17 +50,24 @@ public class EquipmentBelongTo {
      */
     @TableField("equip")
     private Boolean equip;
+//    /**
+//     * 是否绑定
+//     */
+//    @TableField("bind")
+//    private Boolean bind;
 
 
-    public static String BELONG_TO = "belong_to";
+    public static final String BELONG_TO = "belong_to";
 
-    public static String BELONG_TO_ID = "belong_to_id";
+    public static final String BELONG_TO_ID = "belong_to_id";
 
-    public static String EQUIPMENT_ID = "equipment_id";
+    public static final String EQUIPMENT_ID = "equipment_id";
 
-    public static String EQUIPMENT_LEVEL = "equipment_level";
+    public static final String EQUIPMENT_LEVEL = "equipment_level";
 
-    public static String TOTAL_CNT = "total_cnt";
+    public static final String TOTAL_CNT = "total_cnt";
 
-    public static String EQUIP = "equip";
+    public static final String EQUIP = "equip";
+
+    public static final String BIND = "bind";
 }

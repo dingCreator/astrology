@@ -24,7 +24,9 @@ import com.dingCreator.astrology.util.template.ExtraBattleProcessTemplate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -1661,7 +1663,33 @@ public enum EquipmentEnum {
                 }
             }
     ),
-    ;
+
+    EQUIPMENT_20251001(20251001L, "人民之光", 0,
+            "【2025国庆纪念武器】这是人民的力量更是人民的胜利" +
+                    "\n隐藏技能：生灵伟力" +
+                    "\n队伍中每存在一名友方单位（包括召唤物）则使造成伤害提高25%" +
+                    "\n神煅加护" +
+                    "\n攻击+35% 法强+35%",
+            Arrays.asList(
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 7000L, 0.35F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_ATK, 7000L, 0.35F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.3F),
+                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 1.5F)
+            ), EquipmentRankEnum.WONDER, EquipmentTypeEnum.WEAPON, new ExtraBattleProcessTemplate() {
+        @Override
+        public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
+            AtomicLong damage = battleEffect.getDamage();
+            int teammate = battleEffect.getOur().size() - 1;
+            if (teammate > 0) {
+                float rate = 0.25F * teammate;
+                battleEffect.getBattleRound().getBuilder().append("，")
+                        .append(battleEffect.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
+                        .append("的武器技能【生灵伟力】被触发，存在").append(teammate).append("名")
+                        .append("友方单位，伤害提升").append(rate);
+                damage.set(Math.round(damage.get() * (1 + rate)));
+            }
+        }
+    });
     /**
      * ID
      */
@@ -1766,6 +1794,20 @@ public enum EquipmentEnum {
         this.equipmentRankEnum = equipmentRankEnum;
         this.equipmentTypeEnum = equipmentTypeEnum;
         this.limitJob = Collections.singletonList("All");
+        this.extraBattleProcessTemplate = extraBattleProcessTemplate;
+    }
+
+    EquipmentEnum(Long id, String name, int limitLevel, String desc, List<EquipmentPropertiesDTO> prop,
+                  EquipmentRankEnum equipmentRankEnum, EquipmentTypeEnum equipmentTypeEnum,
+                  ExtraBattleProcessTemplate extraBattleProcessTemplate) {
+        this.id = id;
+        this.name = name;
+        this.limitLevel = limitLevel;
+        this.desc = desc;
+        this.prop = prop;
+        this.equipmentRankEnum = equipmentRankEnum;
+        this.equipmentTypeEnum = equipmentTypeEnum;
+        this.limitJob = Collections.singletonList(Constants.ALL);
         this.extraBattleProcessTemplate = extraBattleProcessTemplate;
     }
 

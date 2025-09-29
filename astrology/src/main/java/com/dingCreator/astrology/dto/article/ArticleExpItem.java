@@ -43,7 +43,7 @@ public class ArticleExpItem extends ArticleItemDTO {
     }
 
     @Override
-    public void changeCnt(Long playerId, int cnt) {
+    public void changeCnt(Long playerId, int cnt, boolean checkBind) {
         PlayerDTO player = PlayerCache.getPlayerById(playerId).getPlayerDTO();
         long exp = 0L;
         if (this.val != 0L) {
