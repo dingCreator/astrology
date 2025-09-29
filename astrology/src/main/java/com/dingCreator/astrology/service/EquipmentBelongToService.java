@@ -2,6 +2,10 @@ package com.dingCreator.astrology.service;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.database.DatabaseProvider;
 import com.dingCreator.astrology.dto.equipment.EquipmentGroupQueryDTO;
@@ -12,8 +16,11 @@ import com.dingCreator.astrology.mapper.EquipmentBelongToMapper;
 import com.dingCreator.astrology.util.LockUtil;
 import com.dingCreator.astrology.vo.EquipmentGroupVO;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -143,8 +150,7 @@ public class EquipmentBelongToService {
      */
     public void addBelongTo(EquipmentBelongTo equipmentBelongTo) {
         DatabaseProvider.getInstance().transactionExecute(sqlSession ->
-                LockUtil.execute(Constants.EQUIPMENT_LOCK_PREFIX + equipmentBelongTo +
-                        Constants.UNDERLINE + equipmentBelongTo.getBelongToId(), () -> {
+                LockUtil.execute(Constants.EQUIPMENT_LOCK_PREFIX + equipmentBelongTo.getBelongToId(), () -> {
                     EquipmentBelongToMapper mapper = sqlSession.getMapper(EquipmentBelongToMapper.class);
                     EquipmentBelongTo oldEquipment = mapper.selectOne(new QueryWrapper<EquipmentBelongTo>()
                             .eq(EquipmentBelongTo.BELONG_TO, equipmentBelongTo.getBelongTo())
@@ -166,6 +172,56 @@ public class EquipmentBelongToService {
                         }
                         mapper.insert(equipmentBelongTo);
                     }
+                })
+        );
+    }
+
+    /**
+     * 新增所有权
+     *
+     * @param equipmentBelongToList 装备归属
+     */
+    public void batchAddBelongTo(List<EquipmentBelongTo> equipmentBelongToList) {
+        List<String> lockNames = equipmentBelongToList.stream().map(EquipmentBelongTo::getBelongToId).map(Objects::toString).collect(Collectors.toList());
+        DatabaseProvider.getInstance().batchTransactionExecute(sqlSession ->
+                LockUtil.execute(Constants.EQUIPMENT_LOCK_PREFIX, lockNames, () -> {
+                    List<String> belongTos = new ArrayList<>();
+                    List<Long> belongToIds = new ArrayList<>();
+                    List<Long> equipmentIds = new ArrayList<>();
+                    List<Integer> levels = new ArrayList<>();
+                    equipmentBelongToList.forEach(blt -> {
+                        belongTos.add(blt.getBelongTo());
+                        belongToIds.add(blt.getBelongToId());
+                        equipmentIds.add(blt.getEquipmentId());
+                        levels.add(blt.getEquipmentLevel());
+                    });
+
+                    EquipmentBelongToMapper mapper = sqlSession.getMapper(EquipmentBelongToMapper.class);
+                    List<EquipmentBelongTo> oldEquipments = mapper.selectList(new QueryWrapper<EquipmentBelongTo>()
+                            .in(EquipmentBelongTo.BELONG_TO, belongTos.stream().distinct().collect(Collectors.toList()))
+                            .in(EquipmentBelongTo.BELONG_TO_ID, belongToIds.stream().distinct().collect(Collectors.toList()))
+                            .in(EquipmentBelongTo.EQUIPMENT_ID, equipmentIds.stream().distinct().collect(Collectors.toList()))
+                            .in(EquipmentBelongTo.EQUIPMENT_LEVEL, levels.stream().distinct().collect(Collectors.toList()))
+                    );
+
+                    Map<String, EquipmentBelongTo> oldEquipmentMap = oldEquipments.stream()
+                            .collect(Collectors.toMap(
+                                    e -> e.getBelongTo() + Constants.UNDERLINE + e.getBelongToId() + Constants.UNDERLINE
+                                            + e.getEquipmentId() + Constants.UNDERLINE + e.getEquipmentLevel(),
+                                    Function.identity()
+                            ));
+
+                    equipmentBelongToList.forEach(blt -> {
+                        String key = blt.getBelongTo() + Constants.UNDERLINE + blt.getBelongToId() + Constants.UNDERLINE
+                                + blt.getEquipmentId() + Constants.UNDERLINE + blt.getEquipmentLevel();
+                        if (oldEquipmentMap.containsKey(key)) {
+                            EquipmentBelongTo old = oldEquipmentMap.get(key);
+                            old.setTotalCnt(old.getTotalCnt() + blt.getTotalCnt());
+                            mapper.updateById(old);
+                        } else {
+                            mapper.insert(blt);
+                        }
+                    });
                 })
         );
     }

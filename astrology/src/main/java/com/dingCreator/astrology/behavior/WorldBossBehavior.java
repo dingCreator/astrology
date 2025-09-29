@@ -154,48 +154,52 @@ public class WorldBossBehavior {
         calendar.set(Calendar.HOUR, 20);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 30);
-        ScheduleUtil.startTimer(this::distributeTimer, calendar.getTime(), 7 * 24 * 60 * 60 * 1000);
+        ScheduleUtil.startTimer(() -> {
+            try {
+                distributeTimer();
+            } catch (Exception e) {
+                logger.error("发放世界boss奖励发生错误", e);
+            }
+        }, calendar.getTime(), 7 * 24 * 60 * 60 * 1000);
     }
 
     public void distributeTimer() {
-        {
-            logger.info("start to distribute world boss award, start time:{}", LocalDateTime.now());
-            WorldBossService worldBossService = WorldBossService.getInstance();
-            WorldBossRecordService worldBossRecordService = WorldBossRecordService.getInstance();
+        logger.info("start to distribute world boss award, start time:{}", LocalDateTime.now());
+        WorldBossService worldBossService = WorldBossService.getInstance();
+        WorldBossRecordService worldBossRecordService = WorldBossRecordService.getInstance();
 
-            List<WorldBoss> worldBossList = worldBossService.listNotDistributeWorldBoss();
-            if (CollectionUtils.isEmpty(worldBossList)) {
+        List<WorldBoss> worldBossList = worldBossService.listNotDistributeWorldBoss();
+        if (CollectionUtils.isEmpty(worldBossList)) {
+            return;
+        }
+        worldBossList.forEach(worldBoss -> {
+            if (worldBoss.getDistribute()) {
+                logger.info("{}-{}奖励已发放", worldBoss.getStartTime(), worldBoss.getEndTime());
                 return;
             }
-            worldBossList.forEach(worldBoss -> {
-                if (worldBoss.getDistribute()) {
-                    logger.info("{}-{}奖励已发放", worldBoss.getStartTime(), worldBoss.getEndTime());
-                    return;
-                }
 
-                String awardJson = worldBoss.getAward();
-                if (Objects.isNull(awardJson) || awardJson.isEmpty()) {
-                    logger.info("{}-{}没有配置奖励", worldBoss.getStartTime(), worldBoss.getEndTime());
-                    return;
-                }
+            String awardJson = worldBoss.getAward();
+            if (Objects.isNull(awardJson) || awardJson.isEmpty()) {
+                logger.info("{}-{}没有配置奖励", worldBoss.getStartTime(), worldBoss.getEndTime());
+                return;
+            }
 
-                int i = 1;
-                int total;
-                do {
-                    PageResponse<WorldBossRankRecordDTO> response
-                            = worldBossRecordService.queryRankPage(worldBoss.getId(), i, 500);
-                    if (CollectionUtils.isEmpty(response.getData())) {
-                        logger.info("{}-{}没有挑战记录", worldBoss.getStartTime(), worldBoss.getEndTime());
-                        break;
-                    }
-                    total = response.getTotal();
-                    distributeAward(convertAwardList(awardJson), response.getData());
-                    i++;
-                } while (i * 500 < total);
-                WorldBossService.getInstance().setDistributeFlag(worldBoss);
-                WorldBossService.getInstance().recoverWorldBoss(worldBoss);
-            });
-        }
+            int i = 1;
+            int total;
+            do {
+                PageResponse<WorldBossRankRecordDTO> response
+                        = worldBossRecordService.queryRankPage(worldBoss.getId(), i, 500);
+                if (CollectionUtils.isEmpty(response.getData())) {
+                    logger.info("{}-{}没有挑战记录", worldBoss.getStartTime(), worldBoss.getEndTime());
+                    break;
+                }
+                total = response.getTotal();
+                distributeAward(convertAwardList(awardJson), response.getData());
+                i++;
+            } while (i * 500 < total);
+            WorldBossService.getInstance().setDistributeFlag(worldBoss);
+            WorldBossService.getInstance().recoverWorldBoss(worldBoss);
+        });
     }
 
     public void distributeAward(List<WorldBossAwardDTO> awardList, List<WorldBossRankRecordDTO> recordList) {

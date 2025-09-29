@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author ding
@@ -75,5 +76,14 @@ public abstract class ArticleItemDTO implements Serializable {
     public ArticleItemVO view() {
         ArticleItemVO vo = ArticleItemVO.builder().count(this.cnt).rare(this.rare).build();
         return fillView(vo);
+    }
+
+    /**
+     * 添加到发放队列
+     *
+     * @param sendingQueue 发放队列
+     */
+    public void add2SendingQueue(List<ArticleItemDTO> sendingQueue) {
+        sendingQueue.add(this);
     }
 }
