@@ -43,8 +43,8 @@ public enum AssetTypeEnum {
             PlayerExceptionEnum.NOT_ENOUGH_MIN_SHUI_HE_XI, false
     ),
 
-    ORIGIN_DRAGON_BALL("originDragonBall", "起源龙珠", "起源龙珠", "挑战M10获得的奖励，可用于商店购买商品",
-            (assetList, cost) -> validateCache(assetList, "originalDragonBall", cost),
+    ORIGIN_DRAGON_BALL("originDragonBall", "起源龙珠", "起源龙珠", "可用于商店购买商品",
+            (assetList, cost) -> validateCache(assetList, "originDragonBall", cost),
             PlayerExceptionEnum.NOT_ENOUGH_ORIGIN_DRAGON_BALL, false
     ),
 
