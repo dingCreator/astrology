@@ -13,6 +13,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -71,10 +72,10 @@ public class BattleFieldDTO implements Serializable {
         // 战斗前
         // 境界压制法则
         // 获取最高境界
-        long initiatorHighestRank = initiatorList.stream()
-                .mapToLong(b -> b.getOrganismInfoDTO().getOrganismDTO().getRank()).max().orElse(0L);
-        long recipientHighestRank = recipientList.stream()
-                .mapToLong(b -> b.getOrganismInfoDTO().getOrganismDTO().getRank()).max().orElse(0L);
+        BattleDTO initiatorHighestRank = initiatorList.stream()
+                .max(Comparator.comparing(o -> o.getOrganismInfoDTO().getOrganismDTO().getRank())).orElse(null);
+        BattleDTO recipientHighestRank = recipientList.stream()
+                .max(Comparator.comparing(o -> o.getOrganismInfoDTO().getOrganismDTO().getRank())).orElse(null);
         // 境界压制
         BattleUtil.getRankSuppression(initiatorList, recipientHighestRank, battleMsg);
         BattleUtil.getRankSuppression(recipientList, initiatorHighestRank, battleMsg);

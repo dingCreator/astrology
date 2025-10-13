@@ -16,13 +16,13 @@ public abstract class ThisBehaviorExtraBattleProcessTemplate implements Serializ
     /**
      * 本轮开始前
      */
-    public void beforeThisRound(BattleRoundDTO battleRound) {
+    public void beforeBehavior(BattleRoundDTO battleRound) {
     }
 
     /**
      * 本轮结束后
      */
-    public void afterThisRound(BattleRoundDTO battleRound) {
+    public void afterBehavior(BattleRoundDTO battleRound) {
     }
 
     /**

@@ -21,6 +21,14 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class RuleDTO implements Serializable {
     /**
+     * 来源
+     */
+    private BattleDTO from;
+    /**
+     * 目标
+     */
+    private BattleDTO tar;
+    /**
      * 法则名称
      */
     private String ruleName;

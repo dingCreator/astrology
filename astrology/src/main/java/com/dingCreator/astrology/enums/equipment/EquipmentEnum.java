@@ -1009,7 +1009,7 @@ public enum EquipmentEnum {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的宝物技能【星游皎夜】被触发");
-                    RuleUtil.addRule(this.getOwner(), EffectTypeEnum.TIMES_SHIELD, "星源护盾", 1L, builder);
+                    RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.TIMES_SHIELD, "星源护盾", 1L, builder);
                     battleField.getBattleMsg().add(builder.toString());
                 }
 
@@ -1027,7 +1027,7 @@ public enum EquipmentEnum {
                         } else {
                             markMap.remove("破碎的星源护盾");
                             builder.append(owner.getOrganismInfoDTO().getOrganismDTO().getName()).append("的宝物技能【星游皎夜】被触发");
-                            RuleUtil.addRule(owner, EffectTypeEnum.TIMES_SHIELD, "星源护盾", 1L, builder);
+                            RuleUtil.addRule(owner, owner, EffectTypeEnum.TIMES_SHIELD, "星源护盾", 1L, builder);
                         }
                     }
                 }
@@ -1096,6 +1096,37 @@ public enum EquipmentEnum {
                 }
             }
     ),
+//    EQUIPMENT_417(417L, "子之矛", "" +
+//            "\n隐藏技能：自相矛盾" +
+//            "\n每回合开始时进入“矛利”状态，提升自身20%攻击 10%穿甲持续一回合" +
+//            "\n与“子之盾”同时装备时解锁“自相矛盾”，每回合开始时有（50%+攻击–防御/攻击+防御）概率增强当前“矛利”进入“矛更利”状态。" +
+//            "“矛更利”状态下，提升自身40%攻击 20%穿甲 20%暴击 50%暴伤，且有15%概率使敌方陷入“流血”异常持续一回合。“矛更利”与“盾益坚”状态不同时触发",
+//            Arrays.asList(
+//                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.ATK, 2800L),
+//                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.15F),
+//                    new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 0.4F)
+//            ), EquipmentRankEnum.MYSTERY, EquipmentTypeEnum.WEAPON,
+//    ),
+//    EQUIPMENT_418(418L, "子之盾", ""
+//
+//    ),
+    /*
+    *
+名称： （防具）
+
+限制等级：lv50
+
+属性：防御+4500 法抗+4500 血量+100000 暴免+40%
+
+隐藏技能：自相矛盾
+
+每回合开始时进入“盾坚”状态，提升自身 20%双抗持续一回合。与“子之矛”同时装备时解锁“自相矛盾”，每回合开始时进行一次判定。有（50%+防御–攻击/防御+攻击）概率增强当前“盾坚”进入“盾益坚”状态。“盾益坚”状态下，提升自身35%双抗 12%免伤持续一回合。“矛更利”与“盾益坚”状态不同时触发。
+
+说明：矛更利与盾益坚状态综合概率为100%，一者触发排斥另一者触发。矛更利或盾益坚存在时，盾坚和矛利状态不增强但同时存在。
+    *
+    * */
+
+
 
     EQUIPMENT_500(500L, "彼岸·净天无涯", "陪伴邪修长大的魔剑——天无涯的完全形态，四大魔器之初，"
             + "零号魔器——天喑无道上掉落的碎屑打造的仿制品，拥有同源于天喑无道的力量，除开本源之外，其本体由无垠之精——一种域外神铁打造而成"
@@ -1353,7 +1384,7 @@ public enum EquipmentEnum {
                 @Override
                 public void afterMyRound(BattleRoundDTO battleRound) {
                     StringBuilder builder = battleRound.getBuilder();
-                    builder.append("※").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName()).append("的宝物技能【博天万法】被触发");
+                    builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName()).append("的宝物技能【博天万法】被触发");
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.DEF, 0.25F), 1, builder);
                     BuffUtil.addBuff(this.getOwner(), this.getOwner(), new BuffDTO(EffectTypeEnum.MAGIC_DEF, 0.25F), 1, builder);
                 }
@@ -1398,9 +1429,9 @@ public enum EquipmentEnum {
                     String name = this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName();
                     StringBuilder builder = new StringBuilder("※" + name + "的饰品法则【零度法则】被触发");
                     battleField.getOur(this.getOwner()).forEach(o ->
-                            RuleUtil.addRule(o, EffectTypeEnum.SPEED, "零度法则", 0.2F, builder));
+                            RuleUtil.addRule(this.getOwner(), o, EffectTypeEnum.SPEED, "零度法则", 0.2F, builder));
                     battleField.getEnemy(this.getOwner()).forEach(o ->
-                            RuleUtil.addRule(o, EffectTypeEnum.SPEED, "零度法则", -0.2F, builder));
+                            RuleUtil.addRule(this.getOwner(), o, EffectTypeEnum.SPEED, "零度法则", -0.2F, builder));
                     battleField.getBattleMsg().add(builder.toString());
                 }
 
@@ -1543,8 +1574,8 @@ public enum EquipmentEnum {
                 public void beforeBattle(BattleFieldDTO battleField) {
                     OrganismDTO organism = this.getOwner().getOrganismInfoDTO().getOrganismDTO();
                     StringBuilder builder = new StringBuilder("※").append(organism.getName()).append("的饰品法则【泯灭法则】被触发");
-                    battleField.getEnemy(this.getOwner()).forEach(b -> RuleUtil.addRule(b, EffectTypeEnum.HEAL,
-                            "泯灭法则", -0.9F, builder));
+                    battleField.getEnemy(this.getOwner()).forEach(b -> RuleUtil.addRule(this.getOwner(), b,
+                            EffectTypeEnum.HEAL, "泯灭法则", -0.9F, builder));
                     battleField.getBattleMsg().add(builder.toString());
                     // 触发技能
                     ExtraBattleProcessTemplate sk1032Tpl = SkillEnum.SKILL_1032.getGlobalExtraProcess();
@@ -1556,7 +1587,9 @@ public enum EquipmentEnum {
                 @Override
                 public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
                     if (battleEffect.getDamage().get() > 0) {
-                        battleEffect.getDamage().set(Math.round(battleEffect.getDamage().get() * 1.15));
+                        BuffUtil.addBuff(this.getOwner(), battleEffect.getTar(),
+                                new BuffDTO(EffectTypeEnum.DAMAGE, "谋天化道", 0.15F, BuffOverrideStrategyEnum.IGNORE),
+                                battleEffect.getBattleRound().getBuilder());
                     }
                 }
             }
@@ -1685,7 +1718,7 @@ public enum EquipmentEnum {
                 battleEffect.getBattleRound().getBuilder().append("，")
                         .append(battleEffect.getFrom().getOrganismInfoDTO().getOrganismDTO().getName())
                         .append("的武器技能【生灵伟力】被触发，存在").append(teammate).append("名")
-                        .append("友方单位，伤害提升").append(rate);
+                        .append("友方单位，伤害提升").append(rate * 100).append("%");
                 damage.set(Math.round(damage.get() * (1 + rate)));
             }
         }

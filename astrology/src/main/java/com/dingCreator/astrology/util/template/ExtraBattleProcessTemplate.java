@@ -1,7 +1,5 @@
 package com.dingCreator.astrology.util.template;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.battle.BattleDTO;
 import com.dingCreator.astrology.dto.battle.BattleEffectDTO;
 import com.dingCreator.astrology.dto.battle.BattleFieldDTO;
@@ -208,16 +206,19 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
         changeDamageRate(battleEffect);
     }
 
-    public final void executeBeforeMyBehavior(BattleEffectDTO battleEffect) {
+    public final void executeBeforeBehavior(BattleEffectDTO battleEffect) {
         if (!effect()) {
             return;
         }
         if (battleEffect.getFrom().equals(this.owner)) {
             beforeMyBehavior(battleEffect);
         }
+        if (this.ownerEnemy.contains(battleEffect.getFrom())) {
+            beforeEnemyBehavior(battleEffect);
+        }
     }
 
-    public final void executeAfterMyBehavior(BattleEffectDTO battleEffect) {
+    public final void executeAfterBehavior(BattleEffectDTO battleEffect) {
         if (!effect()) {
             return;
         }
@@ -317,13 +318,13 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
     }
 
     /**
-     * 友方轮次前
+     * 敌方轮次前
      */
     public void beforeEnemyRound(BattleRoundDTO battleRound) {
     }
 
     /**
-     * 友方轮次后
+     * 敌方轮次后
      */
     public void afterEnemyRound(BattleRoundDTO battleRound) {
     }
@@ -344,6 +345,12 @@ public abstract class ExtraBattleProcessTemplate implements Serializable {
      * 我的行动前
      */
     public void beforeMyBehavior(BattleEffectDTO battleEffect) {
+    }
+
+    /**
+     * 敌方行动前
+     */
+    public void beforeEnemyBehavior(BattleEffectDTO battleEffect) {
     }
 
     /**

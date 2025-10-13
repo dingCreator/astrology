@@ -26,20 +26,26 @@ public class ArticleAssetItem extends ArticleItemDTO {
 
     public ArticleAssetItem(String assetType) {
         super(ArticleTypeEnum.ASSET.getType());
-        Assert.notNull(AssetTypeEnum.getByCode(assetType));
+        AssetTypeEnum assetTypeEnum = AssetTypeEnum.getByCode(assetType);
+        Assert.notNull(assetTypeEnum);
         this.assetType = assetType;
+        this.rare = assetTypeEnum.getRare();
     }
 
     public ArticleAssetItem(String assetType, long cnt) {
         super(ArticleTypeEnum.ASSET.getType());
-        Assert.notNull(AssetTypeEnum.getByCode(assetType));
+        AssetTypeEnum assetTypeEnum = AssetTypeEnum.getByCode(assetType);
+        Assert.notNull(assetTypeEnum);
         this.assetType = assetType;
         this.cnt = cnt;
+        this.rare = assetTypeEnum.getRare();
     }
 
     public void setAssetType(String assetType) {
-        Assert.notNull(AssetTypeEnum.getByCode(assetType));
+        AssetTypeEnum assetTypeEnum = AssetTypeEnum.getByCode(assetType);
+        Assert.notNull(assetTypeEnum);
         this.assetType = assetType;
+        this.rare = assetTypeEnum.getRare();
     }
 
     @Override

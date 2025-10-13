@@ -609,20 +609,21 @@ public class BattleUtil {
         return response;
     }
 
-    public static void getRankSuppression(List<BattleDTO> battleTmp, long highestRank, List<String> battleMsg) {
+    public static void getRankSuppression(List<BattleDTO> battleTmp, BattleDTO from, List<String> battleMsg) {
         StringBuilder builder = new StringBuilder();
+        long highestRank = from.getOrganismInfoDTO().getOrganismDTO().getRank();
         long count = battleTmp.stream()
                 .filter(i -> i.getOrganismInfoDTO().getOrganismDTO().getRank() < highestRank)
                 .peek(r -> {
                     OrganismDTO organismDTO = r.getOrganismInfoDTO().getOrganismDTO();
                     float rate = RankUtil.getRankSuppression(organismDTO.getRank(), highestRank);
-                    RuleUtil.addRule(r, EffectTypeEnum.ATK, "境界压制", rate, builder);
-                    RuleUtil.addRule(r, EffectTypeEnum.MAGIC_ATK, "境界压制", rate, builder);
-                    RuleUtil.addRule(r, EffectTypeEnum.DEF, "境界压制", rate, builder);
-                    RuleUtil.addRule(r, EffectTypeEnum.MAGIC_DEF, "境界压制", rate, builder);
-                    RuleUtil.addRule(r, EffectTypeEnum.HIT, "境界压制", rate, builder);
-                    RuleUtil.addRule(r, EffectTypeEnum.DODGE, "境界压制", rate, builder);
-                    RuleUtil.addRule(r, EffectTypeEnum.SPEED, "境界压制", rate, builder);
+                    RuleUtil.addRule(from, r, EffectTypeEnum.ATK, "境界压制", rate, builder);
+                    RuleUtil.addRule(from, r, EffectTypeEnum.MAGIC_ATK, "境界压制", rate, builder);
+                    RuleUtil.addRule(from, r, EffectTypeEnum.DEF, "境界压制", rate, builder);
+                    RuleUtil.addRule(from, r, EffectTypeEnum.MAGIC_DEF, "境界压制", rate, builder);
+                    RuleUtil.addRule(from, r, EffectTypeEnum.HIT, "境界压制", rate, builder);
+                    RuleUtil.addRule(from, r, EffectTypeEnum.DODGE, "境界压制", rate, builder);
+                    RuleUtil.addRule(from, r, EffectTypeEnum.SPEED, "境界压制", rate, builder);
                 }).count();
         if (count > 0) {
             battleMsg.add("※" + builder);
