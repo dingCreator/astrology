@@ -77,6 +77,8 @@ public class EquipmentUtil {
         val = getLongVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getArmor(), equipmentBarDTO);
         // 饰品
         val = getLongVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getJewelry(), equipmentBarDTO);
+        // 法则
+        val = getLongVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getRule(), equipmentBarDTO);
         return val;
     }
 
@@ -137,6 +139,8 @@ public class EquipmentUtil {
         val = getFloatVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getArmor(), equipmentBarDTO);
         // 饰品
         val = getFloatVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getJewelry(), equipmentBarDTO);
+        // 法则
+        val = getFloatVal(val, equipmentPropertiesTypeEnum, equipmentBarDTO.getRule(), equipmentBarDTO);
         return val;
     }
 
@@ -177,6 +181,9 @@ public class EquipmentUtil {
                     equipmentBelongTo.getEquipmentLevel()));
         } else if (EquipmentTypeEnum.JEWELRY.equals(equipmentEnum.getEquipmentTypeEnum())) {
             equipmentBarDTO.setJewelry(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
+                    equipmentBelongTo.getEquipmentLevel()));
+        } else if (EquipmentTypeEnum.RULE.equals(equipmentEnum.getEquipmentTypeEnum())) {
+            equipmentBarDTO.setRule(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
                     equipmentBelongTo.getEquipmentLevel()));
         }
     }

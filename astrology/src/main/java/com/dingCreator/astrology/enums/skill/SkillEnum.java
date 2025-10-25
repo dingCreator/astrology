@@ -2058,12 +2058,12 @@ public enum SkillEnum implements Serializable {
             StringBuilder builder = battleEffect.getBattleRound().getBuilder();
             Map<String, Integer> fromMarkMap = battleEffect.getFrom().getMarkMap();
             if (fromMarkMap.containsKey("沼溺")) {
-                builder.append("，“沼溺”使受到的伤害降低70%");
+                builder.append("，“沼溺”使伤害降低70%");
                 battleEffect.getDamage().addAndGet(-Math.round(0.7F * battleEffect.getDamage().get()));
             } else {
                 int fire = fromMarkMap.getOrDefault("薪火", 0);
                 float rate = 0.02F * fire;
-                builder.append("，“薪火”使受到的伤害提升").append(rate * 100).append("%");
+                builder.append("，“薪火”使伤害提升").append(rate * 100).append("%");
                 battleEffect.getDamage().addAndGet(Math.round(rate * battleEffect.getDamage().get()));
             }
         }

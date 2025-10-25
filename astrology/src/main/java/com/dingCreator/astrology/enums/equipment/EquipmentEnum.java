@@ -1391,7 +1391,7 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_PENETRATE, 0.3F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.HIT, 2100L),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DODGE, 0.3F)
-            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.JEWELRY,
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.RULE,
             new ExtraBattleProcessTemplate() {
                 @Override
                 public void beforeBattle(BattleFieldDTO battleField) {
@@ -1449,7 +1449,7 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 1F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 4F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.PENETRATE, 0.4F)
-            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.WEAPON, JobEnum.GUN.getJobCode(),
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.RULE, JobEnum.GUN.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
                 public void ifMeHitEnemy(BattleEffectDTO battleEffect) {
@@ -1477,7 +1477,7 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.MAGIC_DEF, 32000L, 0.15F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_REDUCTION_RATE, 0.5F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE_REDUCTION, 1.5F)
-            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.ARMOR, JobEnum.SI_DI_WU_SHI.getJobCode(),
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.RULE, JobEnum.SI_DI_WU_SHI.getJobCode(),
             new ExtraBattleProcessTemplate() {
                 @Override
                 public void beforeBattle(BattleFieldDTO battleField) {
@@ -1537,7 +1537,7 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.LIFE_STEALING, 0.8F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_RATE, 0.8F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 1.5F)
-            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.JEWELRY,
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.RULE,
             new ExtraBattleProcessTemplate() {
                 @Override
                 public void beforeBattle(BattleFieldDTO battleField) {
@@ -1583,7 +1583,7 @@ public enum EquipmentEnum {
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.CRITICAL_DAMAGE, 2.3F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.DODGE, 3100L, 0.2F),
                     new EquipmentPropertiesDTO(EquipmentPropertiesTypeEnum.BEHAVIOR_SPEED, 3100L, 0.15F)
-            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.JEWELRY,
+            ), EquipmentRankEnum.RULE, EquipmentTypeEnum.RULE,
             new ExtraBattleProcessTemplate() {
                 @Override
                 public void beforeMyRound(BattleRoundDTO battleRound) {

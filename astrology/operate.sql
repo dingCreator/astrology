@@ -37,3 +37,5 @@ SELECT belong_to_id , equipment_id ,sum(total_cnt) cnt from bot.astrology_equipm
 where equipment_id >600
 group by belong_to_id ,equipment_id
 HAVING cnt>0
+
+update bot_dev.astrology_equipment_belong_to set equip=0 where equipment_id between 600 and 699 and equip=1;

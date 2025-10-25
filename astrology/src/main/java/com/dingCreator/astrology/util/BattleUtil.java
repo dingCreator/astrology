@@ -668,6 +668,7 @@ public class BattleUtil {
             initEquipmentExtraProcess(from, our, enemy, bar.getArmor(), extraBattleProcessList);
             initEquipmentExtraProcess(from, our, enemy, bar.getJewelry(), extraBattleProcessList);
             initEquipmentExtraProcess(from, our, enemy, bar.getWeapon(), extraBattleProcessList);
+            initEquipmentExtraProcess(from, our, enemy, bar.getRule(), extraBattleProcessList);
         }
     }
 

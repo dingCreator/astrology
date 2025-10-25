@@ -26,6 +26,7 @@ public enum EquipmentExceptionEnum {
     NOT_EQUIP_ARMOR(Constants.EQUIPMENT_EXCEPTION_PREFIX + "007", "你未穿戴防具"),
     NOT_EQUIP_JEWELRY(Constants.EQUIPMENT_EXCEPTION_PREFIX + "008", "你未穿戴饰品"),
     NOT_ENOUGH_EQUIPMENT(Constants.EQUIPMENT_EXCEPTION_PREFIX + "009", "装备数量不足"),
+    NOT_EQUIP_RULE(Constants.EQUIPMENT_EXCEPTION_PREFIX + "010", "你未穿戴法则"),
     ;
 
     private final String code;

@@ -61,6 +61,12 @@ public class EquipmentBehavior {
             }
             equipmentBarDTO.setJewelry(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
                     equipmentBelongTo.getEquipmentLevel()));
+        } else if (EquipmentTypeEnum.RULE.equals(equipmentEnum.getEquipmentTypeEnum())) {
+            if (Objects.nonNull(equipmentBarDTO.getRule())) {
+                equipmentBelongToService.updateEquipment(equipmentBarDTO.getRule().getId(), false);
+            }
+            equipmentBarDTO.setRule(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getEquipmentId(),
+                    equipmentBelongTo.getEquipmentLevel()));
         }
         playerInfoDTO.getPlayerDTO().clearAdditionVal();
         equipmentBelongToService.updateEquipment(equipmentBelongTo.getId(), true);

@@ -94,6 +94,30 @@ public enum EquipmentTypeEnum {
                 EquipmentBelongToService.getInstance().updateEquipment(bar.getJewelry().getId(), false);
                 bar.setJewelry(null);
             }),
+    /**
+     * 法则
+     */
+    RULE("rule", "法则",
+            (playerId, equipmentBelongTo) -> {
+                EquipmentUtil.validate(playerId, equipmentBelongTo);
+                PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
+                EquipmentBarDTO bar = playerInfoDTO.getEquipmentBarDTO();
+                if (Objects.nonNull(bar.getRule())) {
+                    EquipmentBelongToService.getInstance().updateEquipment(bar.getRule().getId(), false);
+                }
+                bar.setRule(new EquipmentDTO(equipmentBelongTo.getId(), equipmentBelongTo.getBelongToId(),
+                        equipmentBelongTo.getEquipmentLevel()));
+                EquipmentBelongToService.getInstance().updateEquipment(equipmentBelongTo.getId(), true);
+            },
+            playerId -> {
+                PlayerInfoDTO playerInfoDTO = PlayerCache.getPlayerById(playerId);
+                EquipmentBarDTO bar = playerInfoDTO.getEquipmentBarDTO();
+                if (Objects.isNull(bar.getRule())) {
+                    throw EquipmentExceptionEnum.NOT_EQUIP_JEWELRY.getException();
+                }
+                EquipmentBelongToService.getInstance().updateEquipment(bar.getRule().getId(), false);
+                bar.setRule(null);
+            }),
     ;
     private final String type;
     private final String chnDesc;

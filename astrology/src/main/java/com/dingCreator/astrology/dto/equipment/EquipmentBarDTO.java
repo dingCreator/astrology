@@ -22,4 +22,8 @@ public class EquipmentBarDTO implements Serializable {
      * 饰品
      */
     private EquipmentDTO jewelry;
+    /**
+     * 法则
+     */
+    private EquipmentDTO rule;
 }
