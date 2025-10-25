@@ -94,7 +94,7 @@ public class BattleEffectDTO {
         // 插入结算
         List<ExtraBattleProcessTemplate> extraBattleProcessList = battleField.getExtraBattleProcessTemplateList();
         // 插入结算-我的行动前
-        extraBattleProcessList.forEach(ext -> ext.executeBeforeMyBehavior(this));
+        extraBattleProcessList.forEach(ext -> ext.executeBeforeBehavior(this));
         nowSkill.getThisBehaviorExtraProcess().beforeEffect(this);
         skillEffect.getTemplate().beforeEffect(this);
         // 行动过程
@@ -103,7 +103,7 @@ public class BattleEffectDTO {
         skillEffect.getTemplate().afterEffect(this);
         nowSkill.getThisBehaviorExtraProcess().afterEffect(this);
         extraBattleProcessList.forEach(ext -> {
-            ext.executeAfterMyBehavior(this);
+            ext.executeAfterBehavior(this);
             ext.executeAfterEnemyBehavior(this);
         });
     }

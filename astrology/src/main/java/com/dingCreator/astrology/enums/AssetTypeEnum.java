@@ -23,37 +23,44 @@ public enum AssetTypeEnum {
     /**
      * 货币类型
      */
-    ASTROLOGY_COIN("astrologyCoin", "圣星币", "圣星币", "圣星王朝发行的货币，大陆的通用货币",
+    ASTROLOGY_COIN("astrologyCoin", "圣星币", "圣星币", 100,
+            "圣星王朝发行的货币，大陆的通用货币",
             (assetList, cost) -> validateCache(assetList, "astrologyCoin", cost),
             PlayerExceptionEnum.NOT_ENOUGH_ASTROLOGY_COIN, true
     ),
 
-    DIAMOND("diamond", "缘石", "缘石", "被缘神力量浸染的石头，或许有特殊的用处",
+    DIAMOND("diamond", "缘石", "缘石", 200,
+            "被缘神力量浸染的石头，或许有特殊的用处",
             (assetList, cost) -> validateCache(assetList, "diamond", cost),
             PlayerExceptionEnum.NOT_ENOUGH_DIAMOND, true
     ),
 
-    WORLD_BOSS_TOKEN("worldBossToken", "世界boss令牌", "世界boss令牌", "世界boss令牌，可用于参与挑战世界boss",
+    WORLD_BOSS_TOKEN("worldBossToken", "世界boss令牌", "世界boss令牌", 0,
+            "世界boss令牌，可用于参与挑战世界boss",
             (assetList, cost) -> validateCache(assetList, "worldBossToken", cost),
             PlayerExceptionEnum.NOT_ENOUGH_WORLD_BOSS_TOKEN, false
     ),
 
-    MIN_SHUI_HE_XI("minShuiHeXi", "冥水河隙", "冥水河隙", "挑战M10获得的奖励，可用于商店购买商品",
+    MIN_SHUI_HE_XI("minShuiHeXi", "冥水河隙", "冥水河隙", 0,
+            "挑战M10获得的奖励，可用于商店购买商品",
             (assetList, cost) -> validateCache(assetList, "minShuiHeXi", cost),
             PlayerExceptionEnum.NOT_ENOUGH_MIN_SHUI_HE_XI, false
     ),
 
-    ORIGIN_DRAGON_BALL("originDragonBall", "起源龙珠", "起源龙珠", "可用于商店购买商品",
+    ORIGIN_DRAGON_BALL("originDragonBall", "起源龙珠", "起源龙珠", 600,
+            "可用于商店购买商品",
             (assetList, cost) -> validateCache(assetList, "originDragonBall", cost),
             PlayerExceptionEnum.NOT_ENOUGH_ORIGIN_DRAGON_BALL, false
     ),
 
-    TRIAL_AFTERGLOW("trialAfterglow", "审判余晖", "审判余晖", "",
+    TRIAL_AFTERGLOW("trialAfterglow", "审判余晖", "审判余晖", 0,
+            "",
             (assetList, cost) -> validateCache(assetList, "trialAfterglow", cost),
             PlayerExceptionEnum.NOT_ENOUGH_TRIAL_AFTERGLOW, false
     ),
 
-    SECRET_SCROLL("secretScroll", "天枢密卷", "天枢密卷", "天枢密卷，可用于商店购买商品",
+    SECRET_SCROLL("secretScroll", "天枢密卷", "天枢密卷", 0,
+            "天枢密卷，可用于商店购买商品",
             (assetList, cost) -> validateCache(assetList, "secretScroll", cost),
             PlayerExceptionEnum.NOT_ENOUGH_TRIAL_AFTERGLOW, false
     ),
@@ -64,6 +71,8 @@ public enum AssetTypeEnum {
     private final String chnName;
 
     private final String showName;
+
+    private final Integer rare;
 
     private final String desc;
 

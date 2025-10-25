@@ -5,7 +5,6 @@ import com.dingCreator.astrology.constants.Constants;
 import com.dingCreator.astrology.dto.battle.*;
 import com.dingCreator.astrology.dto.organism.OrganismDTO;
 import com.dingCreator.astrology.dto.organism.OrganismInfoDTO;
-import com.dingCreator.astrology.dto.organism.monster.MonsterDTO;
 import com.dingCreator.astrology.dto.skill.SkillBarDTO;
 import com.dingCreator.astrology.dto.skill.SkillEffectDTO;
 import com.dingCreator.astrology.enums.BuffOverrideStrategyEnum;
@@ -252,7 +251,7 @@ public enum SkillEnum implements Serializable {
 
                     BuffUtil.addBuff(from, from, new BuffDTO(EffectTypeEnum.MAGIC_ATK, 0.2F), 3, builder);
                     BuffUtil.addBuff(from, from, new BuffDTO(EffectTypeEnum.HIT, 0.2F), 3, builder);
-                    RuleUtil.addRule(from, EffectTypeEnum.TIMES_SHIELD, "源星盾", 1, builder);
+                    RuleUtil.addRule(from, from, EffectTypeEnum.TIMES_SHIELD, "源星盾", 1, builder);
                 }
             }
     ),
@@ -500,7 +499,7 @@ public enum SkillEnum implements Serializable {
                     BattleUtil.doHealing(tar, tar.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition(), builder,
                             battleEffect.getBattleRound().getBattleField());
                     BattleUtil.doMpChange(tar, tar.getOrganismInfoDTO().getOrganismDTO().getMaxMpWithAddition(), builder);
-                    RuleUtil.addRule(from, EffectTypeEnum.ATK, "浴血神战", -0.6F, builder);
+                    RuleUtil.addRule(from, from, EffectTypeEnum.ATK, "浴血神战", -0.6F, builder);
                     markMap.put("浴血神战", 1);
                 }
             }
@@ -649,7 +648,7 @@ public enum SkillEnum implements Serializable {
             "All", 100L, new SkillEffectDTO(TargetEnum.ME, DamageTypeEnum.ATK, 0F),
             new ThisBehaviorExtraBattleProcessTemplate() {
                 @Override
-                public void afterThisRound(BattleRoundDTO battleRound) {
+                public void afterBehavior(BattleRoundDTO battleRound) {
                     BattleDTO from = battleRound.getFrom();
                     if (from.getMarkMap().containsKey("太初神誓")) {
                         int cnt = from.getMarkMap().get("太初神誓") - 1;
@@ -716,7 +715,7 @@ public enum SkillEnum implements Serializable {
             new SkillEffectDTO(TargetEnum.ALL_ENEMY, DamageTypeEnum.MAGIC, 18F),
             new ThisBehaviorExtraBattleProcessTemplate() {
                 @Override
-                public void beforeThisRound(BattleRoundDTO battleRound) {
+                public void beforeBehavior(BattleRoundDTO battleRound) {
                     BuffUtil.addBuff(battleRound.getFrom(), battleRound.getFrom(),
                             new BuffDTO(EffectTypeEnum.HIT, "", 999999999L),
                             0, battleRound.getBuilder());
@@ -741,7 +740,7 @@ public enum SkillEnum implements Serializable {
             new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 4.5F),
             new ThisBehaviorExtraBattleProcessTemplate() {
                 @Override
-                public void beforeThisRound(BattleRoundDTO battleRound) {
+                public void beforeBehavior(BattleRoundDTO battleRound) {
                     BattleDTO from = battleRound.getFrom();
                     float rate = from.getMarkMap().containsKey("伪神") ? 0.3F : 0.15F;
                     BuffUtil.addBuff(from, from, new BuffDTO(EffectTypeEnum.PENETRATE, "", rate), 0,
@@ -1067,6 +1066,68 @@ public enum SkillEnum implements Serializable {
             }
     ),
 
+    SKILL_54(54L, "破障迷蔼之光", "降低友方全体2点“血之花”成熟度，回复友方全体5000+100%法强点血量", Constants.ALL, 120L,
+            new SkillEffectDTO(TargetEnum.ALL_OUR), new ThisBehaviorExtraBattleProcessTemplate() {
+        @Override
+        public void ifHit(BattleEffectDTO battleEffect) {
+            StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+            BattleFieldDTO battleField = battleEffect.getBattleRound().getBattleField();
+
+            changedBloodFlower(battleEffect.getTar(), -2, builder);
+            long src = battleEffect.getFrom().getOrganismInfoDTO().getOrganismDTO().getMagicAtk();
+            long magicAtk = BattleUtil.getLongProperty(src, OrganismPropertiesEnum.MAGIC_ATK.getFieldName(),
+                    battleEffect.getFrom(), battleField);
+            BattleUtil.doHealing(battleEffect.getTar(), 5000 + magicAtk, builder, battleField);
+        }
+    }),
+
+    SKILL_55(55L, "破障迷蔼之锋", "降低友方全体2点“血之花”成熟度，对敌方单体造成1500%物理伤害，对血魔额外造成1000%物理伤害", Constants.ALL, 120L,
+            new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 15F), new ThisBehaviorExtraBattleProcessTemplate() {
+        @Override
+        public void afterEffect(BattleEffectDTO battleEffect) {
+            battleEffect.getOur().forEach(o -> changedBloodFlower(o, -2, battleEffect.getBattleRound().getBuilder()));
+        }
+    }),
+
+    SKILL_56(56L, "碎障之光", "降低友方全体1点“血之花”成熟度，回复友方全体50%法强点血量。自身造成伤害减少25%持续一回合",
+            Constants.ALL, 60L, new SkillEffectDTO(TargetEnum.ME), new ThisBehaviorExtraBattleProcessTemplate() {
+        @Override
+        public void ifHit(BattleEffectDTO battleEffect) {
+            StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+            long magicAtk = BattleUtil.getLongProperty(
+                    battleEffect.getFrom().getOrganismInfoDTO().getOrganismDTO().getMagicAtk(),
+                    OrganismPropertiesEnum.MAGIC_ATK.getFieldName(), battleEffect.getFrom(),
+                    battleEffect.getBattleRound().getBattleField());
+            battleEffect.getOur().forEach(o -> {
+                changedBloodFlower(o, -1, builder);
+                BattleUtil.doHealing(o, magicAtk, builder, battleEffect.getBattleRound().getBattleField());
+            });
+            BuffUtil.addBuff(battleEffect.getFrom(), battleEffect.getFrom(), new BuffDTO(EffectTypeEnum.DO_DAMAGE, -0.25F), 1, builder);
+        }
+    }),
+
+    SKILL_57(57L, "破障之锋", "造成1000%物理伤害，降低友方全体1点“血之花”成熟度，自身防御降低25%持续一回合",
+            Constants.ALL, 60L, new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 10F),
+            new ThisBehaviorExtraBattleProcessTemplate() {
+                @Override
+                public void afterEffect(BattleEffectDTO battleEffect) {
+                    StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+                    battleEffect.getOur().forEach(o -> changedBloodFlower(o, -1, builder));
+                    BuffUtil.addBuff(battleEffect.getFrom(), battleEffect.getFrom(), new BuffDTO(EffectTypeEnum.DEF, -0.25F), 1, builder);
+                }
+            }
+    ),
+
+    SKILL_58(58L, "星启·临河倾渊",
+            "造成1700%法术伤害，对血魔造成伤害翻倍。血魔第二姿态时，额外削减血魔两层“血之华”并转化为“血之花”成熟度（无血之华则不转化）",
+            Constants.ALL, 200L, new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 17F)
+    ),
+
+    SKILL_59(59L, "绝锋·天孤破云",
+            "造成1700%物理伤害，对血魔额外造成1000%物理伤害并使血魔防御降低15%持续三回合。血魔第二姿态时额外削减血魔两层“血之华”并转化为“血之花”成熟度（无血之华则不转化）",
+            Constants.ALL, 200L, new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 17F)
+    ),
+
 
     /**
      * 以下是BOSS的技能
@@ -1357,7 +1418,7 @@ public enum SkillEnum implements Serializable {
         }
 
         @Override
-        public void afterThisRound(BattleRoundDTO battleRound) {
+        public void afterBehavior(BattleRoundDTO battleRound) {
             StringBuilder builder = battleRound.getBuilder();
             battleRound.getEnemy().stream().filter(e -> e.getMarkMap().containsKey("莹雪化谢-斫霜")).forEach(e -> {
                 e.getMarkMap().remove("莹雪化谢-斫霜");
@@ -1468,7 +1529,7 @@ public enum SkillEnum implements Serializable {
                 }
 
                 @Override
-                public void afterThisRound(BattleRoundDTO battleRound) {
+                public void afterBehavior(BattleRoundDTO battleRound) {
                     BattleDTO from = battleRound.getFrom();
                     StringBuilder builder = battleRound.getBuilder();
                     BuffUtil.addBuff(from, from,
@@ -1682,7 +1743,7 @@ public enum SkillEnum implements Serializable {
                     new BuffDTO(EffectTypeEnum.DODGE, "“勇者”（初）", 0.1F), 10, builder);
             BuffUtil.addBuff(this.getOwner(), this.getOwner(),
                     new BuffDTO(EffectTypeEnum.SPEED, "“勇者”（初）", 0.1F), 10, builder);
-            RuleUtil.addRule(battleField.getEnemy(this.getOwner()).get(0),
+            RuleUtil.addRule(this.getOwner(), battleField.getEnemy(this.getOwner()).get(0),
                     EffectTypeEnum.MAGIC_DEF, "“勇者”（初）", -0.15F, builder);
             battleField.getBattleMsg().add(builder.toString());
         }
@@ -1726,18 +1787,18 @@ public enum SkillEnum implements Serializable {
                             && EquipmentEnum.EQUIPMENT_8.getId().equals(bar.getWeapon().getEquipmentId()))
             ) {
                 builder.append(organism.getName()).append("的被动【年兽之力】被触发").append("，属性特大幅提升");
-                RuleUtil.addRule(this.getOwner(), EffectTypeEnum.ATK, "年兽之力", 88.88F, builder);
-                RuleUtil.addRule(this.getOwner(), EffectTypeEnum.MAGIC_ATK, "年兽之力", 88.88F, builder);
-                RuleUtil.addRule(this.getOwner(), EffectTypeEnum.DEF, "年兽之力", 88.88F, builder);
-                RuleUtil.addRule(this.getOwner(), EffectTypeEnum.MAGIC_DEF, "年兽之力", 88.88F, builder);
-                RuleUtil.addRule(this.getOwner(), EffectTypeEnum.HIT, "年兽之力", 88.88F, builder);
-                RuleUtil.addRule(this.getOwner(), EffectTypeEnum.DODGE, "年兽之力", 88.88F, builder);
-                RuleUtil.addRule(this.getOwner(), EffectTypeEnum.SPEED, "年兽之力", 88.88F, builder);
-                RuleUtil.addRule(this.getOwner(), EffectTypeEnum.CRITICAL, "年兽之力", 0.88F, builder);
-                RuleUtil.addRule(this.getOwner(), EffectTypeEnum.CRITICAL_DAMAGE, "年兽之力", 8.8F, builder);
-                RuleUtil.addRule(this.getOwner(), EffectTypeEnum.CRITICAL_REDUCTION, "年兽之力", 0.88F, builder);
-                RuleUtil.addRule(this.getOwner(), EffectTypeEnum.CRITICAL_DAMAGE_REDUCTION, "年兽之力", 0.88F, builder);
-                RuleUtil.addRule(this.getOwner(), EffectTypeEnum.LIFE_STEAL, "年兽之力", 8.88F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.ATK, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.MAGIC_ATK, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.DEF, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.MAGIC_DEF, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.HIT, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.DODGE, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.SPEED, "年兽之力", 88.88F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.CRITICAL, "年兽之力", 0.88F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.CRITICAL_DAMAGE, "年兽之力", 8.8F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.CRITICAL_REDUCTION, "年兽之力", 0.88F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.CRITICAL_DAMAGE_REDUCTION, "年兽之力", 0.88F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.LIFE_STEAL, "年兽之力", 8.88F, builder);
             } else {
                 builder.append("因对方装备了“轰天雷”，").append(organism.getName()).append("的【年兽之力】失效");
             }
@@ -1752,8 +1813,8 @@ public enum SkillEnum implements Serializable {
             StringBuilder builder = new StringBuilder("※")
                     .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                     .append("的被动【审判（惩）】被触发");
-            RuleUtil.addRule(this.getOwner(), EffectTypeEnum.ATK, "审判（惩）", 0.5F, builder);
-            RuleUtil.addRule(this.getOwner(), EffectTypeEnum.MAGIC_ATK, "审判（惩）", 0.5F, builder);
+            RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.ATK, "审判（惩）", 0.5F, builder);
+            RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.MAGIC_ATK, "审判（惩）", 0.5F, builder);
             battleField.getBattleMsg().add(builder.toString());
         }
     }),
@@ -1811,9 +1872,9 @@ public enum SkillEnum implements Serializable {
                     new BuffDTO(EffectTypeEnum.DODGE, "真·勇者", 0.2F), 10, builder);
             BuffUtil.addBuff(this.getOwner(), this.getOwner(),
                     new BuffDTO(EffectTypeEnum.SPEED, "真·勇者", 0.2F), 10, builder);
-            RuleUtil.addRule(battleField.getEnemy(this.getOwner()).get(0),
+            RuleUtil.addRule(this.getOwner(), battleField.getEnemy(this.getOwner()).get(0),
                     EffectTypeEnum.DEF, "真·勇者", -0.1F, builder);
-            RuleUtil.addRule(battleField.getEnemy(this.getOwner()).get(0),
+            RuleUtil.addRule(this.getOwner(), battleField.getEnemy(this.getOwner()).get(0),
                     EffectTypeEnum.MAGIC_DEF, "真·勇者", -0.1F, builder);
             battleField.getBattleMsg().add(builder.toString());
         }
@@ -1842,7 +1903,7 @@ public enum SkillEnum implements Serializable {
             Collections.nCopies(10, new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 0.75F)),
             new ThisBehaviorExtraBattleProcessTemplate() {
                 @Override
-                public void beforeThisRound(BattleRoundDTO battleRound) {
+                public void beforeBehavior(BattleRoundDTO battleRound) {
                     BattleDTO from = battleRound.getFrom();
                     StringBuilder builder = battleRound.getBuilder();
                     BuffUtil.addBuff(from, from, new BuffDTO(EffectTypeEnum.HIT, "", 0.15F), 2, builder);
@@ -1883,7 +1944,7 @@ public enum SkillEnum implements Serializable {
             Constants.NONE, 90L, new SkillEffectDTO(TargetEnum.ME, DamageTypeEnum.ATK, 0F),
             new ThisBehaviorExtraBattleProcessTemplate() {
                 @Override
-                public void beforeThisRound(BattleRoundDTO battleRound) {
+                public void beforeBehavior(BattleRoundDTO battleRound) {
                     BattleDTO from = battleRound.getFrom();
                     StringBuilder builder = battleRound.getBuilder();
                     BattleUtil.doHealing(from,
@@ -2092,7 +2153,7 @@ public enum SkillEnum implements Serializable {
             BattleDTO owner = this.getOwner();
             StringBuilder builder = new StringBuilder("※").append(owner.getOrganismInfoDTO().getOrganismDTO().getName())
                     .append("的被动【神性·君临（异维）】被触发");
-            RuleUtil.addRule(owner, EffectTypeEnum.IMMUNITY, "异维入侵", 0F, builder);
+            RuleUtil.addRule(owner, owner, EffectTypeEnum.IMMUNITY, "异维入侵", 0F, builder);
             battleField.getBattleMsg().add(builder.toString());
         }
 
@@ -2279,7 +2340,7 @@ public enum SkillEnum implements Serializable {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的被动【古龙之血·生魂】被触发");
-                    RuleUtil.addRule(this.getOwner(), EffectTypeEnum.HEAL, "古龙之血·生魂", 0.3F, builder);
+                    RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.HEAL, "古龙之血·生魂", 0.3F, builder);
                     battleField.getBattleMsg().add(builder.toString());
                 }
 
@@ -2334,7 +2395,7 @@ public enum SkillEnum implements Serializable {
             Constants.NONE, 80L, new SkillEffectDTO(TargetEnum.ALL_ENEMY, DamageTypeEnum.MAGIC, 5.5F),
             new ThisBehaviorExtraBattleProcessTemplate() {
                 @Override
-                public void beforeThisRound(BattleRoundDTO battleRound) {
+                public void beforeBehavior(BattleRoundDTO battleRound) {
                     BuffUtil.addBuff(battleRound.getFrom(), battleRound.getFrom(),
                             new BuffDTO(EffectTypeEnum.HIT, 0.99F), 0, battleRound.getBuilder());
                 }
@@ -2415,7 +2476,7 @@ public enum SkillEnum implements Serializable {
                     StringBuilder builder = new StringBuilder("※")
                             .append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
                             .append("的被动【异维入侵】被触发");
-                    RuleUtil.addRule(this.getOwner(), EffectTypeEnum.IMMUNITY, "异维入侵", 0L, builder);
+                    RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.IMMUNITY, "异维入侵", 0L, builder);
                 }
             }
     ),
@@ -2610,6 +2671,7 @@ public enum SkillEnum implements Serializable {
                     count, battleRound.getOur(), 0, battleRound.getBuilder());
         }
     }),
+
     SKILL_1085(1085L, "寰宇皆知",
             "获得“博识”状态，攻击命中时有70%概率识破敌人弱点使该次伤害提升至150%，受到攻击时有70%概率看破敌人的攻击，使该次伤害降低至80%",
             Constants.NONE, false, new ExtraBattleProcessTemplate() {
@@ -2618,7 +2680,7 @@ public enum SkillEnum implements Serializable {
             if (RandomUtil.isHit(0.7F)) {
                 StringBuilder builder = battleEffect.getBattleRound().getBuilder();
                 builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName())
-                        .append("识破敌人弱点，伤害提升至150%");
+                        .append("识破弱点，伤害提升至150%");
                 battleEffect.getDamage().set(Math.round(battleEffect.getDamage().get() * 1.5F));
                 if (SKILL_1086.equals(battleEffect.getNowSkill()) || SKILL_1087.equals(battleEffect.getNowSkill())) {
                     ExtraBattleProcessTemplate specialExecuteTpl = battleEffect.getBattleRound().getBattleField()
@@ -2626,7 +2688,9 @@ public enum SkillEnum implements Serializable {
                             .filter(extra -> battleEffect.getFrom().equals(extra.getOwner()))
                             .filter(extra -> extra.getClass().equals(battleEffect.getNowSkill().getGlobalExtraProcess().getClass()))
                             .findFirst().orElse(null);
-                    specialExecuteTpl.executeSpecialExecute(battleEffect);
+                    if (Objects.nonNull(specialExecuteTpl)) {
+                        specialExecuteTpl.executeSpecialExecute(battleEffect);
+                    }
                 }
                 if (SKILL_1089.equals(battleEffect.getNowSkill())) {
                     long damage = BattleUtil.getDamage(this.getOwner(), battleEffect.getTar(), battleEffect.getBattleRound(),
@@ -2654,6 +2718,7 @@ public enum SkillEnum implements Serializable {
             }
         }
     }),
+
     SKILL_1086(1086L, "以理服人", "造成750%物理伤害，若命中敌人“弱点”则使敌方眩晕一回合", Constants.NONE, 100L,
             new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 7.5F),
             new ThisBehaviorExtraBattleProcessTemplate() {
@@ -2669,6 +2734,7 @@ public enum SkillEnum implements Serializable {
                 }
             }
     ),
+
     SKILL_1087(1087L, "百法缭乱", "造成750%法术伤害，若命中敌人弱点则使敌人陷入“焚毁”与“溺水”持续一回合", Constants.NONE, 100L,
             new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 7.5F),
             new ThisBehaviorExtraBattleProcessTemplate() {
@@ -2685,6 +2751,7 @@ public enum SkillEnum implements Serializable {
                 }
             }
     ),
+
     SKILL_1088(1088L, "众法守相", "提高自身25%攻击 25%法强 25%防御 25%法抗持续三回合，"
             + "三回合内若看破敌人攻击则提高自身50%攻击 50%法强持续一回合。装备该技能时每回合回复自身10蓝量", Constants.NONE, 100L,
             new SkillEffectDTO(TargetEnum.ANY_ENEMY), new ThisBehaviorExtraBattleProcessTemplate() {
@@ -2712,9 +2779,162 @@ public enum SkillEnum implements Serializable {
             }
         }
     }),
+
     SKILL_1089(1089L, "万法归一", "造成1700%法术伤害，若识破敌人弱点，则额外造成1700%物理伤害", Constants.NONE, 100L,
             new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.MAGIC, 17F)
     ),
+
+    SKILL_1090(1090L, "如血与啮噬之海", "开局，血魔为敌方全体种入“血之花”，自身获得100层“血之华”。血魔每有一层“血之华”使自身受到的伤害减少1%。" +
+            "敌方每次攻击命中血魔后，血魔减少一层“血之华”，对应敌方“血之花”获得一点成熟度。\n" +
+            "“血之花”按照对应成熟度成长为对应等级并获得对应效果。\n" +
+            "一级∶5-10 血之花持有者提高100%攻击，100%法强\n" +
+            "二级∶11–30 血之花持有者提高200%攻击 200%法强 造成伤害提高100% 每回合流失最大血量的1%。\n" +
+            "三级：31–50 血之花持有者提高300%攻击 300%法强 造成伤害提高150%。双抗降低50% 每回合流失最大血量的5%。\n" +
+            "四级：50-59 血之花持有者降低80%攻击 80%法强，双抗降低50%，每回合流失最大血量8%。\n" +
+            "五级：60- 血之花完全绽放，对血之花持有者造成999999999点真实伤害。\n" +
+            "注∶“血之花”按照对应等级触发对应效果，不同时触发其他等级效果。",
+            Constants.NONE, false, new ExtraBattleProcessTemplate() {
+        @Override
+        public void beforeBattle(BattleFieldDTO battleField) {
+            BattleDTO owner = this.getOwner();
+            owner.getMarkMap().put("血之华", 100);
+            battleField.getBattleMsg().add("※" + owner.getOrganismInfoDTO().getOrganismDTO().getName()
+                    + "的被动【如血与啮噬之海】被触发，获得100层“血之华”");
+        }
+
+        @Override
+        public void beforeEnemyBehavior(BattleEffectDTO battleEffect) {
+            if (SKILL_55.equals(battleEffect.getNowSkill()) || SKILL_59.equals(battleEffect.getNowSkill())) {
+                battleEffect.setDamageRate(battleEffect.getDamageRate().add(BigDecimal.TEN));
+            }
+        }
+
+        @Override
+        public void beforeMeDamage(BattleEffectDTO battleEffect) {
+            if (SKILL_58.equals(battleEffect.getNowSkill())) {
+                battleEffect.getDamage().set(2 * battleEffect.getDamage().get());
+            }
+        }
+
+        @Override
+        public void ifEnemyHitMe(BattleEffectDTO battleEffect) {
+            StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+            if (battleEffect.getDamageRate().floatValue() <= 0) {
+                return;
+            }
+            if (SKILL_59.equals(battleEffect.getNowSkill())) {
+                BuffUtil.addBuff(battleEffect.getFrom(), this.getOwner(), new BuffDTO(EffectTypeEnum.DEF, -0.15F), 3, builder);
+            }
+            BattleDTO from = battleEffect.getFrom();
+            Map<String, Integer> fromMarkMap = from.getMarkMap();
+            int round = fromMarkMap.getOrDefault("触发血之花回合", 0);
+            if (round == battleEffect.getBattleRound().getBattleField().getRound()) {
+                return;
+            }
+            int changedQty = this.getOwner().getMarkMap().getOrDefault("血之华姿态", 1) == 2
+                    && (SKILL_58.equals(battleEffect.getNowSkill()) || SKILL_59.equals(battleEffect.getNowSkill())) ? -1 : -3;
+            int realChangedQty = changedBloodCnt(this.getOwner(), changedQty, battleEffect);
+            fromMarkMap.put("触发血之花回合", battleEffect.getBattleRound().getBattleField().getRound());
+            changedBloodFlower(from, -realChangedQty, builder);
+        }
+    }),
+
+    SKILL_1091(1091L, "如恶与苦难之灾",
+            "血魔失去全部“血之华”后展现第二姿态，双抗降低50%，双攻提高50%，每回合收回敌方全体“血之花”一点成熟度并获得对应数量的“血之华”",
+            Constants.NONE, false, new ExtraBattleProcessTemplate() {
+        @Override
+        public void beforeMyRound(BattleRoundDTO battleRound) {
+            Map<String, Integer> markMap = this.getOwner().getMarkMap();
+            StringBuilder builder = battleRound.getBuilder();
+            if (markMap.getOrDefault("血之华", 0) == 0 && markMap.getOrDefault("血之华姿态", 1) == 1) {
+                markMap.put("血之华姿态", 2);
+                builder.append("，").append(this.getOwner().getOrganismInfoDTO().getOrganismDTO().getName()).append("展现第二姿态");
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.DEF, "血之华第二姿态", -0.5F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.MAGIC_DEF, "血之华第二姿态", -0.5F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.ATK, "血之华第二姿态", 0.5F, builder);
+                RuleUtil.addRule(this.getOwner(), this.getOwner(), EffectTypeEnum.MAGIC_ATK, "血之华第二姿态", 0.5F, builder);
+            }
+            if (markMap.getOrDefault("血之华姿态", 1) == 2) {
+                battleRound.getEnemy().forEach(e -> changedBloodFlower(e, -1, builder));
+            }
+        }
+    }),
+
+    SKILL_1092(1092L, "如命与腐世之怠", "对敌方造成800%+300%x敌方血之花等级点物理伤害。有（10%+10%x敌方血之花等级）概率使敌方眩晕一回合",
+            Constants.NONE, new SkillEffectDTO(TargetEnum.ANY_ENEMY, DamageTypeEnum.ATK, 8F),
+            new ThisBehaviorExtraBattleProcessTemplate() {
+                @Override
+                public void changeDamageRate(BattleEffectDTO battleEffect) {
+                    int bloodFlower = battleEffect.getTar().getMarkMap().getOrDefault("血之花", 0);
+                    battleEffect.setDamageRate(battleEffect.getDamageRate()
+                            .add(BigDecimal.valueOf(0.3F).multiply(BigDecimal.valueOf(bloodFlower))));
+                }
+
+                @Override
+                public void ifHit(BattleEffectDTO battleEffect) {
+                    float rate = 0.1F + 0.1F * battleEffect.getTar().getMarkMap().getOrDefault("血之花", 0);
+                    if (RandomUtil.isHit(rate)) {
+                        AbnormalEnum.AbnormalInput input = AbnormalEnum.AbnormalInput.builder()
+                                .from(battleEffect.getFrom()).tar(battleEffect.getTar()).round(1)
+                                .builder(battleEffect.getBattleRound().getBuilder()).build();
+                        AbnormalEnum.VERTIGO.doEffect(input);
+                    }
+                }
+            }
+    ),
+
+    SKILL_1093(1093L, "如雨与蔽听之霾",
+            "血魔提高自身30%速度30%攻击，降低敌方30%命中。持续五回合。\n第二姿态时，血魔额外收回敌方全体两点“血之花”成熟度",
+            Constants.NONE, new SkillEffectDTO(TargetEnum.ME), new ThisBehaviorExtraBattleProcessTemplate() {
+        @Override
+        public void ifHit(BattleEffectDTO battleEffect) {
+            BattleDTO from = battleEffect.getFrom();
+            BattleDTO tar = battleEffect.getTar();
+            StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+            BuffUtil.addBuff(from, from, new BuffDTO(EffectTypeEnum.SPEED, 0.3F), 5, builder);
+            BuffUtil.addBuff(from, from, new BuffDTO(EffectTypeEnum.ATK, 0.3F), 5, builder);
+            BuffUtil.addBuff(from, tar, new BuffDTO(EffectTypeEnum.HIT, -0.3F), 5, builder);
+            if (battleEffect.getFrom().getMarkMap().getOrDefault("血之华姿态", 1) == 2) {
+                battleEffect.getEnemy().forEach(e -> changedBloodFlower(e, -2, builder));
+            }
+        }
+    }),
+
+    SKILL_1094(1094L, "如罪与生死之爱",
+            "第一姿态时对敌方全体造成800%物理伤害，并强制提高敌方全体“血之花”五点成熟度（不消耗血之华）。\n" +
+                    "第二姿态时对敌方全体造成800%法术伤害。收回敌方全体“血之花”五点成熟度（同时转化为“血之华”）。", Constants.NONE, Arrays.asList(
+            new SkillEffectDTO(TargetEnum.ALL_ENEMY, DamageTypeEnum.ATK, 8F, new ThisEffectExtraBattleProcessTemplate() {
+                @Override
+                public void changeDamageRate(BattleEffectDTO battleEffect) {
+                    if (battleEffect.getFrom().getMarkMap().getOrDefault("血之华姿态", 1) == 2) {
+                        battleEffect.setDamageRate(BigDecimal.ZERO);
+                    }
+                }
+
+                @Override
+                public void ifHit(BattleEffectDTO battleEffect) {
+                    if (battleEffect.getFrom().getMarkMap().getOrDefault("血之华姿态", 1) == 1) {
+                        battleEffect.getEnemy().forEach(e -> changedBloodFlower(e, 5, battleEffect.getBattleRound().getBuilder()));
+                    }
+                }
+            }),
+            new SkillEffectDTO(TargetEnum.ALL_ENEMY, DamageTypeEnum.MAGIC, 8F, new ThisEffectExtraBattleProcessTemplate() {
+                @Override
+                public void changeDamageRate(BattleEffectDTO battleEffect) {
+                    if (battleEffect.getFrom().getMarkMap().getOrDefault("血之华姿态", 1) == 1) {
+                        battleEffect.setDamageRate(BigDecimal.ZERO);
+                    }
+                }
+
+                @Override
+                public void ifHit(BattleEffectDTO battleEffect) {
+                    if (battleEffect.getFrom().getMarkMap().getOrDefault("血之华姿态", 1) == 2) {
+                        battleEffect.getEnemy().forEach(e -> changedBloodFlower(e, -5, battleEffect.getBattleRound().getBuilder()));
+                        changedBloodCnt(battleEffect.getFrom(), 5, battleEffect);
+                    }
+                }
+            })
+    )),
 
     /*
     被动：偃相归一——太初法则
@@ -2999,5 +3219,66 @@ public enum SkillEnum implements Serializable {
 
     public String getName(BattleRoundDTO battleRound) {
         return getName();
+    }
+
+    public static int changedBloodCnt(BattleDTO battleDTO, int changedQty, BattleEffectDTO battleEffect) {
+        Map<String, Integer> ownerMarkMap = battleDTO.getMarkMap();
+        int bloodCnt = ownerMarkMap.getOrDefault("血之华", 0);
+        StringBuilder builder = battleEffect.getBattleRound().getBuilder();
+        builder.append("，").append(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName()).append("“血之华”层数");
+        int newBloodCnt = bloodCnt + changedQty;
+        newBloodCnt = Math.max(0, newBloodCnt);
+        int realChangedQty = newBloodCnt - bloodCnt;
+        if (realChangedQty >= 0) {
+            builder.append("+");
+        }
+        builder.append(realChangedQty).append("，当前：").append(newBloodCnt);
+        if (newBloodCnt > 0) {
+            float damageRate = 0.01F * newBloodCnt;
+            builder.append("，受到伤害降低").append(damageRate * 100).append("%");
+            battleEffect.getDamage().set(Math.round(battleEffect.getDamage().get() * (1F - damageRate)));
+        }
+        ownerMarkMap.put("血之华", newBloodCnt);
+        return realChangedQty;
+    }
+
+    public static void changedBloodFlower(BattleDTO battleDTO, int changedQty, StringBuilder builder) {
+        Map<String, Integer> markMap = battleDTO.getMarkMap();
+        int oldBloodFlower = markMap.getOrDefault("血之花", 0);
+        int newBloodFlower = oldBloodFlower + changedQty;
+        newBloodFlower = Math.max(0, newBloodFlower);
+
+        markMap.put("血之花", newBloodFlower);
+        builder.append("，").append(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName()).append("“血之花”成熟度");
+        if (changedQty >= 0) {
+            builder.append("+");
+        }
+        builder.append(changedQty).append("，当前：").append(newBloodFlower);
+
+        RuleUtil.removeRule(battleDTO, "血之花");
+        if (newBloodFlower >= 5 && newBloodFlower <= 10) {
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.ATK, "血之花", 1F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.MAGIC_ATK, "血之花", 1F, builder);
+        } else if (newBloodFlower >= 11 && newBloodFlower <= 30) {
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.ATK, "血之花", 2F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.MAGIC_ATK, "血之花", 2F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.DO_DAMAGE, "血之花", 1F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.BLEEDING, "血之花", 0.01F, builder);
+        } else if (newBloodFlower >= 31 && newBloodFlower <= 50) {
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.ATK, "血之花", 3F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.MAGIC_ATK, "血之花", 3F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.DO_DAMAGE, "血之花", 1.5F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.DEF, "血之花", -0.5F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.MAGIC_DEF, "血之花", -0.5F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.BLEEDING, "血之花", 0.05F, builder);
+        } else if (newBloodFlower >= 51 && newBloodFlower <= 59) {
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.ATK, "血之花", -0.8F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.MAGIC_ATK, "血之花", -0.8F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.DEF, "血之花", -0.5F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.MAGIC_DEF, "血之花", -0.5F, builder);
+            RuleUtil.addRule(battleDTO, battleDTO, EffectTypeEnum.BLEEDING, "血之花", 0.08F, builder);
+        } else if (newBloodFlower >= 60) {
+            BattleUtil.doRealDamage(battleDTO, 999999999L, builder);
+        }
     }
 }

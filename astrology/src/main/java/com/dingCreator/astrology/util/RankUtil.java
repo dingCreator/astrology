@@ -15,7 +15,7 @@ public class RankUtil {
      */
     public static float getRankSuppression(long fromRank, long toRank) {
         if (fromRank < toRank) {
-            return -Double.valueOf(Math.pow(2, (toRank - fromRank - 1)) * 0.1).floatValue();
+            return -Math.min(1F, Double.valueOf(Math.pow(2, (toRank - fromRank - 1)) * 0.1).floatValue());
         }
         return 0;
     }

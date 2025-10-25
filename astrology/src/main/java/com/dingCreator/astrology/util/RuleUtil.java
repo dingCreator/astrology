@@ -14,31 +14,30 @@ import java.util.Objects;
  */
 public class RuleUtil {
 
-    public static void addRule(BattleDTO battleDTO, EffectTypeEnum effectTypeEnum, String ruleName,
+    public static void addRule(BattleDTO from, BattleDTO tar, EffectTypeEnum effectTypeEnum, String ruleName,
                                long val, StringBuilder builder) {
-        addRule(battleDTO, effectTypeEnum, ruleName, val, 0F, builder);
+        addRule(from, tar, effectTypeEnum, ruleName, val, 0F, builder);
     }
 
-    public static void addRule(BattleDTO battleDTO, EffectTypeEnum effectTypeEnum, String ruleName,
+    public static void addRule(BattleDTO from, BattleDTO tar, EffectTypeEnum effectTypeEnum, String ruleName,
                                float rate, StringBuilder builder) {
-        addRule(battleDTO, effectTypeEnum, ruleName, 0L, rate, builder);
+        addRule(from, tar, effectTypeEnum, ruleName, 0L, rate, builder);
     }
 
-    public static void addRule(BattleDTO battleDTO, EffectTypeEnum effectTypeEnum, String ruleName,
+    public static void addRule(BattleDTO from, BattleDTO tar, EffectTypeEnum effectTypeEnum, String ruleName,
                                long val, float rate, StringBuilder builder) {
         RuleDTO ruleDTO = RuleDTO.builder()
-                .ruleName(ruleName)
-                .effectTypeEnum(effectTypeEnum)
-                .val(val)
-                .rate(new BigDecimal(rate)).build();
-        battleDTO.getRuleList().add(ruleDTO);
+                .from(from).tar(tar)
+                .ruleName(ruleName).effectTypeEnum(effectTypeEnum)
+                .val(val).rate(new BigDecimal(rate)).build();
+        tar.getRuleList().add(ruleDTO);
 
         if (!builder.toString().contains(ruleName)
-                || !builder.toString().contains(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName())) {
+                || !builder.toString().contains(tar.getOrganismInfoDTO().getOrganismDTO().getName())) {
             if (builder.length() > 0) {
                 builder.append("，");
             }
-            builder.append(battleDTO.getOrganismInfoDTO().getOrganismDTO().getName())
+            builder.append(tar.getOrganismInfoDTO().getOrganismDTO().getName())
                     .append("附加<").append(ruleName).append(">");
         }
         if (val != 0) {
@@ -107,5 +106,9 @@ public class RuleUtil {
             return true;
         }
         return false;
+    }
+
+    public static void removeRule(BattleDTO battleDTO, String ruleName) {
+        battleDTO.getRuleList().removeIf(rule -> ruleName.equals(rule.getRuleName()));
     }
 }

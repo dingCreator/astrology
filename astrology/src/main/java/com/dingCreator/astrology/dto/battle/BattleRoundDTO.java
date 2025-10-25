@@ -113,6 +113,28 @@ public class BattleRoundDTO implements Serializable {
                         BattleUtil.doDamage(effectDTO);
                     });
         }
+        from.getRuleList().stream().filter(rule -> EffectTypeEnum.BLEEDING.equals(rule.getEffectTypeEnum()))
+                    .forEach(rule -> {
+                        builder.append("，状态：").append(rule.getRuleName());
+                        BigDecimal bleedingRate = rule.getRate();
+                        bleedingRate = bleedingRate.compareTo(BigDecimal.ZERO) > 0 ?
+                                bleedingRate : bleedingRate.multiply(BigDecimal.valueOf(-1));
+                        long maxHp = from.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition();
+                        long damage = bleedingRate.multiply(BigDecimal.valueOf(maxHp)).longValue();
+                        long def = Math.round(0.2 * BattleUtil.getLongProperty(
+                                from.getOrganismInfoDTO().getOrganismDTO().getDef(),
+                                OrganismPropertiesEnum.DEF.getFieldName(),
+                                from, this.battleField
+                        ));
+                        damage -= def;
+                        damage = Math.min(damage, 100000);
+                        BattleEffectDTO effectDTO = BattleEffectDTO.builder()
+                                .from(rule.getFrom()).tar(from)
+                                .damage(new AtomicLong(damage))
+                                .damageTypeEnum(DamageTypeEnum.SPECIAL)
+                                .battleRound(this).build();
+                        BattleUtil.doDamage(effectDTO);
+                    });
         // 总轮次+1
         battleField.setRound(battleField.getRound() + 1);
         // 角色轮次+1
@@ -179,7 +201,7 @@ public class BattleRoundDTO implements Serializable {
         builder.append("，蓝量：").append(from.getOrganismInfoDTO().getOrganismDTO().getMpWithAddition())
                 .append("/").append(from.getOrganismInfoDTO().getOrganismDTO().getMaxMpWithAddition());
         // 轮次开始前插入结算
-        skillEnum.getThisBehaviorExtraProcess().beforeThisRound(this);
+        skillEnum.getThisBehaviorExtraProcess().beforeBehavior(this);
         final SkillEnum nowSkill = skillEnum;
         skillEnum.getSkillEffects().forEach(skillEffect -> executeSingleEffectBehavior(skillEffect, nowSkill));
         // 显示敌方血量
@@ -187,7 +209,7 @@ public class BattleRoundDTO implements Serializable {
                 .append("血量：").append(e.getOrganismInfoDTO().getOrganismDTO().getHpWithAddition())
                 .append("/").append(e.getOrganismInfoDTO().getOrganismDTO().getMaxHpWithAddition()));
         // 轮次结束后插入结算
-        skillEnum.getThisBehaviorExtraProcess().afterThisRound(this);
+        skillEnum.getThisBehaviorExtraProcess().afterBehavior(this);
         // 记录此回合详细数据
         BattleRoundRecordDTO record = BattleRoundRecordDTO.builder()
                 .from(CopyUtil.copyNewInstance(this.getFrom()))
