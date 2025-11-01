@@ -68,6 +68,42 @@ public class ShopCache {
                     .costMap(costMap).count(1).stock(-1).build());
 
             costMap = new HashMap<>();
+            costMap.put(AssetTypeEnum.MIN_SHUI_HE_XI, 500L);
+            worldShopItemList.add(ShopItemDTO.builder()
+                    .article(new ArticleSkillItem(SkillEnum.SKILL_54.getId()))
+                    .costMap(costMap).count(1).stock(-1).build());
+
+            costMap = new HashMap<>();
+            costMap.put(AssetTypeEnum.MIN_SHUI_HE_XI, 500L);
+            worldShopItemList.add(ShopItemDTO.builder()
+                    .article(new ArticleSkillItem(SkillEnum.SKILL_55.getId()))
+                    .costMap(costMap).count(1).stock(-1).build());
+
+            costMap = new HashMap<>();
+            costMap.put(AssetTypeEnum.MIN_SHUI_HE_XI, 50L);
+            worldShopItemList.add(ShopItemDTO.builder()
+                    .article(new ArticleSkillItem(SkillEnum.SKILL_56.getId()))
+                    .costMap(costMap).count(1).stock(-1).build());
+
+            costMap = new HashMap<>();
+            costMap.put(AssetTypeEnum.MIN_SHUI_HE_XI, 50L);
+            worldShopItemList.add(ShopItemDTO.builder()
+                    .article(new ArticleSkillItem(SkillEnum.SKILL_57.getId()))
+                    .costMap(costMap).count(1).stock(-1).build());
+
+            costMap = new HashMap<>();
+            costMap.put(AssetTypeEnum.MIN_SHUI_HE_XI, 500L);
+            worldShopItemList.add(ShopItemDTO.builder()
+                    .article(new ArticleSkillItem(SkillEnum.SKILL_58.getId()))
+                    .costMap(costMap).count(1).stock(-1).build());
+
+            costMap = new HashMap<>();
+            costMap.put(AssetTypeEnum.MIN_SHUI_HE_XI, 500L);
+            worldShopItemList.add(ShopItemDTO.builder()
+                    .article(new ArticleSkillItem(SkillEnum.SKILL_59.getId()))
+                    .costMap(costMap).count(1).stock(-1).build());
+
+            costMap = new HashMap<>();
             costMap.put(AssetTypeEnum.MIN_SHUI_HE_XI, 1500L);
             worldShopItemList.add(ShopItemDTO.builder()
                     .article(new ArticleEquipmentItem(EquipmentEnum.EQUIPMENT_413.getId()))
