@@ -53,6 +53,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
+ * 战斗工具类
+ *
  * @author ding
  * @date 2024/2/3
  */
@@ -262,7 +264,6 @@ public class BattleUtil {
                         .requestTime(LocalDateTime.now())
                         .opponentId(initiatorId).build()));
     }
-
 
     /**
      * 决斗信息类
@@ -529,6 +530,11 @@ public class BattleUtil {
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 刷新玩家信息
+     *
+     * @param playerList 玩家信息
+     */
     private static void flush(List<OrganismInfoDTO> playerList) {
         List<Long> playerIds = playerList.stream()
                 .map(OrganismInfoDTO::getOrganismDTO)
@@ -606,9 +612,27 @@ public class BattleUtil {
         long startTime = System.currentTimeMillis();
         BattleResultVO response = field.startBattle();
         LOGGER.info("battle process cost: {} ms", System.currentTimeMillis() - startTime);
+        StringBuilder builder = new StringBuilder("伤害统计：");
+        field.getInitiatorList().forEach(b ->
+                builder.append("\n").append(b.getOrganismInfoDTO().getOrganismDTO().getName()).append("：")
+                        .append(Optional.ofNullable(b.getDamage()).orElse(0L))
+        );
+        builder.append("\n");
+        field.getRecipientList().forEach(b ->
+                builder.append("\n").append(b.getOrganismInfoDTO().getOrganismDTO().getName()).append("：")
+                        .append(Optional.ofNullable(b.getDamage()).orElse(0L))
+        );
+        field.getBattleMsg().add(builder.toString());
         return response;
     }
 
+    /**
+     * 附加境界压制
+     *
+     * @param battleTmp 战斗对象
+     * @param from      来源
+     * @param battleMsg 战斗信息
+     */
     public static void getRankSuppression(List<BattleDTO> battleTmp, BattleDTO from, List<String> battleMsg) {
         StringBuilder builder = new StringBuilder();
         long highestRank = from.getOrganismInfoDTO().getOrganismDTO().getRank();
@@ -969,6 +993,8 @@ public class BattleUtil {
                     .append(damageTypeEnum.getTypeChnDesc()).append("伤害");
         }
         target.getOrganismInfoDTO().getOrganismDTO().setHpWithAddition(newHp);
+        battleEffect.getFrom().setDamage(Optional.ofNullable(battleEffect.getFrom().getDamage()).orElse(0L)
+                + battleEffect.getDamage().get());
     }
 
     /**

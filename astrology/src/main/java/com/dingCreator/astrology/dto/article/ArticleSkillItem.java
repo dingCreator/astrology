@@ -41,7 +41,7 @@ public class ArticleSkillItem extends ArticleItemDTO {
     public ArticleItemVO fillView(ArticleItemVO vo) {
         SkillEnum skillEnum = SkillEnum.getById(skillId);
         vo.setName(skillEnum.getName());
-        vo.setDescription(skillEnum.getDesc());
+        vo.setDescription(skillEnum.getDesc() + "【蓝耗：" + skillEnum.getMp() + "】");
         return vo;
     }
 }

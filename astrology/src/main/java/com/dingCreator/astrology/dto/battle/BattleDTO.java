@@ -43,6 +43,10 @@ public class BattleDTO implements Serializable {
      */
     private Long round;
     /**
+     * 伤害量
+     */
+    private Long damage;
+    /**
      * 是否为召唤物
      */
     private Boolean summoned;

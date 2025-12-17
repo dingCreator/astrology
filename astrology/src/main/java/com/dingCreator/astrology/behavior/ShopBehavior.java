@@ -92,7 +92,7 @@ public class ShopBehavior {
         if (idx < 0 || idx >= itemList.size()) {
             throw ShopExceptionEnum.SHOP_ITEM_NO_INVALID.getException();
         }
-        PlayerInfoDTO info = PlayerCache.getPlayerById(playerId);
+        PlayerCache.getPlayerById(playerId);
         return itemList.get(idx).getArticle().view();
     }
 
